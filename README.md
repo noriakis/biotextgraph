@@ -32,6 +32,6 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 
 ### Example annotating gene cluster
 
-[rmarkdown]("https://noriakis.github.io/software/wcGeneSummary/")
+[rmarkdown](https://noriakis.github.io/software/wcGeneSummary/)
 
 <img src="https://github.com/noriakis/software/blob/main/images/wc_example.png?raw=true" width="800px">
