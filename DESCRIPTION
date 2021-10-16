@@ -1,0 +1,12 @@
+Package: wcGeneSummary
+Type: Package
+Title: Make word cloud from RefSeq description of gene set
+Version: 0.99.0
+Authors@R: person("Noriaki", "Sato", email = "nori5030@kuhp.kyoto-u.ac.jp", role = c("cre", "aut"))
+Description: This package makes word cloud of gene set using R libraries GeneSummary, tm and wordcloud. Input is gene list with the type ENTREZID. Useful when GSEA or ORA returned no significant results.
+License: MIT
+Encoding: UTF-8
+Depends:
+    R (>= 4.1.0)
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords
+RoxygenNote: 7.1.1
