@@ -29,3 +29,9 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 # ggsave("cxclWc.png", gwc$wc, width=8, height=8)
 ```
 <img src="https://github.com/noriakis/wcGeneSummary/blob/main/images/cxclWc.png?raw=true" width="800px">
+
+### Example annotating gene cluster
+
+[rmarkdown]("https://noriakis.github.io/software/wcGeneSummary/")
+
+<img src="https://github.com/noriakis/software/blob/main/images/wc_example.png?raw=true" width="800px">
