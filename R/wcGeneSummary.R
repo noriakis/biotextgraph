@@ -26,7 +26,7 @@ wcGeneSummary <- function (geneList,
     returnList <- list()
     tb <- loadGeneSummary(organism = organism)
 
-    load("allFreqGeneSummary.rda") ## Already performed
+    # load("allFreqGeneSummary.rda") ## Already performed
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
     fil <- tb %>% filter(Gene_ID %in% geneList)
     

@@ -1,6 +1,9 @@
 # wcGeneSummary
 Make word cloud of gene set from RefSeq description using R libraries `GeneSummary`, `tm` and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when GSEA or ORA returned no results.
 
+```R
+devtools::install_github("noriakis/wcGeneSummary")
+```
 
 ### Example of ERCC
 ```R
