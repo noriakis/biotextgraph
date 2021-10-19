@@ -17,10 +17,9 @@
 #' @examples wcGeneSummary(geneList)
 #' @export
 #' 
-wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
-                           madeUpper=c("dna","rna"), organism=9606,
+wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
                            palette=c("blue","red"), numWords=15, labelSize=5,
-                           plotType="wc", corThresh=0.6, ...) {
+                           plotType="wc", corThresh=0.6, layout="nicely", ...) {
     returnList <- list()
     tb <- loadGeneSummary(organism = organism)
 
@@ -58,7 +57,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
             nodeName[nodeName == i] <- toupper(i)
         }
         V(coGraph)$name <- nodeName
-        netPlot <- ggraph(coGraph) +
+        netPlot <- ggraph(coGraph, layout=layout) +
             geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)+
             geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
             geom_node_text(aes(label=name), check_overlap=TRUE, repel=TRUE, size = labelSize,
@@ -66,7 +65,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
                            bg.color = "white", segment.color="black",
                            bg.r = .15)+
             scale_size(range=c(2,10))+
-            scale_edge_width(range=c(2,5))+
+            scale_edge_width(range=c(1,3))+
             scale_color_gradient(low=palette[1],high=palette[2])+
             scale_edge_color_gradient(low=palette[1],high=palette[2])+
             theme_graph()
