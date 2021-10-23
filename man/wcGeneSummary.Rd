@@ -10,6 +10,12 @@ wcGeneSummary(
   additionalRemove = NA,
   madeUpper = c("dna", "rna"),
   organism = 9606,
+  palette = c("blue", "red"),
+  numWords = 15,
+  labelSize = 5,
+  plotType = "wc",
+  corThresh = 0.6,
+  layout = "nicely",
   ...
 )
 }
