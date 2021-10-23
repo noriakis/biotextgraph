@@ -4,6 +4,7 @@ Make word cloud or network of gene set from RefSeq description using R libraries
 
 ```R
 devtools::install_github("noriakis/wcGeneSummary")
+library(wcGeneSummary)
 ```
 
 ### Example of ERCC
@@ -40,6 +41,7 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 ### Example of CCL (correlation network)
 
 ```R
+library(ggraph)
 ccls <- c()
 for (i in c(1,2,3,4,5,6,7,8,9)){
     ccls <- c(ccls, paste0("CCL",i))
