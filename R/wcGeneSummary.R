@@ -12,6 +12,7 @@
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
+#' @import ggraph
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 #' 
