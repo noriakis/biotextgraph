@@ -11,10 +11,9 @@
 #' @import dplyr
 #' @import GeneSummary
 #' @import wordcloud
+#' @import igraph
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
-#' @importFrom igraph graph.adjacency
-#' @importFrom igraph V
 #' 
 #' @examples wcGeneSummary(geneList)
 #' @export
