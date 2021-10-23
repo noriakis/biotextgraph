@@ -3,6 +3,7 @@
 export(wcGeneSummary)
 import(GeneSummary)
 import(dplyr)
+import(ggraph)
 import(igraph)
 import(tm)
 import(wordcloud)
