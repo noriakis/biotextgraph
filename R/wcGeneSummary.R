@@ -13,6 +13,7 @@
 #' @import wordcloud
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
+#' @importFrom igraph graph.adjacency
 #' 
 #' @examples wcGeneSummary(geneList)
 #' @export
