@@ -1,6 +1,6 @@
 # wcGeneSummary
 
-Make word cloud or network of gene set from RefSeq description using R libraries `GeneSummary`, `tm` and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when GSEA or ORA returned no results.
+Make word cloud or network of gene set from RefSeq description using R libraries [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), `tm` and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when GSEA or ORA returned no results.
 
 ```R
 devtools::install_github("noriakis/wcGeneSummary")
@@ -55,3 +55,9 @@ cclNet <- wcGeneSummary(entrezID, plotType="network",
 ```
 
 <img src="https://github.com/noriakis/software/blob/main/images/cclNet.png?raw=true" width="800px">
+
+### The other example
+[compare_sign](https://github.com/noriakis/compare_sign)
+
+### References
+[Lucas T. palettetown: Pokemon themed colour schemes for R.](https://github.com/timcdlucas/palettetown)
