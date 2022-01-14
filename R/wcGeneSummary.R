@@ -35,6 +35,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
 
     # load("allFreqGeneSummary.rda") ## Already performed
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
+    filterWords <- c(filterWords, "pmids")
     fil <- tb %>% filter(Gene_ID %in% geneList)
     
     docs <- VCorpus(VectorSource(fil$Gene_summary))
@@ -45,7 +46,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         tm_map(removeWords, filterWords) %>% 
         tm_map(FUN=removePunctuation) %>%
         tm_map(FUN=stripWhitespace)
-    if (!is.na(additionalRemove)){
+    if (prod(is.na(additionalRemove))!=1){
         docs <- docs %>% tm_map(removeWords, additionalRemove)
     }
     
