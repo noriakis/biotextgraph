@@ -13,6 +13,7 @@
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
+#' @param ORA perform over-representation analysis
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -29,7 +30,7 @@
 #' @export
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
-                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10),
+                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), ORA=FALSE,
                            plotType="wc", corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     ## Load from GeneSummary
@@ -39,7 +40,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
 
     ## Filter high frequency words
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
-    filterWords <- c(filterWords, "pmids") # 'PMIDs' is excluded by default
+    filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
     fil <- tb %>% filter(Gene_ID %in% geneList)
     
     ## Make corpus
@@ -55,14 +56,44 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         docs <- docs %>% tm_map(removeWords, additionalRemove)
     }
     
+    if (ORA){
+        warning("This would take time ...")
+        allDocs <- VCorpus(VectorSource(tb$Gene_summary))
+        allDocs <- allDocs %>%
+            tm_map(FUN=content_transformer(tolower)) %>% 
+            tm_map(FUN=removeNumbers) %>%
+            tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) %>%
+            tm_map(removeWords, filterWords) %>% 
+            tm_map(FUN=removePunctuation) %>%
+            tm_map(FUN=stripWhitespace)
+        if (prod(is.na(additionalRemove))!=1){
+            allDocs <- allDocs %>% tm_map(removeWords, additionalRemove)
+        }
+        matAll <- as.matrix(TermDocumentMatrix(allDocs))
+        matAllSorted <- sort(rowSums(matAll), decreasing=TRUE)
+        
+        returnp <- function(name){
+            query <- as.numeric(matSorted[name])
+            noquery <- sum(matSorted) - query
+            queryAll <- as.numeric(matAllSorted[name])
+            allwords <- sum(matAllSorted) - queryAll
+            return(sum(dhyper(query:sum(matSorted), queryAll, allwords, sum(matSorted))))
+        }
+    }
+
+
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
     docs <- TermDocumentMatrix(docs)
-    
+    mat <- as.matrix(docs)
+    matSorted <- sort(rowSums(mat), decreasing=TRUE)
+    if (ORA){
+        ps <- sapply(names(matSorted), returnp)
+        returnList[["ps"]] <- ps
+    }
+
     if (plotType=="network"){
-        mat <- as.matrix(docs)
-        matSorted <- sort(rowSums(mat), decreasing=TRUE)
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
         freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
@@ -98,10 +129,9 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             scale_color_gradient(low=palette[1],high=palette[2])+
             scale_edge_color_gradient(low=palette[1],high=palette[2])+
             theme_graph()
-        return(netPlot)
+        returnList[["net"]] <- netPlot
+        return(returnList)
     } else {
-        mat <- as.matrix(docs)
-        matSorted <- sort(rowSums(mat),decreasing=TRUE)
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
