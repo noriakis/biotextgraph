@@ -33,11 +33,31 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 ```
 <img src="https://github.com/noriakis/wcGeneSummary/blob/main/images/cxclWc.png?raw=true" width="800px">
 
+### Example of CCL (correlation network)
+```R
+library(wcGeneSummary)
+library(org.Hs.eg.db)
+library(ggraph)
+library(igraph)
+ccls <- c()
+for (i in c(1,2,3,4,5,6,7,8,9)){
+    ccls <- c(ccls, paste0("CCL",i))
+}
+entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENTREZID"), keytype="SYMBOL")$ENTREZID
+cclNet <- wcGeneSummary(entrezID, plotType="network",
+                        layout="stress",
+                        madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
+                        numWords = 20, excludeFreq = 5000)
+cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+# ggsave(file="cclNet.png", cclNetTrans, width=7, height=7, bg="transparent")
+```
+
+<img src="https://github.com/noriakis/software/blob/main/images/cclNet.png?raw=true" width="800px">
+
 
 ### The other examples
 
 - [Example annotating gene clusters using WGCNA](https://noriakis.github.io/software/wcGeneSummary/)
-- [Example image of CCL genes (correlation network)](https://github.com/noriakis/software/blob/main/images/cclNet.png)
 - [Example in Bayesian network analysis](https://github.com/noriakis/compare_sign)
 
 ### References
