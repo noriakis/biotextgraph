@@ -12,6 +12,7 @@
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
+#' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -28,7 +29,7 @@
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
                            palette=c("blue","red"), numWords=15, scaleRange=c(5,10),
-                           plotType="wc", corThresh=0.6, layout="nicely", ...) {
+                           plotType="wc", corThresh=0.6, layout="nicely", edgeLink=TRUE, ...) {
     returnList <- list()
     tb <- loadGeneSummary(organism = organism)
 
@@ -67,7 +68,6 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         }
         V(coGraph)$name <- nodeName
         netPlot <- ggraph(coGraph, layout=layout) +
-            geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)+
             geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
             geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
@@ -78,6 +78,11 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             scale_color_gradient(low=palette[1],high=palette[2])+
             scale_edge_color_gradient(low=palette[1],high=palette[2])+
             theme_graph()
+        if (edgeLink){
+            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+        } else {
+            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+        }
         return(netPlot)
     } else {
         mat <- as.matrix(docs)
