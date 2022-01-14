@@ -52,7 +52,7 @@ cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent
 # ggsave(file="cclNet.png", cclNetTrans, width=7, height=7, bg="transparent")
 ```
 
-<img src="https://github.com/noriakis/software/blob/main/images/cclNet.png?raw=true" width="800px">
+<img src="https://github.com/noriakis/software/blob/main/images/cclCorNet.png?raw=true" width="800px">
 
 
 ### The other examples
