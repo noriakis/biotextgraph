@@ -67,8 +67,13 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             nodeName[nodeName == i] <- toupper(i)
         }
         V(coGraph)$name <- nodeName
-        netPlot <- ggraph(coGraph, layout=layout) +
-            geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
+        netPlot <- ggraph(coGraph, layout=layout)
+        if (edgeLink){
+            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+        } else {
+            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+        }
+        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
             geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
@@ -78,11 +83,6 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             scale_color_gradient(low=palette[1],high=palette[2])+
             scale_edge_color_gradient(low=palette[1],high=palette[2])+
             theme_graph()
-        if (edgeLink){
-            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
-        } else {
-            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
-        }
         return(netPlot)
     } else {
         mat <- as.matrix(docs)
