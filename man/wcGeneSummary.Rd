@@ -17,6 +17,7 @@ wcGeneSummary(
   corThresh = 0.6,
   layout = "nicely",
   edgeLink = TRUE,
+  deleteZeroDeg = TRUE,
   ...
 )
 }
@@ -42,6 +43,8 @@ wcGeneSummary(
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
+
+\item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 }
 \value{
 list of data frame and ggplot2 object
