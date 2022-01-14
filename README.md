@@ -38,7 +38,6 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 library(wcGeneSummary)
 library(org.Hs.eg.db)
 library(ggraph)
-library(igraph)
 ccls <- c()
 for (i in c(1,2,3,4,5,6,7,8,9)){
     ccls <- c(ccls, paste0("CCL",i))
