@@ -12,6 +12,7 @@
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
+#' @importFrom igraph graph.adjacency
 #' @import ggraph ggplot2
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
