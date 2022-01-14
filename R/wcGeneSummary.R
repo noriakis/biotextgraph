@@ -8,12 +8,13 @@
 #' @param madeUpper make the words uppercase in resulting plot
 #' @return list of data frame and ggplot2 object
 #' @import tm
-#' @import dplyr
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
+#' @importFrom dplyr filter
 #' @importFrom igraph graph.adjacency
 #' @import ggraph ggplot2
+#' @importFrom ggraph guide_edge_colourbar
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 #' 
