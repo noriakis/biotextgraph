@@ -14,7 +14,6 @@
 #' @importFrom dplyr filter
 #' @importFrom igraph graph.adjacency
 #' @import ggraph ggplot2
-#' @importFrom ggraph guide_edge_colourbar
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 #' 
