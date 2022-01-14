@@ -12,7 +12,7 @@ wcGeneSummary(
   organism = 9606,
   palette = c("blue", "red"),
   numWords = 15,
-  labelSize = 5,
+  scaleRange = c(5, 10),
   plotType = "wc",
   corThresh = 0.6,
   layout = "nicely",
@@ -32,7 +32,7 @@ wcGeneSummary(
 
 \item{numWords}{the number of words to be shown in correlation network}
 
-\item{labelSize}{label size in correlation network}
+\item{scaleRange}{scale for label and node size in correlation network}
 
 \item{plotType}{"wc" or "network"}
 
