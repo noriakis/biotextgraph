@@ -16,6 +16,7 @@ wcGeneSummary(
   plotType = "wc",
   corThresh = 0.6,
   layout = "nicely",
+  edgeLink = TRUE,
   ...
 )
 }
@@ -39,6 +40,8 @@ wcGeneSummary(
 \item{corThresh}{the correlation threshold}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
+
+\item{edgeLink}{if FALSE, use geom_edge_diagonal}
 }
 \value{
 list of data frame and ggplot2 object
