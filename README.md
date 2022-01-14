@@ -61,5 +61,7 @@ cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent
 - [Example in Bayesian network analysis](https://github.com/noriakis/compare_sign)
 
 ### References
-[Zuguang Gu. GeneSummary](https://doi.org/doi:10.18129/B9.bioc.GeneSummary)
-[Lucas T. palettetown: Pokemon themed colour schemes for R.](https://github.com/timcdlucas/palettetown)
+- [Zuguang Gu. GeneSummary](https://doi.org/doi:10.18129/B9.bioc.GeneSummary)
+- Feinerer I, Hornik K, Meyer D. Text Mining Infrastructure in R. J Stat Softw 2008;25:1–54. doi:10.18637/jss.v025.i05
+- [Ian Fellows. wordcloud: Word Clouds. R package version 2.6. 2018.] (https://cran.r-project.org/web/packages/wordcloud/index.html)
+- [Lucas T. palettetown: Pokemon themed colour schemes for R.](https://github.com/timcdlucas/palettetown)

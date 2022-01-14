@@ -4,8 +4,14 @@
 #' 
 #' @param geneList ENTREZID list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq, default to 5000
-#' @param additionalRemove NA
+#' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
+#' @param palette palette for color gradient in correlation network
+#' @param numWords the number of words to be shown in correlation network
+#' @param labelSize label size in correlation network
+#' @param plotType "wc" or "network"
+#' @param corThresh the correlation threshold
+#' @param layout the layout for correlation network, defaul to "nicely"
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary

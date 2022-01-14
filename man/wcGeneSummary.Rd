@@ -24,9 +24,21 @@ wcGeneSummary(
 
 \item{excludeFreq}{exclude words with overall frequency above excludeFreq, default to 5000}
 
-\item{additionalRemove}{NA}
+\item{additionalRemove}{specific words to be excluded}
 
 \item{madeUpper}{make the words uppercase in resulting plot}
+
+\item{palette}{palette for color gradient in correlation network}
+
+\item{numWords}{the number of words to be shown in correlation network}
+
+\item{labelSize}{label size in correlation network}
+
+\item{plotType}{"wc" or "network"}
+
+\item{corThresh}{the correlation threshold}
+
+\item{layout}{the layout for correlation network, defaul to "nicely"}
 }
 \value{
 list of data frame and ggplot2 object
