@@ -47,7 +47,7 @@ entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENTREZID"),
 cclNet <- wcGeneSummary(entrezID, plotType="network",
                         layout="stress",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
-                        numWords = 20, excludeFreq = 5000)
+                        numWords = 15, excludeFreq = 5000, edgeLink=FALSE)
 cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent",colour = NA))
 # ggsave(file="cclNet.png", cclNetTrans, width=7, height=7, bg="transparent")
 ```
