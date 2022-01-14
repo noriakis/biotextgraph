@@ -1,7 +1,8 @@
 # wcGeneSummary
 
-Make word cloud or network of gene set from RefSeq description using R libraries [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), `tm` and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when GSEA or ORA returned no results.
+Make wordcloud or a plot of correlation network of gene set from RefSeq description using R libraries [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), `tm` and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when the enrichment analysis returns no significant results.
 
+### Installation
 ```R
 devtools::install_github("noriakis/wcGeneSummary")
 library(wcGeneSummary)
@@ -32,32 +33,12 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
 ```
 <img src="https://github.com/noriakis/wcGeneSummary/blob/main/images/cxclWc.png?raw=true" width="800px">
 
-### Example annotating gene clusters
 
-[rmarkdown](https://noriakis.github.io/software/wcGeneSummary/)
+### The other examples
 
-<img src="https://github.com/noriakis/software/blob/main/images/wc_example.png?raw=true" width="800px">
-
-### Example of CCL (correlation network)
-
-```R
-library(ggraph)
-ccls <- c()
-for (i in c(1,2,3,4,5,6,7,8,9)){
-    ccls <- c(ccls, paste0("CCL",i))
-}
-entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENTREZID"), keytype="SYMBOL")$ENTREZID
-cclNet <- wcGeneSummary(entrezID, plotType="network",
-              layout="stress",
-              madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
-              numWords = 20, excludeFreq = 5000)
-# ggsave(file="cclNet.png", cclNet, width=7, height=7)
-```
-
-<img src="https://github.com/noriakis/software/blob/main/images/cclNet.png?raw=true" width="800px">
-
-### The other example
-[compare_sign](https://github.com/noriakis/compare_sign)
+- [Example annotating gene clusters using WGCNA](https://noriakis.github.io/software/wcGeneSummary/)
+- [Example image of CCL genes (correlation network)](https://github.com/noriakis/software/blob/main/images/cclNet.png)
+- [Example in Bayesian network analysis](https://github.com/noriakis/compare_sign)
 
 ### References
 [Lucas T. palettetown: Pokemon themed colour schemes for R.](https://github.com/timcdlucas/palettetown)
