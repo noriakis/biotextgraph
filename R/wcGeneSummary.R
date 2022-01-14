@@ -8,8 +8,8 @@
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param palette palette for color gradient in correlation network
 #' @param numWords the number of words to be shown in correlation network
-#' @param labelSize label size in correlation network
 #' @param plotType "wc" or "network"
+#' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @return list of data frame and ggplot2 object
@@ -27,7 +27,7 @@
 #' @export
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
-                           palette=c("blue","red"), numWords=15, labelSize=5,
+                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10),
                            plotType="wc", corThresh=0.6, layout="nicely", ...) {
     returnList <- list()
     tb <- loadGeneSummary(organism = organism)
@@ -69,11 +69,11 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         netPlot <- ggraph(coGraph, layout=layout) +
             geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)+
             geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
-            geom_node_text(aes(label=name), check_overlap=TRUE, repel=TRUE, size = labelSize,
+            geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
                            bg.r = .15)+
-            scale_size(range=c(2,10))+
+            scale_size(range=scaleRange)+
             scale_edge_width(range=c(1,3))+
             scale_color_gradient(low=palette[1],high=palette[2])+
             scale_edge_color_gradient(low=palette[1],high=palette[2])+
