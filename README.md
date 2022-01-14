@@ -61,4 +61,5 @@ cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent
 - [Example in Bayesian network analysis](https://github.com/noriakis/compare_sign)
 
 ### References
+[Zuguang Gu. GeneSummary](https://doi.org/doi:10.18129/B9.bioc.GeneSummary)
 [Lucas T. palettetown: Pokemon themed colour schemes for R.](https://github.com/timcdlucas/palettetown)
