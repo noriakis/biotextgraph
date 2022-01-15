@@ -122,15 +122,13 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         } else {
             netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
         }
-        netPlot <- netPlot + scale_edge_width(range=c(1,3), name = "Correlation")
-
-        ## Add others
         netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)+
             geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
                            bg.r = .15)+
             scale_size(range=scaleRange, name="Frequency")+
+            scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
             scale_edge_color_gradient(low=palette[1],high=palette[2], name = "Correlation")+
             theme_graph()
