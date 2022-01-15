@@ -44,10 +44,10 @@ for (i in c(1,2,3,4,5,6,7,8,9)){
 }
 entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENTREZID"), keytype="SYMBOL")$ENTREZID
 cclNet <- wcGeneSummary(entrezID, plotType="network",
-                        layout="stress",
+                        layout="nicely",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
-                        numWords = 15, excludeFreq = 5000, edgeLink=FALSE)
-cclNetTrans <- cclNet + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+                        numWords = 15, excludeFreq = 5000, edgeLink=FALSE, showLegend=FALSE)
+cclNetTrans <- cclNet$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
 # ggsave(file="cclNet.png", cclNetTrans, width=7, height=7, bg="transparent")
 ```
 
