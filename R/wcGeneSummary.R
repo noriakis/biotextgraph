@@ -126,7 +126,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
-                           bg.r = .15)+
+                           bg.r = .15, show.legend=showLegend)+
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
