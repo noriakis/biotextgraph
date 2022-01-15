@@ -15,6 +15,7 @@
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param ORA perform over-representation analysis
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
+#' @param showLegend whether to show legend in correlation network
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -57,7 +58,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     }
     
     if (ORA){
-        warning("This would take time ...")
+        message("This would take time ...")
         allDocs <- VCorpus(VectorSource(tb$Gene_summary))
         allDocs <- allDocs %>%
             tm_map(FUN=content_transformer(tolower)) %>% 
@@ -115,19 +116,19 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         }
         netPlot <- ggraph(coGraph, layout=layout)
         if (edgeLink){
-            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
         } else {
-            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = F)
+            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
         }
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = F)+
+        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)+
             geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
                            bg.r = .15)+
-            scale_size(range=scaleRange)+
-            scale_edge_width(range=c(1,3))+
-            scale_color_gradient(low=palette[1],high=palette[2])+
-            scale_edge_color_gradient(low=palette[1],high=palette[2])+
+            scale_size(range=scaleRange, name="Frequency")+
+            scale_edge_width(range=c(1,3), name = "Correlation")+
+            scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
+            scale_edge_color_gradient(low=palette[1],high=palette[2], name = "Correlation")+
             theme_graph()
         returnList[["net"]] <- netPlot
         return(returnList)

@@ -13,6 +13,7 @@ wcGeneSummary(
   palette = c("blue", "red"),
   numWords = 15,
   scaleRange = c(5, 10),
+  ORA = FALSE,
   plotType = "wc",
   corThresh = 0.6,
   layout = "nicely",
@@ -36,6 +37,8 @@ wcGeneSummary(
 
 \item{scaleRange}{scale for label and node size in correlation network}
 
+\item{ORA}{perform over-representation analysis}
+
 \item{plotType}{"wc" or "network"}
 
 \item{corThresh}{the correlation threshold}
@@ -45,6 +48,8 @@ wcGeneSummary(
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
+
+\item{showLegend}{whether to show legend in correlation network}
 }
 \value{
 list of data frame and ggplot2 object
