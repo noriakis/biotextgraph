@@ -31,7 +31,7 @@
 #' @export
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
-                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), ORA=FALSE,
+                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), ORA=FALSE, showLegend=FALSE,
                            plotType="wc", corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     ## Load from GeneSummary
