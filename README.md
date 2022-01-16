@@ -53,6 +53,23 @@ cclNetTrans <- cclNet$net + theme(plot.background = element_rect(fill = "transpa
 
 <img src="https://github.com/noriakis/software/blob/main/images/cclCorNetNicely.png?raw=true" width="800px">
 
+### Example of a pathway (corelation network)
+```R
+library(org.Hs.eg.db)
+keggPathways <- org.Hs.egPATH2EG
+mappedKeys <- mappedkeys(keggPathways)
+keggList <- as.list(keggPathways[mappedKeys])
+## Hepatitis C
+hCNet <- wcGeneSummary(keggList$`05160`, plotType="network",
+                        layout="nicely", corThresh = 0.2,
+                        madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
+                        numWords = 30, excludeFreq = 5000, colorText=TRUE,
+                        edgeLink=FALSE, showLegend=FALSE)
+hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+# ggsave(file="hCNet.png", hCNetTrans, width=12, height=12, bg="transparent")
+```
+<img src="https://github.com/noriakis/software/blob/main/images/hCNet.png?raw=true" width="800px">
+
 
 ### The other examples
 

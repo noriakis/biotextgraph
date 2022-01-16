@@ -16,6 +16,7 @@
 #' @param ORA perform over-representation analysis
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
+#' @param colorText color text label based on frequency in correlation network
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -32,7 +33,7 @@
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
                            palette=c("blue","red"), numWords=15, scaleRange=c(5,10), ORA=FALSE, showLegend=FALSE,
-                           plotType="wc", corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
+                           plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     ## Load from GeneSummary
     tb <- loadGeneSummary(organism = organism)
@@ -101,6 +102,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         
         ## Check correlation
         corData <- cor(freqWordsDTM)
+        returnList[["corMat"]] <- corData
 
         ## Set correlation below threshold to zero
         corData[corData<corThresh] <- 0
@@ -122,11 +124,18 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         } else {
             netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
         }
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)+
-            geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
+        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)
+        if (colorText){
+            netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq, color=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                           bg.color = "white", segment.color="black",
+                           bg.r = .15, show.legend=showLegend)
+        } else{
+            netPlot <- netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            color = "black",
                            bg.color = "white", segment.color="black",
-                           bg.r = .15, show.legend=showLegend)+
+                           bg.r = .15, show.legend=showLegend) 
+        }
+        netPlot <- netPlot+
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
