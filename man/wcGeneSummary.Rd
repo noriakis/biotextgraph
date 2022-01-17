@@ -13,9 +13,9 @@ wcGeneSummary(
   palette = c("blue", "red"),
   numWords = 15,
   scaleRange = c(5, 10),
-  ORA = FALSE,
   showLegend = FALSE,
   plotType = "wc",
+  colorText = FALSE,
   corThresh = 0.6,
   layout = "nicely",
   edgeLink = TRUE,
@@ -38,11 +38,11 @@ wcGeneSummary(
 
 \item{scaleRange}{scale for label and node size in correlation network}
 
-\item{ORA}{perform over-representation analysis}
-
 \item{showLegend}{whether to show legend in correlation network}
 
 \item{plotType}{"wc" or "network"}
+
+\item{colorText}{color text label based on frequency in correlation network}
 
 \item{corThresh}{the correlation threshold}
 
