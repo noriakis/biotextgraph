@@ -13,7 +13,6 @@
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
-#' @param ORA perform over-representation analysis
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
@@ -32,7 +31,7 @@
 #' @export
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
-                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), ORA=FALSE, showLegend=FALSE,
+                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), showLegend=FALSE,
                            plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     ## Load from GeneSummary
@@ -57,32 +56,6 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     if (prod(is.na(additionalRemove))!=1){
         docs <- docs %>% tm_map(removeWords, additionalRemove)
     }
-    
-    if (ORA){
-        message("This would take time ...")
-        allDocs <- VCorpus(VectorSource(tb$Gene_summary))
-        allDocs <- allDocs %>%
-            tm_map(FUN=content_transformer(tolower)) %>% 
-            tm_map(FUN=removeNumbers) %>%
-            tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) %>%
-            tm_map(removeWords, filterWords) %>% 
-            tm_map(FUN=removePunctuation) %>%
-            tm_map(FUN=stripWhitespace)
-        if (prod(is.na(additionalRemove))!=1){
-            allDocs <- allDocs %>% tm_map(removeWords, additionalRemove)
-        }
-        matAll <- as.matrix(TermDocumentMatrix(allDocs))
-        matAllSorted <- sort(rowSums(matAll), decreasing=TRUE)
-        
-        returnp <- function(name){
-            query <- as.numeric(matSorted[name])
-            noquery <- sum(matSorted) - query
-            queryAll <- as.numeric(matAllSorted[name])
-            allwords <- sum(matAllSorted) - queryAll
-            return(sum(dhyper(query:sum(matSorted), queryAll, allwords, sum(matSorted))))
-        }
-    }
-
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
@@ -90,10 +63,6 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     docs <- TermDocumentMatrix(docs)
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
-    if (ORA){
-        ps <- sapply(names(matSorted), returnp)
-        returnList[["ps"]] <- ps
-    }
 
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
