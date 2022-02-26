@@ -32,6 +32,8 @@ wcGeneSummary(
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 
+\item{organism}{organism ID to use}
+
 \item{palette}{palette for color gradient in correlation network}
 
 \item{numWords}{the number of words to be shown in correlation network}
@@ -51,6 +53,8 @@ wcGeneSummary(
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
+
+\item{...}{parameters to wordcloud()}
 }
 \value{
 list of data frame and ggplot2 object
@@ -59,5 +63,6 @@ list of data frame and ggplot2 object
 Plot wordcloud of RefSeq description obtained by GeneSummary
 }
 \examples{
+geneList <- c("6346")
 wcGeneSummary(geneList)
 }

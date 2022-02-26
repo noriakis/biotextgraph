@@ -16,6 +16,8 @@
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
+#' @param organism organism ID to use
+#' @param ... parameters to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -27,7 +29,9 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 #' 
-#' @examples wcGeneSummary(geneList)
+#' @examples
+#' geneList <- c("6346")
+#' wcGeneSummary(geneList)
 #' @export
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
