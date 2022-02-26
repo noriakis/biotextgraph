@@ -10,3 +10,5 @@ Depends:
     R (>= 4.1.0)
 Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph
 RoxygenNote: 7.1.2
+URL: https://github.com/noriakis/wcGeneSummary
+BugReports: https://github.com/noriakis/wcGeneSummary/issues
