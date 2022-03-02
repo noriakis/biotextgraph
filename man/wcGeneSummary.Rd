@@ -54,7 +54,7 @@ wcGeneSummary(
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
-\item{...}{parameters to wordcloud()}
+\item{...}{parameters to pass to wordcloud()}
 }
 \value{
 list of data frame and ggplot2 object
