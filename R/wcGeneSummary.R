@@ -17,7 +17,7 @@
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
 #' @param organism organism ID to use
-#' @param ... parameters to wordcloud()
+#' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
