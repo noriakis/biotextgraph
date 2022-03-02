@@ -10,7 +10,8 @@ getWordsOnDendro(
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
   numberOfWords = 25,
-  excludeFreq = 10000
+  excludeFreq = 10000,
+  orgDb = org.Hs.eg.db
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ getWordsOnDendro(
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
 \item{excludeFreq}{words with the frequency above this threshold is excluded beforehand}
+
+\item{orgDb}{organism database}
 }
 \value{
 list of pyramid plot grobs and its positions
