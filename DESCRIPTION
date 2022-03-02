@@ -8,5 +8,5 @@ License: MIT
 Encoding: UTF-8
 Depends:
     R (>= 4.2.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork
 RoxygenNote: 7.1.2

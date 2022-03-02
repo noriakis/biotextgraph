@@ -11,8 +11,8 @@ returnPyramid(
   geneVecType,
   filterWords,
   numberOfWords,
+  orgDb,
   additionalRemove = NA,
-  orgDb = org.Hs.eg.db,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
   highCol = "red"
@@ -31,9 +31,9 @@ returnPyramid(
 
 \item{numberOfWords}{the number of words to plot}
 
-\item{additionalRemove}{words to filter}
-
 \item{orgDb}{database to change the ID to ENTREZ ID}
+
+\item{additionalRemove}{words to filter}
 
 \item{widths}{parameters to pass to patchwork}
 

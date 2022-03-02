@@ -8,16 +8,18 @@
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
 #' @param numberOfWords the number of words to plot (default: 25)
 #' @param excludeFreq words with the frequency above this threshold is excluded beforehand
+#' @param orgDb organism database
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @importFrom ggdendro dendro_data
+#' @importFrom dplyr select
 #' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
 #' 
 #' @examples \dontrun{getWordsOnDendro(dhc, geneVec)}
 #' @export
 #' 
-getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEMBL", numberOfWords=25, excludeFreq=10000){
+getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEMBL", numberOfWords=25, excludeFreq=10000, orgDb=org.Hs.eg.db){
     
     ## Filter high frequency words
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
@@ -57,7 +59,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
 
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit & length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
-                        grobList[[as.character(grobNum)]]$plot <- returnPyramid(L,R, geneVec, geneVecType, filterWords, numberOfWords, additionalRemove=NA)
+                        grobList[[as.character(grobNum)]]$plot <- returnPyramid(L,R, geneVec, geneVecType, filterWords, numberOfWords, orgDb=orgDb, additionalRemove=NA)
                         grobList[[as.character(grobNum)]]$height <- HEIGHT
                         grobList[[as.character(grobNum)]]$xmin <- XMIN
                         grobList[[as.character(grobNum)]]$xmax <- XMAX
@@ -135,19 +137,21 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
+#' @import ggplot2
+#' @import patchwork
 #' @importFrom GeneSummary loadGeneSummary
+#' @importFrom dplyr mutate if_else
 #' @importFrom ggdendro dendro_data
-#' @importFrom AnnotationDbi select
 #' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
 #' 
 #' 
-returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords, additionalRemove=NA,
-                          orgDb=org.Hs.eg.db, widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red") {
+returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords, orgDb, additionalRemove=NA,
+                          widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red") {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
-    geneList = select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList = AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filL <- tb %>% filter(Gene_ID %in% geneList)
-    geneList = select(orgDb, keys = names(geneVec)[geneVec %in% R], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList = AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% R], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filR <- tb %>% filter(Gene_ID %in% geneList)
     
     all_L <- paste(filL$Gene_summary, collapse = "")
