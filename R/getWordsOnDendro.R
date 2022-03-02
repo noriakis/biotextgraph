@@ -47,8 +47,13 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
                     lb <- i %>% cutree(k=2)
                     # L <- as.numeric(sapply(strsplit(names(lb[lb==1]), "ME"), "[", 2)) # WGCNA
                     # R <- as.numeric(sapply(strsplit(names(lb[lb==2]), "ME"), "[", 2)) # WGCNA
-                    L <- names(lb[lb==1])
-                    R <- names(lb[lb==2])
+                    if (mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==1])) %>% select(x))[,1])) > mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==2])) %>% select(x))[,1]))) {
+                        R <- names(lb[lb==1])
+                        L <- names(lb[lb==2])
+                    } else {
+                        L <- names(lb[lb==1])
+                        R <- names(lb[lb==2])
+                    }
 
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit & length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
