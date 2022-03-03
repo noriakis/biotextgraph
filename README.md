@@ -91,7 +91,7 @@ library(magrittr)
 ## An example to annotate module eigengenes in WGCNA
 ## Perform pvclust on ME data.frame
 ## block-wise module identification was performed beforehand
-result <- pvclust(bwmod$MEs, method.dist="cor", method.hclust="average", nboot=10)
+result <- pvclust(bwmod$MEs[,1:7], method.dist="cor", method.hclust="average", nboot=10)
 
 ## Make the dendrogram
 dhc <- result %>%
@@ -123,7 +123,7 @@ for (gr in grobList){
         addPlot <- gr$plot
     }
     dendroPlot <- dendroPlot +
-        annotation_custom(addPlot, xmin=gr$xmin-0.2, xmax=gr$xmax+0.2, ymin=gr$height+0.01, ymax=gr$heightup-0.01)
+        annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax, ymin=gr$height+0.005, ymax=gr$heightup-0.005)
 }
 
 dendroPlot
