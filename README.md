@@ -57,7 +57,7 @@ cclNetTrans <- cclNet$net + theme(plot.background = element_rect(fill = "transpa
 
 <img src="https://github.com/noriakis/software/blob/main/images/cclCorNetNicely.png?raw=true" width="800px">
 
-### Example of a pathway (corelation network)
+### Example of a corelation network of words in the pathway
 ```R
 library(org.Hs.eg.db)
 keggPathways <- org.Hs.egPATH2EG
@@ -74,6 +74,61 @@ hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transpare
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/hCNet.png?raw=true" width="800px">
 
+### Example of annotating dendrogram of gene cluster by words
+
+The example of annotating dendrogram by pyramid plots of word counts is shown. In this example, `WGCNA` was used to cluster the gene expression values. Module eigengenes are further clustered by `pvclust`. `getWordsOnDendro` can be used to obtain the `patchworkGrob` list. Grobs can be plotted on dendrogram plot using the `annotation_custom`. Plotting is not functionalized due to positioning requirements.
+
+```R
+library(wcGeneSummary)
+library(org.Hs.eg.db)
+library(dendextend)
+library(pvclust)
+library(ggplot2)
+library(grid)
+library(gridExtra)
+library(magrittr)
+
+## An example to annotate module eigengenes in WGCNA
+## Perform pvclust on ME data.frame
+## block-wise module identification was performed beforehand
+result <- pvclust(bwmod$MEs, method.dist="cor", method.hclust="average", nboot=10)
+
+## Make the dendrogram
+dhc <- result %>%
+    as.dendrogram() %>%
+    hang.dendrogram()
+
+## Make named vector
+geneVec <- paste0("ME", bwmod$colors)
+names(geneVec) <- names(bwmod$colors)
+
+## Get pyramid plot list using the function.
+## It takes time when geneNumLimit is large.
+grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = 10, geneNumLimit = 1000,
+                             geneVecType = "ENSEMBL", excludeFreq = 10000)
+
+## Plot dendrogram ggplot, using the pvclust p-values
+dendroPlot <- dhc %>% pvclust_show_signif_gradient(result) %>% ggplot() 
+
+## Plot the grob on dendrogram using annotation_custom.
+## If border is TRUE, border line is drawn using grid.rect.
+border <- TRUE
+for (gr in grobList){
+    if (border){
+        addPlot <- ggplotify::as.grob(function(){
+            grid.arrange(gr$plot)
+            grid.rect(width = .98, height = .98, gp = gpar(lwd = 1, col = "black", fill = NA))
+        })
+    } else {
+        addPlot <- gr$plot
+    }
+    dendroPlot <- dendroPlot +
+        annotation_custom(addPlot, xmin=gr$xmin-0.2, xmax=gr$xmax+0.2, ymin=gr$height+0.01, ymax=gr$heightup-0.01)
+}
+
+dendroPlot
+```
+<img src="https://github.com/noriakis/software/blob/main/images/plotDendro.png?raw=true" width="800px">
 
 ### The other examples
 
