@@ -50,16 +50,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     
     ## Make corpus
     docs <- VCorpus(VectorSource(fil$Gene_summary))
-    docs <- docs %>%
-        tm_map(FUN=content_transformer(tolower)) %>% 
-        tm_map(FUN=removeNumbers) %>%
-        tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) %>%
-        tm_map(removeWords, filterWords) %>% 
-        tm_map(FUN=removePunctuation) %>%
-        tm_map(FUN=stripWhitespace)
-    if (prod(is.na(additionalRemove))!=1){
-        docs <- docs %>% tm_map(removeWords, additionalRemove)
-    }
+    docs <- makeCorpus(docs, filterWords, additionalRemove)
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
