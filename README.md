@@ -20,7 +20,7 @@ gwc <- wcGeneSummary(entrezID, excludeFreq = 5000, max.words=200, random.order=F
                      colors=palettetown::pokepal(150), shape="circle", rot.per=0.4)
 # ggsave("erccWc.png", gwc$wc, width=8, height=8)
 ```
-<img src="https://github.com/noriakis/wcGeneSummary/blob/main/images/erccWc.png?raw=true" width="800px">
+<img src="https://github.com/noriakis/software/blob/main/images/erccWc.png?raw=true" width="800px">
 
 ### Example of CXCL
 ```R
@@ -35,7 +35,7 @@ gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
                      colors=palettetown::pokepal(151), shape="circle", rot.per=0.4)
 # ggsave("cxclWc.png", gwc$wc, width=8, height=8)
 ```
-<img src="https://github.com/noriakis/wcGeneSummary/blob/main/images/cxclWc.png?raw=true" width="800px">
+<img src="https://github.com/noriakis/software/blob/main/images/cxclWc.png?raw=true" width="800px">
 
 ### Example of CCL (correlation network)
 ```R
