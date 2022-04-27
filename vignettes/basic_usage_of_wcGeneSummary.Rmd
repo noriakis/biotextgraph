@@ -1,0 +1,39 @@
+---
+title: "wcGeneSummary"
+author: "Noriaki Sato"
+package: wcGeneSummary
+output: 
+    BiocStyle::html_document:
+        toc_float: true
+vignette: >
+    %\VignetteIndexEntry{wcGeneSummary}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}  
+---
+
+# Basic usage
+
+## Producing word clouds
+The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
+
+```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE}
+library(wcGeneSummary)
+library(org.Hs.eg.db)
+erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
+entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
+gwc <- wcGeneSummary(entrezID)
+gwc$wc
+```
+
+It accepts values of the `wordcloud()` function, and also returns a data frame consisting of frequency of each term.
+
+```{r table}
+knitr::kable(
+  head(gwc$df), caption = 'Term frequencies.',
+  row.names = FALSE
+)
+```
+
+## Producing correlation networks
+
+# Custom usage
