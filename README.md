@@ -74,6 +74,12 @@ hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transpare
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/hCNet.png?raw=true" width="800px">
 
+### Example of annotating Bayesian network
+
+Interactive inspection of Bayesian network of module eigengenes using `Cytoscape.js` and `wcGeneSummary`.
+<img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
+
+
 ### Example of annotating dendrogram of gene cluster by words
 
 The example of annotating dendrogram by pyramid plots of word counts is shown. In this example, `WGCNA` was used to cluster the gene expression values. Module eigengenes are further clustered by `pvclust`. `getWordsOnDendro` can be used to obtain the `patchworkGrob` list. Grobs can be plotted on dendrogram plot using the `annotation_custom`. Plotting is not functionalized due to positioning requirements.
