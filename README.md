@@ -80,9 +80,9 @@ Interactive inspection of Bayesian network of module eigengenes using `Cytoscape
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
 
 Using barplots.  
-<center>
+<p align="center">
 <img src="https://github.com/noriakis/software/blob/main/images/bbn.png?raw=true" width="400px">
-</center>
+</p>
 
 ### Example of annotating dendrogram of gene cluster by words
 
