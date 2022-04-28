@@ -79,8 +79,10 @@ hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transpare
 Interactive inspection of Bayesian network of module eigengenes using `Cytoscape.js` and `wcGeneSummary`.
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
 
-Using barplots.
-<img src="https://github.com/noriakis/software/blob/main/images/bbn.png?raw=true">
+Using barplots.  
+<center>
+<img src="https://github.com/noriakis/software/blob/main/images/bbn.png?raw=true" width="400px">
+</center>
 
 ### Example of annotating dendrogram of gene cluster by words
 
