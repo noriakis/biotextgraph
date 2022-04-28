@@ -7,7 +7,7 @@ output:
         toc_float: true
 vignette: >
     %\VignetteIndexEntry{wcGeneSummary}
-    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEngine{knitr::knitr}
     %\VignetteEncoding{UTF-8}  
 ---
 
