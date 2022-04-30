@@ -17,7 +17,7 @@ library(wcGeneSummary)
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
 gwc <- wcGeneSummary(entrezID, excludeFreq = 5000, max.words=200, random.order=FALSE,
-                     colors=palettetown::pokepal(150), shape="circle", rot.per=0.4)
+                     colors=palettetown::pokepal(150), rot.per=0.4)
 # ggsave("erccWc.png", gwc$wc, width=8, height=8)
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/erccWc.png?raw=true" width="800px">
@@ -32,7 +32,7 @@ entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=cxcls, columns=c("ENTREZID")
 gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
                      madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                      max.words=200, random.order=FALSE,
-                     colors=palettetown::pokepal(151), shape="circle", rot.per=0.4)
+                     colors=palettetown::pokepal(151), rot.per=0.4)
 # ggsave("cxclWc.png", gwc$wc, width=8, height=8)
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/cxclWc.png?raw=true" width="800px">
