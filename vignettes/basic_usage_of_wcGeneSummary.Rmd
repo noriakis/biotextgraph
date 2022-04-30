@@ -25,7 +25,16 @@ gwc <- wcGeneSummary(entrezID)
 gwc$wc
 ```
 
-It accepts values of the `wordcloud()` function, and also returns a data frame consisting of frequency of each term.
+It accepts values of the `wordcloud()` function. 
+
+```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE}
+## Use palette from palettetown (Mewtwo!)
+gwc <- wcGeneSummary(entrezID, max.words=200, random.order=FALSE,
+                     colors=palettetown::pokepal(150), rot.per=0.4)
+gwc$wc
+```
+
+And also returns a data frame consisting of frequency of each term.
 
 ```{r table}
 knitr::kable(
@@ -33,6 +42,8 @@ knitr::kable(
   row.names = FALSE
 )
 ```
+
+
 
 ## Producing correlation networks
 
