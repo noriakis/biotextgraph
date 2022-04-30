@@ -9,5 +9,6 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
 Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork
+Suggests: knitr, rmarkdown
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
