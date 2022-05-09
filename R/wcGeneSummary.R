@@ -17,7 +17,7 @@
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
 #' @param organism organism ID to use
-#' @param enrich currently, only 'reactome' is supported
+#' @param enrich currently, only 'reactome' and 'kegg' is supported
 #' @param topPath how many pathway descriptions are included in text analysis
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
@@ -31,6 +31,7 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 #' @importFrom ReactomePA enrichPathway
+#' @importFrom clusterProfiler enrichKEGG
 #' 
 #' @examples
 #' geneList <- c("6346")
@@ -47,13 +48,15 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     if (!is.null(enrich)) {
         if (enrich=="reactome"){
             pathRes <- enrichPathway(geneList)
-            ## Make corpus
-            docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-            docs <- makeCorpus(docs, additionalRemove, additionalRemove)
+        } else if (enrich=="kegg"){
+            pathRes <- enrichKEGG(geneList)
         } else {
-            ## Currently only supports Reactome
-            stop("please specify 'reactome'")
+            ## Currently only supports some pathways
+            stop("please specify 'reactome' or 'kegg'")
         }
+        ## Make corpus
+        docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+        docs <- makeCorpus(docs, additionalRemove, additionalRemove)
     } else {
         ## Load from GeneSummary
         tb <- loadGeneSummary(organism = organism)

@@ -56,7 +56,7 @@ wcGeneSummary(
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
-\item{enrich}{currently, only 'reactome' is supported}
+\item{enrich}{currently, only 'reactome' and 'kegg' is supported}
 
 \item{topPath}{how many pathway descriptions are included in text analysis}
 
