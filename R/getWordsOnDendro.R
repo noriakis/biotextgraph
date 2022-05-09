@@ -12,6 +12,7 @@
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
+#' @import org.Hs.eg.db
 #' @importFrom ggdendro dendro_data
 #' @importFrom dplyr select
 #' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
@@ -149,9 +150,9 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords
                           widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red") {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
-    geneList = AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList <- AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filL <- tb %>% filter(Gene_ID %in% geneList)
-    geneList = AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% R], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList <- AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% R], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filR <- tb %>% filter(Gene_ID %in% geneList)
     
     all_L <- paste(filL$Gene_summary, collapse = "")

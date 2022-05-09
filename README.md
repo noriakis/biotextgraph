@@ -74,6 +74,16 @@ hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transpare
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/hCNet.png?raw=true" width="800px">
 
+Additionally perform enrichment analysis on the same gene list and plot a correlation network.
+```R
+hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome",
+                           topPath=30, numWords=30,
+                           plotType="network", corThresh=0.2)
+hCNetReacTrans <- hCNetReac$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+# ggsave(file="hCNetTrans.png", hCNetReacTrans, width=12, height=12, bg="transparent")
+```
+<img src="https://github.com/noriakis/software/blob/main/images/hCNetTrans.png?raw=true" width="800px">
+
 ### Example of annotating Bayesian network
 
 Interactive inspection of Bayesian network of module eigengenes using `Cytoscape.js` and `wcGeneSummary`.
