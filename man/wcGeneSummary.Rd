@@ -20,6 +20,8 @@ wcGeneSummary(
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
+  enrich = NULL,
+  topPath = 10,
   ...
 )
 }
@@ -53,6 +55,10 @@ wcGeneSummary(
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
+
+\item{enrich}{currently, only 'reactome' is supported}
+
+\item{topPath}{how many pathway descriptions are included in text analysis}
 
 \item{...}{parameters to pass to wordcloud()}
 }

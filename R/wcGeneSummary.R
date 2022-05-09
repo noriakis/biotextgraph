@@ -17,17 +17,20 @@
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
 #' @param organism organism ID to use
+#' @param enrich currently, only 'reactome' is supported
+#' @param topPath how many pathway descriptions are included in text analysis
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
+#' @import ggraph ggplot2
 #' @importFrom dplyr filter
 #' @importFrom igraph graph.adjacency
-#' @import ggraph ggplot2
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
+#' @importFrom ReactomePA enrichPathway
 #' 
 #' @examples
 #' geneList <- c("6346")
@@ -36,21 +39,36 @@
 #' 
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
                            palette=c("blue","red"), numWords=15, scaleRange=c(5,10), showLegend=FALSE,
-                           plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
+                           plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
+                           enrich=NULL, topPath=10, ...) {
     returnList <- list()
-    ## Load from GeneSummary
-    tb <- loadGeneSummary(organism = organism)
 
-    # load("allFreqGeneSummary.rda") # Already performed, and automatically loaded
+    ## If specified pathway option
+    if (!is.null(enrich)) {
+        if (enrich=="reactome"){
+            pathRes <- enrichPathway(geneList)
+            ## Make corpus
+            docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+            docs <- makeCorpus(docs, additionalRemove, additionalRemove)
+        } else {
+            ## Currently only supports Reactome
+            stop("please specify 'reactome'")
+        }
+    } else {
+        ## Load from GeneSummary
+        tb <- loadGeneSummary(organism = organism)
 
-    ## Filter high frequency words
-    filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
-    filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
-    fil <- tb %>% filter(Gene_ID %in% geneList)
-    
-    ## Make corpus
-    docs <- VCorpus(VectorSource(fil$Gene_summary))
-    docs <- makeCorpus(docs, filterWords, additionalRemove)
+        # load("allFreqGeneSummary.rda") # Already performed, and automatically loaded
+
+        ## Filter high frequency words
+        filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
+        filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
+        fil <- tb %>% filter(Gene_ID %in% geneList)
+        
+        ## Make corpus
+        docs <- VCorpus(VectorSource(fil$Gene_summary))
+        docs <- makeCorpus(docs, filterWords, additionalRemove)
+    }
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
@@ -106,7 +124,6 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             scale_edge_color_gradient(low=palette[1],high=palette[2], name = "Correlation")+
             theme_graph()
         returnList[["net"]] <- netPlot
-        return(returnList)
     } else {
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         for (i in madeUpper) {
@@ -116,6 +133,11 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
         returnList[["df"]] <- returnDf
         returnList[["wc"]] <- wc
-    return(returnList)
     }
+
+    if (!is.null(enrich)){
+        returnList[["enrich"]] <- pathRes
+    }
+
+    return(returnList)
 }
