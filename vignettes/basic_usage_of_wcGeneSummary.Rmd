@@ -60,11 +60,12 @@ net$net
 ## Simulate WGCNA
 ## you can just use results from WGCNA.
 ## Assuming WGCNA results are stored in `mod`
-library(bnlearn)
+# library(bnlearn)
 library(igraph)
 
 ## Replace like boot.strength(mod$MEs, R=500, algorithm = "hc")
-dag = model2network("[ME1][ME2|ME1]")
+# dag <- model2network("[ME1][ME2|ME1]") # If using bnlearn
+dag <- graph_from_literal( ME1-+ME2 )
 
 ## Simulate genes in the modules
 ccls <- c()
@@ -87,7 +88,8 @@ modColors <- c(ERCCcol, CCLcol)
 ensg <- names(modColors)
 
 ## Convert to igraph
-g <- as.igraph(dag)
+# g <- as.igraph(dag)
+g <- dag
 
 ## Assign edge attributes
 ## Skip, if you perform boot.strength, the edge attributes can be added from the result
