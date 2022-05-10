@@ -94,6 +94,12 @@ Using barplots.
 <img src="https://github.com/noriakis/software/blob/main/images/bbn.png?raw=true" width="400px">
 </p>
 
+You can also export to `vis.js`.
+<p align="center">
+<img src="https://github.com/noriakis/software/blob/main/images/bbn_visjs.png?raw=true" width="400px">
+</p>
+
+
 ### Example of annotating dendrogram of gene cluster by words
 
 The example of annotating dendrogram by pyramid plots of word counts is shown. In this example, `WGCNA` was used to cluster the gene expression values. Module eigengenes are further clustered by `pvclust`. `getWordsOnDendro` can be used to obtain the `patchworkGrob` list. Grobs can be plotted on dendrogram plot using the `annotation_custom`. Plotting is not functionalized due to positioning requirements.
