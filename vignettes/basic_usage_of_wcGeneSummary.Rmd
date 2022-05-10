@@ -16,9 +16,12 @@ vignette: >
 ## Producing word clouds
 The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
 
-```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE}
+```{r load, warning=FALSE, message=FALSE}
 library(wcGeneSummary)
 library(org.Hs.eg.db)
+```
+
+```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=T}
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
 gwc <- wcGeneSummary(entrezID)
@@ -27,10 +30,10 @@ gwc$wc
 
 It accepts values of the `wordcloud()` function. 
 
-```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE}
-## Use palette from palettetown (Mewtwo!)
+```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
+## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
 gwc <- wcGeneSummary(entrezID, max.words=200, random.order=FALSE,
-                     colors=palettetown::pokepal(150), rot.per=0.4)
+                     colors=palette(), rot.per=0.4)
 gwc$wc
 ```
 
@@ -46,5 +49,123 @@ knitr::kable(
 
 
 ## Producing correlation networks
-
+```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
+library(ggraph)
+net <- wcGeneSummary(entrezID, plotType="network")
+net$net
+```
 # Custom usage
+
+```{r mod, warning=FALSE, message=FALSE}
+## Simulate WGCNA
+## you can just use results from WGCNA.
+## Assuming WGCNA results are stored in `mod`
+library(bnlearn)
+library(igraph)
+
+## Replace like boot.strength(mod$MEs, R=500, algorithm = "hc")
+dag = model2network("[ME1][ME2|ME1]")
+
+## Simulate genes in the modules
+ccls <- c()
+for (i in c(1,2,3,4,5,6,7,8,9)){
+    ccls <- c(ccls, paste0("CCL",i))
+}
+erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
+
+CCLensg <- AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+ERCCensg <- AnnotationDbi::select(org.Hs.eg.db, keys=erccs, columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+
+CCLensg <- CCLensg[!is.na(CCLensg)]
+ERCCensg <- ERCCensg[!is.na(ERCCensg)]
+
+CCLcol <- rep(1, length(CCLensg))
+names(CCLcol) <- CCLensg
+ERCCcol <- rep(2, length(ERCCensg))
+names(ERCCcol) <- ERCCensg
+modColors <- c(ERCCcol, CCLcol)
+ensg <- names(modColors)
+
+## Convert to igraph
+g <- as.igraph(dag)
+
+## Assign edge attributes
+## Skip, if you perform boot.strength, the edge attributes can be added from the result
+# el <- data.frame(as_edgelist(g))
+# colnames(el) <- c("from","to")
+# el <- left_join(el, bs)
+# E(g)$strength <- el$strength
+# E(g)$direction <- el$direction
+
+## Node attributes
+V(g)$stripName <- gsub("ME","",V(g)$name)
+sizes <- table(modColors)
+V(g)$size <- as.numeric(sizes[V(g)$stripName])
+
+## Directory to save images and a script
+rootDir <- "./"
+netDir <- "visCyjs"
+imageDir <- "images"
+
+dir.create(paste0(rootDir, netDir))
+dir.create(paste0(rootDir, netDir, "/", imageDir))
+
+images <- c()
+plotType <- "bar"
+numLim <- 200 # limit for gene number
+for (i in V(g)$name){
+    print(i)
+    i <- as.numeric(gsub("ME","",i)) # strip ME
+
+    queries <- ensg[modColors==i]
+    if (length(queries)>numLim) {
+        warning("Sampling random genes")
+        queries <- queries[sample(1:length(queries), numLim)] ## Temporary restrict to randomly chosen genes, should be replaced to like kME values
+    }
+    
+    ## Convert to ENTREZ
+    entre <- AnnotationDbi::select(org.Hs.eg.db, keytype="ENSEMBL", keys = queries, columns = "ENTREZID")$ENTREZID
+    
+    if (plotType=="bar"){
+        plt <- makeBar(entre) # get barplot
+    } else { ## If wordcloud
+        # A <- wcGeneSummary(entre,
+        #                    madeUpper=c("dna","rna",
+        #                                tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))))
+        # palNum <- sample(1:151,1) # palettetown
+        # 
+        # ## This time use ggwordcloud()
+        # plt <- ggwordcloud::ggwordcloud(A$df$word, A$df$freq,
+        #                      shape="circle", min.freq = 10,
+        #                      rot.per = 0.5, random.order = FALSE,
+        #                      colors = pokepal(palNum))+
+        #          scale_size_area(max_size = 40)
+    }
+    ## Save images
+    ggsave(paste0(rootDir, netDir, "/", imageDir, "/", i ,".png"),
+           plt, dpi=300, width=10, height=10)
+    ## Store image dir
+    images <- c(images, paste0(imageDir, "/", i ,".png"))
+}
+V(g)$image <- images
+
+## Node shape
+if (plotType=="bar"){
+    V(g)$shape <- rep("rectangle", length(V(g))) 
+} else {
+    V(g)$shape <- rep("circle", length(V(g)))
+}
+
+## Scale the node size
+sizeMin <- 50
+sizeMax <- 200
+rawMin <- min(V(g)$size)
+rawMax <- max(V(g)$size)
+scf <- (sizeMax-sizeMin)/(rawMax-rawMin)
+V(g)$size <- scf * V(g)$size + sizeMin - scf * rawMin
+
+## Export
+exportCyjs(g, rootDir, netDir)
+# or, exportVisjs(g, rootDir, netDir)
+```
+Use like `http-server` in the directory containing JavaScripts, and interactively inspect the module relationship.
