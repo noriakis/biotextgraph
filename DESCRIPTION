@@ -8,7 +8,7 @@ License: MIT
 Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, ReactomePA, org.Hs.eg.db, clusterProfiler
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, ReactomePA, org.Hs.eg.db, clusterProfiler, jsonlite, cyjShiny
 Suggests: knitr, rmarkdown, markdown
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
