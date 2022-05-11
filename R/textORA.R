@@ -10,7 +10,7 @@
 textORA <- function(queries) {
     tb <- loadGeneSummary()
     
-    fil <- tb |> dplyr::filter(Gene_ID %in% geneList)
+    fil <- tb |> dplyr::filter(Gene_ID %in% queries)
     
     ## Make corpus for queried genes
     docs <- VCorpus(VectorSource(fil$Gene_summary))

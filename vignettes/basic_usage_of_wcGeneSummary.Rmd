@@ -75,8 +75,14 @@ hist(pvs)
 pvs[order(pvs)] |> head()
 ```
 
+```{r oranet, fig.cap="A correlation network of gene summaries (ORA)", warning=FALSE, message=FALSE, cache=T}
+net <- wcGeneSummary(entrezID, plotType="network", ora=TRUE)
+net$net
+```
+
 # Custom usage
 
+## Interactive inspection of Bayesian network annotated by words
 ```{r mod, warning=FALSE, message=FALSE}
 ## Simulate WGCNA
 ## you can just use results from WGCNA.
@@ -205,7 +211,7 @@ V(g)$size <- scf * V(g)$size + sizeMin - scf * rawMin
 exportCyjs(g, rootDir, netDir)
 # or, exportVisjs(g, rootDir, netDir)
 ```
-Use like `http-server` in the directory containing JavaScripts, and interactively inspect the module relationship.
+Use like `http-server` in the directory containing a JavaScript, and interactively inspect the module relationship.
 
 ```{r wgcna, fig.cap="A ME dendrogram with words", warning=FALSE, message=FALSE, cache=T}
 plotEigengeneNetworksWithWords(MEs, modColors)
