@@ -11,7 +11,8 @@ getWordsOnDendro(
   geneVecType = "ENSEMBL",
   numberOfWords = 25,
   excludeFreq = 10000,
-  orgDb = org.Hs.eg.db
+  orgDb = org.Hs.eg.db,
+  madeUpper = c("rna", "dna")
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ getWordsOnDendro(
 \item{excludeFreq}{words with the frequency above this threshold is excluded beforehand}
 
 \item{orgDb}{organism database}
+
+\item{madeUpper}{words with uppercase}
 }
 \value{
 list of pyramid plot grobs and its positions
