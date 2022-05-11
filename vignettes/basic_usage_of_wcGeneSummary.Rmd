@@ -16,9 +16,11 @@ vignette: >
 ```{r load, warning=FALSE, message=FALSE}
 library(wcGeneSummary)
 library(org.Hs.eg.db)
+library(ggplot2)
 ```
 
 ## Producing word clouds
+
 The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
 As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 5000.
 
@@ -34,6 +36,7 @@ It accepts values of the `wordcloud()` function.
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
 gwc <- wcGeneSummary(entrezID, random.order=FALSE,
+                     numWords=100,
                      colors=palette(), rot.per=0.4)
 gwc$wc
 ```
@@ -54,6 +57,19 @@ library(ggraph)
 net <- wcGeneSummary(entrezID, plotType="network")
 net$net
 ```
+
+## Text over represenatation analysis (experimental)
+```{r}
+keggPathways <- org.Hs.egPATH2EG
+mappedKeys <- mappedkeys(keggPathways)
+keggList <- as.list(keggPathways[mappedKeys])
+geneList <- keggList$`00785` # Lipoic acid metabolism
+
+pvs <- textORA(geneList)
+hist(pvs)
+pvs[order(pvs)] |> head()
+```
+
 # Custom usage
 
 ```{r mod, warning=FALSE, message=FALSE}
