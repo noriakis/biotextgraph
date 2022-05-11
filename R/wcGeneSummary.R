@@ -47,6 +47,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
 
     ## If specified pathway option
     if (!is.null(enrich)) {
+        cat("performing enrichment analysis ...\n")
         if (enrich=="reactome"){
             pathRes <- enrichPathway(geneList)
         } else if (enrich=="kegg"){
@@ -66,13 +67,14 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
 
         ## Filter high frequency words
         filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
+        cat(paste("filtered", length(filterWords), "words ...\n"))
         filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
 
         if (ora){
             cat("performing ORA\n")
             sig <- textORA(geneList)
             sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            cat(paste("filtered", length(sigFilter), "words\n"))
+            cat(paste("filtered", length(sigFilter), "words ...\n"))
             filterWords <- c(filterWords, sigFilter)
         }
 
