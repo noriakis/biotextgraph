@@ -15,7 +15,8 @@ returnPyramid(
   additionalRemove = NA,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
-  highCol = "red"
+  highCol = "red",
+  madeUpper = c("rna", "dna")
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ returnPyramid(
 \item{lowCol}{gradient low color}
 
 \item{highCol}{gradient high color}
+
+\item{madeUpper}{words with uppercase}
 }
 \value{
 list of pyramid plot grobs and its positions

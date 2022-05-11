@@ -1,3 +1,72 @@
+#' plotEigengeneNetworksWithWords
+#' 
+#' plot an eigengene dendrogram with word annotation
+#' 
+#' 
+#' @param MEs module eigengene data
+#' @param colors named vector of cluster
+#' @param numberOfWords number of words to be included in pyramid plots
+#' @param geneNumLimit clusters with gene number above this threshold are ignored
+#' @param geneVecType type of IDs in `colors`
+#' @param excludeFreq exclude the words above this threshold
+#' @param border whether to draw border on pyramid plots
+#' @param madeUpper words with uppercase
+#' @param nboot pvclust bootstrap number
+#' 
+#' @export
+#' @import grid gridExtra
+#' @import ggplot2
+#' @importFrom pvclust pvclust
+#' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
+plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
+                                            numberOfWords=10, geneNumLimit=1000,
+                                            geneVecType="ENSEMBL",excludeFreq=10000,
+                                            border=TRUE, madeUpper=c("rna","dna")) {
+    ## Perform pvclust on ME data.frame
+    result <- pvclust(MEs, method.dist="cor", method.hclust="average", nboot=nboot)
+    
+    # make dendrogram    
+    dhc <- result |>
+        as.dendrogram() |>
+        hang.dendrogram()
+
+    ## Make named vector
+    geneVec <- paste0("ME", colors)
+    names(geneVec) <- names(colors)
+    
+    ## Get pyramid plot list using the function.
+    ## It takes time when geneNumLimit is large.
+    grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = numberOfWords,
+                                 geneNumLimit = geneNumLimit,
+                                 geneVecType = geneVecType, excludeFreq = excludeFreq,
+                                 madeUpper = madeUpper)
+    
+    ## Plot dendrogram ggplot, using the pvclust p-values
+    dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
+    
+    ## Plot the grob on dendrogram using annotation_custom.
+    ## If border is TRUE, border line is drawn using grid.rect.
+    for (gr in grobList){
+        if (border){
+            addPlot <- ggplotify::as.grob(function(){
+                grid.arrange(gr$plot)
+                grid.rect(width = .98, height = .98,
+                          gp = gpar(lwd = 1, col = "black", fill = NA))
+            })
+        } else {
+            addPlot <- gr$plot
+        }
+        dendroPlot <- dendroPlot +
+            annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                              ymin=gr$height+0.005, ymax=gr$heightup-0.005)
+    }
+    
+    dendroPlot
+}
+
+
+
+
 #' getWordsOnDendro
 #' 
 #' Get grobs to plot on the dendrogram with the position information
@@ -9,18 +78,21 @@
 #' @param numberOfWords the number of words to plot (default: 25)
 #' @param excludeFreq words with the frequency above this threshold is excluded beforehand
 #' @param orgDb organism database
+#' @param madeUpper words with uppercase
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
 #' @importFrom ggdendro dendro_data
 #' @importFrom dplyr select
-#' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
+#' @importFrom dendextend get_nodes_attr get_subdendrograms nnodes
 #' 
 #' @examples \dontrun{getWordsOnDendro(dhc, geneVec)}
 #' @export
 #' 
-getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEMBL", numberOfWords=25, excludeFreq=10000, orgDb=org.Hs.eg.db){
+getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEMBL",
+                             numberOfWords=25, excludeFreq=10000, orgDb=org.Hs.eg.db,
+                             madeUpper=c("rna","dna")){
     
     ## Filter high frequency words
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
@@ -39,6 +111,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
         subdendro <- dhc %>% get_subdendrograms(k=k)
         
         for (i in subdendro){
+
             NODES <- i %>% get_nodes_attr("label")
             NODES <- NODES[!is.na(NODES)]
             XMIN <- as.numeric(labelPos %>% filter(label==NODES[1]) %>% select(x))
@@ -47,7 +120,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
             
             if (!HEIGHT %in% curHeights){
                 if (nnodes(i)!=1){
-                    lb <- i %>% cutree(k=2)
+                    lb <- i %>% dendextend::cutree(k=2) ## not stats::cutree
                     # L <- as.numeric(sapply(strsplit(names(lb[lb==1]), "ME"), "[", 2)) # WGCNA
                     # R <- as.numeric(sapply(strsplit(names(lb[lb==2]), "ME"), "[", 2)) # WGCNA
                     if (mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==1])) %>% select(x))[,1])) > mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==2])) %>% select(x))[,1]))) {
@@ -60,7 +133,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
 
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit & length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
-                        grobList[[as.character(grobNum)]]$plot <- returnPyramid(L,R, geneVec, geneVecType, filterWords, numberOfWords, orgDb=orgDb, additionalRemove=NA)
+                        grobList[[as.character(grobNum)]]$plot <- returnPyramid(L,R, geneVec, geneVecType, filterWords, numberOfWords, orgDb=orgDb, additionalRemove=NA, madeUpper=madeUpper)
                         grobList[[as.character(grobNum)]]$height <- HEIGHT
                         grobList[[as.character(grobNum)]]$xmin <- XMIN
                         grobList[[as.character(grobNum)]]$xmax <- XMAX
@@ -135,6 +208,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' @param widths parameters to pass to patchwork
 #' @param lowCol gradient low color
 #' @param highCol gradient high color
+#' @param madeUpper words with uppercase
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -147,7 +221,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' 
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords, orgDb, additionalRemove=NA,
-                          widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red") {
+                          widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red", madeUpper=c("rna","dna")) {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
     geneList <- AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
@@ -187,6 +261,12 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords
         Label = c(rownames(common_words[1:numberOfWords, ]), rownames(common_words[1:numberOfWords, ]))
     )
     
+    ## Convert to uppercase
+    nodeName <- topDf$Label   
+    for (i in madeUpper) {
+        nodeName[nodeName == i] <- toupper(i)
+    }
+    topDf$Label <- nodeName
     
     gg1 <- topDf %>%
         mutate(Count = if_else(ME == L, Word, 0)) %>%

@@ -102,58 +102,14 @@ You can also export to `vis.js`.
 
 ### Example of annotating dendrogram of gene cluster by words
 
-The example of annotating dendrogram by pyramid plots of word counts is shown. In this example, `WGCNA` was used to cluster the gene expression values. Module eigengenes are further clustered by `pvclust`. `getWordsOnDendro` can be used to obtain the `patchworkGrob` list. Grobs can be plotted on dendrogram plot using the `annotation_custom`. Plotting is not functionalized due to positioning requirements.
+The example of annotating dendrogram by pyramid plots of word counts is shown. In this example, `WGCNA` was used to cluster the gene expression values. Module eigengenes are further clustered by `pvclust`. `getWordsOnDendro` can be used to obtain the `patchworkGrob` list. Grobs can be plotted on dendrogram plot using the `annotation_custom`.
 
 ```R
 library(wcGeneSummary)
-library(org.Hs.eg.db)
-library(dendextend)
-library(pvclust)
-library(ggplot2)
-library(grid)
-library(gridExtra)
-library(magrittr)
-
-## An example to annotate module eigengenes in WGCNA
-## Perform pvclust on ME data.frame
-## block-wise module identification was performed beforehand
-result <- pvclust(bwmod$MEs[,1:7], method.dist="cor", method.hclust="average", nboot=10)
-
-## Make the dendrogram
-dhc <- result %>%
-    as.dendrogram() %>%
-    hang.dendrogram()
-
-## Make named vector
-geneVec <- paste0("ME", bwmod$colors)
-names(geneVec) <- names(bwmod$colors)
-
-## Get pyramid plot list using the function.
-## It takes time when geneNumLimit is large.
-grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = 10, geneNumLimit = 1000,
-                             geneVecType = "ENSEMBL", excludeFreq = 10000)
-
-## Plot dendrogram ggplot, using the pvclust p-values
-dendroPlot <- dhc %>% pvclust_show_signif_gradient(result) %>% ggplot() 
-
-## Plot the grob on dendrogram using annotation_custom.
-## If border is TRUE, border line is drawn using grid.rect.
-border <- TRUE
-for (gr in grobList){
-    if (border){
-        addPlot <- ggplotify::as.grob(function(){
-            grid.arrange(gr$plot)
-            grid.rect(width = .98, height = .98, gp = gpar(lwd = 1, col = "black", fill = NA))
-        })
-    } else {
-        addPlot <- gr$plot
-    }
-    dendroPlot <- dendroPlot +
-        annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax, ymin=gr$height+0.005, ymax=gr$heightup-0.005)
-}
-
-dendroPlot
+## MEs and colors are stored in `bwmod`, a blockwise module result from WGCNA
+plotEigengeneNetworksWithWords(bwmod$MEs, bwmod$colors)
 ```
+
 <img src="https://github.com/noriakis/software/blob/main/images/plotDendro.png?raw=true" width="800px">
 
 ### The other examples
