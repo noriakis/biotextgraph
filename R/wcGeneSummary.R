@@ -19,6 +19,7 @@
 #' @param organism organism ID to use
 #' @param enrich currently, only 'reactome' and 'kegg' is supported
 #' @param topPath how many pathway descriptions are included in text analysis
+#' @param ora perform ora or not (experimental)
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -41,7 +42,7 @@
 wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
                            palette=c("blue","red"), numWords=15, scaleRange=c(5,10), showLegend=FALSE,
                            plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                           enrich=NULL, topPath=10, ...) {
+                           enrich=NULL, topPath=10, ora=FALSE, ...) {
     returnList <- list()
 
     ## If specified pathway option
@@ -66,6 +67,15 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         ## Filter high frequency words
         filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
         filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
+
+        if (ora){
+            cat("performing ORA\n")
+            sig <- textORA(geneList)
+            sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
+            cat(paste("filtered", length(sigFilter), "words\n"))
+            filterWords <- c(filterWords, sigFilter)
+        }
+
         fil <- tb %>% filter(Gene_ID %in% geneList)
         
         ## Make corpus

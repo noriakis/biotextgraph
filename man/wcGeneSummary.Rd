@@ -22,6 +22,7 @@ wcGeneSummary(
   deleteZeroDeg = TRUE,
   enrich = NULL,
   topPath = 10,
+  ora = FALSE,
   ...
 )
 }
@@ -59,6 +60,8 @@ wcGeneSummary(
 \item{enrich}{currently, only 'reactome' and 'kegg' is supported}
 
 \item{topPath}{how many pathway descriptions are included in text analysis}
+
+\item{ora}{perform ora or not (experimental)}
 
 \item{...}{parameters to pass to wordcloud()}
 }
