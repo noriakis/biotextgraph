@@ -65,27 +65,41 @@ library(igraph)
 
 ## Replace like boot.strength(mod$MEs, R=500, algorithm = "hc")
 # dag <- model2network("[ME1][ME2|ME1]") # If using bnlearn
-dag <- graph_from_literal( ME1-+ME2 )
+dag <- graph_from_literal( ME1-+ME2, ME1-+ME3 )
 
-## Simulate genes in the modules
+## Simulate WGCNA results (three modules)
 ccls <- c()
 for (i in c(1,2,3,4,5,6,7,8,9)){
     ccls <- c(ccls, paste0("CCL",i))
 }
+cxcls <- c()
+for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
+    cxcls <- c(cxcls, paste0("CXCL",i))
+}
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 
 CCLensg <- AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+CXCLensg <- AnnotationDbi::select(org.Hs.eg.db, keys=cxcls, columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
 ERCCensg <- AnnotationDbi::select(org.Hs.eg.db, keys=erccs, columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
 
 CCLensg <- CCLensg[!is.na(CCLensg)]
+CXCLensg <- CXCLensg[!is.na(CXCLensg)]
 ERCCensg <- ERCCensg[!is.na(ERCCensg)]
 
 CCLcol <- rep(1, length(CCLensg))
 names(CCLcol) <- CCLensg
-ERCCcol <- rep(2, length(ERCCensg))
+CXCLcol <- rep(2, length(CXCLensg))
+names(CXCLcol) <- CXCLensg
+ERCCcol <- rep(3, length(ERCCensg))
 names(ERCCcol) <- ERCCensg
-modColors <- c(ERCCcol, CCLcol)
+modColors <- c(CCLcol, CXCLcol, ERCCcol)
 ensg <- names(modColors)
+
+MEs <- data.frame(
+    ME1 = 1:10,
+    ME2 = 2:11,
+    ME3 = 10:1
+)
 
 ## Convert to igraph
 # g <- as.igraph(dag)
@@ -171,3 +185,7 @@ exportCyjs(g, rootDir, netDir)
 # or, exportVisjs(g, rootDir, netDir)
 ```
 Use like `http-server` in the directory containing JavaScripts, and interactively inspect the module relationship.
+
+```{r wgcna, fig.cap="A ME dendrogram with words", warning=FALSE, message=FALSE, cache=T}
+plotEigengeneNetworksWithWords(MEs, modColors)
+```
