@@ -31,7 +31,7 @@ gwc <- wcGeneSummary(entrezID)
 gwc$wc
 ```
 
-It accepts values of the `wordcloud()` function. 
+It accepts values of the `wordcloud()` function. `numWords` specifies how many words are to be shown on word clouds.
 
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
@@ -41,7 +41,7 @@ gwc <- wcGeneSummary(entrezID, random.order=FALSE,
 gwc$wc
 ```
 
-And also returns a data frame consisting of frequency of each term.
+And it also returns a data frame consisting of frequency of each term.
 
 ```{r table}
 knitr::kable(
@@ -59,7 +59,8 @@ net$net
 ```
 
 ## Text over represenatation analysis (experimental)
-```{r}
+
+```{r ora}
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
@@ -83,10 +84,14 @@ net$net
 # Custom usage
 
 ## Interactive inspection of Bayesian network annotated by words
+
+In this example, a Bayesian network showing the module eigengenes relationship are inferred using `boot.strength` function in `bnlearn` from the weighted gene correlation network analysis (WGCNA) results. The modules are annotated by word clouds produced by `wcGeneSummary()`, and can be exported to the format of `Cytoscape.js` or `vis.js`. In this way, module relationship can be interactively inspected with the functional implications.
+
 ```{r mod, warning=FALSE, message=FALSE}
-## Simulate WGCNA
+## In this example, we simulate WGCNA results.
 ## you can just use results from WGCNA.
 ## Assuming WGCNA results are stored in `mod`
+
 # library(bnlearn)
 library(igraph)
 
@@ -211,7 +216,10 @@ V(g)$size <- scf * V(g)$size + sizeMin - scf * rawMin
 exportCyjs(g, rootDir, netDir)
 # or, exportVisjs(g, rootDir, netDir)
 ```
-Use like `http-server` in the directory containing a JavaScript, and interactively inspect the module relationship.
+
+Use like `http-server` in the directory containing a exported JavaScript, and interactively inspect the module relationship.
+
+### Annotating module eigengenes dendrogram
 
 ```{r wgcna, fig.cap="A ME dendrogram with words", warning=FALSE, message=FALSE, cache=T}
 plotEigengeneNetworksWithWords(MEs, modColors)
