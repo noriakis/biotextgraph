@@ -63,8 +63,13 @@ net$net
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
-geneList <- keggList$`00785` # Lipoic acid metabolism
 
+geneList <- keggList$`00785` # Lipoic acid metabolism
+pvs <- textORA(geneList)
+hist(pvs)
+pvs[order(pvs)] |> head()
+
+geneList <- keggList$`05150` # Staphylococcus aureus infection
 pvs <- textORA(geneList)
 hist(pvs)
 pvs[order(pvs)] |> head()
