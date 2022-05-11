@@ -7,7 +7,7 @@
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param palette palette for color gradient in correlation network
-#' @param numWords the number of words to be shown in correlation network
+#' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
@@ -79,6 +79,8 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
     docs <- TermDocumentMatrix(docs)
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
+    returnList[["rawfrequency"]] <- matSorted
+    returnList[["TDM"]] <- docs
 
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
@@ -128,6 +130,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             theme_graph()
         returnList[["net"]] <- netPlot
     } else {
+        matSorted <- matSorted[1:numWords]
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))

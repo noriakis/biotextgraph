@@ -13,15 +13,16 @@ vignette: >
 
 # Basic usage
 
-## Producing word clouds
-The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
-
 ```{r load, warning=FALSE, message=FALSE}
 library(wcGeneSummary)
 library(org.Hs.eg.db)
 ```
 
-```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=T}
+## Producing word clouds
+The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
+As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 5000.
+
+```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=TRUE}
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
 gwc <- wcGeneSummary(entrezID)
@@ -32,7 +33,7 @@ It accepts values of the `wordcloud()` function.
 
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
-gwc <- wcGeneSummary(entrezID, max.words=200, random.order=FALSE,
+gwc <- wcGeneSummary(entrezID, random.order=FALSE,
                      colors=palette(), rot.per=0.4)
 gwc$wc
 ```
@@ -46,9 +47,8 @@ knitr::kable(
 )
 ```
 
-
-
 ## Producing correlation networks
+
 ```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
 library(ggraph)
 net <- wcGeneSummary(entrezID, plotType="network")
