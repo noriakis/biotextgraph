@@ -3,7 +3,8 @@
 #' Plot wordcloud of RefSeq description obtained by GeneSummary
 #' 
 #' @param geneList ENTREZID list
-#' @param excludeFreq exclude words with overall frequency above excludeFreq, default to 5000
+#' @param excludeFreq exclude words with overall frequency above excludeFreq
+#'　　　　　　　　　　　default to 5000
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param palette palette for color gradient in correlation network
@@ -39,10 +40,13 @@
 #' wcGeneSummary(geneList)
 #' @export
 #' 
-wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, madeUpper=c("dna","rna"), organism=9606,
-                           palette=c("blue","red"), numWords=15, scaleRange=c(5,10), showLegend=FALSE,
-                           plotType="wc", colorText=FALSE, corThresh=0.6, layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                           enrich=NULL, topPath=10, ora=FALSE, ...) {
+wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
+                            madeUpper=c("dna","rna"), organism=9606,
+                            palette=c("blue","red"), numWords=15,
+                            scaleRange=c(5,10), showLegend=FALSE,
+                            plotType="wc", colorText=FALSE, corThresh=0.6,
+                            layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
+                            enrich=NULL, topPath=10, ora=FALSE, ...) {
     returnList <- list()
 
     ## If specified pathway option
@@ -63,12 +67,15 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         ## Load from GeneSummary
         tb <- loadGeneSummary(organism = organism)
 
-        # load("allFreqGeneSummary.rda") # Already performed, and automatically loaded
+        ## Already performed, and automatically loaded
+        # load("allFreqGeneSummary.rda") 
 
         ## Filter high frequency words
-        filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
+        filterWords <- allFreqGeneSummary[
+                                allFreqGeneSummary$freq > excludeFreq,]$word
         cat(paste("filtered", length(filterWords), "words ...\n"))
-        filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
+        filterWords <- c(filterWords, "pmids", "geneid") 
+        ## Excluded by default
 
         if (ora){
             cat("performing ORA\n")
@@ -119,26 +126,37 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)
         if (edgeLink){
-            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
+            netPlot <- netPlot +
+                        geom_edge_link(aes(width=weight, color=weight),
+                            alpha=0.5, show.legend = showLegend)
         } else {
-            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
+            netPlot <- netPlot +
+                        geom_edge_diagonal(aes(width=weight, color=weight),
+                            alpha=0.5, show.legend = showLegend)
         }
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)
+        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+                                            show.legend = showLegend)
         if (colorText){
-            netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq, color=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           bg.color = "white", segment.color="black",
-                           bg.r = .15, show.legend=showLegend)
-        } else{
-            netPlot <- netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           color = "black",
-                           bg.color = "white", segment.color="black",
-                           bg.r = .15, show.legend=showLegend) 
+            netPlot <- netPlot +
+                        geom_node_text(aes(label=name, size=Freq, color=Freq),
+                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
+        } else {
+            netPlot <- netPlot +
+                        geom_node_text(aes(label=name, size=Freq),
+                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                            color = "black",
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend) 
         }
         netPlot <- netPlot+
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
-            scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
-            scale_edge_color_gradient(low=palette[1],high=palette[2], name = "Correlation")+
+            scale_color_gradient(low=palette[1],high=palette[2],
+                name = "Frequency")+
+            scale_edge_color_gradient(low=palette[1],high=palette[2],
+                name = "Correlation")+
             theme_graph()
         returnList[["net"]] <- netPlot
     } else {
@@ -148,7 +166,8 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA, made
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] = toupper(i)
         }
-        wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
+        wc <- as.ggplot(as_grob(
+                ~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
         returnList[["df"]] <- returnDf
         returnList[["wc"]] <- wc
     }
