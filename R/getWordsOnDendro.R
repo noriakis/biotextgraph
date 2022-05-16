@@ -116,8 +116,10 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             madeUpper=c("rna","dna")){
     
     ## Filter high frequency words
-    filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
-    filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
+    filterWords <- allFreqGeneSummary[
+                    allFreqGeneSummary$freq>excludeFreq,]$word
+    filterWords <- c(filterWords, "pmids", "geneid")
+    # 'PMIDs' is excluded by default
     
     grobList <- list()
     alHeights <- c(((dhc %>%
@@ -167,9 +169,14 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                                         R <- names(lb[lb==2])
                     }
 
-                    if (length(names(geneVec)[geneVec %in% L])<geneNumLimit & length(names(geneVec)[geneVec %in% R])<geneNumLimit)
+                    if (length(names(geneVec)[geneVec %in% L])<geneNumLimit &
+                        length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
-                        grobList[[as.character(grobNum)]]$plot <- returnPyramid(L,R, geneVec, geneVecType, filterWords, numberOfWords, orgDb=orgDb, additionalRemove=NA, madeUpper=madeUpper)
+                        grobList[[as.character(grobNum)]]$plot <- 
+                            returnPyramid(L,R, geneVec, geneVecType,
+                                filterWords, numberOfWords, orgDb=orgDb,
+                                additionalRemove=NA, madeUpper=madeUpper)
+
                         grobList[[as.character(grobNum)]]$height <- HEIGHT
                         grobList[[as.character(grobNum)]]$xmin <- XMIN
                         grobList[[as.character(grobNum)]]$xmax <- XMAX
@@ -217,7 +224,8 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
     docs <- docs %>%
         tm_map(FUN=content_transformer(tolower)) %>% 
         tm_map(FUN=removeNumbers) %>%
-        tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) %>%
+        tm_map(removeWords, stopwords::stopwords("english",
+            "stopwords-iso")) %>%
         tm_map(removeWords, filterWords) %>% 
         tm_map(FUN=removePunctuation) %>%
         tm_map(FUN=stripWhitespace)
@@ -256,13 +264,19 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
 #' 
 #' 
-returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords, orgDb, additionalRemove=NA,
-                          widths=c(0.3,0.3,0.3), lowCol="blue", highCol="red", madeUpper=c("rna","dna")) {
+returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
+                        numberOfWords, orgDb, additionalRemove=NA,
+                        widths=c(0.3,0.3,0.3), lowCol="blue",
+                        highCol="red", madeUpper=c("rna","dna")) {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
-    geneList <- AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% L], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList <- AnnotationDbi::select(orgDb,
+        keys = names(geneVec)[geneVec %in% L],
+        columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filL <- tb %>% filter(Gene_ID %in% geneList)
-    geneList <- AnnotationDbi::select(orgDb, keys = names(geneVec)[geneVec %in% R], columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    geneList <- AnnotationDbi::select(orgDb,
+        keys = names(geneVec)[geneVec %in% R],
+        columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filR <- tb %>% filter(Gene_ID %in% geneList)
     
     all_L <- paste(filL$Gene_summary, collapse = "")
@@ -286,15 +300,22 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords
     L <- paste0(L, collapse="_")
     R <- paste0(R, collapse="_")
     
-    # Referencing: https://stackoverflow.com/questions/54191369/how-to-create-pyramid-bar-chart-in-r-with-y-axis-labels-between-the-bars
+    # Referencing:
+    # https://stackoverflow.com/questions/54191369/
+    # how-to-create-pyramid-bar-chart-in-r-with-y-axis-labels-between-the-bars
+
     if (dim(common_words)[1]<numberOfWords){
         numberOfWords <- dim(common_words)[1]
     }
     
     topDf <- data.frame(
-        ME = factor(c(rep(L,numberOfWords), rep(R,numberOfWords)), levels = c(L,R)),
-        Word = c(common_words[1:numberOfWords, 1], common_words[1:numberOfWords, 2]),
-        Label = c(rownames(common_words[1:numberOfWords, ]), rownames(common_words[1:numberOfWords, ]))
+        ME = factor(c(rep(L,numberOfWords),
+            rep(R,numberOfWords)),
+            levels = c(L,R)),
+        Word = c(common_words[1:numberOfWords, 1],
+            common_words[1:numberOfWords, 2]),
+        Label = c(rownames(common_words[1:numberOfWords, ]),
+            rownames(common_words[1:numberOfWords, ]))
     )
     
     ## Convert to uppercase

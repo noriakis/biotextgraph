@@ -48,5 +48,6 @@ returnP <- function(name, matSorted, allFreqGeneSummary){
     allwords <- sum(allFreqGeneSummary$freq) - queryAll
     
     ## p-value
-    return(sum(dhyper(query:sum(matSorted), queryAll, allwords, sum(matSorted))))
+    return(sum(dhyper(query:sum(matSorted), queryAll,
+        allwords, sum(matSorted))))
 }

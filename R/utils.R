@@ -24,12 +24,16 @@ makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
         }
     }
     wc <- wcGeneSummary(queries,
-                        madeUpper=c("dna","rna",tolower(AnnotationDbi::keys(org.Hs.eg.db, keytype="SYMBOL"))))
+                        madeUpper=c("dna","rna",
+                        tolower(AnnotationDbi::keys(org.Hs.eg.db,
+                            keytype="SYMBOL"))))
     barp <- utils::head(wc$df, n=top)
     if (reorder){
-        plt <- ggplot(barp, aes(x=reorder(word, freq), y=freq, fill=word)) + coord_flip()
+        plt <- ggplot(barp, aes(x=reorder(word, freq),
+            y=freq, fill=word)) + coord_flip()
     } else {
-        plt <- ggplot(barp, aes(x=word, y=freq, fill=word)) + coord_flip()
+        plt <- ggplot(barp, aes(x=word, y=freq, fill=word)) +
+                coord_flip()
     }     
     plt <- plt +    
         geom_bar(stat = "identity") + xlab("Word") + ylab("Frequency") +
@@ -73,7 +77,8 @@ exportCyjs <- function(g, rootDir, netDir) {
     )
     
     edgeList <- as_edgelist(g)
-    edges <- data.frame(source=edgeList[,1], target=edgeList[,2], interaction=NA)
+    edges <- data.frame(source=edgeList[,1],
+        target=edgeList[,2], interaction=NA)
     edges$strength <- E(g)$strength
     
     pret <- prettify(dataFramesToJSON(edges, nodes))
@@ -205,7 +210,8 @@ exportVisjs <- function(g, rootDir, netDir){
         ))
     
     edgeList <- as_edgelist(g)
-    edgejson <- toJSON(data.frame(from=edgeList[,1], to=edgeList[,2], width=E(g)$strength))
+    edgejson <- toJSON(data.frame(from=edgeList[,1], to=edgeList[,2],
+        width=E(g)$strength))
     
     # Make JS
     js <- paste0("
