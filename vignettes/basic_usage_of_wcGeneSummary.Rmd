@@ -76,8 +76,10 @@ hist(pvs)
 pvs[order(pvs)] |> head()
 ```
 
+Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
+
 ```{r oranet, fig.cap="A correlation network of gene summaries (ORA)", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(entrezID, plotType="network", ora=TRUE)
+net <- wcGeneSummary(entrezID, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
 
