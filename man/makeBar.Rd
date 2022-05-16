@@ -17,6 +17,9 @@ makeBar(queries, top = 10, pal = NULL, textSize = 20, reorder = TRUE)
 
 \item{reorder}{order by frequency or not}
 }
+\value{
+barplot of word frequency
+}
 \description{
 Makeing a barplot of word frequency from queried genes
 }

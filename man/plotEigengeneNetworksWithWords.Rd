@@ -35,6 +35,13 @@ plotEigengeneNetworksWithWords(
 
 \item{madeUpper}{words with uppercase}
 }
+\value{
+plot of dendrogram between module eigengenes with word annotations
+}
 \description{
 plot an eigengene dendrogram with word annotation
+}
+\examples{
+mod <- returnExample()
+plotEigengeneNetworksWithWords(mod$MEs, mod$colors)
 }

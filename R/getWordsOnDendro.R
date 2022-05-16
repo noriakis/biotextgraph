@@ -16,14 +16,21 @@
 #' @export
 #' @import grid gridExtra
 #' @import ggplot2
+#' @return plot of dendrogram between module eigengenes with word annotations
+#' @examples
+#' mod <- returnExample()
+#' plotEigengeneNetworksWithWords(mod$MEs, mod$colors)
 #' @importFrom pvclust pvclust
 #' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
-                                            geneVecType="ENSEMBL",excludeFreq=10000,
-                                            border=TRUE, madeUpper=c("rna","dna")) {
+                                            geneVecType="ENSEMBL",
+                                            excludeFreq=10000,
+                                            border=TRUE,
+                                            madeUpper=c("rna","dna")) {
     ## Perform pvclust on ME data.frame
-    result <- pvclust(MEs, method.dist="cor", method.hclust="average", nboot=nboot)
+    result <- pvclust(MEs, method.dist="cor",
+        method.hclust="average", nboot=nboot)
     
     # make dendrogram    
     dhc <- result |>
@@ -38,7 +45,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
     ## It takes time when geneNumLimit is large.
     grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
-                                 geneVecType = geneVecType, excludeFreq = excludeFreq,
+                                 geneVecType = geneVecType,
+                                 excludeFreq = excludeFreq,
                                  madeUpper = madeUpper)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
@@ -73,10 +81,12 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' 
 #' @param dhc dendrogram
 #' @param geneVec gene-named vector of node names in dendrogram
-#' @param geneNumLimit when the gene number is above this threshold, pyramid plots are not produced 
+#' @param geneNumLimit when the gene number is above this threshold,
+#'                     pyramid plots are not produced 
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
 #' @param numberOfWords the number of words to plot (default: 25)
-#' @param excludeFreq words with the frequency above this threshold is excluded beforehand
+#' @param excludeFreq words with the frequency above
+#'                    this threshold is excluded beforehand
 #' @param orgDb organism database
 #' @param madeUpper words with uppercase
 #' 
@@ -85,23 +95,40 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @import org.Hs.eg.db
 #' @importFrom ggdendro dendro_data
 #' @importFrom dplyr select
+#' @importFrom ggdendro label
 #' @importFrom dendextend get_nodes_attr get_subdendrograms nnodes
 #' 
-#' @examples \dontrun{getWordsOnDendro(dhc, geneVec)}
+#' @examples
+#' mod <- returnExample()
+#' result <- hclust(dist(t(mod$MEs)))
+#' dhc <- result |>
+#'     as.dendrogram() |>
+#'     dendextend::hang.dendrogram()
+#' geneVec <- paste0("ME", mod$colors)
+#' names(geneVec) <- names(mod$colors)
+#' getWordsOnDendro(dhc, geneVec, numberOfWords = 2)
 #' @export
 #' 
-getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEMBL",
-                             numberOfWords=25, excludeFreq=10000, orgDb=org.Hs.eg.db,
-                             madeUpper=c("rna","dna")){
+getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
+                            geneVecType="ENSEMBL",
+                            numberOfWords=25, excludeFreq=10000,
+                            orgDb=org.Hs.eg.db,
+                            madeUpper=c("rna","dna")){
     
     ## Filter high frequency words
     filterWords <- allFreqGeneSummary[allFreqGeneSummary$freq>excludeFreq,]$word
     filterWords <- c(filterWords, "pmids", "geneid") # 'PMIDs' is excluded by default
     
     grobList <- list()
-    alHeights <- c(((dhc %>% get_subdendrograms(k=1))[[1]] %>% get_nodes_attr("height")))
-    alNodes <- c(((dhc %>% get_subdendrograms(k=1))[[1]] %>% get_nodes_attr("label")))
-    curHeights <- c(((dhc %>% get_subdendrograms(k=1))[[1]] %>% get_nodes_attr("height"))[1])
+    alHeights <- c(((dhc %>%
+        get_subdendrograms(k=1))[[1]] %>%
+        get_nodes_attr("height")))
+    alNodes <- c(((dhc %>%
+        get_subdendrograms(k=1))[[1]] %>%
+        get_nodes_attr("label")))
+    curHeights <- c(((dhc %>%
+        get_subdendrograms(k=1))[[1]] %>%
+        get_nodes_attr("height"))[1])
     k <- 2
     grobNum <- 1
     ddata <-dendro_data(dhc)
@@ -114,21 +141,30 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000, geneVecType="ENSEM
 
             NODES <- i %>% get_nodes_attr("label")
             NODES <- NODES[!is.na(NODES)]
-            XMIN <- as.numeric(labelPos %>% filter(label==NODES[1]) %>% select(x))
-            XMAX <- as.numeric(labelPos %>% filter(label==NODES[length(NODES)]) %>% select(x))
+            XMIN <- as.numeric(labelPos %>%
+                filter(label==NODES[1]) %>% select(x))
+            XMAX <- as.numeric(labelPos %>%
+                filter(label==NODES[length(NODES)]) %>% select(x))
             HEIGHT <- get_nodes_attr(i, "height")[1]
             
             if (!HEIGHT %in% curHeights){
                 if (nnodes(i)!=1){
                     lb <- i %>% dendextend::cutree(k=2) ## not stats::cutree
-                    # L <- as.numeric(sapply(strsplit(names(lb[lb==1]), "ME"), "[", 2)) # WGCNA
-                    # R <- as.numeric(sapply(strsplit(names(lb[lb==2]), "ME"), "[", 2)) # WGCNA
-                    if (mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==1])) %>% select(x))[,1])) > mean(as.numeric((labelPos %>% filter(label %in% names(lb[lb==2])) %>% select(x))[,1]))) {
-                        R <- names(lb[lb==1])
-                        L <- names(lb[lb==2])
-                    } else {
-                        L <- names(lb[lb==1])
-                        R <- names(lb[lb==2])
+                    # L <- as.numeric(sapply(strsplit(names(lb[lb==1]),
+                    # "ME"), "[", 2)) # WGCNA
+                    # R <- as.numeric(sapply(strsplit(names(lb[lb==2]),
+                    # "ME"), "[", 2)) # WGCNA
+                    if (mean(as.numeric((labelPos %>% filter(
+                                    .data$label %in% names(lb[lb==1])) %>%
+                                    select(x))[,1])) >
+                        mean(as.numeric((labelPos %>% filter(
+                                    .data$label %in% names(lb[lb==2])) %>%
+                                    select(x))[,1]))) {
+                                                        R <- names(lb[lb==1])
+                                                        L <- names(lb[lb==2])
+                                                    } else {
+                                                        L <- names(lb[lb==1])
+                                                        R <- names(lb[lb==2])
                     }
 
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit & length(names(geneVec)[geneVec %in% R])<geneNumLimit)
@@ -245,7 +281,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords, numberOfWords
     common_words <- subset(all_m, all_m[, 1] > 0 & all_m[, 2] > 0)
     difference <- abs(common_words[, 1] - common_words[, 2])
     common_words <- cbind(common_words, difference)
-    common_words <- common_words[order(common_words[, 3], decreasing = T), ]
+    common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
     
     L <- paste0(L, collapse="_")
     R <- paste0(R, collapse="_")

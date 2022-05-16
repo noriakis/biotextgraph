@@ -11,6 +11,7 @@
 #' @param textSize text size in barplot
 #' @param reorder order by frequency or not
 #' @import org.Hs.eg.db
+#' @return barplot of word frequency
 #' @export
 #' 
 makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
@@ -24,7 +25,7 @@ makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
     }
     wc <- wcGeneSummary(queries,
                         madeUpper=c("dna","rna",tolower(AnnotationDbi::keys(org.Hs.eg.db, keytype="SYMBOL"))))
-    barp <- head(wc$df, n=top)
+    barp <- utils::head(wc$df, n=top)
     if (reorder){
         plt <- ggplot(barp, aes(x=reorder(word, freq), y=freq, fill=word)) + coord_flip()
     } else {
@@ -46,6 +47,14 @@ makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
 #' @param netDir directory to store scripts
 #' @import jsonlite
 #' @importFrom cyjShiny dataFramesToJSON
+#' @return return nothing, export to a specified directory
+#' @examples
+#' library(igraph)
+#' g <- graph_from_literal( ME1-+ME2 )
+#' V(g)$image <- c("path1","path2")
+#' V(g)$shape <- c("image","image")
+#' V(g)$size <- c(1,1)
+#' \donttest{exportCyjs(g, "./", "net")}
 #' @export
 #' 
 exportCyjs <- function(g, rootDir, netDir) {
@@ -155,7 +164,7 @@ exportCyjs <- function(g, rootDir, netDir) {
     write(js, file = paste0(rootDir, netDir, "/script.js"))
     write(style, file = paste0(rootDir, netDir, "/style.css"))
     write(html, file = paste0(rootDir, netDir, "/index.html"))
-    message(paste0("Exported to ",rootDir,netDir))
+    # message(paste0("Exported to ",rootDir,netDir))
 }
 
 #' exportVisjs
@@ -166,6 +175,14 @@ exportCyjs <- function(g, rootDir, netDir) {
 #' @param rootDir root directory path
 #' @param netDir directory to store scripts
 #' @import jsonlite
+#' @return return nothing, export to a specified directory
+#' @examples
+#' library(igraph)
+#' g <- graph_from_literal( ME1-+ME2 )
+#' V(g)$image <- c("path1","path2")
+#' V(g)$shape <- c("image","image")
+#' V(g)$size <- c(1,1)
+#' \donttest{exportVisjs(g, "./", "net")}
 #' @export
 #' 
 exportVisjs <- function(g, rootDir, netDir){
@@ -264,5 +281,58 @@ exportVisjs <- function(g, rootDir, netDir){
     write(js, file = paste0(rootDir, netDir, "/script.js"))
     write(html, file = paste0(rootDir, netDir, "/index.html"))
     write(style, file = paste0(rootDir, netDir, "/style.css"))
-    message(paste0("Exported to ",rootDir,netDir))
+    # message(paste0("Exported to ",rootDir,netDir))
+}
+
+#' returnExample
+#' 
+#' return an example dataset used in the analysis
+#' 
+#' @import org.Hs.eg.db
+#' @return return example MEs and colors
+#' @examples returnExample()
+#' @export
+#' 
+returnExample <- function() {
+    ## Simulate WGCNA results (three modules)
+    ccls <- c()
+    for (i in c(1,2,3,4,5,6,7,8,9)){
+        ccls <- c(ccls, paste0("CCL",i))
+    }
+    cxcls <- c()
+    for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
+        cxcls <- c(cxcls, paste0("CXCL",i))
+    }
+    erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
+
+    CCLensg <- AnnotationDbi::select(org.Hs.eg.db, keys=ccls,
+        columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+    CXCLensg <- AnnotationDbi::select(org.Hs.eg.db, keys=cxcls,
+        columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+    ERCCensg <- AnnotationDbi::select(org.Hs.eg.db, keys=erccs,
+        columns=c("ENSEMBL"), keytype="SYMBOL")$ENSEMBL
+
+    CCLensg <- CCLensg[!is.na(CCLensg)]
+    CXCLensg <- CXCLensg[!is.na(CXCLensg)]
+    ERCCensg <- ERCCensg[!is.na(ERCCensg)]
+
+    CCLcol <- rep(1, length(CCLensg))
+    names(CCLcol) <- CCLensg
+    CXCLcol <- rep(2, length(CXCLensg))
+    names(CXCLcol) <- CXCLensg
+    ERCCcol <- rep(3, length(ERCCensg))
+    names(ERCCcol) <- ERCCensg
+    modColors <- c(CCLcol, CXCLcol, ERCCcol)
+    ensg <- names(modColors)
+
+    MEs <- data.frame(
+        ME1 = 1:10,
+        ME2 = 2:11,
+        ME3 = 10:1
+    )
+
+    mod <- list()
+    mod[["MEs"]] <- MEs
+    mod[["colors"]] <- modColors
+    mod
 }

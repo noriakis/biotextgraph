@@ -29,7 +29,8 @@ wcGeneSummary(
 \arguments{
 \item{geneList}{ENTREZID list}
 
-\item{excludeFreq}{exclude words with overall frequency above excludeFreq, default to 5000}
+\item{excludeFreq}{exclude words with overall frequency above excludeFreq
+default to 5000}
 
 \item{additionalRemove}{specific words to be excluded}
 

@@ -11,7 +11,12 @@ textORA(queries)
 }
 \value{
 p-values for the words
+
+p-values for the words
 }
 \description{
 Return p-values from hypergeometric distribution
+}
+\examples{
+textORA(c("2067","2068","2071","2072"))
 }
