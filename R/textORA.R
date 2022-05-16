@@ -5,6 +5,8 @@
 #' @param queries gene list (Entrez ID)
 #' @return p-values for the words
 #' @import GeneSummary tm
+#' @return p-values for the words
+#' @examples textORA(c("2067","2068","2071","2072"))
 #' @export
 #' 
 textORA <- function(queries) {
@@ -25,7 +27,9 @@ textORA <- function(queries) {
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
     
-    pvs <- sapply(names(matSorted), function (x) returnP(x, matSorted, allFreqGeneSummary))
+    pvs <- vapply(names(matSorted),
+        function (x) returnP(x, matSorted, allFreqGeneSummary),
+        FUN.VALUE=1)
     pvs
 }
 

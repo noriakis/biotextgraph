@@ -4,7 +4,7 @@
 #' 
 #' @param geneList ENTREZID list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
-#'　　　　　　　　　　　default to 5000
+#'                    default to 5000
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param palette palette for color gradient in correlation network
@@ -29,6 +29,8 @@
 #' @import igraph
 #' @import ggraph ggplot2
 #' @importFrom dplyr filter
+#' @importFrom grDevices palette
+#' @importFrom stats as.dendrogram cor dhyper p.adjust
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
@@ -51,7 +53,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
 
     ## If specified pathway option
     if (!is.null(enrich)) {
-        cat("performing enrichment analysis ...\n")
+        message("performing enrichment analysis ...")
         if (enrich=="reactome"){
             pathRes <- enrichPathway(geneList)
         } else if (enrich=="kegg"){
@@ -73,15 +75,15 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
         ## Filter high frequency words
         filterWords <- allFreqGeneSummary[
                                 allFreqGeneSummary$freq > excludeFreq,]$word
-        cat(paste("filtered", length(filterWords), "words ...\n"))
+        qqcat("filtered @{length(filterWords)} words ...")
         filterWords <- c(filterWords, "pmids", "geneid") 
         ## Excluded by default
 
         if (ora){
-            cat("performing ORA\n")
+            message("performing ORA\n")
             sig <- textORA(geneList)
             sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            cat(paste("filtered", length(sigFilter), "words ...\n"))
+            qqcat("filtered @{length(sigFilter)} words ...")
             filterWords <- c(filterWords, sigFilter)
         }
 
@@ -138,19 +140,20 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
                                             show.legend = showLegend)
         if (colorText){
             netPlot <- netPlot +
-                        geom_node_text(aes(label=name, size=Freq, color=Freq),
+                        geom_node_text(
+                            aes_(label=~name, size=~Freq, color=~Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             bg.color = "white", segment.color="black",
                             bg.r = .15, show.legend=showLegend)
         } else {
             netPlot <- netPlot +
-                        geom_node_text(aes(label=name, size=Freq),
+                        geom_node_text(aes_(label=~name, size=~Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
                             bg.color = "white", segment.color="black",
                             bg.r = .15, show.legend=showLegend) 
         }
-        netPlot <- netPlot+
+        netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_color_gradient(low=palette[1],high=palette[2],
@@ -164,7 +167,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
-            returnDf[returnDf$word == i,"word"] = toupper(i)
+            returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
         wc <- as.ggplot(as_grob(
                 ~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))

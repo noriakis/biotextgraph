@@ -20,13 +20,15 @@ getWordsOnDendro(
 
 \item{geneVec}{gene-named vector of node names in dendrogram}
 
-\item{geneNumLimit}{when the gene number is above this threshold, pyramid plots are not produced}
+\item{geneNumLimit}{when the gene number is above this threshold,
+pyramid plots are not produced}
 
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
-\item{excludeFreq}{words with the frequency above this threshold is excluded beforehand}
+\item{excludeFreq}{words with the frequency above
+this threshold is excluded beforehand}
 
 \item{orgDb}{organism database}
 
@@ -39,5 +41,12 @@ list of pyramid plot grobs and its positions
 Get grobs to plot on the dendrogram with the position information
 }
 \examples{
-\dontrun{getWordsOnDendro(dhc, geneVec)}
+mod <- returnExample()
+result <- hclust(dist(t(mod$MEs)))
+dhc <- result |>
+    as.dendrogram() |>
+    dendextend::hang.dendrogram()
+geneVec <- paste0("ME", mod$colors)
+names(geneVec) <- names(mod$colors)
+getWordsOnDendro(dhc, geneVec, numberOfWords = 2)
 }

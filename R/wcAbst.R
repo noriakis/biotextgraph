@@ -20,11 +20,14 @@
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
+#' @examples wcAbst("DDX41")
+#' @return list of data frame and ggplot2 object
 #' @import tm easyPubMed
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
+#' @importFrom GetoptLong qqcat
 #' @importFrom dplyr filter
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
@@ -40,13 +43,13 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        	if (length(queries)>5){stop("please limit the gene number to 5")}
 				query <- paste(queries, collapse=" OR ")
 
-				cat(paste("querying pubmed for", query, "\n"))
+				qqcat("querying pubmed for @{query}")
 
 				pubmedIds <- get_pubmed_ids(query)
 				pubmedData <- fetch_pubmed_data(pubmedIds)
 				allXml <- articles_to_list(pubmedData)
 
-				cat("converting to a data frame ...\n")
+				message("converting to a data frame ...\n")
 				dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
 				                                max_chars = -1, getAuthors = FALSE))
 				fetched[["rawdf"]] <- dataDf
@@ -117,7 +120,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 		        for (i in madeUpper) {
 		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
-		            returnDf[returnDf$word == i,"word"] = toupper(i)
+		            returnDf[returnDf$word == i,"word"] <- toupper(i)
 		        }
 		        wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
 		        fetched[["df"]] <- returnDf

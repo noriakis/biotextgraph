@@ -53,6 +53,12 @@ wcAbst(
 
 \item{...}{parameters to pass to wordcloud()}
 }
+\value{
+list of data frame and ggplot2 object
+}
 \description{
 make word cloud or correlation network from PubMed abstracts using easyPubMed
+}
+\examples{
+wcAbst("DDX41")
 }
