@@ -54,7 +54,7 @@ makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \donttest{exportCyjs(g, "./", "net")}
+#' \dontrun{exportCyjs(g, "./", "net")}
 #' @export
 #' 
 exportCyjs <- function(g, rootDir, netDir) {
@@ -182,7 +182,7 @@ exportCyjs <- function(g, rootDir, netDir) {
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \donttest{exportVisjs(g, "./", "net")}
+#' \dontrun{exportVisjs(g, "./", "net")}
 #' @export
 #' 
 exportVisjs <- function(g, rootDir, netDir){
