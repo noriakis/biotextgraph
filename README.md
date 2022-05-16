@@ -114,7 +114,7 @@ plotEigengeneNetworksWithWords(bwmod$MEs, bwmod$colors)
 
 ### The other examples
 
-- [Example annotating gene clusters using WGCNA](https://noriakis.github.io/software/wcGeneSummary/)
+- [Example annotating gene clusters using WGCNA](https://noriakis.github.io/software/wcGeneSummary/WGCNA.html)
 - [Example in Bayesian network analysis](https://github.com/noriakis/compare_sign)
 
 ### References
