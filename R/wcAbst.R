@@ -34,13 +34,15 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    palette=c("blue","red"), numWords=30, scaleRange=c(5,10),
-                   showLegend=FALSE, plotType="wc", colorText=FALSE, corThresh=0.6,
-                   layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, additionalRemove=NA, ...)
+                   showLegend=FALSE, plotType="wc", colorText=FALSE,
+                   corThresh=0.6, layout="nicely", edgeLink=TRUE,
+                   deleteZeroDeg=TRUE, additionalRemove=NA, ...)
         {
         	if (!is.list(redo)) {
 	        	fetched <- list() # store results
 
-	        	if (length(queries)>5){stop("please limit the gene number to 5")}
+	        	if (length(queries)>5){
+	        		stop("please limit the gene number to 5")}
 				query <- paste(queries, collapse=" OR ")
 
 				qqcat("querying pubmed for @{query}")
@@ -51,7 +53,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 
 				message("converting to a data frame ...\n")
 				dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
-				                                max_chars = -1, getAuthors = FALSE))
+				                        max_chars = -1, getAuthors = FALSE))
 				fetched[["rawdf"]] <- dataDf
 
 				docs <- VCorpus(VectorSource(dataDf$abstract))
@@ -93,26 +95,37 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        ## Main plot
 		        netPlot <- ggraph(coGraph, layout=layout)
 		        if (edgeLink){
-		            netPlot <- netPlot + geom_edge_link(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
+		            netPlot <- netPlot +
+		                geom_edge_link(aes(width=weight, color=weight),
+		                	alpha=0.5, show.legend = showLegend)
 		        } else {
-		            netPlot <- netPlot + geom_edge_diagonal(aes(width=weight, color=weight), alpha=0.5, show.legend = showLegend)
+		            netPlot <- netPlot +
+		                geom_edge_diagonal(aes(width=weight, color=weight),
+		                	alpha=0.5, show.legend = showLegend)
 		        }
-		        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq), show.legend = showLegend)
+		        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+		        show.legend = showLegend)
 		        if (colorText){
-		            netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq, color=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
-		                           bg.color = "white", segment.color="black",
-		                           bg.r = .15, show.legend=showLegend)
-		        } else{
-		            netPlot <- netPlot <- netPlot + geom_node_text(aes(label=name, size=Freq), check_overlap=TRUE, repel=TRUE,# size = labelSize,
-		                           color = "black",
-		                           bg.color = "white", segment.color="black",
-		                           bg.r = .15, show.legend=showLegend) 
+		            netPlot <- netPlot + 
+		                geom_node_text(aes(label=name, size=Freq, color=Freq),
+		                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
+		        } else {
+		            netPlot <- netPlot + 
+		                geom_node_text(aes(label=name, size=Freq),
+		                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                            color = "black",
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend) 
 		        }
 		        netPlot <- netPlot+
 		            scale_size(range=scaleRange, name="Frequency")+
 		            scale_edge_width(range=c(1,3), name = "Correlation")+
-		            scale_color_gradient(low=palette[1],high=palette[2], name = "Frequency")+
-		            scale_edge_color_gradient(low=palette[1],high=palette[2], name = "Correlation")+
+		            scale_color_gradient(low=palette[1],high=palette[2],
+		            	name = "Frequency")+
+		            scale_edge_color_gradient(low=palette[1],high=palette[2],
+		            	name = "Correlation")+
 		            theme_graph()
 		        fetched[["net"]] <- netPlot
 		    } else {
@@ -122,7 +135,8 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
 		            returnDf[returnDf$word == i,"word"] <- toupper(i)
 		        }
-		        wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
+		        wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word,
+		        	freq = returnDf$freq, ...)))
 		        fetched[["df"]] <- returnDf
 		        fetched[["wc"]] <- wc
 		    }
