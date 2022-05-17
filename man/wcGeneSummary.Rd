@@ -6,6 +6,7 @@
 \usage{
 wcGeneSummary(
   geneList,
+  keyType = "SYMBOL",
   excludeFreq = 5000,
   additionalRemove = NA,
   madeUpper = c("dna", "rna"),
@@ -14,6 +15,7 @@ wcGeneSummary(
   numWords = 15,
   scaleRange = c(5, 10),
   showLegend = FALSE,
+  orgDb = org.Hs.eg.db,
   plotType = "wc",
   colorText = FALSE,
   corThresh = 0.6,
@@ -28,6 +30,8 @@ wcGeneSummary(
 }
 \arguments{
 \item{geneList}{ENTREZID list}
+
+\item{keyType}{default to SYMBOL}
 
 \item{excludeFreq}{exclude words with overall frequency above excludeFreq
 default to 5000}
@@ -45,6 +49,8 @@ default to 5000}
 \item{scaleRange}{scale for label and node size in correlation network}
 
 \item{showLegend}{whether to show legend in correlation network}
+
+\item{orgDb}{default to org.Hs.eg.db}
 
 \item{plotType}{"wc" or "network"}
 
@@ -73,6 +79,6 @@ list of data frame and ggplot2 object
 Plot wordcloud of RefSeq description obtained by GeneSummary
 }
 \examples{
-geneList <- c("6346")
+geneList <- c("DDX41")
 wcGeneSummary(geneList)
 }

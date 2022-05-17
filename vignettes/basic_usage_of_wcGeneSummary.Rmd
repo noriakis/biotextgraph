@@ -26,8 +26,7 @@ As many of the words are commonly observed, you should limit word frequency by `
 
 ```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=TRUE}
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
-entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
-gwc <- wcGeneSummary(entrezID)
+gwc <- wcGeneSummary(erccs)
 gwc$wc
 ```
 
@@ -35,7 +34,7 @@ It accepts values of the `wordcloud()` function. `numWords` specifies how many w
 
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
-gwc <- wcGeneSummary(entrezID, random.order=FALSE,
+gwc <- wcGeneSummary(erccs, random.order=FALSE,
                      numWords=100,
                      colors=palette(), rot.per=0.4)
 gwc$wc
@@ -54,7 +53,7 @@ knitr::kable(
 
 ```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
 library(ggraph)
-net <- wcGeneSummary(entrezID, plotType="network")
+net <- wcGeneSummary(erccs, plotType="network")
 net$net
 ```
 
@@ -79,7 +78,7 @@ pvs[order(pvs)] |> head()
 Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 
 ```{r oranet, fig.cap="A correlation network of gene summaries (ORA)", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(entrezID, plotType="network", ora=TRUE, edgeLink=FALSE)
+net <- wcGeneSummary(erccs, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
 
@@ -144,10 +143,11 @@ for (i in V(g)$name){
     }
     
     ## Convert to ENTREZ
-    entre <- AnnotationDbi::select(org.Hs.eg.db, keytype="ENSEMBL", keys = queries, columns = "ENTREZID")$ENTREZID
+    entre <- AnnotationDbi::select(org.Hs.eg.db, keytype="ENSEMBL",
+        keys = queries, columns = "ENTREZID")$ENTREZID
     
     if (plotType=="bar"){
-        plt <- makeBar(entre) # get barplot
+        plt <- makeBar(entre, keyType="ENTREZID") # get barplot
     } else { ## If wordcloud
         # A <- wcGeneSummary(entre,
         #                    madeUpper=c("dna","rna",
