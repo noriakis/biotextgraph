@@ -1,5 +1,5 @@
 test_that("test basic functions produce no errors", {
-    geneList <- c("2067","2068","2071","2072")
+    geneList <- c("CXCL10","CXCL9")
 
     library(ggraph)
     expect_error( wcGeneSummary(geneList), NA)

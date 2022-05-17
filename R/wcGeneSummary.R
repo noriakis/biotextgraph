@@ -5,6 +5,7 @@
 #' @param geneList ENTREZID list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
 #'                    default to 5000
+#' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param palette palette for color gradient in correlation network
@@ -17,6 +18,7 @@
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
+#' @param orgDb default to org.Hs.eg.db
 #' @param organism organism ID to use
 #' @param enrich currently, only 'reactome' and 'kegg' is supported
 #' @param topPath how many pathway descriptions are included in text analysis
@@ -25,6 +27,7 @@
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
+#' @import org.Hs.eg.db
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
@@ -38,17 +41,29 @@
 #' @importFrom clusterProfiler enrichKEGG
 #' 
 #' @examples
-#' geneList <- c("6346")
+#' geneList <- c("DDX41")
 #' wcGeneSummary(geneList)
 #' @export
 #' 
-wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
+wcGeneSummary <- function (geneList, keyType="SYMBOL",
+                            excludeFreq=5000, additionalRemove=NA,
                             madeUpper=c("dna","rna"), organism=9606,
                             palette=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
+                            orgDb=org.Hs.eg.db,
                             plotType="wc", colorText=FALSE, corThresh=0.6,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, ...) {
+
+    qqcat("Input genes: @{length(geneList)}\n")
+    if (keyType!="ENSEMBL"){
+        geneList <- AnnotationDbi::select(orgDb,
+            keys = geneList, columns = c("ENTREZID"),
+            keytype = keyType)$ENTREZID
+        geneList <- geneList[!is.na(geneList)]
+        qqcat("Converted input genes: @{length(geneList)}\n")
+    }
+
     returnList <- list()
 
     ## If specified pathway option
@@ -75,7 +90,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
         ## Filter high frequency words
         filterWords <- allFreqGeneSummary[
                                 allFreqGeneSummary$freq > excludeFreq,]$word
-        qqcat("filtered @{length(filterWords)} words ...")
+        qqcat("filtered @{length(filterWords)} words ...\n")
         filterWords <- c(filterWords, "pmids", "geneid") 
         ## Excluded by default
 
@@ -83,7 +98,7 @@ wcGeneSummary <- function (geneList, excludeFreq=5000, additionalRemove=NA,
             message("performing ORA\n")
             sig <- textORA(geneList)
             sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            qqcat("filtered @{length(sigFilter)} words ...")
+            qqcat("filtered @{length(sigFilter)} words ...\n")
             filterWords <- c(filterWords, sigFilter)
         }
 

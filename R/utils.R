@@ -3,9 +3,10 @@
 #' Makeing a barplot of word frequency from queried genes
 #' 
 #' @examples
-#' geneList <- c("6346")
+#' geneList <- c("DDX41")
 #' makeBar(geneList)
-#' @param queries entrez IDs
+#' @param queries gene IDs
+#' @param keyType default to SYMBOL
 #' @param top how many numbers of words to be shown
 #' @param pal palette used in barplot
 #' @param textSize text size in barplot
@@ -14,7 +15,8 @@
 #' @return barplot of word frequency
 #' @export
 #' 
-makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
+makeBar <- function(queries, top=10, keyType="SYMBOL",
+                    pal=NULL, textSize=20, reorder=TRUE) {
     if (is.null(pal)) {
         # palNum <- sample(1:151,1)
         # pal <- pokepal(palNum)
@@ -23,7 +25,7 @@ makeBar <- function(queries, top=10, pal=NULL, textSize=20, reorder=TRUE) {
             pal <- rep(pal, ceiling(top/length(pal)))
         }
     }
-    wc <- wcGeneSummary(queries,
+    wc <- wcGeneSummary(queries, keyType=keyType,
                         madeUpper=c("dna","rna",
                         tolower(AnnotationDbi::keys(org.Hs.eg.db,
                             keytype="SYMBOL"))))

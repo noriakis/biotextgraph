@@ -4,12 +4,21 @@
 \alias{makeBar}
 \title{makeBar}
 \usage{
-makeBar(queries, top = 10, pal = NULL, textSize = 20, reorder = TRUE)
+makeBar(
+  queries,
+  top = 10,
+  keyType = "SYMBOL",
+  pal = NULL,
+  textSize = 20,
+  reorder = TRUE
+)
 }
 \arguments{
-\item{queries}{entrez IDs}
+\item{queries}{gene IDs}
 
 \item{top}{how many numbers of words to be shown}
+
+\item{keyType}{default to SYMBOL}
 
 \item{pal}{palette used in barplot}
 
@@ -24,6 +33,6 @@ barplot of word frequency
 Makeing a barplot of word frequency from queried genes
 }
 \examples{
-geneList <- c("6346")
+geneList <- c("DDX41")
 makeBar(geneList)
 }

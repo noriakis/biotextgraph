@@ -15,8 +15,7 @@ library(wcGeneSummary)
 ### Example of ERCC
 ```R
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
-entrezID = AnnotationDbi::select(org.Hs.eg.db, keys = erccs, columns = c("ENTREZID"), keytype = "SYMBOL")$ENTREZID
-gwc <- wcGeneSummary(entrezID, excludeFreq = 5000, max.words=200, random.order=FALSE,
+gwc <- wcGeneSummary(erccs, excludeFreq = 5000, max.words=200, random.order=FALSE,
                      colors=palettetown::pokepal(150), rot.per=0.4)
 # ggsave("erccWc.png", gwc$wc, width=8, height=8)
 ```
@@ -28,8 +27,7 @@ cxcls <- c()
 for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
     cxcls <- c(cxcls, paste0("CXCL",i))
 }
-entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=cxcls, columns=c("ENTREZID"), keytype="SYMBOL")$ENTREZID
-gwc <- wcGeneSummary(entrezID, excludeFreq=14000,
+gwc <- wcGeneSummary(cxcls, excludeFreq=14000,
                      madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                      max.words=200, random.order=FALSE,
                      colors=palettetown::pokepal(151), rot.per=0.4)
@@ -46,8 +44,7 @@ ccls <- c()
 for (i in c(1,2,3,4,5,6,7,8,9)){
     ccls <- c(ccls, paste0("CCL",i))
 }
-entrezID = AnnotationDbi::select(org.Hs.eg.db, keys=ccls, columns=c("ENTREZID"), keytype="SYMBOL")$ENTREZID
-cclNet <- wcGeneSummary(entrezID, plotType="network",
+cclNet <- wcGeneSummary(ccls, plotType="network",
                         layout="nicely",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                         numWords = 15, excludeFreq = 5000, edgeLink=FALSE, showLegend=FALSE)
@@ -65,7 +62,7 @@ mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
 ## Hepatitis C
 hCNet <- wcGeneSummary(keggList$`05160`, plotType="network",
-                        layout="nicely", corThresh = 0.2,
+                        layout="nicely", corThresh = 0.2, keyType="ENTREZID",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                         numWords = 30, excludeFreq = 5000, colorText=TRUE,
                         edgeLink=FALSE, showLegend=FALSE)
@@ -76,7 +73,7 @@ hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transpare
 
 Additionally perform enrichment analysis on the same gene list and plot a correlation network.
 ```R
-hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome",
+hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZID"
                            topPath=30, numWords=30,
                            plotType="network", corThresh=0.2)
 hCNetReacTrans <- hCNetReac$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
