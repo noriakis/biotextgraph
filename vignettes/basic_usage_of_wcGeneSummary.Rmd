@@ -189,11 +189,14 @@ exportCyjs(g, rootDir, netDir)
 # or, exportVisjs(g, rootDir, netDir)
 ```
 
-Use like `http-server` in the directory containing a exported JavaScript, and interactively inspect the module relationship.
+Use like `http-server` in the directory containing a exported JavaScript, and interactively inspect the module relationship with word information.
 
-### Annotating module eigengenes dendrogram
+## Annotating module eigengenes dendrogram
+
+As users of WGCNA typically plot dendrogramm and heatmap of module eigengenes using `plotEigengeneNetworks`, it is useful to combine with wcGeneSummary, which plot additional word information on a dendrogram with one line.
 
 ```{r wgcna, fig.cap="A ME dendrogram with words", warning=FALSE, message=FALSE, cache=T}
+# WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
 plotEigengeneNetworksWithWords(MEs, modColors)
 ```
 
