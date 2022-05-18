@@ -51,7 +51,7 @@ knitr::kable(
 
 N-gram is supported by library `tm`, specified by `ngram`.
 
-```{r ngramwc}
+```{r ngramwc, warning=FALSE}
 gwc2 <- wcGeneSummary(erccs, random.order=FALSE,
                      numWords=100, ngram=2,
                      colors=palette(), rot.per=0.4)
