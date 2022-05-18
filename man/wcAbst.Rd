@@ -16,7 +16,9 @@ wcAbst(
   colorText = FALSE,
   corThresh = 0.6,
   layout = "nicely",
+  edgeLabel = FALSE,
   edgeLink = TRUE,
+  ngram = NA,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   ...
@@ -45,7 +47,11 @@ wcAbst(
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
+\item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
+
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
+
+\item{ngram}{default to NA (1)}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
