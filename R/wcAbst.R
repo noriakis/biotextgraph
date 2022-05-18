@@ -13,9 +13,11 @@
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
+#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
+#' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
 #' @param ... parameters to pass to wordcloud()
 #' 
@@ -35,7 +37,8 @@
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    palette=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
-                   corThresh=0.6, layout="nicely", edgeLink=TRUE,
+                   corThresh=0.6, layout="nicely",
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA,
                    deleteZeroDeg=TRUE, additionalRemove=NA, ...)
         {
         	if (!is.list(redo)) {
@@ -59,7 +62,17 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				docs <- VCorpus(VectorSource(dataDf$abstract))
 				docs <- makeCorpus(docs, additionalRemove, additionalRemove)
 
-				docs <- TermDocumentMatrix(docs)
+			    if (!is.na(ngram)){
+			        NgramTokenizer <- function(x)
+			            unlist(lapply(ngrams(words(x), ngram),
+			                paste, collapse = " "),
+			                use.names = FALSE)
+			        docs <- TermDocumentMatrix(docs,
+			            control = list(tokenize = NgramTokenizer))
+			    } else {
+			        docs <- TermDocumentMatrix(docs)
+			    }
+
 				mat <- as.matrix(docs)
 				matSorted <- sort(rowSums(mat), decreasing=TRUE)
 				fetched[["rawfrequency"]] <- matSorted
@@ -81,7 +94,8 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 
 		        ## Set correlation below threshold to zero
 		        corData[corData<corThresh] <- 0
-		        coGraph <- graph.adjacency(corData, weighted=TRUE, diag = FALSE)
+		        coGraph <- graph.adjacency(corData, weighted=TRUE,
+		        	mode="undirected", diag = FALSE)
 		        V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 		        nodeName <- V(coGraph)$name
 		        for (i in madeUpper) {
@@ -94,17 +108,40 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 
 		        ## Main plot
 		        netPlot <- ggraph(coGraph, layout=layout)
+
 		        if (edgeLink){
-		            netPlot <- netPlot +
-		                geom_edge_link(aes(width=weight, color=weight),
-		                	alpha=0.5, show.legend = showLegend)
+		            if (edgeLabel){
+		                netPlot <- netPlot +
+		                            geom_edge_link(aes(width=weight,
+		                            	color=weight,
+		                                label=round(weight,3)),
+		                                angle_calc = 'along',
+		                                label_dodge = unit(2.5, 'mm'),
+		                                alpha=0.5, show.legend = showLegend)
+		            } else {
+		                netPlot <- netPlot +
+		                            geom_edge_link(aes(width=weight,
+		                            	color=weight),
+		                                alpha=0.5, show.legend = showLegend)
+		            }
 		        } else {
-		            netPlot <- netPlot +
-		                geom_edge_diagonal(aes(width=weight, color=weight),
-		                	alpha=0.5, show.legend = showLegend)
+		            if (edgeLabel){
+		                netPlot <- netPlot +
+		                            geom_edge_diagonal(aes(width=weight,
+		                            	color=weight,
+		                                label=round(weight,3)),
+		                                angle_calc = 'along',
+		                                label_dodge = unit(2.5, 'mm'),
+		                                alpha=0.5, show.legend = showLegend)
+		            } else {
+		                netPlot <- netPlot +
+		                            geom_edge_diagonal(aes(width=weight,
+		                            	color=weight),
+		                                alpha=0.5, show.legend = showLegend)                
+		            }
 		        }
 		        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
-		        show.legend = showLegend)
+		                                             show.legend = showLegend)
 		        if (colorText){
 		            netPlot <- netPlot + 
 		                geom_node_text(aes(label=name, size=Freq, color=Freq),

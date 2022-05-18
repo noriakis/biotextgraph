@@ -16,6 +16,8 @@ wcGeneSummary(
   scaleRange = c(5, 10),
   showLegend = FALSE,
   orgDb = org.Hs.eg.db,
+  edgeLabel = FALSE,
+  ngram = NA,
   plotType = "wc",
   colorText = FALSE,
   corThresh = 0.6,
@@ -51,6 +53,10 @@ default to 5000}
 \item{showLegend}{whether to show legend in correlation network}
 
 \item{orgDb}{default to org.Hs.eg.db}
+
+\item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
+
+\item{ngram}{default to NA (1)}
 
 \item{plotType}{"wc" or "network"}
 
