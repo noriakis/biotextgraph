@@ -12,6 +12,9 @@ devtools::install_github("noriakis/wcGeneSummary")
 library(wcGeneSummary)
 ```
 
+### Documentation
+[https://noriakis.github.io/software/wcGeneSummary/](https://noriakis.github.io/software/wcGeneSummary/)
+
 ### Example of ERCC
 ```R
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
