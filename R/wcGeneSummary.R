@@ -94,15 +94,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ## Filter high frequency words
         filterWords <- allFreqGeneSummary[
                                 allFreqGeneSummary$freq > excludeFreq,]$word
-        qqcat("filtered @{length(filterWords)} words ...\n")
+        qqcat("filtered @{length(filterWords)} words (frequency) ...\n")
         filterWords <- c(filterWords, "pmids", "geneid") 
         ## Excluded by default
 
         if (ora){
-            message("performing ORA\n")
+            qqcat("performing ORA\n")
             sig <- textORA(geneList)
             sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            qqcat("filtered @{length(sigFilter)} words ...\n")
+            qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
             filterWords <- c(filterWords, sigFilter)
         }
 

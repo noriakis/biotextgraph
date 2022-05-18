@@ -54,7 +54,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				pubmedData <- fetch_pubmed_data(pubmedIds)
 				allXml <- articles_to_list(pubmedData)
 
-				message("converting to a data frame ...\n")
+				qqcat("converting to a data frame ...\n")
 				dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
 				                        max_chars = -1, getAuthors = FALSE))
 				fetched[["rawdf"]] <- dataDf
