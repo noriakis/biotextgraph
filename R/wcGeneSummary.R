@@ -60,7 +60,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             enrich=NULL, topPath=10, ora=FALSE, ...) {
 
     qqcat("Input genes: @{length(geneList)}\n")
-    if (keyType!="ENSEMBL"){
+    if (keyType!="ENTREZID"){
         geneList <- AnnotationDbi::select(orgDb,
             keys = geneList, columns = c("ENTREZID"),
             keytype = keyType)$ENTREZID
