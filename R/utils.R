@@ -1,3 +1,49 @@
+#' returnSim
+#' 
+#' return similarity matrix of cluster
+#' based on intersection over union of words
+#' 
+#' @param cllist cluster list (named vector or list)
+#' @param keyType keytype
+#' @param numLimit threshold for gene number limit
+#'                 default to 5000
+#' @param ... parameters to pass to wcGeneSummary()
+#' @return similarity matrix
+#' @export
+#' @examples
+#' ex <- returnExample()
+#' returnSim(ex$color, keyType="ENSEMBL")
+#' @importFrom GetoptLong qqcat
+returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
+    store <- list()
+    if (!is.list(cllist)){
+        converted <- list()
+        clname <- unique(cllist)
+        for (c in clname) {
+            converted[[as.character(c)]] <-
+                names(cllist)[cllist==c]
+        }
+    } else {
+        converted <- cllist
+    }
+    qqcat("Number of clusters: @{length(converted)}\n")
+    for (i in names(converted)) {
+        ## Time consuming cluster
+        if (length(converted[[i]])<numLimit){
+            qqcat("@{i}\n")
+            store[[i]] <-
+                wcGeneSummary(converted[[i]],
+                              keyType=keyType,
+                              ...)$rawfrequency
+        }
+    }
+    sim <- sapply(store, function(x) sapply(store,
+                    function(y)
+                        length(intersect(names(x), names(y))) /
+                        length(union(names(x), names(y)))))
+    return(as.matrix(sim))
+}
+
 #' makeBar
 #' 
 #' Makeing a barplot of word frequency from queried genes
