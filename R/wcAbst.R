@@ -48,7 +48,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        		stop("please limit the gene number to 5")}
 				query <- paste(queries, collapse=" OR ")
 
-				qqcat("querying pubmed for @{query}")
+				qqcat("querying pubmed for @{query}\n")
 
 				pubmedIds <- get_pubmed_ids(query)
 				pubmedData <- fetch_pubmed_data(pubmedIds)
@@ -58,30 +58,30 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
 				                        max_chars = -1, getAuthors = FALSE))
 				fetched[["rawdf"]] <- dataDf
-
-				docs <- VCorpus(VectorSource(dataDf$abstract))
-				docs <- makeCorpus(docs, additionalRemove, additionalRemove)
-
-			    if (!is.na(ngram)){
-			        NgramTokenizer <- function(x)
-			            unlist(lapply(ngrams(words(x), ngram),
-			                paste, collapse = " "),
-			                use.names = FALSE)
-			        docs <- TermDocumentMatrix(docs,
-			            control = list(tokenize = NgramTokenizer))
-			    } else {
-			        docs <- TermDocumentMatrix(docs)
-			    }
-
-				mat <- as.matrix(docs)
-				matSorted <- sort(rowSums(mat), decreasing=TRUE)
-				fetched[["rawfrequency"]] <- matSorted
-				fetched[["TDM"]] <- docs
 			} else {
 				fetched <- redo
-				matSorted <- fetched[["rawfrequency"]]
-				docs <- fetched[["TDM"]]
+				dataDf <- fetched[["rawdf"]]
 			}
+
+			docs <- VCorpus(VectorSource(dataDf$abstract))
+			docs <- makeCorpus(docs, additionalRemove, additionalRemove)
+
+		    if (!is.na(ngram)){
+		        NgramTokenizer <- function(x)
+		            unlist(lapply(ngrams(words(x), ngram),
+		                paste, collapse = " "),
+		                use.names = FALSE)
+		        docs <- TermDocumentMatrix(docs,
+		            control = list(tokenize = NgramTokenizer))
+		    } else {
+		        docs <- TermDocumentMatrix(docs)
+		    }
+
+			mat <- as.matrix(docs)
+			matSorted <- sort(rowSums(mat), decreasing=TRUE)
+			fetched[["rawfrequency"]] <- matSorted
+			fetched[["TDM"]] <- docs
+
 
 		    if (plotType=="network"){
 		        matSorted <- matSorted[1:numWords]

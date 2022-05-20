@@ -102,6 +102,8 @@ net$net
 
 # Custom usage
 
+## Recluster the cluster using word information
+
 ## Interactive inspection of Bayesian network annotated by words
 
 In this example, a Bayesian network showing the module eigengenes relationship are inferred using `boot.strength` function in `bnlearn` from the weighted gene correlation network analysis (WGCNA) results. The modules are annotated by word clouds produced by `wcGeneSummary()`, and can be exported to the format of `Cytoscape.js` or `vis.js`. In this way, module relationship can be interactively inspected with the functional implications.
