@@ -49,7 +49,7 @@
 #' @export
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
-                            excludeFreq=5000, additionalRemove=NA,
+                            excludeFreq=2000, additionalRemove=NA,
                             madeUpper=c("dna","rna"), organism=9606,
                             palette=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
@@ -107,7 +107,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         fil <- tb %>% filter(Gene_ID %in% geneList)
-        
+        fil <- fil[!duplicated(fil$Gene_ID),]
+
+        returnList[["rawtext"]] <- fil
         ## Make corpus
         docs <- VCorpus(VectorSource(fil$Gene_summary))
         docs <- makeCorpus(docs, filterWords, additionalRemove)
@@ -128,6 +130,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     }
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
+
+    if (numWords > length(matSorted)){
+        numWords <- length(matSorted)
+    }
+
     returnList[["rawfrequency"]] <- matSorted
     returnList[["TDM"]] <- docs
 

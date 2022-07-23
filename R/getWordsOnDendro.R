@@ -274,10 +274,13 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
         keys = names(geneVec)[geneVec %in% L],
         columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filL <- tb %>% filter(Gene_ID %in% geneList)
+    filL <- filL[!duplicated(filL$Gene_ID),]
+
     geneList <- AnnotationDbi::select(orgDb,
         keys = names(geneVec)[geneVec %in% R],
         columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
     filR <- tb %>% filter(Gene_ID %in% geneList)
+    filR <- filR[!duplicated(filR$Gene_ID),]
     
     all_L <- paste(filL$Gene_summary, collapse = "")
     all_R <- paste(filR$Gene_summary, collapse = "")

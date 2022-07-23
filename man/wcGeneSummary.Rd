@@ -7,7 +7,7 @@
 wcGeneSummary(
   geneList,
   keyType = "SYMBOL",
-  excludeFreq = 5000,
+  excludeFreq = 2000,
   additionalRemove = NA,
   madeUpper = c("dna", "rna"),
   organism = 9606,

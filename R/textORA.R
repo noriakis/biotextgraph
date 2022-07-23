@@ -1,6 +1,7 @@
 #' textORA
 #' 
 #' Return p-values from hypergeometric distribution
+#' (experimental)
 #' 
 #' @param queries gene list (Entrez ID)
 #' @return p-values for the words
@@ -10,10 +11,12 @@
 #' @export
 #' 
 textORA <- function(queries) {
+    ##TODO Options to use other backgrounds
     tb <- loadGeneSummary()
     
     fil <- tb |> dplyr::filter(Gene_ID %in% queries)
-    
+    fil <- fil[!duplicated(fil$Gene_ID),]
+
     ## Make corpus for queried genes
     docs <- VCorpus(VectorSource(fil$Gene_summary))
     docs <- docs |>
