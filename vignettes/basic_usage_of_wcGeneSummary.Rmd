@@ -58,6 +58,14 @@ gwc2 <- wcGeneSummary(erccs, random.order=FALSE,
 gwc2$wc
 ```
 
+Word clustering based on the occurrence in the text can be visualized.
+
+```{r tagging, warning=FALSE}
+gwcl <- wcGeneSummary(erccs, random.order=FALSE,
+                     numWords=100, tag=TRUE,
+                     colors=palette(), rot.per=0.4)
+gwcl$wc
+```
 
 ## Producing correlation networks
 
