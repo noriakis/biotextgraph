@@ -8,13 +8,13 @@ License: MIT
 Encoding: UTF-8
 Depends:
     R (>= 4.1.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, ReactomePA, org.Hs.eg.db, clusterProfiler, jsonlite, cyjShiny, gridExtra, pvclust, easyPubMed, GetoptLong, grid, grDevices, stats, NLP
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, ReactomePA, org.Hs.eg.db, clusterProfiler, jsonlite, cyjShiny, gridExtra, pvclust, easyPubMed, GetoptLong, grid, grDevices, stats, NLP, ggforce
 Suggests: 
     knitr,
     rmarkdown,
     markdown,
     testthat (>= 3.0.0)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 biocViews: Visualization
