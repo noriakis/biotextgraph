@@ -11,7 +11,7 @@ wcGeneSummary(
   additionalRemove = NA,
   madeUpper = c("dna", "rna"),
   organism = 9606,
-  palette = c("blue", "red"),
+  pal = c("blue", "red"),
   numWords = 15,
   scaleRange = c(5, 10),
   showLegend = FALSE,
@@ -21,6 +21,9 @@ wcGeneSummary(
   plotType = "wc",
   colorText = FALSE,
   corThresh = 0.6,
+  genePlot = FALSE,
+  genePathPlot = NA,
+  tag = FALSE,
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
@@ -44,7 +47,7 @@ default to 5000}
 
 \item{organism}{organism ID to use}
 
-\item{palette}{palette for color gradient in correlation network}
+\item{pal}{palette for color gradient in correlation network}
 
 \item{numWords}{the number of words to be shown}
 
@@ -63,6 +66,13 @@ default to 5000}
 \item{colorText}{color text label based on frequency in correlation network}
 
 \item{corThresh}{the correlation threshold}
+
+\item{genePlot}{plot associated genes (default: FALSE)}
+
+\item{genePathPlot}{plot associated genes and pathways (default: FALSE)
+"kegg" or "reactome"}
+
+\item{tag}{perform pvclust on words and colorlize them in wordcloud}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 

@@ -5,7 +5,9 @@ test_that("test basic functions produce no errors", {
     expect_error( wcGeneSummary(geneList), NA)
     expect_error( wcGeneSummary(geneList, ora=TRUE), NA)
     expect_error( wcGeneSummary(geneList, plotType="network"), NA)
-
+    expect_error( wcGeneSummary(geneList,
+        plotType="network", genePlot=TRUE), NA)
+    
     ## Test plotEigengeneNetworksWithWords
     library(igraph)
     mod <- returnExample()

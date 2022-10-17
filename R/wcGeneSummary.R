@@ -8,7 +8,7 @@
 #' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
-#' @param palette palette for color gradient in correlation network
+#' @param pal palette for color gradient in correlation network
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
@@ -25,6 +25,10 @@
 #' @param topPath how many pathway descriptions are included in text analysis
 #' @param ora perform ora or not (experimental)
 #' @param ngram default to NA (1)
+#' @param genePlot plot associated genes (default: FALSE)
+#' @param genePathPlot plot associated genes and pathways (default: FALSE)
+#'                     "kegg" or "reactome"
+#' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -33,7 +37,10 @@
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
+#' @import pvclust
+#' @import ggforce
 #' @importFrom dplyr filter
+#' @importFrom stats dist
 #' @importFrom grDevices palette
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
 #' @importFrom igraph graph.adjacency
@@ -41,7 +48,7 @@
 #' @importFrom NLP ngrams words
 #' @importFrom ggplotify as.ggplot
 #' @importFrom ReactomePA enrichPathway
-#' @importFrom clusterProfiler enrichKEGG
+#' @importFrom clusterProfiler enrichKEGG setReadable
 #' 
 #' @examples
 #' geneList <- c("DDX41")
@@ -51,11 +58,12 @@
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, additionalRemove=NA,
                             madeUpper=c("dna","rna"), organism=9606,
-                            palette=c("blue","red"), numWords=15,
+                            pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
                             ngram=NA, plotType="wc",
-                            colorText=FALSE, corThresh=0.6,
+                            colorText=FALSE, corThresh=0.6, genePlot=FALSE,
+                            genePathPlot=NA, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, ...) {
 
@@ -143,6 +151,45 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         freqWords <- names(matSorted)
         freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         
+        ## genePlot: plot associated genes
+        if (!is.na(genePathPlot)) {genePlot <- TRUE}
+        if (genePlot) {
+            revID <- AnnotationDbi::select(orgDb,
+                keys = as.character(fil$Gene_ID), 
+                columns = c("SYMBOL"),
+                keytype = "ENTREZID")$SYMBOL
+            row.names(freqWordsDTM) <- revID
+        }
+
+        ## genePathPlot: plot associated genes and pathways
+        if (!is.na(genePathPlot)) {
+            
+            if (genePathPlot == "reactome") {
+                pathRes <- enrichPathway(geneList)
+            }
+            else if (genePathPlot == "kegg") {
+                pathRes <- enrichKEGG(geneList)
+            }
+            else {
+                stop("please specify 'reactome' or 'kegg'")
+            }
+            
+            if (dim(subset(pathRes@result, p.adjust<0.05))[1]==0) {
+                stop("No enriched term found.")
+            } else {
+                qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
+            }
+            
+            sigPath <- subset(setReadable(pathRes, orgDb)@result, p.adjust<0.05)
+            pathGraph <- c()
+            for (i in 1:nrow(sigPath)){
+                pa <- sigPath[i, "Description"]
+                for (j in unlist(strsplit(sigPath[i, "geneID"], "/"))){
+                    pathGraph <- rbind(pathGraph, c(pa, j))
+                }
+            }
+        }
+
         ## Check correlation
         corData <- cor(freqWordsDTM)
         returnList[["corMat"]] <- corData
@@ -152,17 +199,67 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         coGraph <- graph.adjacency(corData, weighted=TRUE,
                     mode="undirected", diag = FALSE)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
-        nodeName <- V(coGraph)$name
-        for (i in madeUpper) {
-            nodeName[nodeName == i] <- toupper(i)
-        }
-        V(coGraph)$name <- nodeName
+
         if (deleteZeroDeg){
             coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
         }
 
+        nodeName <- V(coGraph)$name
+        dtmCol <- colnames(freqWordsDTM)
+        for (i in madeUpper) {
+            dtmCol[dtmCol == i] <- toupper(i)
+            nodeName[nodeName == i] <- toupper(i)
+        }
+        V(coGraph)$name <- nodeName
+        colnames(freqWordsDTM) <- dtmCol
+
+        if (genePlot) {
+            genemap <- c()
+            for (rn in nodeName){
+                tmp <- freqWordsDTM[ ,rn]
+                for (nm in names(tmp[tmp!=0])){
+                    genemap <- rbind(genemap, c(rn, nm))
+                }
+            }
+            genemap <- igraph::graph_from_edgelist(genemap, directed = FALSE)
+            coGraph <- igraph::union(coGraph, genemap)
+            tmpW <- E(coGraph)$weight
+            if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
+                corThreshGenePlot <- corThresh - 0.1}
+            tmpW[is.na(tmpW)] <- corThreshGenePlot
+            E(coGraph)$weight <- tmpW
+        }
+
+
+        if (!is.na(genePathPlot)) {
+
+            withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
+            withinCoGraphPathGraph <- pathGraph[ pathGraph[,2] %in% withinCoGraph,]
+
+            grp <- c()
+            for (i in V(coGraph)$name) {
+                if (i %in% withinCoGraphPathGraph[,2]){
+                    tmpMap <- withinCoGraphPathGraph[withinCoGraphPathGraph[,2] %in% i,]
+                    if (is.vector(tmpMap)) {
+                        grp <- c(grp, tmpMap[1])
+                    } else {
+                        tmpMap <- tmpMap[order(tmpMap[,1]),]
+                        grp <- c(grp, paste(tmpMap[,1], collapse="\n"))
+                    }
+                } else {
+                    grp <- c(grp, NA)
+                }
+            }
+            V(coGraph)$grp <- grp
+        }
+           
+
+        returnList[["ig"]] <- coGraph
+
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)
+
+
         if (edgeLink){
             if (edgeLabel){
                 netPlot <- netPlot +
@@ -216,21 +313,60 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
-            scale_color_gradient(low=palette[1],high=palette[2],
+            scale_color_gradient(low=pal[1],high=pal[2],
                 name = "Frequency")+
-            scale_edge_color_gradient(low=palette[1],high=palette[2],
+            scale_edge_color_gradient(low=pal[1],high=pal[2],
                 name = "Correlation")+
             theme_graph()
+
+        if (!is.na(genePathPlot)) {
+            netPlot <- netPlot + geom_mark_hull(
+                aes(netPlot$data$x,
+                    netPlot$data$y,
+                    group = grp,
+                    label=grp, fill=grp,
+                    filter = !is.na(grp)),
+                concavity = 4,
+                expand = unit(2, "mm"),
+                alpha = 0.25,
+                na.rm = TRUE,
+                # label.fill="transparent",
+                show.legend = FALSE
+            )
+        }
         returnList[["net"]] <- netPlot
     } else {
+        ## WC
         matSorted <- matSorted[1:numWords]
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+
+        if (tag) {
+
+            freqWords <- names(matSorted)
+            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            pvcl <- pvpick(pvc)
+
+            wcCol <- returnDf$word
+            for (i in seq_along(pvcl$clusters)){
+                for (j in pvcl$clusters[[i]])
+                    wcCol[wcCol==j] <- pal[i]
+            }
+            wcCol[!wcCol %in% pal] <- "grey"
+        }
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
-        wc <- as.ggplot(as_grob(
-                ~wordcloud(words = returnDf$word, freq = returnDf$freq, ...)))
+        if (tag){
+            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+                                               freq = returnDf$freq,
+                                               colors = wcCol,
+                                               ordered.colors = TRUE)))
+        } else {
+            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+                                               freq = returnDf$freq, ...)))
+        }
         returnList[["df"]] <- returnDf
         returnList[["wc"]] <- wc
     }
