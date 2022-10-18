@@ -8,7 +8,7 @@
 #' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
-#' @param pal palette for color gradient in correlation network
+#' @param pal palette for color gradient in correlation network and tag coloring
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
@@ -346,6 +346,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
             pvcl <- pvpick(pvc)
+            returnList[["pvcl"]] <- pvcl
 
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
@@ -353,6 +354,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     wcCol[wcCol==j] <- pal[i]
             }
             wcCol[!wcCol %in% pal] <- "grey"
+
         }
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
@@ -362,6 +364,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
                                                freq = returnDf$freq,
                                                colors = wcCol,
+                                               random.order=FALSE,
                                                ordered.colors = TRUE)))
         } else {
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 

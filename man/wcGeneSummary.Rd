@@ -47,7 +47,7 @@ default to 5000}
 
 \item{organism}{organism ID to use}
 
-\item{pal}{palette for color gradient in correlation network}
+\item{pal}{palette for color gradient in correlation network and tag coloring}
 
 \item{numWords}{the number of words to be shown}
 
