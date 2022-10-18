@@ -88,10 +88,19 @@ net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.
 net$net
 ```
 
+The clustering results based on `pvclust` can be shown also on the correlation network.
+
+```{r tagnet, fig.cap="A correlation network of genes with cluster information", warning=FALSE, message=FALSE, cache=T}
+net <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.2,
+                     numWords=20, tag=TRUE)
+net$net
+net$pvcl
+```
+
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`.
 ```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5,
-                     numWords=10)
+net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
+                     numWords=20)
 net$net
 ```
 
