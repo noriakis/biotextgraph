@@ -261,7 +261,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
            
 
         if (tag) {
-            netCol <- names(V(coGraph))
+            netCol <- tolower(names(V(coGraph)))
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
                     netCol[netCol==j] <- paste0("cluster",i)
