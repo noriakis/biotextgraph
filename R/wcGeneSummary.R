@@ -151,6 +151,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         freqWords <- names(matSorted)
         freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         
+        if (tag) {
+            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            pvcl <- pvpick(pvc)
+            returnList[["pvcl"]] <- pvcl
+        }
+
         ## genePlot: plot associated genes
         if (!is.na(genePathPlot)) {genePlot <- TRUE}
         if (genePlot) {
@@ -254,6 +260,16 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
            
 
+        if (tag) {
+            netCol <- names(V(coGraph))
+            for (i in seq_along(pvcl$clusters)){
+                for (j in pvcl$clusters[[i]])
+                    netCol[netCol==j] <- paste0("cluster",i)
+            }
+            netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+            V(coGraph)$tag <- netCol
+        }
+
         returnList[["ig"]] <- coGraph
 
         ## Main plot
@@ -293,8 +309,17 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                 alpha=0.5, show.legend = showLegend)                
             }
         }
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
-                                            show.legend = showLegend)
+
+        if (tag) {
+            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+                                                show.legend = showLegend)
+        } else { 
+            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+                                                show.legend = showLegend)+
+                                 scale_color_gradient(low=pal[1],high=pal[2],
+                                                      name = "Frequency")
+        }
+
         if (colorText){
             netPlot <- netPlot +
                         geom_node_text(
@@ -313,8 +338,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
-            scale_color_gradient(low=pal[1],high=pal[2],
-                name = "Frequency")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
                 name = "Correlation")+
             theme_graph()
