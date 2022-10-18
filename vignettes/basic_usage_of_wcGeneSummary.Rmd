@@ -25,18 +25,22 @@ The basic usage of the package is producing a word cloud of gene summaries by qu
 As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 5000.
 
 ```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=TRUE}
-erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
-gwc <- wcGeneSummary(erccs)
+## Configure input genes
+inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
+
+gwc <- wcGeneSummary(inpSymbol)
 gwc$wc
 ```
 
-It accepts values of the `wordcloud()` function. `numWords` specifies how many words are to be shown on word clouds.
+It accepts values of the `wordcloud()` function. `numWords` specifies how many words are to be shown on word cloud.
+The function accepts the other parameters which is passed to `wordcloud()`.
 
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
-gwc <- wcGeneSummary(erccs, random.order=FALSE,
-                     numWords=100,
-                     colors=palette(), rot.per=0.4)
+gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
+                     numWords=100, excludeFreq=2000,
+                     colors=palette(),
+                     rot.per=0.4)
 gwc$wc
 ```
 
@@ -52,26 +56,27 @@ knitr::kable(
 N-gram is supported by library `tm`, specified by `ngram`.
 
 ```{r ngramwc, warning=FALSE}
-gwc2 <- wcGeneSummary(erccs, random.order=FALSE,
+gwc2 <- wcGeneSummary(inpSymbol, random.order=FALSE,
                      numWords=100, ngram=2,
                      colors=palette(), rot.per=0.4)
 gwc2$wc
 ```
 
-Word clustering based on the occurrence in the text can be visualized.
+Word clustering (pvclust) based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
 
 ```{r tagging, warning=FALSE}
-gwcl <- wcGeneSummary(erccs, random.order=FALSE,
-                     numWords=100, tag=TRUE,
-                     colors=palette(), rot.per=0.4)
+gwcl <- wcGeneSummary(inpSymbol,
+                     numWords=30, tag=TRUE, pal = palette(),
+                     rot.per=0.4)
 gwcl$wc
+gwcl$pvcl
 ```
 
 ## Producing correlation networks
 
 ```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
 library(ggraph)
-net <- wcGeneSummary(erccs, plotType="network")
+net <- wcGeneSummary(inpSymbol, plotType="network")
 net$net
 ```
 
@@ -79,7 +84,14 @@ The edge label can be shown by `edgeLabel=TRUE`.
 The threhsold of correlation can be specified by `corThresh`.
 
 ```{r ngramnet, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(erccs, plotType="network", edgeLabel=TRUE, corThresh=0.8)
+net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.8, numWords=20)
+net$net
+```
+
+The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`.
+```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
+net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5,
+                     numWords=10)
 net$net
 ```
 
@@ -104,7 +116,7 @@ pvs[order(pvs)] |> head()
 Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 
 ```{r oranet, fig.cap="A correlation network of gene summaries (ORA)", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(erccs, plotType="network", ora=TRUE, edgeLink=FALSE)
+net <- wcGeneSummary(inpSymbol, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
 
