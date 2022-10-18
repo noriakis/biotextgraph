@@ -84,7 +84,7 @@ The edge label can be shown by `edgeLabel=TRUE`.
 The threhsold of correlation can be specified by `corThresh`.
 
 ```{r ngramnet, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.8, numWords=20)
+net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.5, numWords=20)
 net$net
 ```
 
@@ -100,6 +100,13 @@ net$pvcl
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`.
 ```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
+                     numWords=20)
+net$net
+```
+
+The associated enriched pathways (if present) can be shown by specifying `genePathPlot`.
+```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
+net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="reactome", corThresh=0.5, tag=TRUE, edgeLink=FALSE,
                      numWords=20)
 net$net
 ```
