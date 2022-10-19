@@ -258,12 +258,19 @@ wcBSDB <- function (mbList,
         }
 
         if (colorText){
-            netPlot <- netPlot +
-                        geom_node_text(
-                            aes_(label=~name, size=~Freq, color=~Freq),
-                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
+            if (tag) {
+                netPlot <- netPlot + 
+                    geom_node_text(aes(label=name, size=Freq, color=tag),
+                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                        bg.color = "white", segment.color="black",
+                        bg.r = .15, show.legend=showLegend)
+            } else {
+                netPlot <- netPlot + 
+                    geom_node_text(aes(label=name, size=Freq, color=Freq),
+                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                        bg.color = "white", segment.color="black",
+                        bg.r = .15, show.legend=showLegend)
+            }
         } else {
             netPlot <- netPlot +
                         geom_node_text(aes_(label=~name, size=~Freq),
