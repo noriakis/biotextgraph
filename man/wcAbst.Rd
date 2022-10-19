@@ -8,7 +8,8 @@ wcAbst(
   queries,
   redo = NA,
   madeUpper = c("dna", "rna"),
-  palette = c("blue", "red"),
+  target = "abstract",
+  pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
   showLegend = FALSE,
@@ -16,9 +17,11 @@ wcAbst(
   colorText = FALSE,
   corThresh = 0.6,
   layout = "nicely",
+  tag = FALSE,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
+  genePlot = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   ...
@@ -31,7 +34,9 @@ wcAbst(
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 
-\item{palette}{palette for color gradient in correlation network}
+\item{target}{"abstract" or "title"}
+
+\item{pal}{palette for color gradient in correlation network}
 
 \item{numWords}{the number of words to be shown}
 
@@ -47,11 +52,15 @@ wcAbst(
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
+\item{tag}{cluster the words based on text}
+
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
 
 \item{ngram}{default to NA (1)}
+
+\item{genePlot}{plot associated genes (default: FALSE)}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 

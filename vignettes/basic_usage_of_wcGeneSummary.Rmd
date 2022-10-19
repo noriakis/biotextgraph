@@ -105,7 +105,7 @@ net$net
 ```
 
 The associated enriched pathways (if present) can be shown by specifying `genePathPlot`.
-```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
+```{r gpplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="reactome", corThresh=0.5, tag=TRUE, edgeLink=FALSE,
                      numWords=20)
 net$net
