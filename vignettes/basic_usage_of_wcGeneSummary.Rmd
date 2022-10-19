@@ -98,16 +98,21 @@ net$pvcl
 ```
 
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`.
+The edges connecting word to corresponding gene are shown.
+
+
 ```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
                      numWords=20)
 net$net
 ```
 
-The associated enriched pathways (if present) can be shown by specifying `genePathPlot`.
+The associated enriched pathways (if present) can be shown by specifying `genePathPlot`, using `ggforce`.
+In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot.
+
 ```{r gpplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="reactome", corThresh=0.5, tag=TRUE, edgeLink=FALSE,
-                     numWords=20)
+net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="kegg", corThresh=0.5,
+                     tag=TRUE, edgeLink=FALSE, genePathPlotSig=0.05, numWords=20)
 net$net
 ```
 
@@ -135,6 +140,10 @@ Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 net <- wcGeneSummary(inpSymbol, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
+
+## Visualization of PubMed information.
+
+Using `easyPubMed`, one can perform the same analysis on PubMed text.
 
 # Custom usage
 
