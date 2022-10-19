@@ -194,7 +194,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             } else {
                 qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
             }
-            
+            if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
+            returnList[["pathRes"]] <- pathRes
             sigPath <- subset(setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
             pathGraph <- c()
             for (i in 1:nrow(sigPath)){
