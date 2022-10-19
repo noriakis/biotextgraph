@@ -53,7 +53,7 @@ wcBSDB <- function (mbList,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
-                    ngram=NA, plotType="wc", disPlot=NA,
+                    ngram=NA, plotType="wc", disPlot=FALSE,
                     colorText=FALSE, corThresh=0.6, tag=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
 
