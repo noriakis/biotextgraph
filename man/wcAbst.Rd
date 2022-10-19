@@ -9,6 +9,9 @@ wcAbst(
   redo = NA,
   madeUpper = c("dna", "rna"),
   target = "abstract",
+  usefil = NA,
+  filnum = 0,
+  geneUpper = FALSE,
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
@@ -35,6 +38,12 @@ wcAbst(
 \item{madeUpper}{make the words uppercase in resulting plot}
 
 \item{target}{"abstract" or "title"}
+
+\item{usefil}{filter based on "gstfidf" or "bsdbtfidf"}
+
+\item{filnum}{specify filter tfidf}
+
+\item{geneUpper}{make queries uppercase}
 
 \item{pal}{palette for color gradient in correlation network}
 

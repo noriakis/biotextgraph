@@ -22,6 +22,9 @@
 #' @param target "abstract" or "title"
 #' @param tag cluster the words based on text
 #' @param genePlot plot associated genes (default: FALSE)
+#' @param usefil filter based on "gstfidf" or "bsdbtfidf"
+#' @param filnum specify filter tfidf
+#' @param geneUpper make queries uppercase
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -38,7 +41,8 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
-				   target="abstract",
+				   target="abstract", usefil=NA, filnum=0,
+				   geneUpper=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.6, layout="nicely", tag=FALSE,
@@ -47,8 +51,8 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
         {
         	if (!is.list(redo)) {
 	        	fetched <- list() # store results
-	        	if (length(queries)>5){
-	        		stop("please limit the gene number to 5")}
+	        	if (length(queries)>10){
+	        		stop("please limit the gene number to 10")}
 				query <- paste(queries, collapse=" ")
 				qqcat("querying pubmed for @{query}\n")
 				allDataDf <- c()
@@ -66,8 +70,12 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				}
 				fetched[["rawdf"]] <- allDataDf
 			} else {
+				qqcat("Resuming from the previous results ...\n")
 				fetched <- redo
 				allDataDf <- fetched[["rawdf"]]
+			}
+			if (geneUpper){
+				madeUpper <- c(madeUpper, tolower(unique(allDataDf$query)))
 			}
 			if (target=="abstract"){
 				docs <- VCorpus(VectorSource(allDataDf$abstract))
@@ -76,7 +84,24 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 			} else {
 				stop("specify target or abstract")
 			}
-			docs <- makeCorpus(docs, additionalRemove, additionalRemove)
+
+			if (!is.na(usefil)){
+				if (usefil=="gstfidf") {
+					qqcat("filter based on GeneSummary\n")
+					filterWords <- allTfIdfGeneSummary[
+                                allTfIdfGeneSummary$tfidf > filnum,]$word
+				} else if (usefil=="bsdbtfidf"){
+					qqcat("filter based on BugSigDB\n")
+					filterWords <- allTfIdfBSDB[
+                                allTfIdfBSDB$tfidf > filnum,]$word
+				} else {
+					stop("please specify gstfidf or bsdbtfidf")
+				}
+			} else {
+				filterWords <- NA
+			}
+
+			docs <- makeCorpus(docs, filterWords, additionalRemove)
 
 		    if (!is.na(ngram)){
 		        NgramTokenizer <- function(x)
@@ -202,11 +227,19 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		                                                      name = "Frequency")
 		        }
 		        if (colorText){
-		            netPlot <- netPlot + 
-		                geom_node_text(aes(label=name, size=Freq, color=Freq),
-		                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
+		        	if (tag) {
+			            netPlot <- netPlot + 
+			                geom_node_text(aes(label=name, size=Freq, color=tag),
+			                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
+	                            bg.color = "white", segment.color="black",
+	                            bg.r = .15, show.legend=showLegend)
+		            } else {
+			            netPlot <- netPlot + 
+			                geom_node_text(aes(label=name, size=Freq, color=Freq),
+			                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
+	                            bg.color = "white", segment.color="black",
+	                            bg.r = .15, show.legend=showLegend)
+		            }
 		        } else {
 		            netPlot <- netPlot + 
 		                geom_node_text(aes(label=name, size=Freq),
