@@ -222,7 +222,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' 
 makeCorpus <- function (docs, filterWords, additionalRemove) {
     docs <- docs %>%
-        tm_map(FUN=content_transformer(tolower)) %>% 
+        tm_map(FUN=content_transformer(tolower)) %>%
         tm_map(FUN=removeNumbers) %>%
         tm_map(removeWords, stopwords::stopwords("english",
             "stopwords-iso")) %>%

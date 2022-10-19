@@ -6,7 +6,7 @@
 #' @param queries gene symbols (max: 5)
 #' @param redo if plot in other parameters, input the previous list
 #' @param madeUpper make the words uppercase in resulting plot
-#' @param palette palette for color gradient in correlation network
+#' @param pal palette for color gradient in correlation network
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
@@ -19,6 +19,9 @@
 #' @param colorText color text label based on frequency in correlation network
 #' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
+#' @param target "abstract" or "title"
+#' @param tag cluster the words based on text
+#' @param genePlot plot associated genes (default: FALSE)
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -35,35 +38,44 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
-                   palette=c("blue","red"), numWords=30, scaleRange=c(5,10),
+				   target="abstract",
+                   pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
-                   corThresh=0.6, layout="nicely",
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA,
+                   corThresh=0.6, layout="nicely", tag=FALSE,
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, ...)
         {
         	if (!is.list(redo)) {
 	        	fetched <- list() # store results
-
 	        	if (length(queries)>5){
 	        		stop("please limit the gene number to 5")}
-				query <- paste(queries, collapse=" OR ")
-
+				query <- paste(queries, collapse=" ")
 				qqcat("querying pubmed for @{query}\n")
+				allDataDf <- c()
+				for (q in queries) {
+					qqcat("querying pubmed for @{q}\n")
+					pubmedIds <- get_pubmed_ids(q)
+					pubmedData <- fetch_pubmed_data(pubmedIds)
+					allXml <- articles_to_list(pubmedData)
 
-				pubmedIds <- get_pubmed_ids(query)
-				pubmedData <- fetch_pubmed_data(pubmedIds)
-				allXml <- articles_to_list(pubmedData)
-
-				qqcat("converting to a data frame ...\n")
-				dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
-				                        max_chars = -1, getAuthors = FALSE))
-				fetched[["rawdf"]] <- dataDf
+					qqcat("converting to a data frame ...\n")
+					dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
+					                        max_chars = -1, getAuthors = FALSE))
+					dataDf$query <- q
+					allDataDf <- rbind(allDataDf, dataDf)
+				}
+				fetched[["rawdf"]] <- allDataDf
 			} else {
 				fetched <- redo
-				dataDf <- fetched[["rawdf"]]
+				allDataDf <- fetched[["rawdf"]]
 			}
-
-			docs <- VCorpus(VectorSource(dataDf$abstract))
+			if (target=="abstract"){
+				docs <- VCorpus(VectorSource(allDataDf$abstract))
+			} else if (target=="title"){
+				docs <- VCorpus(VectorSource(allDataDf$title))
+			} else {
+				stop("specify target or abstract")
+			}
 			docs <- makeCorpus(docs, additionalRemove, additionalRemove)
 
 		    if (!is.na(ngram)){
@@ -87,7 +99,14 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        matSorted <- matSorted[1:numWords]
 		        freqWords <- names(matSorted)
 		        freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-		        
+		        row.names(freqWordsDTM) <- allDataDf$query
+
+                if (tag) {
+		            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+		            pvcl <- pvpick(pvc)
+		            fetched[["pvcl"]] <- pvcl
+		        }
+
 		        ## Check correlation
 		        corData <- cor(freqWordsDTM)
 		        fetched[["corMat"]] <- corData
@@ -97,16 +116,49 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        coGraph <- graph.adjacency(corData, weighted=TRUE,
 		        	mode="undirected", diag = FALSE)
 		        V(coGraph)$Freq <- matSorted[V(coGraph)$name]
-		        nodeName <- V(coGraph)$name
-		        for (i in madeUpper) {
-		            nodeName[nodeName == i] <- toupper(i)
-		        }
-		        V(coGraph)$name <- nodeName
+
 		        if (deleteZeroDeg){
 		            coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
 		        }
 
+		        nodeName <- V(coGraph)$name
+		        dtmCol <- colnames(freqWordsDTM)
+		        for (i in madeUpper) {
+		            dtmCol[dtmCol == i] <- toupper(i)
+		            nodeName[nodeName == i] <- toupper(i)
+		        }
+		        V(coGraph)$name <- nodeName
+		        colnames(freqWordsDTM) <- dtmCol
+
+		        if (genePlot) {
+		            genemap <- c()
+		            for (rn in nodeName){
+		                tmp <- freqWordsDTM[ ,rn]
+		                for (nm in names(tmp[tmp!=0])){
+		                    genemap <- rbind(genemap, c(rn, nm))
+		                }
+		            }
+		            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
+		            coGraph <- igraph::union(coGraph, genemap)
+		            tmpW <- E(coGraph)$weight
+		            if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
+		                corThreshGenePlot <- corThresh - 0.1}
+		            tmpW[is.na(tmpW)] <- corThreshGenePlot
+		            E(coGraph)$weight <- tmpW
+		        }
+
+		        if (tag) {
+		            netCol <- tolower(names(V(coGraph)))
+		            for (i in seq_along(pvcl$clusters)){
+		                for (j in pvcl$clusters[[i]])
+		                    netCol[netCol==j] <- paste0("cluster",i)
+		            }
+		            netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+		            V(coGraph)$tag <- netCol
+		        }
+
 		        ## Main plot
+		        fetched[["ig"]] <- coGraph
 		        netPlot <- ggraph(coGraph, layout=layout)
 
 		        if (edgeLink){
@@ -140,8 +192,15 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		                                alpha=0.5, show.legend = showLegend)                
 		            }
 		        }
-		        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
-		                                             show.legend = showLegend)
+		        if (tag) {
+		            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+		                                                show.legend = showLegend)
+		        } else { 
+		            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+		                                                show.legend = showLegend)+
+		                                 scale_color_gradient(low=pal[1],high=pal[2],
+		                                                      name = "Frequency")
+		        }
 		        if (colorText){
 		            netPlot <- netPlot + 
 		                geom_node_text(aes(label=name, size=Freq, color=Freq),
@@ -159,9 +218,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        netPlot <- netPlot+
 		            scale_size(range=scaleRange, name="Frequency")+
 		            scale_edge_width(range=c(1,3), name = "Correlation")+
-		            scale_color_gradient(low=palette[1],high=palette[2],
-		            	name = "Frequency")+
-		            scale_edge_color_gradient(low=palette[1],high=palette[2],
+		            scale_edge_color_gradient(low=pal[1],high=pal[2],
 		            	name = "Correlation")+
 		            theme_graph()
 		        fetched[["net"]] <- netPlot

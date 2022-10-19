@@ -2,11 +2,12 @@
 #' 
 #' Plot wordcloud of RefSeq description obtained by GeneSummary
 #' 
-#' @param geneList gene ID list
+#' @param mbList microbe list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
-#'                    default to 5000
-#' @param keyType default to SYMBOL
+#'                    default to 0
 #' @param additionalRemove specific words to be excluded
+#' @param mbPlot plot microbe names
+#' @param disPlot plot diseases
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param pal palette for color gradient in correlation network and tag coloring
 #' @param numWords the number of words to be shown
@@ -19,23 +20,13 @@
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
-#' @param orgDb default to org.Hs.eg.db
-#' @param organism organism ID to use
-#' @param enrich currently, only 'reactome' and 'kegg' is supported
-#' @param topPath how many pathway descriptions are included in text analysis
-#' @param ora perform ora or not (experimental)
 #' @param ngram default to NA (1)
-#' @param genePlot plot associated genes (default: FALSE)
-#' @param genePathPlot plot associated genes and pathways (default: FALSE)
-#'                     "kegg" or "reactome"
-#' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
-#' @import GeneSummary
-#' @import org.Hs.eg.db
+#' @import bugsigdbr
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
@@ -45,92 +36,68 @@
 #' @importFrom stats dist
 #' @importFrom grDevices palette
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
-#' @importFrom igraph graph.adjacency
+#' @importFrom igraph graph.adjacency graph_from_edgelist
 #' @importFrom cowplot as_grob
 #' @importFrom NLP ngrams words
 #' @importFrom ggplotify as.ggplot
-#' @importFrom ReactomePA enrichPathway
-#' @importFrom clusterProfiler enrichKEGG setReadable
 #' 
 #' @examples
-#' geneList <- c("DDX41")
-#' wcGeneSummary(geneList)
+#' mbList <- c("Veillonella dispar")
+#' wcBSDB(mbList)
 #' @export
 #' 
-wcGeneSummary <- function (geneList, keyType="SYMBOL",
-                            excludeFreq=2000, excludeTfIdf=NA,
-                            additionalRemove=NA,
-                            madeUpper=c("dna","rna"), organism=9606,
-                            pal=c("blue","red"), numWords=15,
-                            scaleRange=c(5,10), showLegend=FALSE,
-                            orgDb=org.Hs.eg.db, edgeLabel=FALSE,
-                            ngram=NA, plotType="wc",
-                            colorText=FALSE, corThresh=0.6, genePlot=FALSE,
-                            genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
-                            layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                            enrich=NULL, topPath=10, ora=FALSE, ...) {
+wcBSDB <- function (mbList,
+                    excludeFreq=1000, excludeTfIdf=NA,
+                    additionalRemove=NA,
+                    madeUpper=c("dna","rna"),
+                    pal=c("blue","red"), numWords=15,
+                    scaleRange=c(5,10), showLegend=FALSE,
+                    edgeLabel=FALSE, mbPlot=FALSE,
+                    ngram=NA, plotType="wc", disPlot=NA,
+                    colorText=FALSE, corThresh=0.6, tag=FALSE,
+                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
 
-    qqcat("Input genes: @{length(geneList)}\n")
-    if (keyType!="ENTREZID"){
-        geneList <- AnnotationDbi::select(orgDb,
-            keys = geneList, columns = c("ENTREZID"),
-            keytype = keyType)$ENTREZID
-        geneList <- geneList[!is.na(geneList)]
-        qqcat("Converted input genes: @{length(geneList)}\n")
-    }
-
+    qqcat("Input microbes: @{length(mbList)}\n")
     returnList <- list()
 
-    ## If specified pathway option
-    if (!is.null(enrich)) {
-        message("performing enrichment analysis ...")
-        if (enrich=="reactome"){
-            pathRes <- enrichPathway(geneList)
-        } else if (enrich=="kegg"){
-            pathRes <- enrichKEGG(geneList)
-        } else {
-            ## Currently only supports some pathways
-            stop("please specify 'reactome' or 'kegg'")
-        }
-        ## Make corpus
-        docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-        docs <- makeCorpus(docs, additionalRemove, additionalRemove)
-    } else {
-        ## Load from GeneSummary
-        tb <- loadGeneSummary(organism = organism)
+    ## Load from GeneSummary
+    tb <- importBugSigDB()
 
-        ## Already performed, and automatically loaded
-        # load("allFreqGeneSummary.rda") 
-
-        ## Filter high frequency words
-        filterWords <- allFreqGeneSummary[
-                                allFreqGeneSummary$freq > excludeFreq,]$word
-        if (!is.na(excludeTfIdf)){
-            filterWords <- c(filterWords,
-                allTfIdfGeneSummary[
-                                allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
-        }
-        qqcat("filtered @{length(filterWords)} words (frequency) ...\n")
-        filterWords <- c(filterWords, "pmids", "geneid") 
-        ## Excluded by default
-
-        if (ora){
-            qqcat("performing ORA\n")
-            sig <- textORA(geneList)
-            sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
-            filterWords <- c(filterWords, sigFilter)
-            returnList[["ora"]] <- sig
-        }
-
-        fil <- tb %>% filter(Gene_ID %in% geneList)
-        fil <- fil[!duplicated(fil$Gene_ID),]
-
-        returnList[["rawtext"]] <- fil
-        ## Make corpus
-        docs <- VCorpus(VectorSource(fil$Gene_summary))
-        docs <- makeCorpus(docs, filterWords, additionalRemove)
+    ## Filter high frequency words
+    filterWords <- allFreqBSDB[
+        allFreqBSDB$freq > excludeFreq,]$word
+    if (!is.na(excludeTfIdf)){
+        filterWords <- c(filterWords,
+            allTfIdfBSDB[
+                allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
+    qqcat("filtered @{length(filterWords)} words (frequency) ...\n")
+    # filterWords <- c(filterWords, "pmids", "geneid") 
+    ## Excluded by default
+
+    # if (ora){
+    #     qqcat("performing ORA\n")
+    #     sig <- textORA(mbList)
+    #     sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
+    #     qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
+    #     filterWords <- c(filterWords, sigFilter)
+    #     returnList[["ora"]] <- sig
+    # }
+    
+    subTb <- c()        
+    for (m in mbList) {
+        tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,
+                 fixed = TRUE),]
+        tmp$query <- m
+        subTb <- rbind(subTb, tmp)
+    }
+    returnList[["subsetBSDB"]] <- subTb
+    fil <- subTb[!duplicated(subTb$Title),]
+
+
+    ## Make corpus
+    docs <- VCorpus(VectorSource(fil$Title))
+    docs <- makeCorpus(docs, filterWords, additionalRemove)
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
@@ -167,42 +134,20 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         ## genePlot: plot associated genes
-        if (!is.na(genePathPlot)) {genePlot <- TRUE}
-        if (genePlot) {
-            revID <- AnnotationDbi::select(orgDb,
-                keys = as.character(fil$Gene_ID), 
-                columns = c("SYMBOL"),
-                keytype = "ENTREZID")$SYMBOL
-            row.names(freqWordsDTM) <- revID
+        if (!is.na(disPlot)) {mbPlot <- TRUE}
+        if (mbPlot) {
+            row.names(freqWordsDTM) <- fil$query
         }
-
-        ## genePathPlot: plot associated genes and pathways
-        if (!is.na(genePathPlot)) {
-            
-            if (genePathPlot == "reactome") {
-                pathRes <- enrichPathway(geneList)
+        
+        if (disPlot) {
+            dis <- c()
+            for (i in seq_len(nrow(subTb))){
+                dis <- rbind(dis,
+                c(subTb[i, "Condition"], subTb[i, "query"]))
             }
-            else if (genePathPlot == "kegg") {
-                pathRes <- enrichKEGG(geneList)
-            }
-            else {
-                stop("please specify 'reactome' or 'kegg'")
-            }
-            
-            if (dim(subset(pathRes@result, p.adjust<0.05))[1]==0) {
-                stop("No enriched term found.")
-            } else {
-                qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
-            }
-            
-            sigPath <- subset(setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
-            pathGraph <- c()
-            for (i in 1:nrow(sigPath)){
-                pa <- sigPath[i, "Description"]
-                for (j in unlist(strsplit(sigPath[i, "geneID"], "/"))){
-                    pathGraph <- rbind(pathGraph, c(pa, j))
-                }
-            }
+            dis <- dis[!is.na(dis[,1]),]
+            dis <- dis[!is.na(dis[,2]),]
+            dmg <- simplify(graph_from_data_frame(dis, directed=FALSE))
         }
 
         ## Check correlation
@@ -228,46 +173,29 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         V(coGraph)$name <- nodeName
         colnames(freqWordsDTM) <- dtmCol
 
-        if (genePlot) {
-            genemap <- c()
+        if (mbPlot) {
+            mbmap <- c()
             for (rn in nodeName){
                 tmp <- freqWordsDTM[ ,rn]
                 for (nm in names(tmp[tmp!=0])){
-                    genemap <- rbind(genemap, c(rn, nm))
+                    mbmap <- rbind(mbmap, c(rn, nm))
                 }
             }
-            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
-            coGraph <- igraph::union(coGraph, genemap)
+            mbmap <- simplify(graph_from_edgelist(mbmap, directed = FALSE))
+            coGraph <- igraph::union(coGraph, mbmap)
+            
+            if (disPlot) {
+                coGraph <- igraph::union(coGraph, dmg)
+            }
+            
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
-                corThreshGenePlot <- corThresh - 0.1}
-            tmpW[is.na(tmpW)] <- corThreshGenePlot
+                corThreshMbPlot <- corThresh - 0.1}
+            tmpW[is.na(tmpW)] <- corThreshMbPlot
             E(coGraph)$weight <- tmpW
         }
+        
 
-
-        if (!is.na(genePathPlot)) {
-
-            withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
-            withinCoGraphPathGraph <- pathGraph[ pathGraph[,2] %in% withinCoGraph,]
-
-            grp <- c()
-            for (i in V(coGraph)$name) {
-                if (i %in% withinCoGraphPathGraph[,2]){
-                    tmpMap <- withinCoGraphPathGraph[withinCoGraphPathGraph[,2] %in% i,]
-                    if (is.vector(tmpMap)) {
-                        grp <- c(grp, tmpMap[1])
-                    } else {
-                        tmpMap <- tmpMap[order(tmpMap[,1]),]
-                        grp <- c(grp, paste(tmpMap[,1], collapse="\n"))
-                    }
-                } else {
-                    grp <- c(grp, NA)
-                }
-            }
-            V(coGraph)$grp <- grp
-        }
-           
 
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
@@ -351,21 +279,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 name = "Correlation")+
             theme_graph()
 
-        if (!is.na(genePathPlot)) {
-            netPlot <- netPlot + geom_mark_hull(
-                aes(netPlot$data$x,
-                    netPlot$data$y,
-                    group = grp,
-                    label=grp, fill=grp,
-                    filter = !is.na(grp)),
-                concavity = 4,
-                expand = unit(2, "mm"),
-                alpha = 0.25,
-                na.rm = TRUE,
-                # label.fill="transparent",
-                show.legend = FALSE
-            )
-        }
         returnList[["net"]] <- netPlot
     } else {
         ## WC
@@ -404,10 +317,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
         returnList[["df"]] <- returnDf
         returnList[["wc"]] <- wc
-    }
-
-    if (!is.null(enrich)){
-        returnList[["enrich"]] <- pathRes
     }
 
     return(returnList)
