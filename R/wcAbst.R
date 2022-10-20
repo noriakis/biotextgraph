@@ -55,21 +55,43 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        	fetched <- list() # store results
 	        	if (length(queries)>10){
 	        		stop("please limit the gene number to 10")}
-				query <- paste(queries, collapse=" ")
+				# query <- paste(queries, collapse=" ")
+	        	query <- paste(queries, collapse=" OR ")
 				# qqcat("querying pubmed for @{query}\n")
-				allDataDf <- c()
-				for (q in queries) {
-					qqcat("querying pubmed for @{q}\n")
-					pubmedIds <- get_pubmed_ids(q, api_key=apiKey)
-					pubmedData <- fetch_pubmed_data(pubmedIds)
-					allXml <- articles_to_list(pubmedData)
+				# allDataDf <- c()
 
-					qqcat("converting to a data frame ...\n")
-					dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
-					                        max_chars = -1, getAuthors = FALSE))
-					dataDf$query <- q
-					allDataDf <- rbind(allDataDf, dataDf)
+				## Query all by OR and later grepl on title and abstract
+				qqcat("querying pubmed for @{query}\n")
+				pubmedIds <- get_pubmed_ids(query, api_key=apiKey)
+				pubmedData <- fetch_pubmed_data(pubmedIds)
+				allXml <- articles_to_list(pubmedData)
+				qqcat("converting to a data frame ...\n")
+				allDataDf <- do.call(rbind, lapply(allXml, article_to_df, 
+				                        max_chars = -1, getAuthors = FALSE))
+				incs <- c()
+				for (i in queries){
+				    li <- tolower(i)
+				    inc <- grepl(li, tolower(allDataDf$abstract), fixed=TRUE)
+				    inc[inc] <- i
+				    inct <- grepl(li, tolower(allDataDf$title), fixed=TRUE)
+				    inct[inct] <- i
+				    incs <- cbind(incs, inc, inct)
 				}
+				allDataDf$query <- apply(incs, 1,
+					function(x) paste(unique(x[x!="FALSE"]), collapse=","))
+
+				# for (q in queries) {
+				# 	qqcat("querying pubmed for @{q}\n")
+				# 	pubmedIds <- get_pubmed_ids(q, api_key=apiKey)
+				# 	pubmedData <- fetch_pubmed_data(pubmedIds)
+				# 	allXml <- articles_to_list(pubmedData)
+
+				# 	qqcat("converting to a data frame ...\n")
+				# 	dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
+				# 	                        max_chars = -1, getAuthors = FALSE))
+				# 	dataDf$query <- q
+				# 	allDataDf <- rbind(allDataDf, dataDf)
+				# }
 				fetched[["rawdf"]] <- allDataDf
 			} else {
 				qqcat("Resuming from the previous results ...\n")
@@ -77,7 +99,10 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				allDataDf <- fetched[["rawdf"]]
 			}
 			if (geneUpper){
-				madeUpper <- c(madeUpper, tolower(unique(allDataDf$query)))
+				aq <- allDataDf$query
+				aq <- aq[aq!=""]
+				madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
+				# print(madeUpper)
 			}
 			if (target=="abstract"){
 				docs <- VCorpus(VectorSource(allDataDf$abstract))
@@ -167,7 +192,15 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		            for (rn in nodeName){
 		                tmp <- freqWordsDTM[ ,rn]
 		                for (nm in names(tmp[tmp!=0])){
-		                    genemap <- rbind(genemap, c(rn, nm))
+		                	if (nm!=""){
+		                		if (grepl(",",nm,fixed=TRUE)){
+		                			for (nm2 in unlist(strsplit(nm, ","))){
+		                				genemap <- rbind(genemap, c(rn, paste(nm2, "(Q)")))
+		                			}
+		                		} else {
+				                    genemap <- rbind(genemap, c(rn, paste(nm, "(Q)")))
+				                }
+		                	}
 		                }
 		            }
 		            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
