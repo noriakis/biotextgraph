@@ -129,9 +129,14 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        row.names(freqWordsDTM) <- allDataDf$query
 
                 if (tag) {
-		            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-		            pvcl <- pvpick(pvc)
-		            fetched[["pvcl"]] <- pvcl
+                	if (is.list(redo) & "pvcl" %in% names(fetched)){
+                		qqcat("Using previous pvclust results ...")
+                		pvcl <- fetched[["pvcl"]]
+                	} else {
+			            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+			            pvcl <- pvpick(pvc)
+			            fetched[["pvcl"]] <- pvcl
+			        }
 		        }
 
 		        ## Check correlation
