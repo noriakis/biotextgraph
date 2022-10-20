@@ -25,6 +25,7 @@
 #' @param usefil filter based on "gstfidf" or "bsdbtfidf"
 #' @param filnum specify filter tfidf
 #' @param geneUpper make queries uppercase
+#' @param apiKey api key for eutilities
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -34,6 +35,7 @@
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
+#' @import stringr
 #' @import ggraph ggplot2
 #' @importFrom GetoptLong qqcat
 #' @importFrom dplyr filter
@@ -42,7 +44,7 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   target="abstract", usefil=NA, filnum=0,
-				   geneUpper=FALSE,
+				   geneUpper=FALSE, apiKey=NULL,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.6, layout="nicely", tag=FALSE,
@@ -54,11 +56,11 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        	if (length(queries)>10){
 	        		stop("please limit the gene number to 10")}
 				query <- paste(queries, collapse=" ")
-				qqcat("querying pubmed for @{query}\n")
+				# qqcat("querying pubmed for @{query}\n")
 				allDataDf <- c()
 				for (q in queries) {
 					qqcat("querying pubmed for @{q}\n")
-					pubmedIds <- get_pubmed_ids(q)
+					pubmedIds <- get_pubmed_ids(q, api_key=apiKey)
 					pubmedData <- fetch_pubmed_data(pubmedIds)
 					allXml <- articles_to_list(pubmedData)
 
@@ -258,14 +260,38 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		    } else {
 		    	matSorted <- matSorted[1:numWords]
 		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+		        if (tag) {
+
+		            freqWords <- names(matSorted)
+		            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+		            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+		            pvcl <- pvpick(pvc)
+		            fetched[["pvcl"]] <- pvcl
+
+		            wcCol <- returnDf$word
+		            for (i in seq_along(pvcl$clusters)){
+		                for (j in pvcl$clusters[[i]])
+		                    wcCol[wcCol==j] <- pal[i]
+		            }
+		            wcCol[!wcCol %in% pal] <- "grey"
+
+		        }
 		        for (i in madeUpper) {
 		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
 		            returnDf[returnDf$word == i,"word"] <- toupper(i)
 		        }
-		        wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word,
-		        	freq = returnDf$freq, ...)))
-		        fetched[["df"]] <- returnDf
-		        fetched[["wc"]] <- wc
+		        if (tag){
+		            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+		                                               freq = returnDf$freq,
+		                                               colors = wcCol,
+		                                               random.order=FALSE,
+		                                               ordered.colors = TRUE)))
+		        } else {
+		            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+		                                               freq = returnDf$freq, ...)))
+		        }
+                fetched[["df"]] <- returnDf
+        		fetched[["wc"]] <- wc
 		    }
     return(fetched)
 }

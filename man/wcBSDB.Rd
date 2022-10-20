@@ -2,14 +2,17 @@
 % Please edit documentation in R/wcBSDB.R
 \name{wcBSDB}
 \alias{wcBSDB}
-\title{wcGeneSummary}
+\title{wcBSDB}
 \usage{
 wcBSDB(
   mbList,
   excludeFreq = 1000,
   excludeTfIdf = NA,
-  additionalRemove = NA,
+  additionalRemove = c("microbiota", "microbiome"),
+  target = "title",
+  apiKey = NULL,
   madeUpper = c("dna", "rna"),
+  redo = NA,
   pal = c("blue", "red"),
   numWords = 15,
   scaleRange = c(5, 10),
@@ -18,7 +21,7 @@ wcBSDB(
   mbPlot = FALSE,
   ngram = NA,
   plotType = "wc",
-  disPlot = NA,
+  disPlot = FALSE,
   colorText = FALSE,
   corThresh = 0.6,
   tag = FALSE,
@@ -38,7 +41,13 @@ default to 0}
 
 \item{additionalRemove}{specific words to be excluded}
 
+\item{target}{"title" or "abstract"}
+
+\item{apiKey}{api key for eutilities}
+
 \item{madeUpper}{make the words uppercase in resulting plot}
+
+\item{redo}{if "abstract" is chosen in target, one can provide resulting object again}
 
 \item{pal}{palette for color gradient in correlation network and tag coloring}
 
@@ -76,7 +85,7 @@ default to 0}
 list of data frame and ggplot2 object
 }
 \description{
-Plot wordcloud of RefSeq description obtained by GeneSummary
+Plot wordcloud of BugSigDB
 }
 \examples{
 mbList <- c("Veillonella dispar")

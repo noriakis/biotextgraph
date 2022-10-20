@@ -1,6 +1,6 @@
-#' wcGeneSummary
+#' wcBSDB
 #' 
-#' Plot wordcloud of RefSeq description obtained by GeneSummary
+#' Plot wordcloud of BugSigDB
 #' 
 #' @param mbList microbe list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
@@ -23,6 +23,9 @@
 #' @param ngram default to NA (1)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
+#' @param target "title" or "abstract"
+#' @param apiKey api key for eutilities
+#' @param redo if "abstract" is chosen in target, one can provide resulting object again
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -32,6 +35,7 @@
 #' @import ggraph ggplot2
 #' @import pvclust
 #' @import ggforce
+#' @import XML
 #' @importFrom dplyr filter
 #' @importFrom stats dist
 #' @importFrom grDevices palette
@@ -48,20 +52,95 @@
 #' 
 wcBSDB <- function (mbList,
                     excludeFreq=1000, excludeTfIdf=NA,
-                    additionalRemove=NA,
-                    madeUpper=c("dna","rna"),
+                    additionalRemove=c("microbiota","microbiome"),
+                    target="title", apiKey=NULL,
+                    madeUpper=c("dna","rna"), redo=NA,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE,
                     colorText=FALSE, corThresh=0.6, tag=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
-
-    qqcat("Input microbes: @{length(mbList)}\n")
     returnList <- list()
+    if (!is.list(redo)) {
+        qqcat("Input microbes: @{length(mbList)}\n")
 
-    ## Load from GeneSummary
-    tb <- importBugSigDB()
+        ## Load from GeneSummary
+        tb <- importBugSigDB()
+
+        # filterWords <- c(filterWords, "pmids", "geneid") 
+        ## Excluded by default
+
+        # if (ora){
+        #     qqcat("performing ORA\n")
+        #     sig <- textORA(mbList)
+        #     sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
+        #     qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
+        #     filterWords <- c(filterWords, sigFilter)
+        #     returnList[["ora"]] <- sig
+        # }
+        
+        subTb <- c()        
+        for (m in mbList) {
+            tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,
+                     fixed = TRUE),]
+            tmp$query <- m
+            subTb <- rbind(subTb, tmp)
+        }
+        # returnList[["subsetBSDB"]] <- subTb
+
+        titles <- unique(subTb$Title)
+        titles <- titles[!is.na(titles)]
+        fil <- c()
+        for (title in titles){
+            tmp <- subset(subTb, Title==title)
+            if (dim(tmp)[1]>1){
+                tmp$title2 <- paste0(tmp$Title,"_",tmp$query)
+                tmp2 <- tmp[!duplicated(tmp$title2),]
+                fil <- rbind(fil, c(paste(tmp2$query, collapse=","),
+                    unique(tmp2$Title), unique(tmp2$PMID)))
+            } else {
+                fil <- rbind(fil, c(tmp$query, tmp$Title, tmp$PMID))
+            }
+        }
+        fil <- data.frame(fil)
+        colnames(fil) <- c("query","Title","PMID")
+
+        # returnList[["filterWords"]] <- filterWords
+        returnList[["subTb"]] <- subTb
+    } else {
+        qqcat("Redoing abstract query for microbes ...\n")
+        target <- "abstract"
+    }
+
+    if (target=="abstract"){
+        if (!is.list(redo)) {
+            pmids <- fil$PMID
+            # pmids <- pmids[!is.na(pmids)]
+            qqcat("querying PubMed for @{length(pmids)} pmids ...\n")
+            queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=XML&id=",
+                                   paste(pmids, collapse=","))
+            if (!is.null(apiKey)){
+                queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
+            }
+            onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
+            xmlString <- readLines(onequery, encoding="UTF8")
+            parsedXML <- xmlTreeParse(xmlString)
+            abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+                                            "Abstract",
+                                            recursive = TRUE)
+            fil$absttext <- as.character(xmlValue(abstset))
+        } else {
+            fil <- redo[["subsetBSDB"]]
+            filterWords <- redo[["filterWords"]]
+            subTb <- redo[["subTb"]]
+        }
+        docs <- VCorpus(VectorSource(fil$absttext))
+    } else {
+        docs <- VCorpus(VectorSource(fil$Title))
+    }
+    ## Make corpus
+    returnList[["subsetBSDB"]] <- fil
 
     ## Filter high frequency words
     filterWords <- allFreqBSDB[
@@ -71,32 +150,7 @@ wcBSDB <- function (mbList,
             allTfIdfBSDB[
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
-    qqcat("filtered @{length(filterWords)} words (frequency) ...\n")
-    # filterWords <- c(filterWords, "pmids", "geneid") 
-    ## Excluded by default
-
-    # if (ora){
-    #     qqcat("performing ORA\n")
-    #     sig <- textORA(mbList)
-    #     sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-    #     qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
-    #     filterWords <- c(filterWords, sigFilter)
-    #     returnList[["ora"]] <- sig
-    # }
-    
-    subTb <- c()        
-    for (m in mbList) {
-        tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,
-                 fixed = TRUE),]
-        tmp$query <- m
-        subTb <- rbind(subTb, tmp)
-    }
-    returnList[["subsetBSDB"]] <- subTb
-    fil <- subTb[!duplicated(subTb$Title),]
-
-
-    ## Make corpus
-    docs <- VCorpus(VectorSource(fil$Title))
+    qqcat("filtering @{length(filterWords)} words (frequency | tfidf) ...\n")
     docs <- makeCorpus(docs, filterWords, additionalRemove)
 
     ## Set parameters for correlation network
@@ -134,12 +188,12 @@ wcBSDB <- function (mbList,
         }
 
         ## genePlot: plot associated genes
-        if (!is.na(disPlot)) {mbPlot <- TRUE}
+        if (disPlot) {mbPlot <- TRUE}
         if (mbPlot) {
             row.names(freqWordsDTM) <- fil$query
         }
         
-        if (disPlot) {
+        if (disPlot) {## This does not need to be deduplicated
             dis <- c()
             for (i in seq_len(nrow(subTb))){
                 dis <- rbind(dis,
@@ -178,9 +232,16 @@ wcBSDB <- function (mbList,
             for (rn in nodeName){
                 tmp <- freqWordsDTM[ ,rn]
                 for (nm in names(tmp[tmp!=0])){
-                    mbmap <- rbind(mbmap, c(rn, nm))
+                    if (grepl(",", nm, fixed = TRUE)) {
+                        for (microbe in unlist(strsplit(nm, ","))){
+                            mbmap <- rbind(mbmap, c(rn, microbe))
+                        }
+                    } else {
+                        mbmap <- rbind(mbmap, c(rn, nm))
+                    }
                 }
             }
+
             mbmap <- simplify(graph_from_edgelist(mbmap, directed = FALSE))
             coGraph <- igraph::union(coGraph, mbmap)
             

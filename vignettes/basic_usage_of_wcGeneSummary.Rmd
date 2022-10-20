@@ -11,7 +11,11 @@ vignette: >
     %\VignetteEncoding{UTF-8}  
 ---
 
+This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and compare the clusters based on those information.
+
 # Basic usage
+
+Load the package and the database for converting identifiers.
 
 ```{r load, warning=FALSE, message=FALSE}
 library(wcGeneSummary)
@@ -22,7 +26,7 @@ library(ggplot2)
 ## Producing word clouds
 
 The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
-As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 5000.
+As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
 
 ```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=TRUE}
 ## Configure input genes
@@ -38,7 +42,8 @@ The function accepts the other parameters which is passed to `wordcloud()`.
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
 gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
-                     numWords=100, excludeFreq=2000,
+                     numWords=100,
+                     excludeTfIdf = 150,
                      colors=palette(),
                      rot.per=0.4)
 gwc$wc
@@ -88,7 +93,7 @@ net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.
 net$net
 ```
 
-The clustering results based on `pvclust` can be shown also on the correlation network.
+The clustering results based on `pvclust` can be shown also on the correlation network, by the node color.
 
 ```{r tagnet, fig.cap="A correlation network of genes with cluster information", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.2,
@@ -100,7 +105,6 @@ net$pvcl
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`.
 The edges connecting word to corresponding gene are shown.
 
-
 ```{r gplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
                      numWords=20)
@@ -109,6 +113,7 @@ net$net
 
 The associated enriched pathways (if present) can be shown by specifying `genePathPlot`, using `ggforce`.
 In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot.
+Enrichment analysis here is performed by the library `clusterProfiler` or `ReactomePA`, and one can control which pathways to plot by `geePathPlotSig` value.
 
 ```{r gpplot, fig.cap="A correlation network of gene summaries with associated genes", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="kegg", corThresh=0.5,
@@ -116,12 +121,40 @@ net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="kegg", corThre
 net$net
 ```
 
-## Text over represenatation analysis (experimental)
+### Comparing two networks
 
-```{r ora}
+```{r compare}
+cxcls <- c()
+for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
+    cxcls <- c(cxcls, paste0("CXCL",i))
+}
+
+net1 <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.5, numWords=20)
+net2 <- wcGeneSummary(cxcls, plotType="network", corThresh=0.5, numWords=20)
+
+## Not having meaningful overlaps
+compareWordNet(net1, net2, titles=c("ercc","cxcl"))
+```
+
+If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
+
+```{r tagcomp, cache=T}
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
+
+
+net1 <- wcGeneSummary(keggList$`05210`, keyType="ENTREZID", plotType="network", corThresh=0.3, numWords=30, tag=TRUE, excludeTfIdf=150)
+net2 <- wcGeneSummary(keggList$`05211`,
+                      keyType="ENTREZID", plotType="network", corThresh=0.3, numWords=30, tag=TRUE, excludeTfIdf=150)
+
+compareWordNet(net1, net2, tag=TRUE)
+```
+
+
+## Text over represenatation analysis (experimental)
+
+```{r ora}
 
 geneList <- keggList$`00785` # Lipoic acid metabolism
 pvs <- textORA(geneList)
@@ -143,7 +176,20 @@ net$net
 
 ## Visualization of PubMed information.
 
-Using `easyPubMed`, one can perform the same analysis on PubMed text.
+Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function recursively queries for the input gene symbols (or microbes), concatenates the results and visualize.
+
+```{r wcabst_wc, cache=T}
+ab <- wcAbst(inpSymbol[1:3])
+ab$wc
+```
+
+As fetching the same information is time consuming, The same object can be passed to `redo` option and reperform the analysis like tagging.
+
+```{r wcabst_wc_2, cache=F}
+abtag <- wcAbst(redo=ab, tag=TRUE)
+abtag$wc
+```
+
 
 # Custom usage
 
