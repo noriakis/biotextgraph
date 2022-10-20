@@ -21,6 +21,7 @@ Load the package and the database for converting identifiers.
 library(wcGeneSummary)
 library(org.Hs.eg.db)
 library(ggplot2)
+library(ggraph)
 ```
 
 ## Producing word clouds
@@ -80,7 +81,6 @@ gwcl$pvcl
 ## Producing correlation networks
 
 ```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
-library(ggraph)
 net <- wcGeneSummary(inpSymbol, plotType="network")
 net$net
 ```
@@ -121,9 +121,31 @@ net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="kegg", corThre
 net$net
 ```
 
+
+## Visualization of PubMed information.
+
+Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize.
+
+```{r wcabst_wc, cache=T}
+ab <- wcAbst(inpSymbol[1:3])
+ab$wc
+```
+
+As fetching the same information is time consuming, The same object can be passed to `redo` option and reperform the analysis like tagging.
+
+```{r wcabst_wc_2, cache=T}
+abtag <- wcAbst(redo=ab, tag=TRUE)
+abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE, plotType="network", corThresh=0.2)
+abtag$wc
+abtag2$net
+```
+
+
 ### Comparing two networks
 
-```{r compare}
+One can compare two networks by providing two objects produced by wc* functions.
+
+```{r compare, cache=T}
 cxcls <- c()
 for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
     cxcls <- c(cxcls, paste0("CXCL",i))
@@ -131,9 +153,12 @@ for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
 
 net1 <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.5, numWords=20)
 net2 <- wcGeneSummary(cxcls, plotType="network", corThresh=0.5, numWords=20)
+net3 <- wcAbst(redo=ab, plotType="network", corThresh=0.2, numWords=20)
 
 ## Not having meaningful overlaps
 compareWordNet(net1, net2, titles=c("ercc","cxcl"))
+compareWordNet(net1, net3, titles=c("ercc","ercc-PubMed"))
+
 ```
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
@@ -174,21 +199,6 @@ net <- wcGeneSummary(inpSymbol, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
 
-## Visualization of PubMed information.
-
-Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function recursively queries for the input gene symbols (or microbes), concatenates the results and visualize.
-
-```{r wcabst_wc, cache=T}
-ab <- wcAbst(inpSymbol[1:3])
-ab$wc
-```
-
-As fetching the same information is time consuming, The same object can be passed to `redo` option and reperform the analysis like tagging.
-
-```{r wcabst_wc_2, cache=F}
-abtag <- wcAbst(redo=ab, tag=TRUE)
-abtag$wc
-```
 
 
 # Custom usage
