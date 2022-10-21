@@ -26,7 +26,7 @@ library(ggraph)
 
 ## Producing word clouds
 
-The basic usage of the package is producing a word cloud of gene summaries by querying Entrez gene IDs.
+The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol.
 As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
 
 ```{r basic, fig.cap="A wordcloud of gene summaries.", warning=FALSE, message=FALSE, cache=TRUE}
@@ -38,7 +38,6 @@ gwc$wc
 ```
 
 It accepts values of the `wordcloud()` function. `numWords` specifies how many words are to be shown on word cloud.
-The function accepts the other parameters which is passed to `wordcloud()`.
 
 ```{r basic2, fig.cap="A wordcloud of gene summaries, customized visualization", warning=FALSE, message=FALSE, cache=T}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
@@ -50,7 +49,7 @@ gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
 gwc$wc
 ```
 
-And it also returns a data frame consisting of frequency of each term.
+It also returns a data frame consisting of frequency of each term.
 
 ```{r table}
 knitr::kable(
@@ -60,6 +59,7 @@ knitr::kable(
 ```
 
 N-gram is supported by library `tm`, specified by `ngram`.
+Default is `1`, and the example specifying `2` is shown below.
 
 ```{r ngramwc, warning=FALSE}
 gwc2 <- wcGeneSummary(inpSymbol, random.order=FALSE,
@@ -68,6 +68,7 @@ gwc2 <- wcGeneSummary(inpSymbol, random.order=FALSE,
 gwc2$wc
 ```
 
+One of the main questions is which words can be clustered together among the words contained in the cluster, 
 Word clustering (pvclust) based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
 
 ```{r tagging, warning=FALSE}
@@ -78,7 +79,11 @@ gwcl$wc
 gwcl$pvcl
 ```
 
+In this example showing ERCC genes, the term `DNA repair` is clustered as expected.
+
 ## Producing correlation networks
+
+The next main function is producing correlation networks between words based on the co-occurrence of the words in the text.
 
 ```{r basic3, fig.cap="A correlation network of gene summaries", warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network")
