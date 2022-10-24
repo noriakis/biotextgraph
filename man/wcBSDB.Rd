@@ -8,9 +8,10 @@ wcBSDB(
   mbList,
   excludeFreq = 1000,
   excludeTfIdf = NA,
-  additionalRemove = c("microbiota", "microbiome"),
+  additionalRemove = NA,
   target = "title",
   apiKey = NULL,
+  pre = FALSE,
   madeUpper = c("dna", "rna"),
   redo = NA,
   pal = c("blue", "red"),
@@ -44,6 +45,8 @@ default to 0}
 \item{target}{"title" or "abstract"}
 
 \item{apiKey}{api key for eutilities}
+
+\item{pre}{predefined filter words}
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 

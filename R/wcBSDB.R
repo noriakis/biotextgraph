@@ -26,6 +26,7 @@
 #' @param target "title" or "abstract"
 #' @param apiKey api key for eutilities
 #' @param redo if "abstract" is chosen in target, one can provide resulting object again
+#' @param pre predefined filter words
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -52,8 +53,9 @@
 #' 
 wcBSDB <- function (mbList,
                     excludeFreq=1000, excludeTfIdf=NA,
-                    additionalRemove=c("microbiota","microbiome"),
+                    additionalRemove=NA,
                     target="title", apiKey=NULL,
+                    pre=FALSE,
                     madeUpper=c("dna","rna"), redo=NA,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
@@ -62,6 +64,9 @@ wcBSDB <- function (mbList,
                     colorText=FALSE, corThresh=0.6, tag=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
+    if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
+        "including","samples","sample","otu","otus","investigated","taxa","taxon")}
+    if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
     if (!is.list(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
 
@@ -105,7 +110,7 @@ wcBSDB <- function (mbList,
         }
         fil <- data.frame(fil)
         colnames(fil) <- c("query","Title","PMID")
-
+        fil <- fil[!is.na(fil$PMID),] # Some PMIDs have NA
         # returnList[["filterWords"]] <- filterWords
         returnList[["subTb"]] <- subTb
     } else {
@@ -129,19 +134,18 @@ wcBSDB <- function (mbList,
             abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
                                             "Abstract",
                                             recursive = TRUE)
-            fil$absttext <- as.character(xmlValue(abstset))
+            absttext <- as.character(xmlValue(abstset))
+            returnList[["absttext"]] <- absttext
         } else {
-            fil <- redo[["subsetBSDB"]]
+            absttext <- redo[["absttext"]]
             filterWords <- redo[["filterWords"]]
             subTb <- redo[["subTb"]]
         }
-        docs <- VCorpus(VectorSource(fil$absttext))
+        docs <- VCorpus(VectorSource(absttext))
     } else {
         docs <- VCorpus(VectorSource(fil$Title))
     }
     ## Make corpus
-    returnList[["subsetBSDB"]] <- fil
-
     ## Filter high frequency words
     filterWords <- allFreqBSDB[
         allFreqBSDB$freq > excludeFreq,]$word
