@@ -27,6 +27,7 @@
 #' @param apiKey api key for eutilities
 #' @param redo if "abstract" is chosen in target, one can provide resulting object again
 #' @param pre predefined filter words
+#' @param tfidf use TfIdf when making TDM
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -53,7 +54,7 @@
 #' 
 wcBSDB <- function (mbList,
                     excludeFreq=1000, excludeTfIdf=NA,
-                    additionalRemove=NA,
+                    additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL,
                     pre=FALSE,
                     madeUpper=c("dna","rna"), redo=NA,
@@ -165,10 +166,21 @@ wcBSDB <- function (mbList,
             unlist(lapply(ngrams(words(x), ngram),
                 paste, collapse = " "),
                 use.names = FALSE)
-        docs <- TermDocumentMatrix(docs,
-            control = list(tokenize = NgramTokenizer))
+        if (tfidf) {
+            docs <- TermDocumentMatrix(docs,
+                control = list(tokenize = NgramTokenizer,
+                    weighting = weightTfIdf))
+        } else {
+            docs <- TermDocumentMatrix(docs,
+                control = list(tokenize = NgramTokenizer))
+        }
     } else {
-        docs <- TermDocumentMatrix(docs)
+        if (tfidf) {
+            docs <- TermDocumentMatrix(docs,
+                control = list(weighting = weightTfIdf))
+        } else {
+            docs <- TermDocumentMatrix(docs)
+        }
     }
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)

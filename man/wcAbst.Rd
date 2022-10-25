@@ -13,6 +13,7 @@ wcAbst(
   filnum = 0,
   geneUpper = FALSE,
   apiKey = NULL,
+  tfidf = FALSE,
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
@@ -47,6 +48,8 @@ wcAbst(
 \item{geneUpper}{make queries uppercase}
 
 \item{apiKey}{api key for eutilities}
+
+\item{tfidf}{use TfIdf when making TDM}
 
 \item{pal}{palette for color gradient in correlation network}
 

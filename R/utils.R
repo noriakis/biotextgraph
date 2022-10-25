@@ -1,3 +1,46 @@
+#' findTerm
+#' 
+#' find queried terms in list of gene clusters and return frequency
+#' 
+#' @param query query words
+#' @param listOfGenes named list of genes
+#' @param split split the query by space, default to FALSE
+#' @param ngram use ngram or not
+#' @param tfidf use tfidf when creating TDM or not
+#' @param keyType key type of listOfGenes
+#' @return named list of frequency
+#' @export
+#' @examples
+#' query <- "DNA repair"
+#' lg <- list()
+#' lg[["sample"]] <- c("ERCC1","ERCC2")
+#' findTerm(query, lg)
+#' 
+findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
+                      tfidf=TRUE, keyType="SYMBOL") {
+    qqcat("Finding query in @{length(listOfGenes)} clusters ...")
+    if (split) {
+        querySplit <- tolower(unlist(strsplit(query, " ")))
+    } else {
+        querySplit <- tolower(query)
+    }
+    frq <- list()
+    for (clus in names(listOfGenes)) {
+        tmptdm <- wcGeneSummary(listOfGenes[[clus]],
+                                keyType = keyType, ngram=ngram,
+                                tfidf=tfidf, onlyTDM=TRUE)
+        querytdm <- t(as.matrix(tmptdm[Terms(tmptdm) %in% querySplit, ]))
+        tmp <- rep(0, length(querySplit))
+        names(tmp) <- querySplit
+        tmpfrq <- apply(querytdm, 2, sum) / dim(querytdm)[1]
+        for (i in names(tmpfrq)){
+            tmp[names(tmp)==i] <- tmpfrq[i]
+        }
+        frq[[clus]] <- tmp
+    }
+    frq
+}
+
 #' returnSim
 #' 
 #' return similarity matrix of cluster

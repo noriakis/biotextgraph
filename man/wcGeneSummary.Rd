@@ -9,7 +9,9 @@ wcGeneSummary(
   keyType = "SYMBOL",
   excludeFreq = 2000,
   excludeTfIdf = NA,
+  tfidf = FALSE,
   additionalRemove = NA,
+  onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
   organism = 9606,
   pal = c("blue", "red"),
@@ -20,6 +22,7 @@ wcGeneSummary(
   edgeLabel = FALSE,
   ngram = NA,
   plotType = "wc",
+  onlyTDM = FALSE,
   colorText = FALSE,
   corThresh = 0.6,
   genePlot = FALSE,
@@ -45,7 +48,11 @@ default to 5000}
 
 \item{excludeTfIdf}{exclude based on tfidf (default: NA)}
 
+\item{tfidf}{use TfIdf when making TDM}
+
 \item{additionalRemove}{specific words to be excluded}
+
+\item{onlyCorpus}{return only corpus}
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 
@@ -66,6 +73,8 @@ default to 5000}
 \item{ngram}{default to NA (1)}
 
 \item{plotType}{"wc" or "network"}
+
+\item{onlyTDM}{return only TDF}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

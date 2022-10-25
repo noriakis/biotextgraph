@@ -9,6 +9,7 @@ wcBSDB(
   excludeFreq = 1000,
   excludeTfIdf = NA,
   additionalRemove = NA,
+  tfidf = FALSE,
   target = "title",
   apiKey = NULL,
   pre = FALSE,
@@ -41,6 +42,8 @@ default to 0}
 \item{excludeTfIdf}{exclude based on tfidf (default: NA)}
 
 \item{additionalRemove}{specific words to be excluded}
+
+\item{tfidf}{use TfIdf when making TDM}
 
 \item{target}{"title" or "abstract"}
 

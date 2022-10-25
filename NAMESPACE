@@ -3,6 +3,7 @@
 export(compareWordNet)
 export(exportCyjs)
 export(exportVisjs)
+export(findTerm)
 export(getWordsOnDendro)
 export(makeBar)
 export(plotEigengeneNetworksWithWords)
