@@ -31,6 +31,9 @@
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
+#' @param onlyTDM return only TDF
+#' @param onlyCorpus return only corpus
+#' @param tfidf use TfIdf when making TDM
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -59,12 +62,13 @@
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NA,
-                            additionalRemove=NA,
+                            tfidf=FALSE,
+                            additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
-                            ngram=NA, plotType="wc",
+                            ngram=NA, plotType="wc", onlyTDM=FALSE,
                             colorText=FALSE, corThresh=0.6, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
@@ -132,6 +136,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         docs <- makeCorpus(docs, filterWords, additionalRemove)
     }
 
+    if (onlyCorpus){
+        return(docs)
+    }
+
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
@@ -140,10 +148,21 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             unlist(lapply(ngrams(words(x), ngram),
                 paste, collapse = " "),
                 use.names = FALSE)
-        docs <- TermDocumentMatrix(docs,
-            control = list(tokenize = NgramTokenizer))
+        if (tfidf) {
+            docs <- TermDocumentMatrix(docs,
+                control = list(tokenize = NgramTokenizer,
+                    weighting = weightTfIdf))
+        } else {
+            docs <- TermDocumentMatrix(docs,
+                control = list(tokenize = NgramTokenizer))
+        }
     } else {
-        docs <- TermDocumentMatrix(docs)
+        if (tfidf) {
+            docs <- TermDocumentMatrix(docs,
+                control = list(weighting = weightTfIdf))
+        } else {
+            docs <- TermDocumentMatrix(docs)
+        }
     }
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
@@ -154,6 +173,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
     returnList[["rawfrequency"]] <- matSorted
     returnList[["TDM"]] <- docs
+
+    if (onlyTDM) {
+        return(docs)
+    }
 
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
