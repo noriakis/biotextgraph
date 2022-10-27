@@ -62,7 +62,7 @@
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NA,
-                            tfidf=FALSE,
+                            tfidf=TRUE,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
