@@ -9,7 +9,7 @@ wcGeneSummary(
   keyType = "SYMBOL",
   excludeFreq = 2000,
   excludeTfIdf = NA,
-  tfidf = FALSE,
+  tfidf = TRUE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
