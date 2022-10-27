@@ -8,6 +8,7 @@
 #' @param ngram use ngram or not
 #' @param tfidf use tfidf when creating TDM or not
 #' @param keyType key type of listOfGenes
+#' @param calc "sum" or "mean"
 #' @return named list of frequency
 #' @export
 #' @examples
@@ -17,7 +18,7 @@
 #' findTerm(query, lg)
 #' 
 findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
-                      tfidf=TRUE, keyType="SYMBOL") {
+                      tfidf=TRUE, calc="sum", keyType="SYMBOL") {
     qqcat("Finding query in @{length(listOfGenes)} clusters ...")
     if (split) {
         querySplit <- tolower(unlist(strsplit(query, " ")))
@@ -32,7 +33,11 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
         querytdm <- t(as.matrix(tmptdm[Terms(tmptdm) %in% querySplit, ]))
         tmp <- rep(0, length(querySplit))
         names(tmp) <- querySplit
-        tmpfrq <- apply(querytdm, 2, sum) / dim(querytdm)[1]
+        if (calc=="sum"){
+            tmpfrq <- apply(querytdm, 2, sum)# / dim(querytdm)[1]
+        } else {
+            tmpfrq <- apply(querytdm, 2, mean)# / dim(querytdm)[1]
+        }
         for (i in names(tmpfrq)){
             tmp[names(tmp)==i] <- tmpfrq[i]
         }

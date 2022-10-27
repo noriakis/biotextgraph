@@ -10,6 +10,7 @@ findTerm(
   split = FALSE,
   ngram = NA,
   tfidf = TRUE,
+  calc = "sum",
   keyType = "SYMBOL"
 )
 }
@@ -23,6 +24,8 @@ findTerm(
 \item{ngram}{use ngram or not}
 
 \item{tfidf}{use tfidf when creating TDM or not}
+
+\item{calc}{"sum" or "mean"}
 
 \item{keyType}{key type of listOfGenes}
 }
