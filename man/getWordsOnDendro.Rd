@@ -13,7 +13,7 @@ getWordsOnDendro(
   numberOfWords = 25,
   excludeFreq = 5000,
   orgDb = org.Hs.eg.db,
-  tfidf = TRUE,
+  tfidf = FALSE,
   madeUpper = c("rna", "dna")
 )
 }
