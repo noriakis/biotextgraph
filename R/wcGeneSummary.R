@@ -85,6 +85,20 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
     returnList <- list()
 
+    ## Filter high frequency words if needed
+    filterWords <- allFreqGeneSummary[
+                            allFreqGeneSummary$freq > excludeFreq,]$word
+    if (!is.na(excludeTfIdf)){
+        filterWords <- c(filterWords,
+            allTfIdfGeneSummary[
+                            allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
+    }
+    filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
+
+    qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
+
+
+
     ## If specified pathway option
     if (!is.null(enrich)) {
         message("performing enrichment analysis ...")
@@ -98,25 +112,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
         ## Make corpus
         docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-        docs <- makeCorpus(docs, additionalRemove, additionalRemove)
+        docs <- makeCorpus(docs, filterWords, additionalRemove)
     } else {
         ## Load from GeneSummary
         tb <- loadGeneSummary(organism = organism)
 
         ## Already performed, and automatically loaded
         # load("allFreqGeneSummary.rda") 
-
-        ## Filter high frequency words
-        filterWords <- allFreqGeneSummary[
-                                allFreqGeneSummary$freq > excludeFreq,]$word
-        if (!is.na(excludeTfIdf)){
-            filterWords <- c(filterWords,
-                allTfIdfGeneSummary[
-                                allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
-        }
-        qqcat("filtered @{length(filterWords)} words (frequency) ...\n")
-        filterWords <- c(filterWords, "pmids", "geneid") 
-        ## Excluded by default
 
         if (ora){
             qqcat("performing ORA\n")

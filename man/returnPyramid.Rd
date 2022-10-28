@@ -15,6 +15,7 @@ returnPyramid(
   additionalRemove = NA,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
+  tfidf = TRUE,
   highCol = "red",
   madeUpper = c("rna", "dna")
 )
@@ -39,6 +40,8 @@ returnPyramid(
 \item{widths}{parameters to pass to patchwork}
 
 \item{lowCol}{gradient low color}
+
+\item{tfidf}{use tfidf}
 
 \item{highCol}{gradient high color}
 

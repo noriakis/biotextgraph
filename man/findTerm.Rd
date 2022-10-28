@@ -11,7 +11,8 @@ findTerm(
   ngram = NA,
   tfidf = TRUE,
   calc = "sum",
-  keyType = "SYMBOL"
+  keyType = "SYMBOL",
+  ...
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ findTerm(
 \item{calc}{"sum" or "mean"}
 
 \item{keyType}{key type of listOfGenes}
+
+\item{...}{passed to wcGeneSummary}
 }
 \value{
 named list of frequency
