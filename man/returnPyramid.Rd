@@ -15,7 +15,7 @@ returnPyramid(
   additionalRemove = NA,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
-  tfidf = TRUE,
+  tfidf = FALSE,
   highCol = "red",
   madeUpper = c("rna", "dna")
 )

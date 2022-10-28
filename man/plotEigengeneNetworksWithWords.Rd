@@ -14,7 +14,7 @@ plotEigengeneNetworksWithWords(
   excludeFreq = 5000,
   excludeTfIdf = NA,
   border = TRUE,
-  tfidf = TRUE,
+  tfidf = FALSE,
   madeUpper = c("rna", "dna")
 )
 }
