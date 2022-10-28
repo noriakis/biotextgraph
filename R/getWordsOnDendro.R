@@ -9,6 +9,8 @@
 #' @param geneNumLimit clusters with gene number above this threshold are ignored
 #' @param geneVecType type of IDs in `colors`
 #' @param excludeFreq exclude the words above this threshold
+#' @param excludeTfIdf exclude the words above this threshold
+#' @param tfidf use tfidf when making TDM
 #' @param border whether to draw border on pyramid plots
 #' @param madeUpper words with uppercase
 #' @param nboot pvclust bootstrap number
@@ -25,8 +27,8 @@
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL",
-                                            excludeFreq=10000,
-                                            border=TRUE,
+                                            excludeFreq=5000, excludeTfIdf=NA,
+                                            border=TRUE, tfidf=TRUE,
                                             madeUpper=c("rna","dna")) {
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
@@ -46,7 +48,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
     grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
-                                 excludeFreq = excludeFreq,
+                                 excludeFreq = excludeFreq, excludeTfIdf=excludeTfIdf,
+                                 tfidf = tfidf,
                                  madeUpper = madeUpper)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
@@ -87,7 +90,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param numberOfWords the number of words to plot (default: 25)
 #' @param excludeFreq words with the frequency above
 #'                    this threshold is excluded beforehand
+#' @param excludeTfIdf filter using tfidf
 #' @param orgDb organism database
+#' @param tfidf use tfidf when making TDM
 #' @param madeUpper words with uppercase
 #' 
 #' @return list of pyramid plot grobs and its positions
@@ -110,16 +115,23 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @export
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
-                            geneVecType="ENSEMBL",
-                            numberOfWords=25, excludeFreq=10000,
-                            orgDb=org.Hs.eg.db,
+                            geneVecType="ENSEMBL", excludeTfIdf=NA,
+                            numberOfWords=25, excludeFreq=5000,
+                            orgDb=org.Hs.eg.db, tfidf=TRUE,
                             madeUpper=c("rna","dna")){
     
-    ## Filter high frequency words
+    ## Filter high frequency words if needed
     filterWords <- allFreqGeneSummary[
-                    allFreqGeneSummary$freq>excludeFreq,]$word
-    filterWords <- c(filterWords, "pmids", "geneid")
-    # 'PMIDs' is excluded by default
+                            allFreqGeneSummary$freq > excludeFreq,]$word
+    if (!is.na(excludeTfIdf)){
+        filterWords <- c(filterWords,
+            allTfIdfGeneSummary[
+                            allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
+    }
+    filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
+
+    # qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
+
     
     grobList <- list()
     alHeights <- c(((dhc %>%
@@ -175,7 +187,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         grobList[[as.character(grobNum)]]$plot <- 
                             returnPyramid(L,R, geneVec, geneVecType,
                                 filterWords, numberOfWords, orgDb=orgDb,
-                                additionalRemove=NA, madeUpper=madeUpper)
+                                additionalRemove=NA, madeUpper=madeUpper, tfidf=tfidf)
 
                         grobList[[as.character(grobNum)]]$height <- HEIGHT
                         grobList[[as.character(grobNum)]]$xmin <- XMIN
@@ -253,6 +265,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' @param lowCol gradient low color
 #' @param highCol gradient high color
 #' @param madeUpper words with uppercase
+#' @param tfidf use tfidf
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -266,7 +279,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
                         numberOfWords, orgDb, additionalRemove=NA,
-                        widths=c(0.3,0.3,0.3), lowCol="blue",
+                        widths=c(0.3,0.3,0.3), lowCol="blue", tfidf=TRUE,
                         highCol="red", madeUpper=c("rna","dna")) {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
@@ -282,8 +295,8 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
     filR <- tb %>% filter(Gene_ID %in% geneList)
     filR <- filR[!duplicated(filR$Gene_ID),]
     
-    all_L <- paste(filL$Gene_summary, collapse = "")
-    all_R <- paste(filR$Gene_summary, collapse = "")
+    all_L <- paste(filL$Gene_summary, collapse = " ")
+    all_R <- paste(filR$Gene_summary, collapse = " ")
     all_bet <- c(all_L, all_R)
     
     all_bet <- VectorSource(all_bet)
@@ -291,7 +304,11 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
     
     ## Clean the corpus
     all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove)
-    all_tdm <- TermDocumentMatrix(all_corpus)
+    if (tfidf){
+        all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
+    } else {
+        all_tdm <- TermDocumentMatrix(all_corpus)
+    }
     all_m <- as.matrix(all_tdm)
     
     ## Modified from: https://rpubs.com/williamsurles/316682

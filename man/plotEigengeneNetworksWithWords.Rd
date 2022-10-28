@@ -11,8 +11,10 @@ plotEigengeneNetworksWithWords(
   numberOfWords = 10,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
-  excludeFreq = 10000,
+  excludeFreq = 5000,
+  excludeTfIdf = NA,
   border = TRUE,
+  tfidf = TRUE,
   madeUpper = c("rna", "dna")
 )
 }
@@ -31,7 +33,11 @@ plotEigengeneNetworksWithWords(
 
 \item{excludeFreq}{exclude the words above this threshold}
 
+\item{excludeTfIdf}{exclude the words above this threshold}
+
 \item{border}{whether to draw border on pyramid plots}
+
+\item{tfidf}{use tfidf when making TDM}
 
 \item{madeUpper}{words with uppercase}
 }

@@ -9,9 +9,11 @@ getWordsOnDendro(
   geneVec,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
+  excludeTfIdf = NA,
   numberOfWords = 25,
-  excludeFreq = 10000,
+  excludeFreq = 5000,
   orgDb = org.Hs.eg.db,
+  tfidf = TRUE,
   madeUpper = c("rna", "dna")
 )
 }
@@ -25,12 +27,16 @@ pyramid plots are not produced}
 
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
+\item{excludeTfIdf}{filter using tfidf}
+
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
 \item{excludeFreq}{words with the frequency above
 this threshold is excluded beforehand}
 
 \item{orgDb}{organism database}
+
+\item{tfidf}{use tfidf when making TDM}
 
 \item{madeUpper}{words with uppercase}
 }
