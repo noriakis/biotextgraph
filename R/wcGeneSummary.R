@@ -26,6 +26,7 @@
 #' @param ora perform ora or not (experimental)
 #' @param ngram default to NA (1)
 #' @param genePlot plot associated genes (default: FALSE)
+#' @param genePlotNum number of genes to be plotted
 #' @param genePathPlot plot associated genes and pathways (default: FALSE)
 #'                     "kegg" or "reactome"
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
@@ -62,7 +63,7 @@
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NA,
-                            tfidf=FALSE,
+                            tfidf=FALSE, genePlotNum=10,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
@@ -215,9 +216,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             
             if (dim(subset(pathRes@result, p.adjust<0.05))[1]==0) {
-                stop("No enriched term found.")
+                stop("no enriched term found.")
             } else {
-                qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
+                qqcat("found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
             returnList[["pathRes"]] <- pathRes
@@ -262,6 +263,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     genemap <- rbind(genemap, c(rn, nm))
                 }
             }
+
+            gcnt <- table(genemap[,2])
+            gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
+            incGene <- names(gcnt)[1:genePlotNum]
+            genemap <- genemap[genemap[,2] %in% incGene,]
+
             genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
             coGraph <- igraph::union(coGraph, genemap)
             tmpW <- E(coGraph)$weight
@@ -425,15 +432,22 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
+
+        if (tfidf) {
+            showFreq <- returnDf$freq*10
+        } else {
+            showFreq <- returnDf$freq
+        }
+
         if (tag){
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = returnDf$freq,
+                                               freq = showFreq,
                                                colors = wcCol,
                                                random.order=FALSE,
                                                ordered.colors = TRUE)))
         } else {
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = returnDf$freq, ...)))
+                                               freq = showFreq, ...)))
         }
         returnList[["df"]] <- returnDf
         returnList[["wc"]] <- wc
