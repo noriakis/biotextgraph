@@ -266,6 +266,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
             gcnt <- table(genemap[,2])
             gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
+            returnList[["geneCount"]] <- gcnt
+            
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]
 
