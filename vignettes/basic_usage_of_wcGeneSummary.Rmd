@@ -160,9 +160,8 @@ net2 <- wcGeneSummary(cxcls, plotType="network", corThresh=0.5, numWords=20)
 net3 <- wcAbst(redo=ab, plotType="network", corThresh=0.2, numWords=20)
 
 ## Not having meaningful overlaps
-compareWordNet(net1, net2, titles=c("ercc","cxcl"))
-compareWordNet(net1, net3, titles=c("ercc","ercc-PubMed"))
-
+compareWordNet(list(net1, net2), titles=c("ercc","cxcl"))
+compareWordNet(list(net1, net3), titles=c("ercc","ercc-PubMed"))
 ```
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.

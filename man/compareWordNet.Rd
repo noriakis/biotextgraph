@@ -5,20 +5,18 @@
 \title{compareWordNet}
 \usage{
 compareWordNet(
-  wc1,
-  wc2,
-  titles = c("title1", "title2"),
+  listOfNets,
+  titles = NULL,
   layout = "nicely",
   hull = FALSE,
   size = 4,
   conc = 1,
-  tag = FALSE
+  tag = FALSE,
+  tagLevel = 1
 )
 }
 \arguments{
-\item{wc1}{results of wc functions (plotType="network")}
-
-\item{wc2}{results of wc functions (plotType="network")}
+\item{listOfNets}{list consisting results of wc* functions (plotType="network")}
 
 \item{titles}{title to be shown on plot}
 
@@ -31,6 +29,8 @@ compareWordNet(
 \item{conc}{concavity parameter}
 
 \item{tag}{show tag on plot}
+
+\item{tagLevel}{words that tagged in this many networks will be included}
 }
 \value{
 plot comparing two gene clusters
@@ -41,5 +41,5 @@ compare two gene clusters based on words
 \examples{
 wc1 <- wcGeneSummary("DDX41", plotType="network")
 wc2 <- wcGeneSummary("IRF3", plotType="network")
-compare <- compareWordNet(wc1, wc2)
+compare <- compareWordNet(list(wc1, wc2))
 }

@@ -106,7 +106,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
         ## If specified pathway option
         if (!is.null(enrich)) {
-            message("performing enrichment analysis ...")
+            if (genePlot) {stop("genePlot cant be performed in enrichment analysis mode")}
+            qqcat("performing enrichment analysis ...")
             if (enrich=="reactome"){
                 pathRes <- enrichPathway(geneList)
             } else if (enrich=="kegg"){
