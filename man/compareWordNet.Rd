@@ -11,6 +11,7 @@ compareWordNet(
   layout = "nicely",
   hull = FALSE,
   size = 4,
+  conc = 1,
   tag = FALSE
 )
 }
@@ -26,6 +27,8 @@ compareWordNet(
 \item{hull}{show category by hull}
 
 \item{size}{node size}
+
+\item{conc}{concavity parameter}
 
 \item{tag}{show tag on plot}
 }

@@ -11,6 +11,7 @@ wcAbst(
   target = "abstract",
   usefil = NA,
   filnum = 0,
+  pvclAlpha = 0.95,
   geneUpper = FALSE,
   apiKey = NULL,
   tfidf = FALSE,
@@ -46,6 +47,8 @@ wcAbst(
 \item{usefil}{filter based on "gstfidf" or "bsdbtfidf"}
 
 \item{filnum}{specify filter tfidf}
+
+\item{pvclAlpha}{alpha for pvpick()}
 
 \item{geneUpper}{make queries uppercase}
 
