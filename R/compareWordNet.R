@@ -27,7 +27,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 
   if (is.null(titles)){
     titles <- c()
-    for (e in seq_along(listoOfNets)){
+    for (e in seq_along(listOfNets)){
       titles <- c(titles, paste0("title",e))
     }
   }

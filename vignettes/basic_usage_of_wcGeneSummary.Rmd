@@ -176,7 +176,7 @@ net1 <- wcGeneSummary(keggList$`05210`, keyType="ENTREZID", plotType="network", 
 net2 <- wcGeneSummary(keggList$`05211`,
                       keyType="ENTREZID", plotType="network", corThresh=0.3, numWords=30, tag=TRUE, excludeTfIdf=150)
 
-compareWordNet(net1, net2, tag=TRUE)
+compareWordNet(list(net1, net2), tag=TRUE)
 ```
 
 
