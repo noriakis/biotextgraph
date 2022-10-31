@@ -27,6 +27,7 @@
 #' @param geneUpper make queries uppercase
 #' @param apiKey api key for eutilities
 #' @param tfidf use TfIdf when making TDM
+#' @param pvclAlpha alpha for pvpick()
 #' @param onlyCorpus return only corpus
 #' @param onlyTDM return only TDM
 #' @param ... parameters to pass to wordcloud()
@@ -47,6 +48,7 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   target="abstract", usefil=NA, filnum=0,
+				   pvclAlpha=0.95,
 				   geneUpper=FALSE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
@@ -180,7 +182,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                 		pvcl <- fetched[["pvcl"]]
                 	} else {
 			            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-			            pvcl <- pvpick(pvc)
+			            pvcl <- pvpick(pvc, alpha=pvclAlpha)
 			            fetched[["pvcl"]] <- pvcl
 			        }
 		        }

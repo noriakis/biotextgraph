@@ -21,6 +21,7 @@ wcGeneSummary(
   showLegend = FALSE,
   orgDb = org.Hs.eg.db,
   edgeLabel = FALSE,
+  pvclAlpha = 0.95,
   ngram = NA,
   plotType = "wc",
   onlyTDM = FALSE,
@@ -73,6 +74,8 @@ default to 5000}
 \item{orgDb}{default to org.Hs.eg.db}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
+
+\item{pvclAlpha}{alpha for pvpick()}
 
 \item{ngram}{default to NA (1)}
 

@@ -9,6 +9,7 @@
 #' @param hull show category by hull
 #' @param size node size
 #' @param tag show tag on plot
+#' @param conc concavity parameter
 #' 
 #' @export
 #' @examples
@@ -19,7 +20,8 @@
 #' @import ggforce
 #' @importFrom stringr str_replace
 compareWordNet <- function(wc1, wc2, titles=c("title1", "title2"),
-                           layout="nicely", hull=FALSE, size=4, tag=FALSE) {
+                           layout="nicely", hull=FALSE, size=4, conc=1,
+                           tag=FALSE) {
   commonNodes <- intersect(names(V(wc1$ig)), names(V(wc2$ig)))
   uig <- igraph::union(wc1$ig, wc2$ig)
   
@@ -75,7 +77,7 @@ compareWordNet <- function(wc1, wc2, titles=c("title1", "title2"),
           fill=contag,
           label=contag,
           filter = !is.na(contag)),
-      concavity = 4,
+      concavity = conc,
       # expand = unit(2, "mm"),
       alpha = 0.25,
       na.rm = TRUE,
@@ -94,7 +96,7 @@ compareWordNet <- function(wc1, wc2, titles=c("title1", "title2"),
             group = col,
             label=col, fill=col,
             filter = !is.na(col)),
-        concavity = 4,
+        concavity = conc,
         # expand = unit(2, "mm"),
         alpha = 0.25,
         na.rm = TRUE,

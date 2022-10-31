@@ -31,6 +31,7 @@
 #'                     "kegg" or "reactome"
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
+#' @param pvclAlpha alpha for pvpick()
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param onlyTDM return only TDF
 #' @param onlyCorpus return only corpus
@@ -70,6 +71,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
+                            pvclAlpha=0.95,
                             ngram=NA, plotType="wc", onlyTDM=FALSE,
                             colorText=FALSE, corThresh=0.6, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
@@ -197,7 +199,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         
         if (tag) {
             pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-            pvcl <- pvpick(pvc)
+            pvcl <- pvpick(pvc, alpha=pvclAlpha)
             returnList[["pvcl"]] <- pvcl
         }
 
