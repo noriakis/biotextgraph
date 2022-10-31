@@ -23,6 +23,8 @@ wcAbst(
   corThresh = 0.6,
   layout = "nicely",
   tag = FALSE,
+  onlyCorpus = FALSE,
+  onlyTDM = FALSE,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -68,6 +70,10 @@ wcAbst(
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
 \item{tag}{cluster the words based on text}
+
+\item{onlyCorpus}{return only corpus}
+
+\item{onlyTDM}{return only TDM}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 

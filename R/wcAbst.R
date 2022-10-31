@@ -27,6 +27,8 @@
 #' @param geneUpper make queries uppercase
 #' @param apiKey api key for eutilities
 #' @param tfidf use TfIdf when making TDM
+#' @param onlyCorpus return only corpus
+#' @param onlyTDM return only TDM
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -49,6 +51,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.6, layout="nicely", tag=FALSE,
+                   onlyCorpus=FALSE, onlyTDM=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, ...)
         {
@@ -130,7 +133,9 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 			}
 
 			docs <- makeCorpus(docs, filterWords, additionalRemove)
-
+			if (onlyCorpus){
+				return(docs)
+			}
 		    if (!is.na(ngram)){
 		        NgramTokenizer <- function(x)
 		            unlist(lapply(ngrams(words(x), ngram),
@@ -151,6 +156,10 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        } else {
 		            docs <- TermDocumentMatrix(docs)
 		        }
+		    }
+
+		    if (onlyTDM){
+		    	return(docs)
 		    }
 
 			mat <- as.matrix(docs)
