@@ -35,6 +35,7 @@
 #' @param onlyTDM return only TDF
 #' @param onlyCorpus return only corpus
 #' @param tfidf use TfIdf when making TDM
+#' @param mergeCorpus specify multiple corpus if intend to combine them
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -73,74 +74,82 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             colorText=FALSE, corThresh=0.6, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                            enrich=NULL, topPath=10, ora=FALSE, ...) {
+                            enrich=NULL, topPath=10, ora=FALSE,
+                            mergeCorpus=NULL, ...) {
+    if (is.null(mergeCorpus)) {
+        qqcat("Input genes: @{length(geneList)}\n")
+        if (keyType!="ENTREZID"){
+            geneList <- AnnotationDbi::select(orgDb,
+                keys = geneList, columns = c("ENTREZID"),
+                keytype = keyType)$ENTREZID
+            geneList <- geneList[!is.na(geneList)]
+            qqcat("Converted input genes: @{length(geneList)}\n")
+        }
 
-    qqcat("Input genes: @{length(geneList)}\n")
-    if (keyType!="ENTREZID"){
-        geneList <- AnnotationDbi::select(orgDb,
-            keys = geneList, columns = c("ENTREZID"),
-            keytype = keyType)$ENTREZID
-        geneList <- geneList[!is.na(geneList)]
-        qqcat("Converted input genes: @{length(geneList)}\n")
-    }
+        returnList <- list()
 
-    returnList <- list()
+        ## Filter high frequency words if needed
+        filterWords <- allFreqGeneSummary[
+                                allFreqGeneSummary$freq > excludeFreq,]$word
+        if (!is.na(excludeTfIdf)){
+            filterWords <- c(filterWords,
+                allTfIdfGeneSummary[
+                                allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
+        }
+        filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
 
-    ## Filter high frequency words if needed
-    filterWords <- allFreqGeneSummary[
-                            allFreqGeneSummary$freq > excludeFreq,]$word
-    if (!is.na(excludeTfIdf)){
-        filterWords <- c(filterWords,
-            allTfIdfGeneSummary[
-                            allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
-    }
-    filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
-
-    qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
+        qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
 
 
 
-    ## If specified pathway option
-    if (!is.null(enrich)) {
-        message("performing enrichment analysis ...")
-        if (enrich=="reactome"){
-            pathRes <- enrichPathway(geneList)
-        } else if (enrich=="kegg"){
-            pathRes <- enrichKEGG(geneList)
+        ## If specified pathway option
+        if (!is.null(enrich)) {
+            message("performing enrichment analysis ...")
+            if (enrich=="reactome"){
+                pathRes <- enrichPathway(geneList)
+            } else if (enrich=="kegg"){
+                pathRes <- enrichKEGG(geneList)
+            } else {
+                ## Currently only supports some pathways
+                stop("please specify 'reactome' or 'kegg'")
+            }
+            ## Make corpus
+            docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+            docs <- makeCorpus(docs, filterWords, additionalRemove)
         } else {
-            ## Currently only supports some pathways
-            stop("please specify 'reactome' or 'kegg'")
+            ## Load from GeneSummary
+            tb <- loadGeneSummary(organism = organism)
+
+            ## Already performed, and automatically loaded
+            # load("allFreqGeneSummary.rda") 
+
+            if (ora){
+                qqcat("performing ORA\n")
+                sig <- textORA(geneList)
+                sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
+                qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
+                filterWords <- c(filterWords, sigFilter)
+                returnList[["ora"]] <- sig
+            }
+
+            fil <- tb %>% filter(Gene_ID %in% geneList)
+            fil <- fil[!duplicated(fil$Gene_ID),]
+
+            returnList[["rawtext"]] <- fil
+            ## Make corpus
+            docs <- VCorpus(VectorSource(fil$Gene_summary))
+            docs <- makeCorpus(docs, filterWords, additionalRemove)
         }
-        ## Make corpus
-        docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-        docs <- makeCorpus(docs, filterWords, additionalRemove)
+
+        if (onlyCorpus){
+            return(docs)
+        }
     } else {
-        ## Load from GeneSummary
-        tb <- loadGeneSummary(organism = organism)
-
-        ## Already performed, and automatically loaded
-        # load("allFreqGeneSummary.rda") 
-
-        if (ora){
-            qqcat("performing ORA\n")
-            sig <- textORA(geneList)
-            sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-            qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
-            filterWords <- c(filterWords, sigFilter)
-            returnList[["ora"]] <- sig
+        if (length(mergeCorpus)<2){
+            stop("Please provide multile corpus")
         }
-
-        fil <- tb %>% filter(Gene_ID %in% geneList)
-        fil <- fil[!duplicated(fil$Gene_ID),]
-
-        returnList[["rawtext"]] <- fil
-        ## Make corpus
-        docs <- VCorpus(VectorSource(fil$Gene_summary))
-        docs <- makeCorpus(docs, filterWords, additionalRemove)
-    }
-
-    if (onlyCorpus){
-        return(docs)
+        returnList <- list()
+        docs <- mergeCorpus
     }
 
     ## Set parameters for correlation network
