@@ -11,11 +11,12 @@ vignette: >
     %\VignetteEncoding{UTF-8}  
 ---
 
-This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and compare the clusters based on those information.
+This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization.
 
 # Basic usage
 
 Load the package and the database for converting identifiers.
+In this example, we use mostly human-derived data, and use `org.Hs.eg.db`.
 
 ```{r load, warning=FALSE, message=FALSE}
 library(wcGeneSummary)
@@ -27,7 +28,7 @@ library(ggraph)
 ## Producing word clouds
 
 The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol.
-As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
+The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
 
 ```{r basic, warning=FALSE, message=FALSE, cache=TRUE}
 ## Configure input genes
@@ -62,16 +63,19 @@ N-gram is supported by library `tm`, specified by `ngram`.
 Default is `1`, and the example specifying `2` is shown below.
 
 ```{r ngramwc, warning=FALSE, fig.height=6, fig.width=6}
-gwc2 <- wcGeneSummary(inpSymbol, ngram=2)
+gwc2 <- wcGeneSummary(inpSymbol, ngram=2, numWords=50)
 gwc2$wc
 ```
 
-One of the main questions is which words can be clustered together among the words contained in the cluster.
-Word clustering (`pvclust`) based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
+One of the main questions is which words can be clustered together among the words contained in the queried gene cluster.
+Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
+For the significance threshold, `pvclAlpha` can be specified.
 
 ```{r tagging, warning=FALSE}
 gwcl <- wcGeneSummary(inpSymbol,
-                     numWords=30, tag=TRUE, pal = palette(),
+                     numWords=30,
+                     tag=TRUE,
+                     pal = palette(),
                      rot.per=0.4)
 gwcl$wc
 gwcl$pvcl
@@ -145,7 +149,7 @@ abtag2$net
 ```
 
 
-### Comparing two networks
+### Comparing two or more networks
 
 One can compare two networks by providing two objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`.
 
@@ -162,6 +166,7 @@ net3 <- wcAbst(redo=ab, plotType="network", corThresh=0.2, numWords=20)
 ## Not having meaningful overlaps
 compareWordNet(list(net1, net2), titles=c("ercc","cxcl"))
 compareWordNet(list(net1, net3), titles=c("ercc","ercc-PubMed"))
+compareWordNet(list(net1, net2, net3), titles=c("ercc","cxcl", "ercc-PubMed"))
 ```
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
