@@ -67,6 +67,14 @@ gwc2 <- wcGeneSummary(inpSymbol, ngram=2, numWords=50)
 gwc2$wc
 ```
 
+Using `clusterProfiler` functions, one can use enriched pathway names for visualization.
+The `enrich` option can be specified, this time `'reactome'`.
+
+```{r ngrampath, warning=FALSE, fig.height=6, fig.width=6}
+gwc3 <- wcGeneSummary(inpSymbol, enrich="reactome", tfidf=TRUE, numWords=50)
+gwc3$wc
+```
+
 One of the main questions is which words can be clustered together among the words contained in the queried gene cluster.
 Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
 For the significance threshold, `pvclAlpha` can be specified.
@@ -149,9 +157,10 @@ abtag2$net
 ```
 
 
-### Comparing two or more networks
+## Comparing two or more networks
 
-One can compare two networks by providing two objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`.
+One can compare two or more networks by providing list of objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`.
+This can be useful for assessing the similarity and dissimilarity of the various text sources, like PubMed, RefSeq, and Reactome pathway names.
 
 ```{r compare, cache=T}
 cxcls <- c()
@@ -184,6 +193,8 @@ net2 <- wcGeneSummary(keggList$`05211`,
 compareWordNet(list(net1, net2), tag=TRUE)
 ```
 
+## Query words across clusters
+
 
 ## Text over represenatation analysis (experimental)
 
@@ -200,6 +211,7 @@ hist(pvs)
 pvs[order(pvs)] |> head()
 ```
 
+This thresholding can be used in RefSeq visualization.
 Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 
 ```{r oranet, warning=FALSE, message=FALSE, cache=T}
