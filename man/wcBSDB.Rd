@@ -13,6 +13,7 @@ wcBSDB(
   target = "title",
   apiKey = NULL,
   pre = FALSE,
+  pvclAlpha = 0.95,
   madeUpper = c("dna", "rna"),
   redo = NA,
   pal = c("blue", "red"),
@@ -50,6 +51,8 @@ default to 0}
 \item{apiKey}{api key for eutilities}
 
 \item{pre}{predefined filter words}
+
+\item{pvclAlpha}{alpha for pvpick()}
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 
@@ -91,7 +94,7 @@ default to 0}
 list of data frame and ggplot2 object
 }
 \description{
-Plot wordcloud of BugSigDB
+Visualize BugSigDB
 }
 \examples{
 mbList <- c("Veillonella dispar")
