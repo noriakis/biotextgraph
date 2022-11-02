@@ -62,7 +62,7 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE,
-                    colorText=FALSE, corThresh=0.6, tag=FALSE,
+                    colorText=FALSE, corThresh=0.2, tag=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",

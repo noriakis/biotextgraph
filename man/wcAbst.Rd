@@ -21,7 +21,7 @@ wcAbst(
   showLegend = FALSE,
   plotType = "wc",
   colorText = FALSE,
-  corThresh = 0.6,
+  corThresh = 0.2,
   layout = "nicely",
   tag = FALSE,
   onlyCorpus = FALSE,
