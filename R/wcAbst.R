@@ -52,7 +52,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   geneUpper=FALSE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
-                   corThresh=0.6, layout="nicely", tag=FALSE,
+                   corThresh=0.2, layout="nicely", tag=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, ...)

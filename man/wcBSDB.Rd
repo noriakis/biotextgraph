@@ -25,7 +25,7 @@ wcBSDB(
   plotType = "wc",
   disPlot = FALSE,
   colorText = FALSE,
-  corThresh = 0.6,
+  corThresh = 0.2,
   tag = FALSE,
   layout = "nicely",
   edgeLink = TRUE,

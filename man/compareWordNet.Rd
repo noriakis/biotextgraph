@@ -12,7 +12,11 @@ compareWordNet(
   size = 4,
   conc = 1,
   tag = FALSE,
-  tagLevel = 1
+  tagLevel = 1,
+  edgeLink = TRUE,
+  freq = TRUE,
+  freqMean = FALSE,
+  scaleRange = c(5, 10)
 )
 }
 \arguments{
@@ -31,6 +35,14 @@ compareWordNet(
 \item{tag}{show tag on plot}
 
 \item{tagLevel}{words that tagged in this many networks will be included}
+
+\item{edgeLink}{whether to use link or diagonal}
+
+\item{freq}{concatenate frequency and show it on plot}
+
+\item{freqMean}{how to concatenate frequency (TRUE: mean, FALSE: sum)}
+
+\item{scaleRange}{point size scaling}
 }
 \value{
 plot comparing two gene clusters

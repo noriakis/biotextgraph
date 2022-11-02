@@ -10,6 +10,10 @@
 #' @param tag show tag on plot
 #' @param tagLevel words that tagged in this many networks will be included
 #' @param conc concavity parameter
+#' @param edgeLink whether to use link or diagonal
+#' @param freq concatenate frequency and show it on plot
+#' @param freqMean how to concatenate frequency (TRUE: mean, FALSE: sum)
+#' @param scaleRange point size scaling
 #' 
 #' @export
 #' @examples
@@ -21,7 +25,8 @@
 #' @importFrom stringr str_replace
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size=4, conc=1,
-                           tag=FALSE, tagLevel=1) {
+                           tag=FALSE, tagLevel=1, edgeLink=TRUE,
+                           freq=TRUE, freqMean=FALSE, scaleRange=c(5,10)) {
   listOfIGs <- list()
   listOfNodes <- list()
 
@@ -41,7 +46,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   uig <- Reduce(igraph::union, listOfIGs)
   nodeAttr <- names(get.vertex.attribute(uig))
   tagName <- nodeAttr[grepl("tag", nodeAttr)]
-  
+  freqName <- nodeAttr[grepl("Freq", nodeAttr)]
   ## concatenate tags
   if (tag) {
       tags <- c()
@@ -60,6 +65,18 @@ compareWordNet <- function(listOfNets, titles=NULL,
       V(uig)$tag <- contag
   }
 
+  if (freq) {
+    frqs <- c()
+    for (fq in freqName){
+      tmpfrq <- get.vertex.attribute(uig, fq)
+      frqs <- cbind(frqs, tmpfrq)
+    }
+    if (freqMean){
+      V(uig)$Freqs <- apply(frqs, 1, function(x) mean(x, na.rm=TRUE))
+    } else {
+      V(uig)$Freqs <- apply(frqs, 1, function(x) sum(x, na.rm=TRUE))
+    }
+  }
 
   col <- c()
   for (node in names(V(uig))){
@@ -69,7 +86,11 @@ compareWordNet <- function(listOfNets, titles=NULL,
           tmpcol <- c()
           for (e in seq_along(listOfIGs)){
               if (node %in% names(V(listOfIGs[[e]]))) {
-                  tmpcol <- c(tmpcol, e)
+                  if (is.null(titles)){
+                    tmpcol <- c(tmpcol, e)
+                  } else {
+                    tmpcol <- c(tmpcol, titles[e])
+                  }
               }
           }
           tmpcol <- paste(tmpcol, collapse="_")
@@ -108,22 +129,28 @@ compareWordNet <- function(listOfNets, titles=NULL,
   #   }
   # }
   # V(uig)$col <- col
-  
-  
-  comNet <- ggraph(uig, layout=layout) +
-    geom_edge_link()+
-    geom_node_text(
-      aes_(label=~name),
-      check_overlap=TRUE, repel=TRUE,# size = labelSize,
-      bg.color = "white", segment.color="black",
-      bg.r = .15, show.legend=FALSE)+
-    theme_graph()
+  comNet <- ggraph(uig, layout=layout)
+
+  if (edgeLink){
+    comNet <- comNet+
+    geom_edge_link()
+  } else {
+    comNet <- comNet+
+    geom_edge_diagonal()
+  }
   
   if (tag){
-    comNet <- comNet + 
-      geom_node_point(aes(color=col), size=4)+
-        scale_color_discrete(name="Group")
-    comNet + geom_mark_hull(
+
+    if (freq) {
+      comNet <- comNet + 
+        geom_node_point(aes(color=col, size=Freqs))+
+          scale_color_discrete(name="Group")
+    } else {
+      comNet <- comNet + 
+        geom_node_point(aes(color=col), size=size)+
+          scale_color_discrete(name="Group")
+    }
+    comNet <- comNet + geom_mark_hull(
       aes(comNet$data$x,
           comNet$data$y,
           group = contag,
@@ -140,9 +167,13 @@ compareWordNet <- function(listOfNets, titles=NULL,
     
   } else {
   
-    if (hull) {  
-      comNet + 
-        geom_node_point(size=size)+
+    if (hull) {
+      if (freq) {
+        comNet <- comNet + geom_node_point(aes(size=Freqs))
+      } else {
+        comNet <- comNet + geom_node_point(size=size)
+      }
+      comNet <- comNet + 
         geom_mark_hull(
         aes(comNet$data$x,
             comNet$data$y,
@@ -157,8 +188,22 @@ compareWordNet <- function(listOfNets, titles=NULL,
         show.legend = FALSE
       )
     } else {
-      comNet + geom_node_point(aes(color=col), size=4)+
+      if (freq) {
+        comNet <- comNet + geom_node_point(aes(color=col, size=Freqs))
+      } else {
+        comNet <- comNet + geom_node_point(aes(color=col), size=size)
+      }
+      comNet <- comNet +
         scale_color_discrete(name="Group")
     }
   }
+
+  comNet +
+  geom_node_text(
+    aes_(label=~name),
+    check_overlap=TRUE, repel=TRUE,# size = labelSize,
+    bg.color = "white", segment.color="black",
+    bg.r = .15, show.legend=FALSE)+
+  scale_size(range=scaleRange, name="Frequency")+
+  theme_graph()
 }

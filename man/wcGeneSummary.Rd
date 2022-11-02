@@ -26,7 +26,7 @@ wcGeneSummary(
   plotType = "wc",
   onlyTDM = FALSE,
   colorText = FALSE,
-  corThresh = 0.6,
+  corThresh = 0.2,
   genePlot = FALSE,
   genePathPlot = NA,
   genePathPlotSig = 0.05,
