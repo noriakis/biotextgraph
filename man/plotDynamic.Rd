@@ -4,10 +4,18 @@
 \alias{plotDynamic}
 \title{plotDynamic}
 \usage{
-plotDynamic(listOfNets, alpha = 0.2, titles = NULL, tag = FALSE)
+plotDynamic(
+  listOfNets,
+  concat = "union",
+  alpha = 0.2,
+  titles = NULL,
+  tag = FALSE
+)
 }
 \arguments{
 \item{listOfNets}{list consisting results of wc* functions (plotType="network")}
+
+\item{concat}{"union" or "intersection"}
 
 \item{alpha}{pass to layout_as_dynamic}
 
