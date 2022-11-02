@@ -20,7 +20,7 @@
 #' wc1 <- wcGeneSummary("DDX41", plotType="network")
 #' wc2 <- wcGeneSummary("IRF3", plotType="network")
 #' compare <- compareWordNet(list(wc1, wc2))
-#' @return plot comparing two gene clusters
+#' @return plot comparing gene clusters
 #' @import ggforce
 #' @importFrom stringr str_replace
 compareWordNet <- function(listOfNets, titles=NULL,
@@ -206,4 +206,66 @@ compareWordNet <- function(listOfNets, titles=NULL,
     bg.r = .15, show.legend=FALSE)+
   scale_size(range=scaleRange, name="Frequency")+
   theme_graph()
+}
+
+
+#' plotDynamic
+#' 
+#' list network of words using graphlayouts::layout_as_dynamic
+#' 
+#' @param listOfNets list consisting results of wc* functions (plotType="network")
+#' @param alpha pass to layout_as_dynamic
+#' @param titles title to be shown on plot
+#' @param tag show tag on plot
+#' 
+#' @export
+#' @examples
+#' wc1 <- wcGeneSummary("DDX41", plotType="network")
+#' wc2 <- wcGeneSummary("IRF3", plotType="network")
+#' compare <- plotDynamic(list(wc1, wc2))
+#' @return plot comparing gene clusters
+#' @importFrom graphlayouts layout_as_dynamic
+plotDynamic <- function(listOfNets, alpha=0.2,titles=NULL,tag=FALSE){
+
+  if (is.null(titles)){
+    titles <- c()
+    for (e in seq_along(listOfNets)){
+      titles <- c(titles, paste0("title",e))
+    }
+  }
+
+  allNodes <- c()
+  for (n in listOfNets){
+      allNodes <- c(allNodes, V(n$ig)$name)
+  }
+  igList <- list()
+  for (e in seq_along(listOfNets)){
+      tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]$ig)))
+      igList[[e]] <- add_vertices(listOfNets[[e]]$ig,
+                                    length(tmpadd),
+                                    attr=list(name=tmpadd))
+  }
+
+  xy <- layout_as_dynamic(igList,alpha = alpha)
+  pList <- vector("list",length(igList))
+
+  for(i in seq_along(igList)){
+    pList[[i]] <- ggraph(igList[[i]],layout="manual",x=xy[[i]][,1],y=xy[[i]][,2])+
+        geom_edge_link0(edge_width=0.6,edge_colour="grey66")
+    if (tag){
+      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=Freq,fill=tag),
+        shape=21, show.legend=FALSE)
+    } else {
+      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=Freq,fill=Freq),
+        shape=21, show.legend=FALSE)+
+                    scale_fill_gradient(low="blue",high="red",
+                           name = "Frequency")
+    }
+      pList[[i]] <- pList[[i]] +
+        geom_node_text(aes(label=name),repel = TRUE,bg.color="white")+
+        theme_graph()+
+        theme(legend.position="bottom")+
+        labs(title=titles[i])
+  }
+  Reduce("+",pList)
 }

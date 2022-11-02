@@ -1,6 +1,6 @@
 #' wcBSDB
 #' 
-#' Plot wordcloud of BugSigDB
+#' Visualize BugSigDB
 #' 
 #' @param mbList microbe list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
@@ -28,6 +28,7 @@
 #' @param redo if "abstract" is chosen in target, one can provide resulting object again
 #' @param pre predefined filter words
 #' @param tfidf use TfIdf when making TDM
+#' @param pvclAlpha alpha for pvpick()
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -56,7 +57,7 @@ wcBSDB <- function (mbList,
                     excludeFreq=1000, excludeTfIdf=NA,
                     additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL,
-                    pre=FALSE,
+                    pre=FALSE, pvclAlpha=0.95,
                     madeUpper=c("dna","rna"), redo=NA,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
@@ -93,6 +94,7 @@ wcBSDB <- function (mbList,
             tmp$query <- m
             subTb <- rbind(subTb, tmp)
         }
+        qqcat("including @{dim(subTb)[1]} articles ...\n")
         # returnList[["subsetBSDB"]] <- subTb
 
         titles <- unique(subTb$Title)
@@ -120,6 +122,7 @@ wcBSDB <- function (mbList,
     }
 
     if (target=="abstract"){
+        qqcat("target is abstract ...\n")
         if (!is.list(redo)) {
             pmids <- fil$PMID
             # pmids <- pmids[!is.na(pmids)]
@@ -128,6 +131,8 @@ wcBSDB <- function (mbList,
                                    paste(pmids, collapse=","))
             if (!is.null(apiKey)){
                 queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
+            } else {
+                qqcat("querying without API key ...\n")
             }
             onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
             xmlString <- readLines(onequery, encoding="UTF8")
@@ -198,9 +203,15 @@ wcBSDB <- function (mbList,
         freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         
         if (tag) {
-            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-            pvcl <- pvpick(pvc)
-            returnList[["pvcl"]] <- pvcl
+            if (is.list(redo)){
+                if (!is.null(redo[["pvcl"]])) {
+                    pvcl <- redo[["pvcl"]]
+                }
+            } else {
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                returnList[["pvcl"]] <- pvcl
+            }
         }
 
         ## genePlot: plot associated genes
@@ -373,9 +384,18 @@ wcBSDB <- function (mbList,
 
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-            pvcl <- pvpick(pvc)
-            returnList[["pvcl"]] <- pvcl
+
+            if (tag) {
+                if (is.list(redo)){
+                    if (!is.null(redo[["pvcl"]])) {
+                        pvcl <- redo[["pvcl"]]
+                    }
+                } else {
+                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                    pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                    returnList[["pvcl"]] <- pvcl
+                }
+            }
 
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){

@@ -45,7 +45,7 @@ compareWordNet(
 \item{scaleRange}{point size scaling}
 }
 \value{
-plot comparing two gene clusters
+plot comparing gene clusters
 }
 \description{
 compare two gene clusters based on words
