@@ -43,7 +43,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
 
   commonNodes <- Reduce(intersect, listOfNodes)
-  uig <- Reduce(igraph::union, listOfIGs)
+  uig <- simplify(Reduce(igraph::union, listOfIGs))
   nodeAttr <- names(get.vertex.attribute(uig))
   tagName <- nodeAttr[grepl("tag", nodeAttr)]
   freqName <- nodeAttr[grepl("Freq", nodeAttr)]
@@ -214,6 +214,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' list network of words using graphlayouts::layout_as_dynamic
 #' 
 #' @param listOfNets list consisting results of wc* functions (plotType="network")
+#' @param concat "union" or "intersection"
 #' @param alpha pass to layout_as_dynamic
 #' @param titles title to be shown on plot
 #' @param tag show tag on plot
@@ -225,7 +226,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
 #' @importFrom graphlayouts layout_as_dynamic
-plotDynamic <- function(listOfNets, alpha=0.2,titles=NULL,tag=FALSE){
+plotDynamic <- function(listOfNets,concat="union",alpha=0.2,titles=NULL,tag=FALSE){
 
   if (is.null(titles)){
     titles <- c()
@@ -234,16 +235,29 @@ plotDynamic <- function(listOfNets, alpha=0.2,titles=NULL,tag=FALSE){
     }
   }
 
-  allNodes <- c()
-  for (n in listOfNets){
-      allNodes <- c(allNodes, V(n$ig)$name)
-  }
-  igList <- list()
-  for (e in seq_along(listOfNets)){
-      tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]$ig)))
-      igList[[e]] <- add_vertices(listOfNets[[e]]$ig,
-                                    length(tmpadd),
-                                    attr=list(name=tmpadd))
+  if (concat=="union"){
+    allNodes <- c()
+    for (n in listOfNets){
+        allNodes <- c(allNodes, V(n$ig)$name)
+    }
+    igList <- list()
+    for (e in seq_along(listOfNets)){
+        tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]$ig)))
+        igList[[e]] <- add_vertices(listOfNets[[e]]$ig,
+                                      length(tmpadd),
+                                      attr=list(name=tmpadd))
+    }
+  } else {
+    uniqNodeNames <- list()
+    for (e in seq_along(listOfNets)){
+        uniqNodeNames[[e]] <- names(V(listOfNets[[e]]$ig))
+    }
+    uniqNodeNames <- Reduce(intersect, uniqNodeNames)
+    igList <- list()
+    for (e in seq_along(listOfNets)){
+        igList[[e]] <- induced_subgraph(listOfNets[[e]]$ig,
+          names(V(listOfNets[[e]]$ig)) %in% uniqNodeNames)
+    }
   }
 
   xy <- layout_as_dynamic(igList,alpha = alpha)
