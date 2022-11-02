@@ -8,7 +8,7 @@
 #' @param ngram use ngram or not
 #' @param tfidf use tfidf when creating TDM or not
 #' @param keyType key type of listOfGenes
-#' @param calc "sum" or "mean"
+#' @param calc "sum", "mean" or "highest"
 #' @param ... passed to wcGeneSummary
 #' @return named list of frequency
 #' @export
@@ -36,8 +36,12 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
         names(tmp) <- querySplit
         if (calc=="sum"){
             tmpfrq <- apply(querytdm, 2, sum)# / dim(querytdm)[1]
-        } else {
+        } else if (calc=="mean") {
             tmpfrq <- apply(querytdm, 2, mean)# / dim(querytdm)[1]
+        } else if (calc=="highest") {
+            tmpfrq <- apply(querytdm, 2, max)
+        } else {
+            stop("please specify sum, mean or highest")
         }
         for (i in names(tmpfrq)){
             tmp[names(tmp)==i] <- tmpfrq[i]

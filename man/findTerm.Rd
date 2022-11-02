@@ -26,7 +26,7 @@ findTerm(
 
 \item{tfidf}{use tfidf when creating TDM or not}
 
-\item{calc}{"sum" or "mean"}
+\item{calc}{"sum", "mean" or "highest"}
 
 \item{keyType}{key type of listOfGenes}
 
