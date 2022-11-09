@@ -30,6 +30,7 @@
 #' @param pvclAlpha alpha for pvpick()
 #' @param onlyCorpus return only corpus
 #' @param onlyTDM return only TDM
+#' @param preset filter preset words
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -55,8 +56,14 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
-                   deleteZeroDeg=TRUE, additionalRemove=NA, ...)
+                   deleteZeroDeg=TRUE, additionalRemove=NA,
+                   preset=FALSE, ...)
         {
+        	if (preset) {
+        		additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
+                                 "analysis","cells","cell","expression","doi",
+                                 "deg","degs")
+        	}
         	if (!is.list(redo)) {
 	        	fetched <- list() # store results
 	        	if (length(queries)>10){
@@ -173,8 +180,9 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		    if (plotType=="network"){
 		        matSorted <- matSorted[1:numWords]
 		        freqWords <- names(matSorted)
-		        freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-		        row.names(freqWordsDTM) <- allDataDf$query
+		        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+		        ## TODO: before or after?
+		        freqWordsDTM <- t(as.matrix(docs))
 
                 if (tag) {
                 	if (is.list(redo) & "pvcl" %in% names(fetched)){
@@ -195,6 +203,8 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        corData[corData<corThresh] <- 0
 		        coGraph <- graph.adjacency(corData, weighted=TRUE,
 		        	mode="undirected", diag = FALSE)
+		        ## before or after?
+		        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
 		        V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
 		        if (deleteZeroDeg){

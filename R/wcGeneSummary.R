@@ -196,7 +196,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
-        freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+        ## TODO: before or after?
+        freqWordsDTM <- t(as.matrix(docs))
         
         if (tag) {
             pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
@@ -255,6 +257,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         corData[corData<corThresh] <- 0
         coGraph <- graph.adjacency(corData, weighted=TRUE,
                     mode="undirected", diag = FALSE)
+        ## before or after?
+        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
         if (deleteZeroDeg){
