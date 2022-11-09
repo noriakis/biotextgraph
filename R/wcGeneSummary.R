@@ -207,6 +207,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ## genePlot: plot associated genes
         if (!is.na(genePathPlot)) {genePlot <- TRUE}
         if (genePlot) {
+            if (!is.null(mergeCorpus)) {
+                stop("cannot perform genePlot when merging corpus ...")
+            }
             revID <- AnnotationDbi::select(orgDb,
                 keys = as.character(fil$Gene_ID), 
                 columns = c("SYMBOL"),
