@@ -200,7 +200,9 @@ wcBSDB <- function (mbList,
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
-        freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+        ## TODO: before or after?
+        freqWordsDTM <- t(as.matrix(docs))
         
         if (tag) {
             if (is.list(redo)){
@@ -239,6 +241,8 @@ wcBSDB <- function (mbList,
         corData[corData<corThresh] <- 0
         coGraph <- graph.adjacency(corData, weighted=TRUE,
                     mode="undirected", diag = FALSE)
+        ## before or after?
+        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
         if (deleteZeroDeg){

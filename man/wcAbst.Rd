@@ -32,6 +32,7 @@ wcAbst(
   genePlot = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
+  preset = FALSE,
   ...
 )
 }
@@ -89,6 +90,8 @@ wcAbst(
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{additionalRemove}{specific words to be excluded}
+
+\item{preset}{filter preset words}
 
 \item{...}{parameters to pass to wordcloud()}
 }
