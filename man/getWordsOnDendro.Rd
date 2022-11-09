@@ -14,6 +14,7 @@ getWordsOnDendro(
   excludeFreq = 5000,
   orgDb = org.Hs.eg.db,
   tfidf = FALSE,
+  numOnly = TRUE,
   madeUpper = c("rna", "dna")
 )
 }
@@ -37,6 +38,8 @@ this threshold is excluded beforehand}
 \item{orgDb}{organism database}
 
 \item{tfidf}{use tfidf when making TDM}
+
+\item{numOnly}{delete number only}
 
 \item{madeUpper}{words with uppercase}
 }

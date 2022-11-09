@@ -13,6 +13,7 @@ returnPyramid(
   numberOfWords,
   orgDb,
   additionalRemove = NA,
+  numOnly = TRUE,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
   tfidf = FALSE,
@@ -36,6 +37,8 @@ returnPyramid(
 \item{orgDb}{database to change the ID to ENTREZ ID}
 
 \item{additionalRemove}{words to filter}
+
+\item{numOnly}{delete number only}
 
 \item{widths}{parameters to pass to patchwork}
 

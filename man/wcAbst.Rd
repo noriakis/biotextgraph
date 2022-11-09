@@ -12,6 +12,7 @@ wcAbst(
   usefil = NA,
   filnum = 0,
   pvclAlpha = 0.95,
+  numOnly = TRUE,
   geneUpper = FALSE,
   apiKey = NULL,
   tfidf = FALSE,
@@ -50,6 +51,8 @@ wcAbst(
 \item{filnum}{specify filter tfidf}
 
 \item{pvclAlpha}{alpha for pvpick()}
+
+\item{numOnly}{delete number only}
 
 \item{geneUpper}{make queries uppercase}
 

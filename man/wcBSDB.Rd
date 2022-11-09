@@ -14,6 +14,7 @@ wcBSDB(
   apiKey = NULL,
   pre = FALSE,
   pvclAlpha = 0.95,
+  numOnly = TRUE,
   madeUpper = c("dna", "rna"),
   redo = NA,
   pal = c("blue", "red"),
@@ -53,6 +54,8 @@ default to 0}
 \item{pre}{predefined filter words}
 
 \item{pvclAlpha}{alpha for pvpick()}
+
+\item{numOnly}{delete number only}
 
 \item{madeUpper}{make the words uppercase in resulting plot}
 

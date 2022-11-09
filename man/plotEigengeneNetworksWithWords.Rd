@@ -11,6 +11,7 @@ plotEigengeneNetworksWithWords(
   numberOfWords = 10,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
+  numOnly = TRUE,
   excludeFreq = 5000,
   excludeTfIdf = NA,
   border = TRUE,
@@ -30,6 +31,8 @@ plotEigengeneNetworksWithWords(
 \item{geneNumLimit}{clusters with gene number above this threshold are ignored}
 
 \item{geneVecType}{type of IDs in `colors`}
+
+\item{numOnly}{delete number only}
 
 \item{excludeFreq}{exclude the words above this threshold}
 

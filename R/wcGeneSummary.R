@@ -37,6 +37,7 @@
 #' @param onlyCorpus return only corpus
 #' @param tfidf use TfIdf when making TDM
 #' @param mergeCorpus specify multiple corpus if intend to combine them
+#' @param numOnly delete number only
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -77,7 +78,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE,
-                            mergeCorpus=NULL, ...) {
+                            mergeCorpus=NULL, numOnly=TRUE, ...) {
     if (is.null(mergeCorpus)) {
         qqcat("Input genes: @{length(geneList)}\n")
         if (keyType!="ENTREZID"){
@@ -118,7 +119,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             ## Make corpus
             docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-            docs <- makeCorpus(docs, filterWords, additionalRemove)
+            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
         } else {
             ## Load from GeneSummary
             tb <- loadGeneSummary(organism = organism)
@@ -141,7 +142,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             returnList[["rawtext"]] <- fil
             ## Make corpus
             docs <- VCorpus(VectorSource(fil$Gene_summary))
-            docs <- makeCorpus(docs, filterWords, additionalRemove)
+            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
         }
 
         if (onlyCorpus){

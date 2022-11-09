@@ -29,6 +29,7 @@
 #' @param pre predefined filter words
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
+#' @param numOnly delete number only
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -57,7 +58,7 @@ wcBSDB <- function (mbList,
                     excludeFreq=1000, excludeTfIdf=NA,
                     additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL,
-                    pre=FALSE, pvclAlpha=0.95,
+                    pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
                     madeUpper=c("dna","rna"), redo=NA,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
@@ -161,7 +162,7 @@ wcBSDB <- function (mbList,
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
     qqcat("filtering @{length(filterWords)} words (frequency | tfidf) ...\n")
-    docs <- makeCorpus(docs, filterWords, additionalRemove)
+    docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}

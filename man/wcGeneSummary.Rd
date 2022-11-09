@@ -38,6 +38,7 @@ wcGeneSummary(
   topPath = 10,
   ora = FALSE,
   mergeCorpus = NULL,
+  numOnly = TRUE,
   ...
 )
 }
@@ -109,6 +110,8 @@ default to 5000}
 \item{ora}{perform ora or not (experimental)}
 
 \item{mergeCorpus}{specify multiple corpus if intend to combine them}
+
+\item{numOnly}{delete number only}
 
 \item{...}{parameters to pass to wordcloud()}
 }

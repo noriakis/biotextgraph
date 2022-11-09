@@ -4,7 +4,7 @@
 \alias{makeCorpus}
 \title{makeCorpus}
 \usage{
-makeCorpus(docs, filterWords, additionalRemove)
+makeCorpus(docs, filterWords, additionalRemove, numOnly)
 }
 \arguments{
 \item{docs}{corpus to clean}
@@ -12,6 +12,8 @@ makeCorpus(docs, filterWords, additionalRemove)
 \item{filterWords}{words to filter based on frequency}
 
 \item{additionalRemove}{words to filter}
+
+\item{numOnly}{delete number only}
 }
 \value{
 cleaned corpus

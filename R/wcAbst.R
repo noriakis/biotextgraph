@@ -31,6 +31,7 @@
 #' @param onlyCorpus return only corpus
 #' @param onlyTDM return only TDM
 #' @param preset filter preset words
+#' @param numOnly delete number only
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -49,7 +50,7 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   target="abstract", usefil=NA, filnum=0,
-				   pvclAlpha=0.95,
+				   pvclAlpha=0.95, numOnly=TRUE,
 				   geneUpper=FALSE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
@@ -141,7 +142,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				filterWords <- NA
 			}
 
-			docs <- makeCorpus(docs, filterWords, additionalRemove)
+			docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
 			if (onlyCorpus){
 				return(docs)
 			}
