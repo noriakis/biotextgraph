@@ -14,6 +14,7 @@
 #' @param border whether to draw border on pyramid plots
 #' @param madeUpper words with uppercase
 #' @param nboot pvclust bootstrap number
+#' @param numOnly delete number only
 #' 
 #' @export
 #' @import grid gridExtra
@@ -26,7 +27,7 @@
 #' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
-                                            geneVecType="ENSEMBL",
+                                            geneVecType="ENSEMBL", numOnly=TRUE,
                                             excludeFreq=5000, excludeTfIdf=NA,
                                             border=TRUE, tfidf=FALSE,
                                             madeUpper=c("rna","dna")) {
@@ -50,6 +51,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  geneVecType = geneVecType,
                                  excludeFreq = excludeFreq, excludeTfIdf=excludeTfIdf,
                                  tfidf = tfidf,
+                                 numOnly = numOnly,
                                  madeUpper = madeUpper)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
@@ -94,6 +96,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param orgDb organism database
 #' @param tfidf use tfidf when making TDM
 #' @param madeUpper words with uppercase
+#' @param numOnly delete number only
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -117,7 +120,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL", excludeTfIdf=NA,
                             numberOfWords=25, excludeFreq=5000,
-                            orgDb=org.Hs.eg.db, tfidf=FALSE,
+                            orgDb=org.Hs.eg.db, tfidf=FALSE, numOnly=TRUE,
                             madeUpper=c("rna","dna")){
     
     ## Filter high frequency words if needed
@@ -186,7 +189,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     {
 
                         pyrm <- returnPyramid(L,R, geneVec, geneVecType,
-                                filterWords, numberOfWords, orgDb=orgDb,
+                                filterWords, numberOfWords, orgDb=orgDb, numOnly=numOnly,
                                 additionalRemove=NA, madeUpper=madeUpper, tfidf=tfidf)
                         if (!is.null(pyrm)){
                             grobList[[as.character(grobNum)]]$plot <- pyrm
@@ -229,15 +232,21 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param docs corpus to clean
 #' @param filterWords words to filter based on frequency
 #' @param additionalRemove words to filter
+#' @param numOnly delete number only
 #' 
 #' @return cleaned corpus
 #' @import tm
 #' 
 #' 
-makeCorpus <- function (docs, filterWords, additionalRemove) {
+makeCorpus <- function (docs, filterWords, additionalRemove, numOnly) {
     docs <- docs %>%
-        tm_map(FUN=content_transformer(tolower)) %>%
-        tm_map(FUN=removeNumbers) %>%
+        tm_map(FUN=content_transformer(tolower))
+    if (numOnly) {
+        docs <- docs %>% tm_map(FUN=removeAloneNumbers)
+    } else {
+        docs <- docs %>% tm_map(FUN=removeNumbers)
+    }
+    docs <- docs %>%
         tm_map(removeWords, stopwords::stopwords("english",
             "stopwords-iso")) %>%
         tm_map(removeWords, filterWords) %>% 
@@ -248,6 +257,13 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
     }
     return(docs)
 }
+
+#' remove_alone_number
+#' 
+removeAloneNumbers <- 
+    function (x) PlainTextDocument(
+        gsub('\\s*(?<!\\B|-)\\d+(?!\\B|-)\\s*', " ",
+                      x, perl=TRUE))
 
 
 #' returnPyramid
@@ -268,6 +284,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' @param highCol gradient high color
 #' @param madeUpper words with uppercase
 #' @param tfidf use tfidf
+#' @param numOnly delete number only
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -280,7 +297,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove) {
 #' 
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
-                        numberOfWords, orgDb, additionalRemove=NA,
+                        numberOfWords, orgDb, additionalRemove=NA, numOnly=TRUE,
                         widths=c(0.3,0.3,0.3), lowCol="blue", tfidf=FALSE,
                         highCol="red", madeUpper=c("rna","dna")) {
     tb <- loadGeneSummary()
@@ -305,7 +322,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
     all_corpus <- VCorpus(all_bet)
     
     ## Clean the corpus
-    all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove)
+    all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly)
     if (tfidf){
         stop("Use of tfidf on returnPyramid is currently not supported ...")
         all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
