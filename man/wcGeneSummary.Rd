@@ -22,6 +22,8 @@ wcGeneSummary(
   orgDb = org.Hs.eg.db,
   edgeLabel = FALSE,
   pvclAlpha = 0.95,
+  bn = FALSE,
+  R = 20,
   ngram = NA,
   plotType = "wc",
   onlyTDM = FALSE,
@@ -77,6 +79,10 @@ default to 5000}
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{pvclAlpha}{alpha for pvpick()}
+
+\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation}
+
+\item{R}{how many bootstrap when bn is stated}
 
 \item{ngram}{default to NA (1)}
 
