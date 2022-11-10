@@ -32,6 +32,8 @@
 #' @param onlyTDM return only TDM
 #' @param preset filter preset words
 #' @param numOnly delete number only
+#' @param bn perform bootstrap-based Bayesian network inference instead of correlation
+#' @param R how many bootstrap when bn is stated
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -55,7 +57,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
                    preset=FALSE, ...)
@@ -197,13 +199,30 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        }
 
 		        ## Check correlation
-		        corData <- cor(freqWordsDTM)
-		        fetched[["corMat"]] <- corData
+		        if (bn) {
+		            qqcat("bn specified, R=@{R} ...\n")
+		            # To avoid computaitonal time, subset to numWords
+		            bnboot <- boot.strength(
+		                data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
+		                algorithm = "hc", R=R)
+		            fetched[["strength"]] <- bnboot
+		            av <- averaged.network(bnboot)
+		            avig <- as.igraph(av)
+		            el <- data.frame(as_edgelist(avig))
+		            colnames(el) <- c("from","to")
+		            mgd <- merge(el, bnboot, by=c("from","to"))
+		            colnames(mgd) <- c("from","to","weight","direction")
+		            coGraph <- graph_from_data_frame(mgd, directed=TRUE)
+		        } else {
+		            ## Check correlation
+		            corData <- cor(freqWordsDTM)
+		            fetched[["corMat"]] <- corData
 
-		        ## Set correlation below threshold to zero
-		        corData[corData<corThresh] <- 0
-		        coGraph <- graph.adjacency(corData, weighted=TRUE,
-		        	mode="undirected", diag = FALSE)
+		            ## Set correlation below threshold to zero
+		            corData[corData<corThresh] <- 0
+		            coGraph <- graph.adjacency(corData, weighted=TRUE,
+		                        mode="undirected", diag = FALSE)
+		        }
 		        ## before or after?
 		        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
 		        V(coGraph)$Freq <- matSorted[V(coGraph)$name]
@@ -260,35 +279,85 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        fetched[["ig"]] <- coGraph
 		        netPlot <- ggraph(coGraph, layout=layout)
 
-		        if (edgeLink){
-		            if (edgeLabel){
-		                netPlot <- netPlot +
-		                            geom_edge_link(aes(width=weight,
-		                            	color=weight,
-		                                label=round(weight,3)),
-		                                angle_calc = 'along',
-		                                label_dodge = unit(2.5, 'mm'),
-		                                alpha=0.5, show.legend = showLegend)
+		        if (bn){
+		            if (edgeLink){
+		                if (edgeLabel){
+		                    netPlot <- netPlot +
+		                                geom_edge_link(
+		                                    aes(width=weight,
+		                                    color=weight,
+		                                    label=round(weight,3)),
+		                                    angle_calc = 'along',
+		                                    label_dodge = unit(2.5, 'mm'),
+		                                    arrow = arrow(length = unit(4, 'mm')), 
+		                                    start_cap = circle(3, 'mm'),
+		                                    end_cap = circle(3, 'mm'),
+		                                    alpha=0.5,
+		                                    show.legend = showLegend)
+		                } else {
+		                    netPlot <- netPlot +
+		                                geom_edge_link(aes(width=weight, color=weight),
+		                                    arrow = arrow(length = unit(4, 'mm')), 
+		                                    start_cap = circle(3, 'mm'),
+		                                    end_cap = circle(3, 'mm'),
+		                                    alpha=0.5, show.legend = showLegend)
+		                }
 		            } else {
-		                netPlot <- netPlot +
-		                            geom_edge_link(aes(width=weight,
-		                            	color=weight),
-		                                alpha=0.5, show.legend = showLegend)
+		                if (edgeLabel){
+		                    netPlot <- netPlot +
+		                                geom_edge_diagonal(
+		                                    aes(width=weight,
+		                                    color=weight,
+		                                    label=round(weight,3)),
+		                                    angle_calc = 'along',
+		                                    label_dodge = unit(2.5, 'mm'),
+		                                    arrow = arrow(length = unit(4, 'mm')), 
+		                                    start_cap = circle(3, 'mm'),
+		                                    end_cap = circle(3, 'mm'),
+		                                    alpha=0.5,
+		                                    show.legend = showLegend)
+		                } else {
+		                    netPlot <- netPlot +
+		                                geom_edge_diagonal(aes(width=weight, color=weight),
+		                                    arrow = arrow(length = unit(4, 'mm')), 
+		                                    start_cap = circle(3, 'mm'),
+		                                    end_cap = circle(3, 'mm'),                                    
+		                                    alpha=0.5, show.legend = showLegend)                
+		                }
 		            }
 		        } else {
-		            if (edgeLabel){
-		                netPlot <- netPlot +
-		                            geom_edge_diagonal(aes(width=weight,
-		                            	color=weight,
-		                                label=round(weight,3)),
-		                                angle_calc = 'along',
-		                                label_dodge = unit(2.5, 'mm'),
-		                                alpha=0.5, show.legend = showLegend)
+		            if (edgeLink){
+		                if (edgeLabel){
+		                    netPlot <- netPlot +
+		                                geom_edge_link(
+		                                    aes(width=weight,
+		                                    color=weight,
+		                                    label=round(weight,3)),
+		                                    angle_calc = 'along',
+		                                    label_dodge = unit(2.5, 'mm'),
+		                                    alpha=0.5,
+		                                    show.legend = showLegend)
+		                } else {
+		                    netPlot <- netPlot +
+		                                geom_edge_link(aes(width=weight, color=weight),
+		                                    alpha=0.5, show.legend = showLegend)
+		                }
 		            } else {
-		                netPlot <- netPlot +
-		                            geom_edge_diagonal(aes(width=weight,
-		                            	color=weight),
-		                                alpha=0.5, show.legend = showLegend)                
+		                if (edgeLabel){
+		                    netPlot <- netPlot +
+		                                geom_edge_diagonal(
+		                                    aes(width=weight,
+		                                    color=weight,
+		                                    label=round(weight,3)),
+		                                    angle_calc = 'along',
+		                                    label_dodge = unit(2.5, 'mm'),
+		                                    alpha=0.5,
+		                                    show.legend = showLegend)
+		                } else {
+		                    netPlot <- netPlot +
+		                                geom_edge_diagonal(aes(width=weight, color=weight),
+		                                    alpha=0.5, show.legend = showLegend)                
+		                }
 		            }
 		        }
 		        if (tag) {

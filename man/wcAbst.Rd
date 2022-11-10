@@ -27,6 +27,8 @@ wcAbst(
   tag = FALSE,
   onlyCorpus = FALSE,
   onlyTDM = FALSE,
+  bn = FALSE,
+  R = 20,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -81,6 +83,10 @@ wcAbst(
 \item{onlyCorpus}{return only corpus}
 
 \item{onlyTDM}{return only TDM}
+
+\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation}
+
+\item{R}{how many bootstrap when bn is stated}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
