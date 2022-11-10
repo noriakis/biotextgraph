@@ -203,6 +203,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         freqWordsDTM <- t(as.matrix(docs))
         
         if (tag) {
+            ## TODO: tagging based on cluster_walktrap
             pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
             pvcl <- pvpick(pvc, alpha=pvclAlpha)
             returnList[["pvcl"]] <- pvcl
