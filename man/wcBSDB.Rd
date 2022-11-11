@@ -29,6 +29,7 @@ wcBSDB(
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
+  tagWhole = FALSE,
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
@@ -84,6 +85,8 @@ default to 0}
 \item{corThresh}{the correlation threshold}
 
 \item{tag}{perform pvclust on words and colorlize them in wordcloud}
+
+\item{tagWhole}{tag whole set or subset}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 

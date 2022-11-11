@@ -22,6 +22,7 @@
 #' @param colorText color text label based on frequency in correlation network
 #' @param ngram default to NA (1)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
+#' @param tagWhole tag whole set or subset
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param target "title" or "abstract"
 #' @param apiKey api key for eutilities
@@ -64,7 +65,7 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE,
-                    colorText=FALSE, corThresh=0.2, tag=FALSE,
+                    colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
     if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
@@ -205,13 +206,33 @@ wcBSDB <- function (mbList,
         ## TODO: before or after?
         freqWordsDTM <- t(as.matrix(docs))
         
-        if (tag) {
+        if (tag) {# Needs rework
             if (is.list(redo)){
                 if (!is.null(redo[["pvcl"]])) {
                     pvcl <- redo[["pvcl"]]
+                } else {
+                    if (tagWhole){
+                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                    } else {
+                        pvc <- pvclust(as.matrix(dist(
+                            t(
+                                freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                                )
+                            )))
+                    }
+                    pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                    redo[["pvcl"]] <- pvcl
                 }
             } else {
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                if (tagWhole){
+                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                } else {
+                    pvc <- pvclust(as.matrix(dist(
+                        t(
+                            freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                            )
+                        )))
+                }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 returnList[["pvcl"]] <- pvcl
             }
@@ -390,16 +411,27 @@ wcBSDB <- function (mbList,
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
 
-            if (tag) {
-                if (is.list(redo)){
-                    if (!is.null(redo[["pvcl"]])) {
-                        pvcl <- redo[["pvcl"]]
+
+            if (is.list(redo)){
+                if (!is.null(redo[["pvcl"]])) {
+                    pvcl <- redo[["pvcl"]]
+                } else {
+                    if (tagWhole){
+                        pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                    } else {
+                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
                     }
+                    pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                    redo[["pvcl"]] <- pvcl
+                }
+            } else {
+                if (tagWhole){
+                    pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
                 } else {
                     pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-                    pvcl <- pvpick(pvc, alpha=pvclAlpha)
-                    returnList[["pvcl"]] <- pvcl
                 }
+                pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                returnList[["pvcl"]] <- pvcl
             }
 
             wcCol <- returnDf$word

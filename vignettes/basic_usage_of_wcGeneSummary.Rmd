@@ -27,8 +27,7 @@ library(ggraph)
 
 ## Producing word clouds
 
-The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol.
-The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
+We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
 
 ```{r basic, warning=FALSE, message=FALSE, cache=TRUE}
 ## Configure input genes
@@ -347,6 +346,104 @@ As users of WGCNA typically plot dendrogramm and heatmap of module eigengenes us
 # WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
 plotEigengeneNetworksWithWords(MEs, modColors)
 ```
+
+# Application examples
+## Load the necessary packages and genes
+
+```{r load2, warning=FALSE, message=FALSE}
+library(wcGeneSummary)
+library(org.Hs.eg.db)
+library(ggplot2)
+library(ReactomePA);library(clusterProfiler)
+library(ggraph)
+degs <- wcGeneSummary:::d3degAn2019
+length(degs)
+degs
+```
+
+## Enrichment analysis
+
+First, we perform enrichment analysis using ReactomePA.
+From the enrichment analysis results, the cluster is related to transcriptional regulation by TP53.
+
+```{r ea, warning=FALSE, message=FALSE, cache=TRUE}
+## Convert to ENTREZID
+entre <- AnnotationDbi::select(org.Hs.eg.db, keytype="SYMBOL",
+                               keys = degs, columns = "ENTREZID")$ENTREZID
+pway <- setReadable(enrichPathway(entre), org.Hs.eg.db)
+sigpway <- subset(pway@result, p.adjust<0.05)
+sigpway$Description
+cnetplot(pway)
+
+## Genes involved in significant pathways
+unlist(unique(sapply(sigpway$geneID, function (x) strsplit(x,"/"))))
+```
+
+We store the name of enriched pathways in the network for the downstream analysis.
+
+```{r netenrich}
+netreac <- wcGeneSummary(degs, enrich="reactome", plotType="network", numWords=50,
+                         colorText=TRUE)
+```
+
+## text mining the gene summaries
+Next we perform the plain function producing a correlation network, with showing the genes related to high-frequency words in the text.
+
+```{r basic2app, warning=FALSE, message=FALSE, cache=TRUE}
+net1 <- wcGeneSummary(degs, plotType="network",
+                      colorText=TRUE, numWords=20,
+                      genePlot=TRUE, genePlotNum=5)
+net1$net
+top5 <- names(head(net1$geneCount, n=5))
+top5
+```
+
+## text mining the available literature
+
+These genes are further queried for PubMed information.
+
+```{r tableapp}
+abst <- wcAbst(top5)
+```
+
+Show the network for the article titles.
+
+```{r absttitleapp}
+titlenet <- wcAbst(redo=abst, target="title", tfidf=TRUE,
+       plotType="network", colorText=TRUE, corThresh=0.1,
+       preset=TRUE)
+titlenet$net
+```
+
+Show the network for the article abstract.
+
+```{r abstmainapp}
+abstnet <- wcAbst(redo=abst, target="abstract", tfidf=TRUE,
+       plotType="network", colorText=TRUE, corThresh=0.1,
+       preset=TRUE)
+abstnet$net
+```
+
+
+## Combine and compare networks
+
+From the RefSeq summary and articles related to important genes, the cluster could have functionality of DNA damage response, which is also upregulated by BKPyV infection. These networks can be combined to find intersections and differences. We can see that in addition to Reactome pathway names, plenty of information could be obtained and summarized by querying other databases, which could aid in interpreting clusters of genes and hypothesis generation.
+
+
+```{r combineapp, fig.height=10, fig.width=10}
+compareWordNet(list(abstnet, titlenet, netreac, net1),
+               titles=c("Abstract","Title","Reactome","RefSeq"))
+```
+
+Dynamic layout can be also used, by `graphlayouts`, for comparing the multiple graphs, especially useful for time-series analysis. See the documentation of [`layout_as_dynamic`](http://graphlayouts.schochastics.net/reference/layout_dynamic.html) for specifying the alpha, which is default to 0.5. 
+
+```{r dyn, warning=FALSE, fig.height=10, fig.width=20}
+library(igraph)
+dyn <- plotDynamic(list(abstnet, titlenet, net1),
+                   titles=c("Abstract","Title","RefSeq"), alpha=1)
+dyn
+```
+
 
 ```{r}
 sessionInfo()

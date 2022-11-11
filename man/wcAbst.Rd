@@ -25,6 +25,7 @@ wcAbst(
   corThresh = 0.2,
   layout = "nicely",
   tag = FALSE,
+  tagWhole = FALSE,
   onlyCorpus = FALSE,
   onlyTDM = FALSE,
   bn = FALSE,
@@ -79,6 +80,8 @@ wcAbst(
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
 \item{tag}{cluster the words based on text}
+
+\item{tagWhole}{tag based on whole data or subset}
 
 \item{onlyCorpus}{return only corpus}
 

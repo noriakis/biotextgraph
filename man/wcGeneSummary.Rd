@@ -39,6 +39,7 @@ wcGeneSummary(
   enrich = NULL,
   topPath = 10,
   ora = FALSE,
+  tagWhole = FALSE,
   mergeCorpus = NULL,
   numOnly = TRUE,
   ...
@@ -114,6 +115,8 @@ default to 5000}
 \item{topPath}{how many pathway descriptions are included in text analysis}
 
 \item{ora}{perform ora or not (experimental)}
+
+\item{tagWhole}{whether to perform pvclust on whole matrix or subset}
 
 \item{mergeCorpus}{specify multiple corpus if intend to combine them}
 
