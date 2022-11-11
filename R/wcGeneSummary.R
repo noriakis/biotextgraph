@@ -31,6 +31,7 @@
 #'                     "kegg" or "reactome"
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
+#' @param tagWhole whether to perform pvclust on whole matrix or subset
 #' @param pvclAlpha alpha for pvpick()
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param onlyTDM return only TDF
@@ -80,7 +81,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                            enrich=NULL, topPath=10, ora=FALSE,
+                            enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, ...) {
     if (is.null(mergeCorpus)) {
         qqcat("Input genes: @{length(geneList)}\n")
@@ -204,7 +205,16 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         
         if (tag) {
             ## TODO: tagging based on cluster_walktrap
-            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            ## TODO: tag based on all words (currently top words for computational time)
+            if (tagWhole){
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            } else {
+            pvc <- pvclust(as.matrix(dist(
+                t(
+                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                    )
+                )))
+            }
             pvcl <- pvpick(pvc, alpha=pvclAlpha)
             returnList[["pvcl"]] <- pvcl
         }
@@ -500,11 +510,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 
         if (tag) {
-
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            if (tagWhole){
+                pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+            } else {
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+            }
             pvcl <- pvpick(pvc)
+            returnList[["pvc"]] <- pvc
             returnList[["pvcl"]] <- pvcl
 
             wcCol <- returnDf$word

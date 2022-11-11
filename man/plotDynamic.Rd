@@ -7,7 +7,7 @@
 plotDynamic(
   listOfNets,
   concat = "union",
-  alpha = 0.2,
+  alpha = 0.5,
   titles = NULL,
   tag = FALSE
 )

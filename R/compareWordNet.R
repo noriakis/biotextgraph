@@ -226,7 +226,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
 #' @importFrom graphlayouts layout_as_dynamic
-plotDynamic <- function(listOfNets,concat="union",alpha=0.2,titles=NULL,tag=FALSE){
+plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALSE){
 
   if (is.null(titles)){
     titles <- c()
@@ -260,7 +260,7 @@ plotDynamic <- function(listOfNets,concat="union",alpha=0.2,titles=NULL,tag=FALS
     }
   }
 
-  xy <- layout_as_dynamic(igList,alpha = alpha)
+  xy <- layout_as_dynamic(igList, alpha = alpha)
   pList <- vector("list",length(igList))
 
   for(i in seq_along(igList)){

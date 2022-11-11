@@ -21,6 +21,7 @@
 #' @param additionalRemove specific words to be excluded
 #' @param target "abstract" or "title"
 #' @param tag cluster the words based on text
+#' @param tagWhole tag based on whole data or subset
 #' @param genePlot plot associated genes (default: FALSE)
 #' @param usefil filter based on "gstfidf" or "bsdbtfidf"
 #' @param filnum specify filter tfidf
@@ -56,7 +57,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   geneUpper=FALSE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
-                   corThresh=0.2, layout="nicely", tag=FALSE,
+                   corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
@@ -192,7 +193,16 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                 		qqcat("Using previous pvclust results ...")
                 		pvcl <- fetched[["pvcl"]]
                 	} else {
-			            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                		if (tagWhole){
+                			pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                		} else {
+			            # pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+	                        pvc <- pvclust(as.matrix(dist(
+						                t(
+						                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+						                    )
+						                )))
+	                    }
 			            pvcl <- pvpick(pvc, alpha=pvclAlpha)
 			            fetched[["pvcl"]] <- pvcl
 			        }
@@ -401,14 +411,27 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		    } else {
 		    	matSorted <- matSorted[1:numWords]
 		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+	            freqWords <- names(matSorted)
+	            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+
 		        if (tag) {
-
-		            freqWords <- names(matSorted)
-		            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-		            pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-		            pvcl <- pvpick(pvc)
-		            fetched[["pvcl"]] <- pvcl
-
+                	if (is.list(redo) & "pvcl" %in% names(fetched)){
+                		qqcat("Using previous pvclust results ...")
+                		pvcl <- fetched[["pvcl"]]
+                	} else {
+                		if (tagWhole){
+                			pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                		} else {
+	                        pvc <- pvclust(as.matrix(dist(
+						                t(
+						                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+						                    )
+						                )))
+	                    }
+			            pvcl <- pvpick(pvc, alpha=pvclAlpha)
+			            fetched[["pvc"]] <- pvc
+			            fetched[["pvcl"]] <- pvcl
+			        }
 		            wcCol <- returnDf$word
 		            for (i in seq_along(pvcl$clusters)){
 		                for (j in pvcl$clusters[[i]])
