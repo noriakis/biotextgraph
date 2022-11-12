@@ -363,7 +363,7 @@ library(org.Hs.eg.db)
 library(ggplot2)
 library(ReactomePA);library(clusterProfiler)
 library(ggraph)
-degs <- wcGeneSummary:::d3degAn2019
+degs <- wcGeneSummary:::d3degDownAn2019
 length(degs)
 degs
 ```
@@ -388,7 +388,7 @@ unlist(unique(sapply(sigpway$geneID, function (x) strsplit(x,"/"))))
 
 We store the name of enriched pathways in the network for the downstream analysis.
 
-```{r netenrich}
+```{r netenrich, cache=TRUE}
 netreac <- wcGeneSummary(degs, enrich="reactome", plotType="network", numWords=50,
                          colorText=TRUE)
 ```
@@ -409,7 +409,7 @@ top5
 
 These genes are further queried for PubMed information.
 
-```{r tableapp}
+```{r tableapp, cache=TRUE}
 abst <- wcAbst(top5)
 ```
 

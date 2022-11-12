@@ -83,6 +83,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, ...) {
+    if (ora & !numOnly) {
+        stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
+    }
     if (is.null(mergeCorpus)) {
         qqcat("Input genes: @{length(geneList)}\n")
         if (keyType!="ENTREZID"){
