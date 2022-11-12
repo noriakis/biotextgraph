@@ -74,9 +74,7 @@ gwc3 <- wcGeneSummary(inpSymbol, enrich="reactome", tfidf=TRUE, numWords=50)
 gwc3$wc
 ```
 
-One of the main questions is which words can be clustered together among the words contained in the queried gene cluster.
-Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`.
-For the significance threshold, `pvclAlpha` can be specified.
+One of the main questions is which words can be clustered together among the words contained in the queried gene cluster. Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`. For the significance threshold, `pvclAlpha` can be specified. The default parameters perform `pvclust` on the subset of dataset for words with high frequency specified by `numWords`. If one want to perform on whole matrix, `tagWhole=TRUE` can be specified, although it is computationally intensive.
 
 ```{r tagging, warning=FALSE}
 gwcl <- wcGeneSummary(inpSymbol,
@@ -86,6 +84,14 @@ gwcl <- wcGeneSummary(inpSymbol,
                      rot.per=0.4)
 gwcl$wc
 gwcl$pvcl
+
+gwclWhole <- wcGeneSummary(inpSymbol,
+                     numWords=30,
+                     tag=TRUE, tagWhole=TRUE,
+                     pal = palette(),
+                     rot.per=0.4)
+gwclWhole$wc
+gwclWhole$pvcl
 ```
 
 In this example showing ERCC genes, the term `DNA repair` is clustered as expected.
@@ -99,12 +105,12 @@ net <- wcGeneSummary(inpSymbol, plotType="network")
 net$net
 ```
 
-The edge label can be shown by `edgeLabel=TRUE`.  
-The threhsold of correlation can be specified by `corThresh`.
-The text color can be changed by `colorText=TRUE`.
+The edge label corresponding to correlation values can be shown by `edgeLabel=TRUE`. The number of words to be shown on plot can be specified by `numWords`. The threshold of correlation can be specified by `corThresh`. The text color can be changed by `colorText=TRUE`. The type of edge can be specified by `edgeLink`, which is by default `TRUE` (link will be used).
 
 ```{r ngramnet, warning=FALSE, message=FALSE, cache=T}
-net <- wcGeneSummary(inpSymbol, plotType="network", edgeLabel=TRUE, corThresh=0.5, numWords=20, colorText=TRUE)
+net <- wcGeneSummary(inpSymbol, plotType="network",
+                     edgeLabel=TRUE, corThresh=0.5,
+                     numWords=20, colorText=TRUE)
 net$net
 ```
 
@@ -117,8 +123,8 @@ net$net
 net$pvcl
 ```
 
-The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`, useful for assessing which words is associated with interesting genes.
-The edges connecting words to corresponding genes are shown.
+The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`, useful for assessing which words is associated with interesting genes. The edges connecting words to corresponding genes are shown.
+Additionally, one can specify `genePlotNum` for limiting the genes shown, which can be useful for identifying important genes associated with high-frequent words.
 
 ```{r gplot, warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
@@ -127,8 +133,7 @@ net$net
 ```
 
 The associated enriched pathways (if present) can be shown by specifying `genePathPlot`, using `ggforce`.
-In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot.
-Enrichment analysis here is performed by the library `clusterProfiler` or `ReactomePA`, and one can control which pathways to plot by `geePathPlotSig` value.
+In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot. Enrichment analysis here is performed by the library `clusterProfiler` or `ReactomePA`, and one can control which pathways to plot by `genePathPlotSig` value.
 
 ```{r gpplot, warning=FALSE, message=FALSE, cache=T}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="kegg", corThresh=0.5,
@@ -139,18 +144,19 @@ net$net
 
 ## Visualization of PubMed information.
 
-Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize.
+Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried.
 
 ```{r wcabst_wc, cache=TRUE}
 ab <- wcAbst(inpSymbol[1:3])
 ab$wc
 ```
 
-As fetching the same information is not desiable and time consuming, the same object can be passed to `redo` option and reperform the analysis like tagging, or changing the visualization options.
+As fetching the same information is not desirable and time consuming, the same object can be passed to `redo` option and re-perform the analysis like tagging, or changing the visualization options.
 
 ```{r wcabst_wc_2, cache=T}
 abtag <- wcAbst(redo=ab, tag=TRUE)
-abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE, plotType="network", corThresh=0.2)
+abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE,
+                 plotType="network", corThresh=0.2)
 abtag$wc
 abtag2$net
 ```
@@ -158,8 +164,7 @@ abtag2$net
 
 ## Comparing two or more networks
 
-One can compare two or more networks by providing list of objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`.
-This can be useful for assessing the similarity and dissimilarity of the various text sources, like PubMed, RefSeq, and Reactome pathway names.
+One can compare two or more networks by providing list of objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`. This can be useful for assessing the similarity and dissimilarity of the various text sources, like PubMed, RefSeq, and Reactome pathway names.
 
 ```{r compare, cache=T}
 cxcls <- c()
@@ -193,7 +198,6 @@ compareWordNet(list(net1, net2), tag=TRUE)
 ```
 
 ## Query words across clusters
-
 
 ## Text over represenatation analysis (experimental)
 
@@ -348,6 +352,9 @@ plotEigengeneNetworksWithWords(MEs, modColors)
 ```
 
 # Application examples
+
+We demonstrate an use case, which investigates transcriptomic changes induced by BK polyomavirus (BKPyV) infection in renal proximal tubular epithelial cells ([An et al. 2019](https://pubmed.ncbi.nlm.nih.gov/30620752/)). Differentially expressed genes in 3 days post-infection were obtained, and down-regulated genes in BKPyV infected cells were examined.
+
 ## Load the necessary packages and genes
 
 ```{r load2, warning=FALSE, message=FALSE}
@@ -386,7 +393,7 @@ netreac <- wcGeneSummary(degs, enrich="reactome", plotType="network", numWords=5
                          colorText=TRUE)
 ```
 
-## text mining the gene summaries
+## Text mining the gene summaries
 Next we perform the plain function producing a correlation network, with showing the genes related to high-frequency words in the text.
 
 ```{r basic2app, warning=FALSE, message=FALSE, cache=TRUE}
@@ -398,7 +405,7 @@ top5 <- names(head(net1$geneCount, n=5))
 top5
 ```
 
-## text mining the available literature
+## Text mining the available literature
 
 These genes are further queried for PubMed information.
 
@@ -430,12 +437,12 @@ abstnet$net
 From the RefSeq summary and articles related to important genes, the cluster could have functionality of DNA damage response, which is also upregulated by BKPyV infection. These networks can be combined to find intersections and differences. We can see that in addition to Reactome pathway names, plenty of information could be obtained and summarized by querying other databases, which could aid in interpreting clusters of genes and hypothesis generation.
 
 
-```{r combineapp, fig.height=10, fig.width=10}
+```{r combineapp, cache=T, fig.height=10, fig.width=10}
 compareWordNet(list(abstnet, titlenet, netreac, net1),
                titles=c("Abstract","Title","Reactome","RefSeq"))
 ```
 
-Dynamic layout can be also used, by `graphlayouts`, for comparing the multiple graphs, especially useful for time-series analysis. See the documentation of [`layout_as_dynamic`](http://graphlayouts.schochastics.net/reference/layout_dynamic.html) for specifying the alpha, which is default to 0.5. 
+Dynamic layout can be also used to compare the networks, by `graphlayouts`, for comparing the multiple graphs, especially useful for time-series analysis. See the documentation of [`layout_as_dynamic`](http://graphlayouts.schochastics.net/reference/layout_dynamic.html) for specifying the alpha, which is default to 0.5. 
 
 ```{r dyn, warning=FALSE, fig.height=10, fig.width=20}
 library(igraph)
