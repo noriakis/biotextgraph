@@ -35,6 +35,8 @@
 #' @param numOnly delete number only
 #' @param bn perform bootstrap-based Bayesian network inference instead of correlation
 #' @param R how many bootstrap when bn is stated
+#' @param onWholeDTM calculate correlation network
+#'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -61,7 +63,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
-                   preset=FALSE, ...)
+                   preset=FALSE, onWholeDTM=FALSE, ...)
         {
         	if (preset) {
         		additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
@@ -225,7 +227,11 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		            coGraph <- graph_from_data_frame(mgd, directed=TRUE)
 		        } else {
 		            ## Check correlation
-		            corData <- cor(freqWordsDTM)
+		            if (onWholeDTM){
+		                corData <- cor(freqWordsDTM)
+		            } else {
+		                corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+		            }
 		            fetched[["corMat"]] <- corData
 
 		            ## Set correlation below threshold to zero

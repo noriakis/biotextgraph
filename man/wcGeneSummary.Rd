@@ -42,6 +42,7 @@ wcGeneSummary(
   tagWhole = FALSE,
   mergeCorpus = NULL,
   numOnly = TRUE,
+  onWholeDTM = FALSE,
   ...
 )
 }
@@ -121,6 +122,9 @@ default to 5000}
 \item{mergeCorpus}{specify multiple corpus if intend to combine them}
 
 \item{numOnly}{delete number only}
+
+\item{onWholeDTM}{calculate correlation network
+on whole dataset or top-words specified by numWords}
 
 \item{...}{parameters to pass to wordcloud()}
 }
