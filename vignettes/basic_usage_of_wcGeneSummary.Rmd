@@ -132,7 +132,7 @@ net$pvcl
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`, useful for assessing which words is associated with interesting genes. The edges connecting words to corresponding genes are shown.
 Additionally, one can specify `genePlotNum` for limiting the genes shown, which can be useful for identifying important genes associated with high-frequent words.
 
-```{r gplot, warning=FALSE, message=FALSE, cache=T, fig.height=8, fig.width=8}
+```{r gplot, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePlot=TRUE, corThresh=0.5, tag=TRUE, edgeLink=FALSE,
                      numWords=20)
 net$net
@@ -141,7 +141,7 @@ net$net
 The associated enriched pathways (if present) can be shown by specifying `genePathPlot`, using `ggforce`.
 In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot. Enrichment analysis here is performed by the library `clusterProfiler` or `ReactomePA`, and one can control which pathways to plot by `genePathPlotSig` value.
 
-```{r gpplot, warning=FALSE, message=FALSE, cache=T, fig.width=8, fig.height=8}
+```{r gpplot, warning=FALSE, message=FALSE, cache=TRUE, fig.width=8, fig.height=8}
 net <- wcGeneSummary(inpSymbol, plotType="network", genePathPlot="reactome", corThresh=0.5,
                      tag=TRUE, edgeLink=FALSE, genePathPlotSig=0.05, numWords=20)
 
@@ -160,7 +160,7 @@ ab$wc
 
 As fetching the same information is not desirable and time consuming, the same object can be passed to `redo` option and re-perform the analysis like tagging, or changing the visualization options.
 
-```{r wcabst_wc_2, cache=T, fig.height=8, fig.width=8}
+```{r wcabst_wc_2, cache=TRUE, fig.height=8, fig.width=8}
 abtag <- wcAbst(redo=ab, tag=TRUE)
 abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE,
                  plotType="network", corThresh=0.2)
@@ -173,7 +173,7 @@ abtag2$net
 
 One can compare two or more networks by providing list of objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`. This can be useful for assessing the similarity and dissimilarity of the various text sources, like PubMed, RefSeq, and Reactome pathway names.
 
-```{r compare, cache=T, fig.height=8, fig.width=8}
+```{r compare, cache=TRUE, fig.height=8, fig.width=8}
 cxcls <- c()
 for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
     cxcls <- c(cxcls, paste0("CXCL",i))
@@ -191,7 +191,7 @@ compareWordNet(list(net1, net2, net3), titles=c("ercc","cxcl", "ercc-PubMed"))
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
 
-```{r tagcomp, cache=F, fig.height=10, fig.width=8}
+```{r tagcomp, cache=FALSE, fig.height=10, fig.width=8}
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
@@ -222,7 +222,7 @@ pvs[order(pvs)] |> head()
 This thresholding can be used in RefSeq visualization.
 Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 
-```{r oranet, warning=FALSE, message=FALSE, cache=T}
+```{r oranet, warning=FALSE, message=FALSE, cache=TRUE}
 net <- wcGeneSummary(inpSymbol, plotType="network", ora=TRUE, edgeLink=FALSE)
 net$net
 ```
@@ -351,7 +351,7 @@ The example visualization is shown below (not by the code above).
 
 As users of WGCNA typically plot dendrogramm and heatmap of module eigengenes using `plotEigengeneNetworks`, it is useful to combine with wcGeneSummary, which plot additional word information on a dendrogram with one line.
 
-```{r wgcna, warning=FALSE, message=FALSE, cache=T, fig.width=6, fig.height=9}
+```{r wgcna, warning=FALSE, message=FALSE, cache=TRUE, fig.width=6, fig.height=9}
 # WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
 plotEigengeneNetworksWithWords(MEs, modColors)
 ```
@@ -370,7 +370,7 @@ for (path in unique(tab$PathwayID)){
 frq <- findTerm(query, listOfGenes[sample(length(listOfGenes), 20)],
                 split=TRUE,
                 keyType="ENTREZID")
-plt <- data.frame(t(data.frame(frq, check.names=F)), check.names=FALSE)
+plt <- data.frame(t(data.frame(frq, check.names=FALSE)), check.names=FALSE)
 
 plt$name <- gsub("path:", "", rownames(plt))
 p <- ggplot(plt, aes(dna, repair, label = plt[,3])) +

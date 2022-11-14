@@ -30,7 +30,8 @@ plot comparing gene clusters
 list network of words using graphlayouts::layout_as_dynamic
 }
 \examples{
-wc1 <- wcGeneSummary("DDX41", plotType="network")
-wc2 <- wcGeneSummary("IRF3", plotType="network")
+library(igraph)
+wc1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
+wc2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
 compare <- plotDynamic(list(wc1, wc2))
 }

@@ -75,8 +75,6 @@ wcBSDB <- function (mbList,
     if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
     if (!is.list(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
-
-        ## Load from GeneSummary
         tb <- importBugSigDB()
 
         # filterWords <- c(filterWords, "pmids", "geneid") 

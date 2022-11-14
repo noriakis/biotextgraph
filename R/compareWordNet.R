@@ -17,9 +17,9 @@
 #' 
 #' @export
 #' @examples
-#' wc1 <- wcGeneSummary("DDX41", plotType="network")
-#' wc2 <- wcGeneSummary("IRF3", plotType="network")
-#' compare <- compareWordNet(list(wc1, wc2))
+#' net1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
+#' net2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
+#' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
 #' @import ggforce
 #' @importFrom stringr str_replace
@@ -230,8 +230,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' 
 #' @export
 #' @examples
-#' wc1 <- wcGeneSummary("DDX41", plotType="network")
-#' wc2 <- wcGeneSummary("IRF3", plotType="network")
+#' library(igraph)
+#' wc1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
+#' wc2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
 #' @importFrom graphlayouts layout_as_dynamic

@@ -226,7 +226,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		                algorithm = "hc", R=R)
 		            fetched[["strength"]] <- bnboot
 		            av <- averaged.network(bnboot)
-		            avig <- as.igraph(av)
+		            avig <- bnlearn::as.igraph(av)
 		            el <- data.frame(as_edgelist(avig))
 		            colnames(el) <- c("from","to")
 		            mgd <- merge(el, bnboot, by=c("from","to"))
