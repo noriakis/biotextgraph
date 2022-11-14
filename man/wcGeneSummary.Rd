@@ -11,6 +11,7 @@ wcGeneSummary(
   excludeTfIdf = NA,
   tfidf = FALSE,
   genePlotNum = 10,
+  mdaeUpperGenes = TRUE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
@@ -42,7 +43,9 @@ wcGeneSummary(
   tagWhole = FALSE,
   mergeCorpus = NULL,
   numOnly = TRUE,
+  madeUpperGenes = TRUE,
   onWholeDTM = FALSE,
+  autoFilter = FALSE,
   ...
 )
 }
@@ -123,8 +126,12 @@ default to 5000}
 
 \item{numOnly}{delete number only}
 
+\item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
+
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
+
+\item{autoFilter}{remove words "pmids", "geneids"}
 
 \item{...}{parameters to pass to wordcloud()}
 }

@@ -8,6 +8,8 @@
 #' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
+#' @param madeUpperGenes make genes upper case automatically (default to TRUE)
+#' @param autoFilter remove words "pmids", "geneids"
 #' @param pal palette for color gradient in correlation network and tag coloring
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
@@ -73,6 +75,7 @@
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NA,
                             tfidf=FALSE, genePlotNum=10,
+                            mdaeUpperGenes=TRUE,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
@@ -84,8 +87,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
-                            mergeCorpus=NULL, numOnly=TRUE, 
-                            onWholeDTM=FALSE, ...) {
+                            mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
+                            onWholeDTM=FALSE, autoFilter=FALSE, ...) {
+    if (madeUpperGenes){
+        madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
+    }
     if (ora & !numOnly) {
         stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
     }
@@ -109,7 +115,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 allTfIdfGeneSummary[
                                 allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
         }
-        filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
+        if (autoFilter){
+            filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
+        }
 
         qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
 
@@ -119,6 +127,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             qqcat("performing enrichment analysis ...")
             if (enrich=="reactome"){
                 pathRes <- enrichPathway(geneList)
+                pathRes@result$Description <- gsub("Homo sapiens\r: ",
+                                "",
+                                pathRes@result$Description)                
             } else if (enrich=="kegg"){
                 pathRes <- enrichKEGG(geneList)
             } else {
@@ -245,6 +256,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             
             if (genePathPlot == "reactome") {
                 pathRes <- enrichPathway(geneList)
+                pathRes@result$Description <- gsub("Homo sapiens\r: ",
+                                "",
+                                pathRes@result$Description)
             }
             else if (genePathPlot == "kegg") {
                 pathRes <- enrichKEGG(geneList)
@@ -487,7 +501,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
         } else {
             netPlot <- netPlot +
-                        geom_node_text(aes_(label=~name, size=~Freq),
+                        geom_node_text(aes(label=name, size=Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
                             bg.color = "white", segment.color="black",

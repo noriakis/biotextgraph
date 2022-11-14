@@ -140,7 +140,17 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
   
   if (tag){
-
+    comNet <- comNet + 
+              geom_mark_hull(
+                aes(x,y,group=tag,fill=tag,
+                filter=!is.na(tag)),
+                concavity=conc,
+                alpha=0.25, na.rm=FALSE,
+                show.legend=TRUE,
+                inherit.aes=TRUE)
+    ## TODO:
+    ## specifying label produces an error,
+    ## thus show.legend=TRUE is specified
     if (freq) {
       comNet <- comNet + 
         geom_node_point(aes(color=col, size=Freqs))+
@@ -150,21 +160,20 @@ compareWordNet <- function(listOfNets, titles=NULL,
         geom_node_point(aes(color=col), size=size)+
           scale_color_discrete(name="Group")
     }
-    comNet <- comNet + geom_mark_hull(
-      aes(comNet$data$x,
-          comNet$data$y,
-          group = contag,
-          fill=contag,
-          label=contag,
-          filter = !is.na(contag)),
-      concavity = conc,
-      # expand = unit(2, "mm"),
-      alpha = 0.25,
-      na.rm = TRUE,
-      # label.fill="transparent",
-      show.legend = FALSE
-    )
-    
+    # comNet <- comNet + geom_mark_hull(
+    #   aes(comNet$data$x,
+    #       comNet$data$y,
+    #       group=tag,
+    #       fill=tag,
+    #       label=tag,
+    #       filter = !is.na(tag)),
+    #   concavity = conc,
+    #   # expand = unit(2, "mm"),
+    #   alpha = 0.25,
+    #   na.rm = TRUE,
+    #   # label.fill="transparent",
+    #   show.legend = FALSE
+    # )
   } else {
   
     if (hull) {
@@ -200,7 +209,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 
   comNet +
   geom_node_text(
-    aes_(label=~name),
+    aes(label=name),
     check_overlap=TRUE, repel=TRUE,# size = labelSize,
     bg.color = "white", segment.color="black",
     bg.r = .15, show.legend=FALSE)+

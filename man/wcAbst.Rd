@@ -13,7 +13,7 @@ wcAbst(
   filnum = 0,
   pvclAlpha = 0.95,
   numOnly = TRUE,
-  geneUpper = FALSE,
+  geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
   pal = c("blue", "red"),
@@ -38,6 +38,7 @@ wcAbst(
   additionalRemove = NA,
   preset = FALSE,
   onWholeDTM = FALSE,
+  madeUpperGenes = TRUE,
   ...
 )
 }
@@ -108,6 +109,8 @@ wcAbst(
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
+
+\item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
 
 \item{...}{parameters to pass to wordcloud()}
 }
