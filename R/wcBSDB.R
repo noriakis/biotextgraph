@@ -393,7 +393,7 @@ wcBSDB <- function (mbList,
             }
         } else {
             netPlot <- netPlot +
-                        geom_node_text(aes_(label=~name, size=~Freq),
+                        geom_node_text(aes(label=name, size=Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
                             bg.color = "white", segment.color="black",

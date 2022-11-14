@@ -6,6 +6,7 @@
 #' @param queries gene symbols (max: 5)
 #' @param redo if plot in other parameters, input the previous list
 #' @param madeUpper make the words uppercase in resulting plot
+#' @param madeUpperGenes make genes upper case automatically (default to TRUE)
 #' @param pal palette for color gradient in correlation network
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
@@ -49,6 +50,7 @@
 #' @import stringr
 #' @import ggraph ggplot2
 #' @importFrom GetoptLong qqcat
+#' @importFrom AnnotationDbi keys
 #' @importFrom dplyr filter
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
@@ -56,15 +58,19 @@
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   target="abstract", usefil=NA, filnum=0,
 				   pvclAlpha=0.95, numOnly=TRUE,
-				   geneUpper=FALSE, apiKey=NULL, tfidf=FALSE,
+				   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
-                   preset=FALSE, onWholeDTM=FALSE, ...)
+                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
         {
+
+    	    if (madeUpperGenes){
+        		madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
+    		}
         	if (preset) {
         		additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
                                  "analysis","cells","cell","expression","doi",
@@ -118,6 +124,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				allDataDf <- fetched[["rawdf"]]
 			}
 			if (geneUpper){
+				## Maybe duplicate to madeUpperGenes
 				aq <- allDataDf$query
 				aq <- aq[aq!=""]
 				madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
@@ -189,7 +196,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
 		        ## TODO: before or after?
 		        freqWordsDTM <- t(as.matrix(docs))
-
+				row.names(freqWordsDTM) <- allDataDf$query
                 if (tag) {
                 	if (is.list(redo) & "pvcl" %in% names(fetched)){
                 		qqcat("Using previous pvclust results ...")
