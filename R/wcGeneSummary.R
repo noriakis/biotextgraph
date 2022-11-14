@@ -56,7 +56,7 @@
 #' @import pvclust
 #' @import ggforce
 #' @importFrom dplyr filter
-#' @importFrom bnlearn boot.strength averaged.network as.igraph
+#' @importFrom bnlearn boot.strength averaged.network
 #' @importFrom stats dist
 #' @importFrom grDevices palette
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
@@ -75,7 +75,6 @@
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NA,
                             tfidf=FALSE, genePlotNum=10,
-                            mdaeUpperGenes=TRUE,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
@@ -292,7 +291,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 algorithm = "hc", R=R)
             returnList[["strength"]] <- bnboot
             av <- averaged.network(bnboot)
-            avig <- as.igraph(av)
+            avig <- bnlearn::as.igraph(av)
             el <- data.frame(as_edgelist(avig))
             colnames(el) <- c("from","to")
             mgd <- merge(el, bnboot, by=c("from","to"))

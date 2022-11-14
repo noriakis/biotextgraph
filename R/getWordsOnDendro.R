@@ -258,7 +258,9 @@ makeCorpus <- function (docs, filterWords, additionalRemove, numOnly) {
     return(docs)
 }
 
-#' remove_alone_number
+#' removeAloneNumbers
+#' 
+#' @noRd
 #' 
 removeAloneNumbers <- 
     function (x) PlainTextDocument(

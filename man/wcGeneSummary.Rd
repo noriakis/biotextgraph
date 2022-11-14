@@ -11,7 +11,6 @@ wcGeneSummary(
   excludeTfIdf = NA,
   tfidf = FALSE,
   genePlotNum = 10,
-  mdaeUpperGenes = TRUE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),

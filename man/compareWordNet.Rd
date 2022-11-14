@@ -51,7 +51,7 @@ plot comparing gene clusters
 compare two gene clusters based on words
 }
 \examples{
-wc1 <- wcGeneSummary("DDX41", plotType="network")
-wc2 <- wcGeneSummary("IRF3", plotType="network")
-compare <- compareWordNet(list(wc1, wc2))
+net1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
+net2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
+compare <- compareWordNet(list(net1, net2))
 }
