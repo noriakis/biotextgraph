@@ -41,6 +41,8 @@
 #' @param numOnly delete number only
 #' @param bn perform bootstrap-based Bayesian network inference instead of correlation
 #' @param R how many bootstrap when bn is stated
+#' @param onWholeDTM calculate correlation network
+#'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -82,7 +84,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
-                            mergeCorpus=NULL, numOnly=TRUE, ...) {
+                            mergeCorpus=NULL, numOnly=TRUE, 
+                            onWholeDTM=FALSE, ...) {
     if (ora & !numOnly) {
         stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
     }
@@ -199,9 +202,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         return(docs)
     }
 
+    ## Subset to numWords
+    matSorted <- matSorted[1:numWords]
+    freqWords <- names(matSorted)
+
     if (plotType=="network"){
-        matSorted <- matSorted[1:numWords]
-        freqWords <- names(matSorted)
         # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         ## TODO: before or after?
         freqWordsDTM <- t(as.matrix(docs))
@@ -281,7 +286,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             coGraph <- graph_from_data_frame(mgd, directed=TRUE)
         } else {
             ## Check correlation
-            corData <- cor(freqWordsDTM)
+            if (onWholeDTM){
+                corData <- cor(freqWordsDTM)
+            } else {
+                corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+            }
             returnList[["corMat"]] <- corData
 
             ## Set correlation below threshold to zero
@@ -509,7 +518,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         returnList[["net"]] <- netPlot
     } else {
         ## WC
-        matSorted <- matSorted[1:numWords]
+
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 
         if (tag) {

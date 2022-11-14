@@ -37,6 +37,7 @@ wcAbst(
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   preset = FALSE,
+  onWholeDTM = FALSE,
   ...
 )
 }
@@ -104,6 +105,9 @@ wcAbst(
 \item{additionalRemove}{specific words to be excluded}
 
 \item{preset}{filter preset words}
+
+\item{onWholeDTM}{calculate correlation network
+on whole dataset or top-words specified by numWords}
 
 \item{...}{parameters to pass to wordcloud()}
 }

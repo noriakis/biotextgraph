@@ -31,6 +31,8 @@
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
 #' @param numOnly delete number only
+#' @param onWholeDTM calculate correlation network
+#'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -64,7 +66,7 @@ wcBSDB <- function (mbList,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
-                    ngram=NA, plotType="wc", disPlot=FALSE,
+                    ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
     returnList <- list()
@@ -256,7 +258,11 @@ wcBSDB <- function (mbList,
         }
 
         ## Check correlation
-        corData <- cor(freqWordsDTM)
+        if (onWholeDTM){
+            corData <- cor(freqWordsDTM)
+        } else {
+            corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+        }
         returnList[["corMat"]] <- corData
 
         ## Set correlation below threshold to zero

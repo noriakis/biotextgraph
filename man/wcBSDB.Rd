@@ -26,6 +26,7 @@ wcBSDB(
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
+  onWholeDTM = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -79,6 +80,9 @@ default to 0}
 \item{plotType}{"wc" or "network"}
 
 \item{disPlot}{plot diseases}
+
+\item{onWholeDTM}{calculate correlation network
+on whole dataset or top-words specified by numWords}
 
 \item{colorText}{color text label based on frequency in correlation network}
 
