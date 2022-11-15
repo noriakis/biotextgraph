@@ -14,6 +14,7 @@
 #' @param freq concatenate frequency and show it on plot
 #' @param freqMean how to concatenate frequency (TRUE: mean, FALSE: sum)
 #' @param scaleRange point size scaling
+#' @param returnNet return only the network (ig)
 #' 
 #' @export
 #' @examples
@@ -26,7 +27,8 @@
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size=4, conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
-                           freq=TRUE, freqMean=FALSE, scaleRange=c(5,10)) {
+                           freq=TRUE, freqMean=FALSE, scaleRange=c(5,10),
+                           returnNet=FALSE) {
   listOfIGs <- list()
   listOfNodes <- list()
 
@@ -98,6 +100,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
       }
   }
   V(uig)$col <- col
+  if (returnNet){
+    return(uig)
+  }
   
   ## concatenate tags
   # if (tag) {
