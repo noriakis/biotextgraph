@@ -299,6 +299,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             coGraph <- graph_from_data_frame(mgd, directed=TRUE)
         } else {
             ## Check correlation
+            ## TODO: speed up calculation using Rcpp 
             if (onWholeDTM){
                 corData <- cor(freqWordsDTM)
             } else {
