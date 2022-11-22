@@ -45,6 +45,8 @@ wcGeneSummary(
   madeUpperGenes = TRUE,
   onWholeDTM = FALSE,
   autoFilter = FALSE,
+  verb = FALSE,
+  udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ...
 )
 }
@@ -131,6 +133,12 @@ default to 5000}
 on whole dataset or top-words specified by numWords}
 
 \item{autoFilter}{remove words "pmids", "geneids"}
+
+\item{verb}{show verb on edges (using udpipe)
+peform udpipe_download_model(language = "english") beforehand,
+and path udpipe file to udpipeModel}
+
+\item{udpipeModel}{udpipe model file name}
 
 \item{...}{parameters to pass to wordcloud()}
 }

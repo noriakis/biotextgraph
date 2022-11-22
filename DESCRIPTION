@@ -16,8 +16,9 @@ Suggests:
     knitr,
     rmarkdown,
     markdown,
+    udpipe,
     testthat (>= 3.0.0)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.2
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 biocViews: Visualization
