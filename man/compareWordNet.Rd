@@ -16,7 +16,8 @@ compareWordNet(
   edgeLink = TRUE,
   freq = TRUE,
   freqMean = FALSE,
-  scaleRange = c(5, 10)
+  scaleRange = c(5, 10),
+  returnNet = FALSE
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ compareWordNet(
 \item{freqMean}{how to concatenate frequency (TRUE: mean, FALSE: sum)}
 
 \item{scaleRange}{point size scaling}
+
+\item{returnNet}{return only the network (ig)}
 }
 \value{
 plot comparing gene clusters

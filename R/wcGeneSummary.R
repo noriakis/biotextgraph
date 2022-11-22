@@ -45,6 +45,10 @@
 #' @param R how many bootstrap when bn is stated
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
+#' @param verb show verb on edges (using udpipe)
+#'             peform udpipe_download_model(language = "english") beforehand,
+#'             and path udpipe file to udpipeModel
+#' @param udpipeModel udpipe model file name
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -87,7 +91,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
-                            onWholeDTM=FALSE, autoFilter=FALSE, ...) {
+                            onWholeDTM=FALSE, autoFilter=FALSE,
+                            verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
+                            ...) {
+    if (verb) {udmodel_english <- udpipe_load_model(file = udpipeModel)}
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
     }
