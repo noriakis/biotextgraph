@@ -39,9 +39,10 @@
 #' @param onlyTDM return only TDF
 #' @param onlyCorpus return only corpus
 #' @param tfidf use TfIdf when making TDM
-#' @param mergeCorpus specify multiple corpus if intend to combine them
-#' @param numOnly delete number only
-#' @param bn perform bootstrap-based Bayesian network inference instead of correlation
+#' @param mergeCorpus specify multiple corpus if intend to combine them.
+#'                    like PubMed information and RefSeq summary
+#' @param numOnly delete number only (not deleting XXX123)
+#' @param bn perform bootstrap-based Bayesian network inference instead of correlation using bnlearn
 #' @param R how many bootstrap when bn is stated
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
@@ -94,7 +95,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             onWholeDTM=FALSE, autoFilter=FALSE,
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             ...) {
-    if (verb) {udmodel_english <- udpipe_load_model(file = udpipeModel)}
+    if (verb) {
+        qqcat("using verb mode ...\n")
+        if (bn) {stop("verb can be only used with undirected graph")}
+        edgeLabel <- TRUE
+        udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)}
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
     }
@@ -102,13 +107,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
     }
     if (is.null(mergeCorpus)) {
-        qqcat("Input genes: @{length(geneList)}\n")
+        qqcat("input genes: @{length(geneList)}\n")
         if (keyType!="ENTREZID"){
             geneList <- AnnotationDbi::select(orgDb,
                 keys = geneList, columns = c("ENTREZID"),
                 keytype = keyType)$ENTREZID
             geneList <- geneList[!is.na(geneList)]
-            qqcat("Converted input genes: @{length(geneList)}\n")
+            qqcat("converted input genes: @{length(geneList)}\n")
         }
 
         returnList <- list()
@@ -163,6 +168,14 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
             fil <- tb %>% filter(Gene_ID %in% geneList)
             fil <- fil[!duplicated(fil$Gene_ID),]
+
+            if (verb) {
+                ## Annotate verbs
+                s <- udpipe::udpipe_annotate(udmodel_english, fil$Gene_summary)
+                x <- data.frame(s)
+                x2 <- x |> dplyr::filter(upos=="VERB")
+                verbs <- tolower(unique(x2$token))
+            }
 
             returnList[["rawtext"]] <- fil
             ## Make corpus
@@ -319,6 +332,60 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             coGraph <- graph.adjacency(corData, weighted=TRUE,
                         mode="undirected", diag = FALSE)
         }
+
+        if (verb) {
+            eg <- as_data_frame(coGraph)
+            newegconc <- c()
+            newatt <- c()
+            nmls <- list()
+            for (j in seq_len(dim(eg)[1])){
+                tmp <- as.character(eg[j,1:2])
+                if (length(intersect(verbs, tmp))==0){
+                    newegconc <- rbind(newegconc,c(tmp,eg[j,3]))
+                    newatt <- c(newatt,NA)
+                } else if (length(intersect(verbs, tmp))==1){
+                    ve <- tmp[tmp%in%verbs]
+                    nve <- tmp[!tmp%in%verbs]
+                    nmls[[ve]] <- c(nmls[[ve]],nve)
+                } else {
+                    next
+                }
+            }
+            for (i in names(nmls)){
+                if (length(nmls[[i]])!=1) {
+                    cmbn <- t(combn(nmls[[i]],2))
+                    cmbn <- cbind(cmbn,rep(NA,dim(cmbn)[1]))
+                    newegconc <- rbind(newegconc,cmbn)
+                    newatt <- c(newatt,rep(i,dim(cmbn)[1]))
+                }
+            }
+            ## Restore cor values
+            for (i in seq_len(nrow(newegconc))){
+              tmp <- newegconc[i,]
+              if (is.na(tmp[3])){
+                y <- try(corData[tmp[1],tmp[2]])
+                if (class(y)=="try-error"){
+                  y <- NA
+                }
+                tmp[3] <- NA
+              }
+              newegconc[i,] <- tmp
+            }
+            ## Merge
+            verbDf <- data.frame(cbind(newegconc, newatt))
+            colnames(verbDf) <- c("from","to","Weight","Verb")
+            coGraph <- graph_from_data_frame(verbDf,
+                directed = FALSE)
+            coGraph <- simplify(coGraph,
+                remove.multiple = TRUE,
+                edge.attr.comb = "concat")
+            E(coGraph)$verb <- vapply(E(coGraph)$Verb,
+                function(x) paste0(x[!is.na(x)],collapse=","),
+                FUN.VALUE = "character")
+            E(coGraph)$weight <- unlist(sapply(E(coGraph)$Weight,
+                function(x) as.numeric(x[!is.na(x)])[1]))
+        }
+
         ## before or after?
         coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
@@ -449,15 +516,27 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         } else {
             if (edgeLink){
                 if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_link(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
-                                    angle_calc = 'along',
-                                    label_dodge = unit(2.5, 'mm'),
-                                    alpha=0.5,
-                                    show.legend = showLegend)
+                    if (verb) {
+                        netPlot <- netPlot +
+                                    geom_edge_diagonal(
+                                        aes(width=weight,
+                                        color=weight,
+                                        label=verb),
+                                        angle_calc = 'along',
+                                        label_dodge = unit(2.5, 'mm'),
+                                        alpha=0.5,
+                                        show.legend = showLegend)
+                    } else {
+                        netPlot <- netPlot +
+                                    geom_edge_diagonal(
+                                        aes(width=weight,
+                                        color=weight,
+                                        label=round(weight,3)),
+                                        angle_calc = 'along',
+                                        label_dodge = unit(2.5, 'mm'),
+                                        alpha=0.5,
+                                        show.legend = showLegend)                        
+                    }
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_link(aes(width=weight, color=weight),
@@ -465,15 +544,27 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 }
             } else {
                 if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_diagonal(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
-                                    angle_calc = 'along',
-                                    label_dodge = unit(2.5, 'mm'),
-                                    alpha=0.5,
-                                    show.legend = showLegend)
+                    if (verb) {
+                        netPlot <- netPlot +
+                                    geom_edge_diagonal(
+                                        aes(width=weight,
+                                        color=weight,
+                                        label=verb),
+                                        angle_calc = 'along',
+                                        label_dodge = unit(2.5, 'mm'),
+                                        alpha=0.5,
+                                        show.legend = showLegend)
+                    } else {
+                        netPlot <- netPlot +
+                                    geom_edge_diagonal(
+                                        aes(width=weight,
+                                        color=weight,
+                                        label=round(weight,3)),
+                                        angle_calc = 'along',
+                                        label_dodge = unit(2.5, 'mm'),
+                                        alpha=0.5,
+                                        show.legend = showLegend)                        
+                    }
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_diagonal(aes(width=weight, color=weight),

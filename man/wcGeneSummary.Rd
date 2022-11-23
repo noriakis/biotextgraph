@@ -86,7 +86,7 @@ default to 5000}
 
 \item{pvclAlpha}{alpha for pvpick()}
 
-\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation}
+\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
 
@@ -123,9 +123,10 @@ default to 5000}
 
 \item{tagWhole}{whether to perform pvclust on whole matrix or subset}
 
-\item{mergeCorpus}{specify multiple corpus if intend to combine them}
+\item{mergeCorpus}{specify multiple corpus if intend to combine them.
+like PubMed information and RefSeq summary}
 
-\item{numOnly}{delete number only}
+\item{numOnly}{delete number only (not deleting XXX123)}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
 
