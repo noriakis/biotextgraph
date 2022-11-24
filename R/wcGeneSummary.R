@@ -686,3 +686,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
     return(returnList)
 }
+
+#' @rdname osp
+#' @examples osp("DDX41")
+#' @export
+osp <- wcGeneSummary
