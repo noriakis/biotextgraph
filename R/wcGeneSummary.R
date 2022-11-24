@@ -49,6 +49,7 @@
 #' @param verb show verb on edges (using udpipe)
 #'             peform udpipe_download_model(language = "english") beforehand,
 #'             and path udpipe file to udpipeModel
+#' @param verbPOS Part of Speech tags in verbs, like "VBN", "VBZ"
 #' @param udpipeModel udpipe model file name
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
@@ -92,7 +93,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
-                            onWholeDTM=FALSE, autoFilter=FALSE,
+                            onWholeDTM=FALSE, autoFilter=FALSE, verbPOS=c("VBZ"),
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             ...) {
     if (verb) {
@@ -174,7 +175,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 s <- udpipe::udpipe_annotate(udmodel_english, fil$Gene_summary)
                 x <- data.frame(s)
                 x2 <- x |> dplyr::filter(upos=="VERB")
-                verbs <- tolower(unique(x2$token))
+                x3 <- x2[x2$xpos %in% verbPOS,]
+                verbs <- tolower(unique(x3$token))
             }
 
             returnList[["rawtext"]] <- fil
@@ -518,7 +520,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 if (edgeLabel){
                     if (verb) {
                         netPlot <- netPlot +
-                                    geom_edge_diagonal(
+                                    geom_edge_link(
                                         aes(width=weight,
                                         color=weight,
                                         label=verb),
@@ -528,7 +530,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                         show.legend = showLegend)
                     } else {
                         netPlot <- netPlot +
-                                    geom_edge_diagonal(
+                                    geom_edge_link(
                                         aes(width=weight,
                                         color=weight,
                                         label=round(weight,3)),
