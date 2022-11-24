@@ -472,3 +472,8 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		    }
     return(fetched)
 }
+
+#' @rdname ospa
+#' @examples ospa("DDX41")
+#' @export
+ospa <- wcAbst

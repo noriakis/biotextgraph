@@ -466,3 +466,8 @@ wcBSDB <- function (mbList,
 
     return(returnList)
 }
+
+#' @rdname ospb
+#' @examples ospb("Veillonella dispar")
+#' @export
+ospb <- wcBSDB
