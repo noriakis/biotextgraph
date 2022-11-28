@@ -4,7 +4,7 @@
   [![R-CMD-check](https://github.com/noriakis/wcGeneSummary/workflows/R-CMD-check/badge.svg)](https://github.com/noriakis/wcGeneSummary/actions)
   <!-- badges: end -->
 
-Make wordcloud or a plot of correlation network of gene set from RefSeq description using R libraries [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), [`tm`](https://www.jstatsoft.org/article/view/v025i05) and `wordcloud`. Input is gene list with the type `ENTREZID`. I think it is useful when the enrichment analysis returns no significant results for a set of genes. The idea for using RefSeq description in [`simplyfyEnrichment`](https://github.com/jokergoo/simplifyEnrichment) is already raised [here](https://github.com/jokergoo/simplifyEnrichment/issues/56).
+This package makes a summarized visualization of gene set using textual information from various sources. The basic function makes wordcloud or a plot of correlation network of gene set from RefSeq description using R libraries such as [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), [`tm`](https://www.jstatsoft.org/article/view/v025i05) and `wordcloud`.
 
 ### Installation
 ```R

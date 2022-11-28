@@ -1,9 +1,9 @@
 Package: wcGeneSummary
 Type: Package
-Title: Make word cloud from gene set
+Title: easy visualization and interpretation of omics summary data
 Version: 0.99.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
-Description: This package makes word cloud of gene set using R libraries GeneSummary, tm and wordcloud. Input is gene list. Useful when GSEA or ORA returned no significant results.
+Description: This package makes a summarized visualization of gene set using textual information from various sources.
 License: MIT
 Encoding: UTF-8
 Depends:
