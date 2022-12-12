@@ -207,8 +207,16 @@ compareWordNet <- function(listOfNets, titles=NULL,
       } else {
         comNet <- comNet + geom_node_point(aes(color=col), size=size)
       }
+      ## You can change it later
+      if (length(listOfNets)==2){
+        cs <- c("tomato","steelblue")
+      } else if (length(listOfNets)==3){
+        cs <- c("tomato","gold","steelblue")
+      } else {
+        cs <- palette()
+      }
       comNet <- comNet +
-        scale_color_discrete(name="Group")
+        scale_color_manual(name="Group",values=cs)
     }
   }
 
