@@ -1,0 +1,10 @@
+setwd("/Users/nsato/Desktop/GitHub/wcGeneSummary")
+roxygen2::roxygenise(".")
+remotes::install_local(".",upgrade="never")
+library(wcGeneSummary)
+a <- osp(c("DDX41","PNKP"), plotType="network")
+b <- osp(c("IRF3","XPO6"), plotType="network")
+c <- osp(c("DDX41","CNPY3"), plotType="network")
+d <- osp(c("ERCC4","DDX41"), plotType="network")
+
+compareWordNet(list(a,b,c,d))
