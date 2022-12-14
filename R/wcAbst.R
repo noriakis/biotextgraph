@@ -67,7 +67,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    deleteZeroDeg=TRUE, additionalRemove=NA,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
         {
-
+        	if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
     	    if (madeUpperGenes){
         		madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
     		}
