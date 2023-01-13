@@ -10,7 +10,11 @@ makeBar(
   keyType = "SYMBOL",
   pal = NULL,
   textSize = 20,
-  reorder = TRUE
+  reorder = TRUE,
+  flip = FALSE,
+  grad = FALSE,
+  retList = FALSE,
+  ...
 )
 }
 \arguments{
@@ -25,6 +29,16 @@ makeBar(
 \item{textSize}{text size in barplot}
 
 \item{reorder}{order by frequency or not}
+
+\item{flip}{flip the barplot (gene name in y-axis)}
+
+\item{grad}{use gradient of frequency}
+
+\item{retList}{return result of wcGeneSummary}
+
+\item{...}{passed to wcGeneSummary()}
+
+\item{orgDb}{orgDb}
 }
 \value{
 barplot of word frequency
