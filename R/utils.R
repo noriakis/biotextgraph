@@ -107,41 +107,72 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
 #' @param queries gene IDs
 #' @param keyType default to SYMBOL
 #' @param top how many numbers of words to be shown
+#' @param grad use gradient of frequency
 #' @param pal palette used in barplot
 #' @param textSize text size in barplot
 #' @param reorder order by frequency or not
+#' @param flip flip the barplot (gene name in y-axis)
+#' @param orgDb orgDb
+#' @param retList return result of wcGeneSummary
+#' @param ... passed to wcGeneSummary()
 #' @import org.Hs.eg.db
 #' @return barplot of word frequency
 #' @export
 #' 
 makeBar <- function(queries, top=10, keyType="SYMBOL",
-                    pal=NULL, textSize=20, reorder=TRUE) {
-    if (is.null(pal)) {
-        # palNum <- sample(1:151,1)
-        # pal <- pokepal(palNum)
-        pal <- palette()
-        if (length(pal)<top){
-            pal <- rep(pal, ceiling(top/length(pal)))
-        }
+                    pal=NULL, textSize=20, reorder=TRUE,
+                    flip=FALSE, grad=FALSE, retList=FALSE, ...) {
+  if (is.null(pal)) {
+    # palNum <- sample(1:151,1)
+    # pal <- pokepal(palNum)
+    pal <- palette()
+    if (length(pal)<top){
+      pal <- rep(pal, ceiling(top/length(pal)))
     }
-    wc <- wcGeneSummary(queries, keyType=keyType,
-                        madeUpper=c("dna","rna",
-                        tolower(AnnotationDbi::keys(org.Hs.eg.db,
-                            keytype="SYMBOL"))))
-    barp <- utils::head(wc$df, n=top)
-    if (reorder){
-        plt <- ggplot(barp, aes(x=reorder(word, freq),
-            y=freq, fill=word)) + coord_flip()
+  }
+  wc <- wcGeneSummary(queries, keyType=keyType, orgDb=orgDb,
+                      madeUpper=c("dna","rna",
+                                  tolower(AnnotationDbi::keys(orgDb,
+                                                              keytype="SYMBOL"))),
+                      ...)
+  barp <- utils::head(wc$df, n=top)
+  ## Need rewrite
+  if (reorder){
+    if (grad) {
+      plt <- ggplot(barp, aes(x=reorder(word, freq),
+                              y=freq, fill=freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
     } else {
-        plt <- ggplot(barp, aes(x=word, y=freq, fill=word)) +
-                coord_flip()
-    }     
+      plt <- ggplot(barp, aes(x=reorder(word, freq),
+                              y=freq, fill=word))+ scale_fill_manual(values=pal, guide="none")
+    }
+  } else {
+    if (grad) {
+      plt <- ggplot(barp, aes(x=word,
+                              y=freq, fill=freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
+    } else {
+      plt <- ggplot(barp, aes(x=word,
+                              y=freq, fill=word))+ scale_fill_manual(values=pal, guide="none")
+    }
+  }     
+  ## Need rewrite
+  if (flip) {
     plt <- plt +    
-        geom_bar(stat = "identity") + xlab("Word") + ylab("Frequency") +
-        theme_minimal() + scale_fill_manual(values=pal, guide="none") + 
-        theme(axis.text = element_text(size = textSize))
-    plt
+      geom_bar(stat = "identity") + xlab("Word") + ylab("Frequency") +
+      theme_minimal() + 
+      theme(axis.text = element_text(size = textSize))+coord_flip()
+  } else {
+    plt <- plt +    
+      geom_bar(stat = "identity") + xlab("Word") + ylab("Frequency") +
+      theme_minimal() + 
+      theme(axis.text = element_text(size = textSize, angle=90))
+  }
+  if (retList){
+    return(list(wc=wc, plot=plt))
+  } else {
+    return(plt)
+  }
 }
+
 
 #' exportCyjs
 #' 

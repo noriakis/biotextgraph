@@ -420,7 +420,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]
-
+            returnList[["geneMap"]] <- genemap
             genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
             coGraph <- igraph::union(coGraph, genemap)
             tmpW <- E(coGraph)$weight
