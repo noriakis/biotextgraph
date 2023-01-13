@@ -21,10 +21,11 @@
 #' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
 #' @param target "abstract" or "title"
-#' @param tag cluster the words based on text
+#' @param tag cluster the words based on text using pvclust
 #' @param tagWhole tag based on whole data or subset
 #' @param genePlot plot associated genes (default: FALSE)
-#' @param usefil filter based on "gstfidf" or "bsdbtfidf"
+#' @param usefil filter based on "gstfidf" (whole gene summary tf-idf)
+#'  or "bsdbtfidf" (whole bugsigdb tf-idf)
 #' @param filnum specify filter tfidf
 #' @param geneUpper make queries uppercase
 #' @param apiKey api key for eutilities
@@ -34,8 +35,11 @@
 #' @param onlyTDM return only TDM
 #' @param preset filter preset words
 #' @param numOnly delete number only
-#' @param bn perform bootstrap-based Bayesian network inference instead of correlation
+#' @param bn perform bootstrap-based Bayesian network inference 
+#' instead of correlation using bnlearn
 #' @param R how many bootstrap when bn is stated
+#' @param delim delimiter for queries
+#' @param orgDb org database, default to org.Hs.eg.db
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
@@ -57,19 +61,19 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				   target="abstract", usefil=NA, filnum=0,
-				   pvclAlpha=0.95, numOnly=TRUE,
+				   pvclAlpha=0.95, numOnly=TRUE, delim="OR",
 				   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
-                   deleteZeroDeg=TRUE, additionalRemove=NA,
+                   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
         {
         	if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
     	    if (madeUpperGenes){
-        		madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
+        		madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     		}
         	if (preset) {
         		additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
@@ -81,7 +85,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        	if (length(queries)>10){
 	        		stop("please limit the gene number to 10")}
 				# query <- paste(queries, collapse=" ")
-	        	query <- paste(queries, collapse=" OR ")
+	        	query <- paste(queries, collapse=paste0(" ",delim," "))
 				# qqcat("querying pubmed for @{query}\n")
 				# allDataDf <- c()
 

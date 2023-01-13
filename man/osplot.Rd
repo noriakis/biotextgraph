@@ -7,7 +7,7 @@
 osplot(target, ...)
 }
 \arguments{
-\item{target}{"abstract", "bugsigdb", "refseq"}
+\item{target}{"pubmed", "bugsigdb", "refseq", "ec"}
 
 \item{...}{passed to each function}
 }
