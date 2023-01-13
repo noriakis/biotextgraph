@@ -102,7 +102,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         edgeLabel <- TRUE
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)}
     if (madeUpperGenes){
-        madeUpper <- c(madeUpper, tolower(keys(org.Hs.eg.db, "SYMBOL")))
+        madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     }
     if (ora & !numOnly) {
         stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
@@ -239,6 +239,14 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     freqWords <- names(matSorted)
 
     if (plotType=="network"){
+        
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        for (i in madeUpper) {
+            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
+            returnDf[returnDf$word == i,"word"] <- toupper(i)
+        }
+        returnList[["df"]] <- returnDf
+
         # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         ## TODO: before or after?
         freqWordsDTM <- t(as.matrix(docs))
