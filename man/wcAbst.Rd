@@ -13,6 +13,7 @@ wcAbst(
   filnum = 0,
   pvclAlpha = 0.95,
   numOnly = TRUE,
+  delim = "OR",
   geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
@@ -36,6 +37,7 @@ wcAbst(
   genePlot = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
+  orgDb = org.Hs.eg.db,
   preset = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
@@ -51,13 +53,16 @@ wcAbst(
 
 \item{target}{"abstract" or "title"}
 
-\item{usefil}{filter based on "gstfidf" or "bsdbtfidf"}
+\item{usefil}{filter based on "gstfidf" (whole gene summary tf-idf)
+or "bsdbtfidf" (whole bugsigdb tf-idf)}
 
 \item{filnum}{specify filter tfidf}
 
 \item{pvclAlpha}{alpha for pvpick()}
 
 \item{numOnly}{delete number only}
+
+\item{delim}{delimiter for queries}
 
 \item{geneUpper}{make queries uppercase}
 
@@ -81,7 +86,7 @@ wcAbst(
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
-\item{tag}{cluster the words based on text}
+\item{tag}{cluster the words based on text using pvclust}
 
 \item{tagWhole}{tag based on whole data or subset}
 
@@ -89,7 +94,8 @@ wcAbst(
 
 \item{onlyTDM}{return only TDM}
 
-\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation}
+\item{bn}{perform bootstrap-based Bayesian network inference 
+instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
 
@@ -104,6 +110,8 @@ wcAbst(
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{additionalRemove}{specific words to be excluded}
+
+\item{orgDb}{org database, default to org.Hs.eg.db}
 
 \item{preset}{filter preset words}
 
