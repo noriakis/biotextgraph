@@ -155,7 +155,7 @@ net$net
 
 ## Visualization of PubMed information.
 
-Using `easyPubMed`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried.
+Using `rentrez`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried.
 
 ```{r wcabst_wc, cache=FALSE, fig.height=8, fig.width=8}
 ab <- wcAbst(inpSymbol[1:3])

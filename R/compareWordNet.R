@@ -207,11 +207,14 @@ compareWordNet <- function(listOfNets, titles=NULL,
       } else {
         comNet <- comNet + geom_node_point(aes(color=col), size=size)
       }
+      catNum <- length(unique(V(uig)$col))
       ## You can change it later
-      if (length(listOfNets)==2){
+      if (catNum==2){
         cs <- c("tomato","steelblue")
-      } else if (length(listOfNets)==3){
+      } else if (catNum==3){
         cs <- c("tomato","gold","steelblue")
+      } else if (catNum==4) {
+        cs <- c("tomato","gold","steelblue","mediumseagreen")
       } else {
         cs <- palette()
       }
