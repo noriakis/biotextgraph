@@ -51,6 +51,7 @@
 #'             and path udpipe file to udpipeModel
 #' @param verbPOS Part of Speech tags in verbs, like "VBN", "VBZ"
 #' @param udpipeModel udpipe model file name
+#' @param cl for parPvclust, parallel clustering can be performed
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -86,7 +87,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
-                            pvclAlpha=0.95, bn=FALSE, R=20,
+                            pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
                             ngram=NA, plotType="wc", onlyTDM=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
@@ -255,13 +256,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ## TODO: tagging based on cluster_walktrap
             ## TODO: tag based on all words (currently top words for computational time)
             if (tagWhole){
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
             } else {
             pvc <- pvclust(as.matrix(dist(
                 t(
                     freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                     )
-                )))
+                )), parallel=cl)
             }
             pvcl <- pvpick(pvc, alpha=pvclAlpha)
             returnList[["pvcl"]] <- pvcl
@@ -647,9 +648,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             if (tagWhole){
-                pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
             } else {
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
             }
             pvcl <- pvpick(pvc)
             returnList[["pvc"]] <- pvc
