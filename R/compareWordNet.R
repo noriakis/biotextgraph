@@ -209,15 +209,16 @@ compareWordNet <- function(listOfNets, titles=NULL,
       }
       catNum <- length(unique(V(uig)$col))
       ## You can change it later
-      if (catNum==2){
-        cs <- c("tomato","steelblue")
-      } else if (catNum==3){
-        cs <- c("tomato","gold","steelblue")
-      } else if (catNum==4) {
-        cs <- c("tomato","gold","steelblue","mediumseagreen")
-      } else {
-        cs <- palette()
-      }
+      cs <- RColorBrewer::brewer.pal(catNum, "PuOr")
+      # if (catNum==2){
+      #   cs <- c("tomato","steelblue")
+      # } else if (catNum==3){
+      #   cs <- c("tomato","gold","steelblue")
+      # } else if (catNum==4) {
+      #   cs <- c("tomato","gold","steelblue","mediumseagreen")
+      # } else {
+      #   cs <- palette()
+      # }
       comNet <- comNet +
         scale_color_manual(name="Group",values=cs)
     }

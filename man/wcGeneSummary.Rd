@@ -24,6 +24,7 @@ wcGeneSummary(
   pvclAlpha = 0.95,
   bn = FALSE,
   R = 20,
+  cl = FALSE,
   ngram = NA,
   plotType = "wc",
   onlyTDM = FALSE,
@@ -90,6 +91,8 @@ default to 5000}
 \item{bn}{perform bootstrap-based Bayesian network inference instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
+
+\item{cl}{for parPvclust, parallel clustering can be performed}
 
 \item{ngram}{default to NA (1)}
 

@@ -77,24 +77,27 @@ One of the main questions is which words can be clustered together among the wor
 
 ```{r tagging, warning=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 
+library(RColorBrewer)
+pal <- brewer.pal(4, "PuOr") 
+pal <- colorRampPalette(pal)(20)
+
+
 ## Cluster on subset of words
 gwcl <- wcGeneSummary(inpSymbol,
                      numWords=30,
                      tag=TRUE,
-                     pal = palette(),
+                     pal = pal,
                      rot.per=0.4)
 gwcl$wc
 gwcl$pvcl
 
 ## Cluster on whole matrix
-library(RColorBrewer)
-pal <- brewer.pal(4, "PuOr") 
-pal <- colorRampPalette(pal)(20)
 
 gwclWhole <- wcGeneSummary(inpSymbol,
                      numWords=50,
                      tag=TRUE, tagWhole=TRUE,
                      pal = pal,
+                     cl=snow::makeCluster(8),
                      rot.per=0.4)
 gwclWhole$wc
 gwclWhole$pvcl
