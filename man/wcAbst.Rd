@@ -129,7 +129,7 @@ on whole dataset or top-words specified by numWords}
 list of data frame and ggplot2 object
 }
 \description{
-make word cloud or correlation network from PubMed abstracts using easyPubMed
+make word cloud or correlation network from PubMed
 }
 \examples{
 wcAbst("DDX41")
