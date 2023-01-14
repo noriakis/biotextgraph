@@ -185,7 +185,7 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
 #' @export
 #' 
 makeBar <- function(queries, top=10, keyType="SYMBOL",
-                    pal=NULL, textSize=20, reorder=TRUE,
+                    pal=NULL, textSize=20, reorder=TRUE, orgDb=org.Hs.eg.db,
                     flip=FALSE, grad=FALSE, retList=FALSE, ...) {
   if (is.null(pal)) {
     # palNum <- sample(1:151,1)

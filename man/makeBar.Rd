@@ -11,6 +11,7 @@ makeBar(
   pal = NULL,
   textSize = 20,
   reorder = TRUE,
+  orgDb = org.Hs.eg.db,
   flip = FALSE,
   grad = FALSE,
   retList = FALSE,
@@ -30,6 +31,8 @@ makeBar(
 
 \item{reorder}{order by frequency or not}
 
+\item{orgDb}{orgDb}
+
 \item{flip}{flip the barplot (gene name in y-axis)}
 
 \item{grad}{use gradient of frequency}
@@ -37,8 +40,6 @@ makeBar(
 \item{retList}{return result of wcGeneSummary}
 
 \item{...}{passed to wcGeneSummary()}
-
-\item{orgDb}{orgDb}
 }
 \value{
 barplot of word frequency
