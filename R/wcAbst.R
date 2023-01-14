@@ -39,6 +39,7 @@
 #' instead of correlation using bnlearn
 #' @param R how many bootstrap when bn is stated
 #' @param delim delimiter for queries
+#' @param retMax how many items are to be retlieved?
 #' @param orgDb org database, default to org.Hs.eg.db
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
@@ -66,7 +67,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
@@ -84,43 +85,11 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 	        	fetched <- list() # store results
 	        	if (length(queries)>10){
 	        		stop("please limit the gene number to 10")}
-				# query <- paste(queries, collapse=" ")
+				
 	        	query <- paste(queries, collapse=paste0(" ",delim," "))
-				# qqcat("querying pubmed for @{query}\n")
-				# allDataDf <- c()
-
-				## Query all by OR and later grepl on title and abstract
-				qqcat("querying pubmed for @{query}\n")
-				pubmedIds <- get_pubmed_ids(query, api_key=apiKey)
-				pubmedData <- fetch_pubmed_data(pubmedIds)
-				allXml <- articles_to_list(pubmedData)
-				qqcat("converting to a data frame ...\n")
-				allDataDf <- do.call(rbind, lapply(allXml, article_to_df, 
-				                        max_chars = -1, getAuthors = FALSE))
-				incs <- c()
-				for (i in queries){
-				    li <- tolower(i)
-				    inc <- grepl(li, tolower(allDataDf$abstract), fixed=TRUE)
-				    inc[inc] <- i
-				    inct <- grepl(li, tolower(allDataDf$title), fixed=TRUE)
-				    inct[inct] <- i
-				    incs <- cbind(incs, inc, inct)
-				}
-				allDataDf$query <- apply(incs, 1,
-					function(x) paste(unique(x[x!="FALSE"]), collapse=","))
-
-				# for (q in queries) {
-				# 	qqcat("querying pubmed for @{q}\n")
-				# 	pubmedIds <- get_pubmed_ids(q, api_key=apiKey)
-				# 	pubmedData <- fetch_pubmed_data(pubmedIds)
-				# 	allXml <- articles_to_list(pubmedData)
-
-				# 	qqcat("converting to a data frame ...\n")
-				# 	dataDf <- do.call(rbind, lapply(allXml, article_to_df, 
-				# 	                        max_chars = -1, getAuthors = FALSE))
-				# 	dataDf$query <- q
-				# 	allDataDf <- rbind(allDataDf, dataDf)
-				# }
+			    clearQuery <- gsub('\"', '', queries)
+				allDataDf <- getPubMed(query, clearQuery, type=target, apiKey=apiKey,
+					retMax=retMax)
 				fetched[["rawdf"]] <- allDataDf
 			} else {
 				qqcat("Resuming from the previous results ...\n")
@@ -135,9 +104,9 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 				# print(madeUpper)
 			}
 			if (target=="abstract"){
-				docs <- VCorpus(VectorSource(allDataDf$abstract))
+				docs <- VCorpus(VectorSource(allDataDf$text))
 			} else if (target=="title"){
-				docs <- VCorpus(VectorSource(allDataDf$title))
+				docs <- VCorpus(VectorSource(allDataDf$text))
 			} else {
 				stop("specify target or abstract")
 			}
@@ -196,6 +165,14 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 
 		    if (plotType=="network"){
 		        matSorted <- matSorted[1:numWords]
+
+		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+		        for (i in madeUpper) {
+		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
+		            returnDf[returnDf$word == i,"word"] <- toupper(i)
+		        }
+		        fetched[["df"]] <- returnDf
+
 		        freqWords <- names(matSorted)
 		        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
 		        ## TODO: before or after?
@@ -283,6 +260,7 @@ wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
 		                	}
 		                }
 		            }
+                    fetched[["geneMap"]] <- genemap
 		            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
 		            coGraph <- igraph::union(coGraph, genemap)
 		            tmpW <- E(coGraph)$weight
