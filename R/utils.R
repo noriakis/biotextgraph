@@ -1,3 +1,68 @@
+#' getPubMed
+#' 
+#' obtain pubmed information
+#' 
+#' @param searchQuery search query
+#' @param rawQuery raw query
+#' @param type abstract or title
+#' @param apiKey api key
+#' @param retMax retmax
+#' @import rentrez
+#' 
+#' @noRd
+
+getPubMed <- function(searchQuery, rawQuery,
+    type="abstract", apiKey=NULL, retMax=10) {
+    if (is.null(apiKey)){
+      qqcat("proceeding without API key\n")
+    } else {
+      set_entrez_key(apiKey)
+    }
+    pubmedSearch <- entrez_search("pubmed",
+                                  term = searchQuery, 
+                                  retmax = retMax)
+    searchResults <- entrez_fetch(db="pubmed",
+                                  pubmedSearch$ids, rettype="xml", 
+                                  parsed=FALSE)
+    parsedXML <- xmlTreeParse(as.character(searchResults))
+
+    if (type=="abstract") {
+      ret <- "Abstract"
+    } else {
+      ret <- "ArticleTitle"
+    }
+
+    charset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+                                    ret,
+                                    recursive = TRUE)
+
+    obtainedText <- as.character(xmlValue(charset))
+
+    incs <- c()
+    for (i in rawQuery){
+      li <- tolower(i)
+      inc <- grepl(li, tolower(obtainedText), fixed=TRUE)
+      inc[inc] <- i
+      # inct <- grepl(li, tolower(titletext), fixed=TRUE)
+      # inct[inct] <- i
+      incs <- cbind(incs, inc)
+    }
+    obtainedDf <- data.frame(cbind(
+      seq_len(length(obtainedText)),
+      obtainedText,
+      apply(incs, 1, function(x) paste(unique(x[x!="FALSE"]), collapse=","))
+    )) |> `colnames<-`(c("ID","text","query"))
+    return(obtainedDf)
+}
+
+
+
+
+
+
+
+
+
 #' findTerm
 #' 
 #' find queried terms in list of gene clusters and return frequency

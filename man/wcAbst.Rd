@@ -31,6 +31,7 @@ wcAbst(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
+  retMax = 10,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -98,6 +99,8 @@ or "bsdbtfidf" (whole bugsigdb tf-idf)}
 instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
+
+\item{retMax}{how many items are to be retlieved?}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
