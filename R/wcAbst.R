@@ -1,6 +1,6 @@
 #' wcAbst
 #' 
-#' make word cloud or correlation network from PubMed abstracts using easyPubMed
+#' make word cloud or correlation network from PubMed
 #' 
 #' 
 #' @param queries gene symbols (max: 5)
