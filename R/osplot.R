@@ -30,6 +30,7 @@ setClass("osplot", slots=list(
         delim="character",
         type="character",
         filtered="character",
+        pmids="character",
         excludeFreq="numeric",
         excludeTfIdf="numeric",
         numWords="numeric",

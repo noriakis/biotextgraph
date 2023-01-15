@@ -4,12 +4,14 @@
 \alias{wcEC}
 \title{wcEC}
 \usage{
-wcEC(file, ecnum, ...)
+wcEC(file, ecnum, onlyTerm = FALSE, ...)
 }
 \arguments{
 \item{file}{file downloaded from expasy}
 
 \item{ecnum}{candidate ecnum, like those obtained from eggNOG-mapper}
+
+\item{onlyTerm}{only return quoted queries}
 
 \item{...}{passed to osplot(target="pubmed")}
 }
