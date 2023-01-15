@@ -27,9 +27,12 @@ osplot <- function(target, ...) {
 
 setClass("osplot", slots=list(
         query="character",
+        type="character",
         filtered="character",
         excludeFreq="numeric",
         excludeTfIdf="numeric",
+        numWords="numeric",
+        ora="vector",
         enrichResults="data.frame",
         rawText="data.frame",
         TDM="TermDocumentMatrix",
@@ -37,15 +40,18 @@ setClass("osplot", slots=list(
         freqDf="data.frame",
         pvclust="list",
         pvpick="list",
+        strength="data.frame",
         corMat="matrix",
-        graph="igraph",
+        igraph="igraph",
         geneCount="vector",
         geneMap="matrix",
-        net="list"
+        net="ggraph",
+        wc="gg"
         ))
 setMethod("show",
   signature(object="osplot"),
   function(object) {
-    qqcat("Query: @{object@query}\n")
+    qqcat("type: @{object@type}\n")
+    cat(paste(object@query, collapse="/"));cat("\n")
     print(object.size(object), units="auto")
   })
