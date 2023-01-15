@@ -269,7 +269,7 @@ wcGeneSummaryTest <- function (geneList, keyType="SYMBOL",
             }
             pvcl <- pvpick(pvc, alpha=pvclAlpha)
             ret@pvclust <- pvc
-            ret@pvpick <- pvc
+            ret@pvpick <- pvcl
         }
 
         ## genePlot: plot associated genes

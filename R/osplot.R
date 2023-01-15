@@ -27,6 +27,7 @@ osplot <- function(target, ...) {
 
 setClass("osplot", slots=list(
         query="character",
+        delim="character",
         type="character",
         filtered="character",
         excludeFreq="numeric",
@@ -38,7 +39,7 @@ setClass("osplot", slots=list(
         TDM="TermDocumentMatrix",
         corpus="VCorpus",
         freqDf="data.frame",
-        pvclust="list",
+        pvclust="pvclust",
         pvpick="list",
         strength="data.frame",
         corMat="matrix",
