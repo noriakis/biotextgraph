@@ -23,6 +23,7 @@ library(wcGeneSummary)
 library(org.Hs.eg.db)
 library(ggplot2)
 library(ggraph)
+library(RColorBrewer)
 ```
 
 ## Producing word clouds
@@ -77,7 +78,6 @@ One of the main questions is which words can be clustered together among the wor
 
 ```{r tagging, warning=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 
-library(RColorBrewer)
 pal <- brewer.pal(4, "PuOr") 
 pal <- colorRampPalette(pal)(20)
 
@@ -505,6 +505,10 @@ compareWordNet(list(abstnet, titlenet, netreac, net1),
 The network can be obtained by `returnNet=TRUE`, which can be used for downstream analysis like assessment of degrees and community detection.
 
 ```{r combineNet, cache=F, fig.height=10, fig.width=10}
+
+pal <- brewer.pal(10, "PuOr") 
+pal <- colorRampPalette(pal)(20)
+
 conet <- compareWordNet(list(abstnet, titlenet, netreac, net1), returnNet=TRUE)
 conet
 
@@ -520,14 +524,14 @@ ggraph(conet)+
                    check_overlap=TRUE, repel=TRUE,
                    bg.color = "white", segment.color="black",
                    bg.r = .15)+
-    scale_color_discrete(name="Walktrap")+
+    scale_color_manual(values=pal, name="Walktrap")+
     theme_graph()
 ```
 
 
 Dynamic layout can be also used to compare the networks, by `graphlayouts`, for comparing the multiple graphs, especially useful for time-series analysis. See the documentation of [`layout_as_dynamic`](http://graphlayouts.schochastics.net/reference/layout_dynamic.html) for specifying the alpha, which is default to 0.5. 
 
-```{r dyn, warning=FALSE, fig.height=10, fig.width=20}
+```{r dyn, warning=FALSE, fig.height=8, fig.width=10}
 library(igraph)
 dyn <- plotDynamic(list(abstnet, titlenet, net1),
                    titles=c("Abstract","Title","RefSeq"), alpha=1)
