@@ -12,6 +12,7 @@ pathviewText(
   pal = "RdBu",
   target = "refseq",
   searchTerms = NULL,
+  node.types = "gene",
   numWords = 20,
   ...
 )
@@ -29,6 +30,8 @@ pathviewText(
 for coloring of nodes}
 
 \item{target}{target DB for word}
+
+\item{node.types}{passed to node.map}
 
 \item{numWords}{number of words in barplot}
 

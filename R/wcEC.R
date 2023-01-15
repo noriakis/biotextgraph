@@ -7,11 +7,12 @@
 #' 
 #' @param file file downloaded from expasy
 #' @param ecnum candidate ecnum, like those obtained from eggNOG-mapper
+#' @param onlyTerm only return quoted queries
 #' @param ... passed to osplot(target="pubmed")
 #' @export
 #' 
 
-wcEC <- function(file, ecnum, ...) {
+wcEC <- function(file, ecnum, onlyTerm=FALSE, ...) {
   flg <- FALSE
   candecs <- NULL
   con = file(file, "r")
@@ -50,6 +51,7 @@ wcEC <- function(file, ecnum, ...) {
   candecs <- data.frame(candecs) |>
     `colnames<-`(c("number","desc","comment"))
   quoted <- dQuote(candecs$desc)
+  if (onlyTerm) {return(quoted)}
   abst <- osplot(target="pubmed",
                  quoted, ...)
   return(abst)

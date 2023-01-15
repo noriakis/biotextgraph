@@ -11,13 +11,14 @@
 #' @param org organism ID in KEGG, default to hsa
 #' @param target target DB for word
 #' @param numWords number of words in barplot
+#' @param node.types passed to node.map
 #' @param ... passed to wc functions
 #' @import png grid pathview
 #' @export
 #'
 #' 
 pathviewText <- function(geneList, keyType, pid, org="hsa",
-  pal="RdBu",target="refseq", searchTerms=NULL,
+  pal="RdBu",target="refseq", searchTerms=NULL, node.types="gene",
   numWords=20, ...) {
   returnList <- list()
   if (!keyType %in% c("KO","ENTREZID")) {
@@ -28,6 +29,8 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                                       keytype = keyType)$ENTREZID
     geneList <- geneList[!is.na(geneList)]
     qqcat("converted input genes: @{length(geneList)}\n")
+  } else {
+    rawGenes <- geneList
   }
 
 
@@ -41,7 +44,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
   node.data=node.info(xml.file)
   plot.data.gene=node.map(mol.data=vec,
                           node.data,
-                          node.types="gene")
+                          node.types=node.types)
 
 
 
