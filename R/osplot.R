@@ -24,3 +24,28 @@ osplot <- function(target, ...) {
 		stop("Please specify pubmed, bugsigdbr, or refseq")
 	}
 }
+
+setClass("osplot", slots=list(
+        query="character",
+        filtered="character",
+        excludeFreq="numeric",
+        excludeTfIdf="numeric",
+        enrichResults="data.frame",
+        rawText="data.frame",
+        TDM="TermDocumentMatrix",
+        corpus="VCorpus",
+        freqDf="data.frame",
+        pvclust="list",
+        pvpick="list",
+        corMat="matrix",
+        graph="igraph",
+        geneCount="vector",
+        geneMap="matrix",
+        net="list"
+        ))
+setMethod("show",
+  signature(object="osplot"),
+  function(object) {
+    qqcat("Query: @{object@query}\n")
+    print(object.size(object), units="auto")
+  })
