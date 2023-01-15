@@ -75,10 +75,10 @@
 #' @importFrom ReactomePA enrichPathway
 #' @importFrom clusterProfiler enrichKEGG setReadable
 #' 
+#' @noRd
 #' @examples
 #' geneList <- c("DDX41")
 #' wcGeneSummary(geneList)
-#' @export
 #' 
 wcGeneSummaryTest <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NULL,

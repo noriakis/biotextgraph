@@ -5,9 +5,10 @@
 #' 
 #' @param geneList gene ID list
 #' @param keyType keytype for queried gene
-#' @param pid pathway id (hsa)
+#' @param pid pathway id
 #' @param pal palette to be passed to RColorBrewer
 #' for coloring of nodes
+#' @param org organism ID in KEGG, default to hsa
 #' @param target target DB for word
 #' @param numWords number of words in barplot
 #' @param ... passed to wc functions
@@ -15,10 +16,11 @@
 #' @export
 #'
 #' 
-pathviewText <- function(geneList, keyType, pid, pal="RdBu",target="refseq",
+pathviewText <- function(geneList, keyType, pid, org="hsa",
+  pal="RdBu",target="refseq", searchTerms=NULL,
   numWords=20, ...) {
   returnList <- list()
-  if (keyType!="ENTREZID"){
+  if (!keyType %in% c("KO","ENTREZID")) {
     qqcat("converting to ENTREZID\n")
     rawGenes <- geneList
     geneList <- AnnotationDbi::select(orgDb,
@@ -33,8 +35,9 @@ pathviewText <- function(geneList, keyType, pid, pal="RdBu",target="refseq",
   vec <- rep(1, length(geneList))
   names(vec) <- geneList
   
-  download.kegg(pathway.id=pid)
-  xml.file=paste0("hsa",pid,".xml")
+  download.kegg(pathway.id=pid,
+    species=org)
+  xml.file=paste0(org, pid,".xml")
   node.data=node.info(xml.file)
   plot.data.gene=node.map(mol.data=vec,
                           node.data,
@@ -72,15 +75,18 @@ pathviewText <- function(geneList, keyType, pid, pal="RdBu",target="refseq",
 
   pv.pars= keggview.native(plot.data.gene=plot.data.gene,
                            cols.ts.gene=molCol,
-                           pathway.name=paste0("hsa",pid),
+                           pathway.name=paste0(org,pid),
                            same.layer=TRUE,
                            plot.col.key=FALSE,
                            out.suffix = "custom.cols")
 
 
-  img <- readPNG(paste0("hsa",pid,".custom.cols.png"))
+  img <- readPNG(paste0(org,pid,".custom.cols.png"))
   g <- rasterGrob(img, interpolate=FALSE)
   if (target=="abstract") {
+    if (!is.null(searchTerms)) {
+      rawGenes <- searchTerms
+    }
     barp <- wcAbst(rawGenes, keyType="ENTREZID",
                    numWords=numWords,
                     plotType="network",
