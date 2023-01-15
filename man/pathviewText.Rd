@@ -8,8 +8,10 @@ pathviewText(
   geneList,
   keyType,
   pid,
+  org = "hsa",
   pal = "RdBu",
   target = "refseq",
+  searchTerms = NULL,
   numWords = 20,
   ...
 )
@@ -19,7 +21,9 @@ pathviewText(
 
 \item{keyType}{keytype for queried gene}
 
-\item{pid}{pathway id (hsa)}
+\item{pid}{pathway id}
+
+\item{org}{organism ID in KEGG, default to hsa}
 
 \item{pal}{palette to be passed to RColorBrewer
 for coloring of nodes}

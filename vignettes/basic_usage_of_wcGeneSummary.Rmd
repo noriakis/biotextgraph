@@ -506,9 +506,6 @@ The network can be obtained by `returnNet=TRUE`, which can be used for downstrea
 
 ```{r combineNet, cache=F, fig.height=10, fig.width=10}
 
-pal <- brewer.pal(10, "PuOr") 
-pal <- colorRampPalette(pal)(20)
-
 conet <- compareWordNet(list(abstnet, titlenet, netreac, net1), returnNet=TRUE)
 conet
 
@@ -524,7 +521,7 @@ ggraph(conet)+
                    check_overlap=TRUE, repel=TRUE,
                    bg.color = "white", segment.color="black",
                    bg.r = .15)+
-    scale_color_manual(values=pal, name="Walktrap")+
+    scale_color_discrete(name="Walktrap")+
     theme_graph()
 ```
 
