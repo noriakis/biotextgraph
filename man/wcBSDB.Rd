@@ -16,7 +16,7 @@ wcBSDB(
   pvclAlpha = 0.95,
   numOnly = TRUE,
   madeUpper = c("dna", "rna"),
-  redo = NA,
+  redo = NULL,
   pal = c("blue", "red"),
   numWords = 15,
   scaleRange = c(5, 10),
@@ -34,6 +34,7 @@ wcBSDB(
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
+  cl = FALSE,
   ...
 )
 }

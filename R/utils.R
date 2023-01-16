@@ -152,13 +152,13 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
             store[[i]] <-
                 wcGeneSummary(converted[[i]],
                               keyType=keyType,
-                              ...)$rawfrequency
+                              ...)@freqDf
         }
     }
     sim <- sapply(store, function(x) sapply(store,
                     function(y)
-                        length(intersect(names(x), names(y))) /
-                        length(union(names(x), names(y)))))
+                        length(intersect(x$word, y$word)) /
+                        length(union(x$word, y$word))))
     return(as.matrix(sim))
 }
 
@@ -200,7 +200,7 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
                                   tolower(AnnotationDbi::keys(orgDb,
                                                               keytype="SYMBOL"))),
                       ...)
-  barp <- utils::head(wc$df, n=top)
+  barp <- utils::head(wc@freqDf, n=top)
   ## Need rewrite
   if (reorder){
     if (grad) {

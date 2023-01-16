@@ -104,16 +104,16 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
   }
 
   ## Obtain words related to genes listed in map
-  gmap <- barp$geneMap
+  gmap <- barp@geneMap
   candWords <- NULL
   for (gn in plot.data.gene[,2]) {
-    if (gn %in% barp$geneMap[, 2]) {
+    if (gn %in% barp@geneMap[, 2]) {
       candWords <- rbind(candWords, gmap[gmap[,2] %in% gn,])
     }
   }
 
-  inBar <- candWords[candWords[,1] %in% barp$df$word,]
-  rePlot <- barp$df[1:numWords,]
+  inBar <- candWords[candWords[,1] %in% barp@freqDf$word,]
+  rePlot <- barp@freqDf[1:numWords,]
   barCols <- NULL
   rePlotColor <- NULL
   for (rn in row.names(rePlot)) {

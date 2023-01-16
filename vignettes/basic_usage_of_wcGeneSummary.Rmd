@@ -34,7 +34,7 @@ We use ERCC genes as input. The basic usage of the package is producing a word c
 ## Configure input genes
 inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 gwc <- wcGeneSummary(inpSymbol)
-gwc$wc
+gwc@wc
 ```
 
 It accepts values of the `wordcloud()` function. `numWords` specifies how many words are to be shown on word cloud. The words are ordered by their frequency, and the subset of 1:`numWords` is used to downstream visualization.
@@ -46,14 +46,14 @@ gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
                      excludeTfIdf = 150,
                      colors=palette(),
                      rot.per=0.4)
-gwc$wc
+gwc@wc
 ```
 
 It also returns a data frame consisting of frequency of each term.
 
 ```{r table, cache=TRUE}
 knitr::kable(
-  head(gwc$df), caption = 'Term frequencies.',
+  head(gwc@freqDf), caption = 'Term frequencies.',
   row.names = FALSE
 )
 ```
@@ -63,7 +63,7 @@ Default is `1`, and the example specifying `2` is shown below.
 
 ```{r ngramwc, warning=FALSE, fig.height=8, fig.width=8, cache=TRUE}
 gwc2 <- wcGeneSummary(inpSymbol, ngram=2, numWords=50)
-gwc2$wc
+gwc2@wc
 ```
 
 Using `clusterProfiler` functions, one can use enriched pathway names for visualization.
@@ -71,7 +71,7 @@ The `enrich` option can be specified for `'kegg'` or `'reactome'`, this time we 
 
 ```{r ngrampath, warning=FALSE, fig.height=8, fig.width=8, cache=TRUE}
 gwc3 <- wcGeneSummary(inpSymbol, enrich="reactome", tfidf=TRUE, numWords=50)
-gwc3$wc
+gwc3@wc
 ```
 
 One of the main questions is which words can be clustered together among the words contained in the queried gene cluster. Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`. For the significance threshold, `pvclAlpha` can be specified. The default parameters perform `pvclust` on the subset of dataset for words with high frequency specified by `numWords`. If one want to perform on whole matrix (which is a natural way), `tagWhole=TRUE` can be specified, although it is computationally intensive.
@@ -88,8 +88,8 @@ gwcl <- wcGeneSummary(inpSymbol,
                      tag=TRUE,
                      pal = pal,
                      rot.per=0.4)
-gwcl$wc
-gwcl$pvcl
+gwcl@wc
+gwcl@pvpick
 
 ## Cluster on whole matrix
 
@@ -99,8 +99,8 @@ gwclWhole <- wcGeneSummary(inpSymbol,
                      pal = pal,
                      cl=snow::makeCluster(8),
                      rot.per=0.4)
-gwclWhole$wc
-gwclWhole$pvcl
+gwclWhole@wc
+gwclWhole@pvpick
 ```
 
 In this example showing ERCC genes, the term `DNA repair` is clustered as expected.
@@ -111,7 +111,7 @@ The next main function is producing correlation networks between words based on 
 
 ```{r basic3, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 net <- wcGeneSummary(inpSymbol, plotType="network")
-net$net
+net@net
 ```
 
 The edge label corresponding to correlation values can be shown by `edgeLabel=TRUE`. The number of words to be shown on plot can be specified by `numWords`. The threshold of correlation can be specified by `corThresh`. The text color can be changed by `colorText=TRUE`. The type of edge can be specified by `edgeLink`, which is by default `TRUE` (link will be used).
@@ -120,7 +120,7 @@ The edge label corresponding to correlation values can be shown by `edgeLabel=TR
 net <- wcGeneSummary(inpSymbol, plotType="network",
                      edgeLabel=TRUE, corThresh=0.5,
                      numWords=20, colorText=TRUE)
-net$net
+net@net
 ```
 
 The clustering results based on `pvclust` can be shown also on the correlation network, by the node color (`tag=TRUE`).
@@ -128,8 +128,8 @@ The clustering results based on `pvclust` can be shown also on the correlation n
 ```{r tagnet, warning=FALSE, message=FALSE, cache=T, fig.height=8, fig.width=8}
 net <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.2,
                      numWords=20, tag=TRUE)
-net$net
-net$pvcl
+net@net
+net@pvpick
 ```
 
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`, useful for assessing which words is associated with interesting genes. The edges connecting words to corresponding genes are shown.
@@ -140,7 +140,7 @@ net <- wcGeneSummary(inpSymbol, plotType="network",
                      genePlot=TRUE, corThresh=0.5,
                      tag=TRUE, edgeLink=FALSE,
                      numWords=20)
-net$net
+net@net
 ```
 
 The associated enriched pathways (if present) can be shown by specifying `genePathPlot`, using `ggforce`.
@@ -152,7 +152,7 @@ net <- wcGeneSummary(inpSymbol, plotType="network",
                      tag=TRUE, edgeLink=FALSE,
                      genePathPlotSig=0.05, numWords=20)
 
-net$net
+net@net
 ```
 
 
@@ -162,7 +162,7 @@ Using `rentrez`, one can perform the same analysis on PubMed text like the artic
 
 ```{r wcabst_wc, cache=FALSE, fig.height=8, fig.width=8}
 ab <- wcAbst(inpSymbol[1:3])
-ab$wc
+ab@wc
 ```
 
 As fetching the same information is not desirable and time consuming, the same object can be passed to `redo` option and re-perform the analysis like tagging, or changing the visualization options.
@@ -171,8 +171,8 @@ As fetching the same information is not desirable and time consuming, the same o
 abtag <- wcAbst(redo=ab, tag=TRUE)
 abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE,
                  plotType="network", corThresh=0.2, preset=TRUE)
-abtag$wc
-abtag2$net
+abtag@wc
+abtag2@net
 ```
 
 
@@ -249,7 +249,7 @@ Filter words using ORA threshold and frequency threshold by setting `ora=TRUE`.
 ```{r oranet, warning=FALSE, message=FALSE, cache=TRUE}
 net <- wcGeneSummary(inpSymbol, plotType="network",
                      ora=TRUE, edgeLink=FALSE)
-net$net
+net@net
 ```
 
 # Custom usage
@@ -460,8 +460,8 @@ net1 <- wcGeneSummary(degs, plotType="network",
                       colorText=TRUE, numWords=20,
                       genePlot=TRUE, genePlotNum=5,
                       genePathPlot="reactome")
-net1$net
-top5 <- names(head(net1$geneCount, n=5))
+net1@net
+top5 <- names(head(net1@geneCount, n=5))
 top5
 ```
 
@@ -479,7 +479,7 @@ Show the network for the article titles.
 titlenet <- wcAbst(redo=abst, target="title", tfidf=TRUE,
        plotType="network", colorText=TRUE, corThresh=0.1,
        preset=TRUE)
-titlenet$net
+titlenet@net
 ```
 
 Show the network for the article abstract.
@@ -488,7 +488,7 @@ Show the network for the article abstract.
 abstnet <- wcAbst(redo=abst, target="abstract", tfidf=TRUE,
        plotType="network", colorText=TRUE, corThresh=0.1,
        preset=TRUE)
-abstnet$net
+abstnet@net
 ```
 
 

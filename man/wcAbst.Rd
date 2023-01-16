@@ -6,7 +6,7 @@
 \usage{
 wcAbst(
   queries,
-  redo = NA,
+  redo = NULL,
   madeUpper = c("dna", "rna"),
   target = "abstract",
   usefil = NA,
@@ -23,6 +23,7 @@ wcAbst(
   showLegend = FALSE,
   plotType = "wc",
   colorText = FALSE,
+  quote = FALSE,
   corThresh = 0.2,
   layout = "nicely",
   tag = FALSE,
@@ -82,6 +83,8 @@ or "bsdbtfidf" (whole bugsigdb tf-idf)}
 \item{plotType}{"wc" or "network"}
 
 \item{colorText}{color text label based on frequency in correlation network}
+
+\item{quote}{whether to quote the queries}
 
 \item{corThresh}{the correlation threshold}
 

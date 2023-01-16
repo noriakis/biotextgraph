@@ -1,6 +1,7 @@
 #' wcGeneSummary
 #' 
 #' Plot wordcloud of RefSeq description obtained by GeneSummary
+#' Testing function for new class
 #' 
 #' @param geneList gene ID list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
@@ -74,13 +75,13 @@
 #' @importFrom ReactomePA enrichPathway
 #' @importFrom clusterProfiler enrichKEGG setReadable
 #' 
+#' @export
 #' @examples
 #' geneList <- c("DDX41")
 #' wcGeneSummary(geneList)
-#' @export
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
-                            excludeFreq=2000, excludeTfIdf=NA,
+                            excludeFreq=2000, excludeTfIdf=NULL,
                             tfidf=FALSE, genePlotNum=10,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
@@ -97,6 +98,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             onWholeDTM=FALSE, autoFilter=FALSE, verbPOS=c("VBZ"),
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             ...) {
+    ret <- new("osplot")
+    ret@query <- geneList
+    ret@type <- "refseq"
+
     if (verb) {
         qqcat("using verb mode ...\n")
         if (bn) {stop("verb can be only used with undirected graph")}
@@ -118,12 +123,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             qqcat("converted input genes: @{length(geneList)}\n")
         }
 
-        returnList <- list()
-
         ## Filter high frequency words if needed
         filterWords <- allFreqGeneSummary[
                                 allFreqGeneSummary$freq > excludeFreq,]$word
-        if (!is.na(excludeTfIdf)){
+        if (!is.null(excludeTfIdf)){
             filterWords <- c(filterWords,
                 allTfIdfGeneSummary[
                                 allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
@@ -131,7 +134,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (autoFilter){
             filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
         }
-
+        ret@filtered <- filterWords
         qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
 
         ## If specified pathway option
@@ -149,6 +152,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 ## Currently only supports some pathways
                 stop("please specify 'reactome' or 'kegg'")
             }
+            ret@enrichResults <- pathRes@result
             ## Make corpus
             docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
@@ -165,7 +169,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
                 qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
                 filterWords <- c(filterWords, sigFilter)
-                returnList[["ora"]] <- sig
+                ret@ora <- sig
             }
 
             fil <- tb %>% filter(Gene_ID %in% geneList)
@@ -180,7 +184,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 verbs <- tolower(unique(x3$token))
             }
 
-            returnList[["rawtext"]] <- fil
+            ret@rawText <- fil
             ## Make corpus
             docs <- VCorpus(VectorSource(fil$Gene_summary))
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
@@ -193,9 +197,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (length(mergeCorpus)<2){
             stop("Please provide multile corpus")
         }
-        returnList <- list()
         docs <- mergeCorpus
     }
+    ret@corpus <- docs
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
@@ -228,8 +232,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         numWords <- length(matSorted)
     }
 
-    returnList[["rawfrequency"]] <- matSorted
-    returnList[["TDM"]] <- docs
+    ret@TDM <- docs
 
     if (onlyTDM) {
         return(docs)
@@ -246,7 +249,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
-        returnList[["df"]] <- returnDf
+        ret@freqDf <- returnDf
 
         # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         ## TODO: before or after?
@@ -265,7 +268,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 )), parallel=cl)
             }
             pvcl <- pvpick(pvc, alpha=pvclAlpha)
-            returnList[["pvcl"]] <- pvcl
+            ret@pvclust <- pvc
+            ret@pvpick <- pvcl
         }
 
         ## genePlot: plot associated genes
@@ -303,7 +307,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 qqcat("found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
-            returnList[["pathRes"]] <- pathRes
+            ret@enrichResults <- pathRes@result
             sigPath <- subset(setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
             pathGraph <- c()
             for (i in 1:nrow(sigPath)){
@@ -320,7 +324,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             bnboot <- boot.strength(
                 data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
                 algorithm = "hc", R=R)
-            returnList[["strength"]] <- bnboot
+            ret@strength <- bnboot
             av <- averaged.network(bnboot)
             avig <- bnlearn::as.igraph(av)
             el <- data.frame(as_edgelist(avig))
@@ -336,7 +340,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             } else {
                 corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
             }
-            returnList[["corMat"]] <- corData
+            ret@corMat <- corData
 
             ## Set correlation below threshold to zero
             corData[corData<corThresh] <- 0
@@ -425,11 +429,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
             gcnt <- table(genemap[,2])
             gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
-            returnList[["geneCount"]] <- gcnt
+            ret@geneCount <- gcnt
             
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]
-            returnList[["geneMap"]] <- genemap
+            ret@geneMap <- genemap
             genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
             coGraph <- igraph::union(coGraph, genemap)
             tmpW <- E(coGraph)$weight
@@ -473,7 +477,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             V(coGraph)$tag <- netCol
         }
 
-        returnList[["ig"]] <- coGraph
+        ret@igraph <- coGraph
 
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)
@@ -638,7 +642,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 show.legend = FALSE
             )
         }
-        returnList[["net"]] <- netPlot
+        ret@net <- netPlot
     } else {
         ## WC
 
@@ -653,8 +657,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
             }
             pvcl <- pvpick(pvc)
-            returnList[["pvc"]] <- pvc
-            returnList[["pvcl"]] <- pvcl
+            ret@pvclust <- pvc
+            ret@pvpick <- pvcl
 
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
@@ -685,15 +689,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
                                                freq = showFreq, ...)))
         }
-        returnList[["df"]] <- returnDf
-        returnList[["wc"]] <- wc
+        ret@freqDf <- returnDf
+        ret@wc <- wc
     }
 
-    if (!is.null(enrich)){
-        returnList[["enrich"]] <- pathRes
-    }
-
-    return(returnList)
+    return(ret)
 }
 
 #' @rdname osp
