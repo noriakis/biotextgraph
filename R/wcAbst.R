@@ -178,7 +178,11 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   matSorted <- sort(rowSums(mat), decreasing=TRUE)
   # fetched[["rawfrequency"]] <- matSorted
   ret@TDM <- docs
-  
+
+  if (numWords > length(matSorted)){
+        numWords <- length(matSorted)
+  }
+  ret@numWords <- numWords  
   
   if (plotType=="network"){
     matSorted <- matSorted[1:numWords]

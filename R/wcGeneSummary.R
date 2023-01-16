@@ -134,12 +134,18 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (autoFilter){
             filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
         }
-        ret@filtered <- filterWords
-        qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
+        if (length(filterWords)!=0 & length(additionalRemove)!=0){
+            allfils <- c(filterWords, additionalRemove)
+            allfils <- allfils[!is.na(allfils)]
+            if (length(allfils)!=0) {
+                ret@filtered <- allfils
+            }
+        }
+        qqcat("filtered @{length(filterWords)} words (frequency and/or tfidf) ...\n")
 
         ## If specified pathway option
         if (!is.null(enrich)) {
-            if (genePlot) {stop("genePlot cant be performed in enrichment analysis mode")}
+            if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
             qqcat("performing enrichment analysis ...")
             if (enrich=="reactome"){
                 pathRes <- enrichPathway(geneList)
@@ -239,6 +245,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     }
 
     ## Subset to numWords
+    ret@numWords <- numWords
     matSorted <- matSorted[1:numWords]
     freqWords <- names(matSorted)
 

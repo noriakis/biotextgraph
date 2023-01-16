@@ -58,6 +58,7 @@ setMethod("show",
   signature(object="osplot"),
   function(object) {
     qqcat("type: @{object@type}\n")
+    qqcat("Number of words: @{object@numWords}\n")
     cat(paste(object@query, collapse="/"));cat("\n")
     print(object.size(object), units="auto")
   })
