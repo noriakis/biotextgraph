@@ -63,8 +63,8 @@
 #' @import ggraph ggplot2
 #' @import pvclust
 #' @import ggforce
+#' @import methods
 #' @importFrom dplyr filter
-#' @importFrom bnlearn boot.strength averaged.network
 #' @importFrom stats dist
 #' @importFrom grDevices palette
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
@@ -703,7 +703,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     return(ret)
 }
 
-#' @rdname osp
+#' osp
+#' 
+#' alias for wcGeneSummary
+#' 
 #' @examples osp("DDX41")
 #' @export
 osp <- wcGeneSummary

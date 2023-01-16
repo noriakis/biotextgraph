@@ -25,6 +25,7 @@
 #' @param tagWhole tag whole set or subset
 #' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param target "title" or "abstract"
+#' @param cl cluster object passed to pvclust
 #' @param apiKey api key for eutilities
 #' @param redo if "abstract" is chosen in target, one can provide resulting object again
 #' @param pre predefined filter words
@@ -475,7 +476,10 @@ wcBSDB <- function (mbList,
     return(ret)
 }
 
-#' @rdname ospb
+#' ospb
+#' 
+#' alias for wcBSDB
+#' 
 #' @examples ospb("Veillonella dispar")
 #' @export
 ospb <- wcBSDB

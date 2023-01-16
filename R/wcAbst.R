@@ -49,7 +49,7 @@
 #' @export
 #' @examples wcAbst("DDX41")
 #' @return list of data frame and ggplot2 object
-#' @import tm easyPubMed
+#' @import tm
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
@@ -478,7 +478,10 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   return(ret)
 }
 
-#' @rdname ospa
+#' ospa
+#' 
+#' alias for wcAbst
+#' 
 #' @examples ospa("DDX41")
 #' @export
 ospa <- wcAbst
