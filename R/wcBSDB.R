@@ -161,7 +161,6 @@ wcBSDB <- function (mbList,
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
-    ret@numWords <- numWords
     if (!is.na(ngram)){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
@@ -189,6 +188,7 @@ wcBSDB <- function (mbList,
     if (numWords > length(matSorted)){
         numWords <- length(matSorted)
     }
+    ret@numWords <- numWords
 
     # returnList[["rawfrequency"]] <- matSorted
     ret@TDM <- docs
