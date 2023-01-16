@@ -8,7 +8,7 @@ wcGeneSummary(
   geneList,
   keyType = "SYMBOL",
   excludeFreq = 2000,
-  excludeTfIdf = NA,
+  excludeTfIdf = NULL,
   tfidf = FALSE,
   genePlotNum = 10,
   additionalRemove = NA,
@@ -154,8 +154,10 @@ list of data frame and ggplot2 object
 }
 \description{
 Plot wordcloud of RefSeq description obtained by GeneSummary
+Testing function for new class
 }
 \examples{
 geneList <- c("DDX41")
 wcGeneSummary(geneList)
+
 }

@@ -62,33 +62,22 @@ wcBSDB <- function (mbList,
                     additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
-                    madeUpper=c("dna","rna"), redo=NA,
+                    madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE,
-                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, ...) {
-    returnList <- list()
+                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
+    ret <- new("osplot")
+    ret@query <- mbList
+    ret@type <- "BSDB"
     if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated","taxa","taxon")}
     if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
-    if (!is.list(redo)) {
+    if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
         tb <- importBugSigDB()
-
-        # filterWords <- c(filterWords, "pmids", "geneid") 
-        ## Excluded by default
-
-        # if (ora){
-        #     qqcat("performing ORA\n")
-        #     sig <- textORA(mbList)
-        #     sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-        #     qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
-        #     filterWords <- c(filterWords, sigFilter)
-        #     returnList[["ora"]] <- sig
-        # }
-        
         subTb <- c()        
         for (m in mbList) {
             tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,
@@ -117,15 +106,18 @@ wcBSDB <- function (mbList,
         colnames(fil) <- c("query","Title","PMID")
         fil <- fil[!is.na(fil$PMID),] # Some PMIDs have NA
         # returnList[["filterWords"]] <- filterWords
-        returnList[["subTb"]] <- subTb
+        ret@pmids <- fil$PMID
+        ret@rawText <- fil
+
     } else {
         qqcat("Redoing abstract query for microbes ...\n")
+        ret <- redo
         target <- "abstract"
     }
 
     if (target=="abstract"){
         qqcat("target is abstract ...\n")
-        if (!is.list(redo)) {
+        if (is.null(redo)) {
             pmids <- fil$PMID
             # pmids <- pmids[!is.na(pmids)]
             qqcat("querying PubMed for @{length(pmids)} pmids ...\n")
@@ -143,11 +135,11 @@ wcBSDB <- function (mbList,
                                             "Abstract",
                                             recursive = TRUE)
             absttext <- as.character(xmlValue(abstset))
-            returnList[["absttext"]] <- absttext
+            ret@rawTextBSDB <- absttext
         } else {
-            absttext <- redo[["absttext"]]
-            filterWords <- redo[["filterWords"]]
-            subTb <- redo[["subTb"]]
+            absttext <- redo@rawTextBSDB
+            filterWords <- ret@filtered
+            subTb <- ret@rawText
         }
         docs <- VCorpus(VectorSource(absttext))
     } else {
@@ -164,10 +156,12 @@ wcBSDB <- function (mbList,
     }
     qqcat("filtering @{length(filterWords)} words (frequency | tfidf) ...\n")
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
-
+    ret@filtered <- filterWords
+    ret@corpus <- docs
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
+    ret@numWords <- numWords
     if (!is.na(ngram)){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
@@ -196,8 +190,8 @@ wcBSDB <- function (mbList,
         numWords <- length(matSorted)
     }
 
-    returnList[["rawfrequency"]] <- matSorted
-    returnList[["TDM"]] <- docs
+    # returnList[["rawfrequency"]] <- matSorted
+    ret@TDM <- docs
 
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
@@ -207,34 +201,36 @@ wcBSDB <- function (mbList,
         freqWordsDTM <- t(as.matrix(docs))
         
         if (tag) {# Needs rework
-            if (is.list(redo)){
-                if (!is.null(redo[["pvcl"]])) {
-                    pvcl <- redo[["pvcl"]]
+            if (!is.null(redo)){
+                if (!is.null(redo@pvpick)) {
+                    pvcl <- ret@pvpick
                 } else {
                     if (tagWhole){
-                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
                     } else {
                         pvc <- pvclust(as.matrix(dist(
                             t(
                                 freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                                 )
-                            )))
+                            )), parallel=cl)
                     }
                     pvcl <- pvpick(pvc, alpha=pvclAlpha)
-                    redo[["pvcl"]] <- pvcl
+                    ret@pvclust <- pvc
+                    ret@pvpick <- pvcl
                 }
             } else {
                 if (tagWhole){
-                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
                             freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                             )
-                        )))
+                        )),parallel=cl)
                 }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
-                returnList[["pvcl"]] <- pvcl
+                ret@pvclust <- pvc
+                ret@pvpick <- pvcl
             }
         }
 
@@ -261,7 +257,8 @@ wcBSDB <- function (mbList,
         } else {
             corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
         }
-        returnList[["corMat"]] <- corData
+        ret@corMat <- corData
+        ret@corThresh <- corThresh
 
         ## Set correlation below threshold to zero
         corData[corData<corThresh] <- 0
@@ -325,7 +322,7 @@ wcBSDB <- function (mbList,
             V(coGraph)$tag <- netCol
         }
 
-        returnList[["ig"]] <- coGraph
+        ret@igraph <- coGraph
 
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)
@@ -404,48 +401,54 @@ wcBSDB <- function (mbList,
                 name = "Correlation")+
             theme_graph()
 
-        returnList[["net"]] <- netPlot
+        ret@net <- netPlot
     } else {
         ## WC
         matSorted <- matSorted[1:numWords]
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 
         if (tag) {
-
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-
-
-            if (is.list(redo)){
-                if (!is.null(redo[["pvcl"]])) {
-                    pvcl <- redo[["pvcl"]]
+            if (!is.null(redo)){
+                if (!is.null(redo@pvpick)) {
+                    pvcl <- ret@pvpick
                 } else {
                     if (tagWhole){
-                        pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
                     } else {
-                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                        pvc <- pvclust(as.matrix(dist(
+                            t(
+                                freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                            )
+                        )), parallel=cl)
                     }
                     pvcl <- pvpick(pvc, alpha=pvclAlpha)
-                    redo[["pvcl"]] <- pvcl
+                    ret@pvclust <- pvc
+                    ret@pvpick <- pvcl
                 }
             } else {
                 if (tagWhole){
-                    pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
                 } else {
-                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+                    pvc <- pvclust(as.matrix(dist(
+                        t(
+                            freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                        )
+                    )),parallel=cl)
                 }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
-                returnList[["pvcl"]] <- pvcl
+                ret@pvclust <- pvc
+                ret@pvpick <- pvcl
             }
-
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
                     wcCol[wcCol==j] <- pal[i]
             }
             wcCol[!wcCol %in% pal] <- "grey"
-
         }
+        
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
@@ -460,11 +463,10 @@ wcBSDB <- function (mbList,
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
                                                freq = returnDf$freq, ...)))
         }
-        returnList[["df"]] <- returnDf
-        returnList[["wc"]] <- wc
+        ret@freqDf <- returnDf
+        ret@wc <- wc
     }
-
-    return(returnList)
+    return(ret)
 }
 
 #' @rdname ospb

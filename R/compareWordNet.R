@@ -40,8 +40,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
 
   for (e in seq_along(listOfNets)) {
-      listOfIGs[[e]] <- listOfNets[[e]]$ig
-      listOfNodes[[e]] <- names(V(listOfNets[[e]]$ig))
+      listOfIGs[[e]] <- listOfNets[[e]]@igraph
+      listOfNodes[[e]] <- names(V(listOfNets[[e]]@igraph))
   }
 
   commonNodes <- Reduce(intersect, listOfNodes)
@@ -265,25 +265,25 @@ plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALS
   if (concat=="union"){
     allNodes <- c()
     for (n in listOfNets){
-        allNodes <- c(allNodes, V(n$ig)$name)
+        allNodes <- c(allNodes, V(n@igraph)$name)
     }
     igList <- list()
     for (e in seq_along(listOfNets)){
-        tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]$ig)))
-        igList[[e]] <- add_vertices(listOfNets[[e]]$ig,
+        tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]@igraph)))
+        igList[[e]] <- add_vertices(listOfNets[[e]]@igraph,
                                       length(tmpadd),
                                       attr=list(name=tmpadd))
     }
   } else {
     uniqNodeNames <- list()
     for (e in seq_along(listOfNets)){
-        uniqNodeNames[[e]] <- names(V(listOfNets[[e]]$ig))
+        uniqNodeNames[[e]] <- names(V(listOfNets[[e]]@igraph))
     }
     uniqNodeNames <- Reduce(intersect, uniqNodeNames)
     igList <- list()
     for (e in seq_along(listOfNets)){
-        igList[[e]] <- induced_subgraph(listOfNets[[e]]$ig,
-          names(V(listOfNets[[e]]$ig)) %in% uniqNodeNames)
+        igList[[e]] <- induced_subgraph(listOfNets[[e]]@igraph,
+          names(V(listOfNets[[e]]@igraph)) %in% uniqNodeNames)
     }
   }
 

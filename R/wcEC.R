@@ -50,7 +50,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, ...) {
   close(con)
   candecs <- data.frame(candecs) |>
     `colnames<-`(c("number","desc","comment"))
-  quoted <- dQuote(candecs$desc)
+  quoted <- dQuote(candecs$desc,options(useFancyQuotes = FALSE))
   if (onlyTerm) {return(quoted)}
   abst <- osplot(target="pubmed",
                  quoted, ...)

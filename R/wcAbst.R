@@ -41,6 +41,7 @@
 #' @param delim delimiter for queries
 #' @param retMax how many items are to be retlieved?
 #' @param orgDb org database, default to org.Hs.eg.db
+#' @param quote whether to quote the queries
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
@@ -60,399 +61,417 @@
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
-wcAbst <- function(queries, redo=NA, madeUpper=c("dna","rna"),
-				   target="abstract", usefil=NA, filnum=0,
-				   pvclAlpha=0.95, numOnly=TRUE, delim="OR",
-				   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE,
+wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
+                   target="abstract", usefil=NA, filnum=0,
+                   pvclAlpha=0.95, numOnly=TRUE, delim="OR",
+                   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
-                   showLegend=FALSE, plotType="wc", colorText=FALSE,
+                   showLegend=FALSE, plotType="wc", colorText=FALSE, quote=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
-        {
-        	if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
-    	    if (madeUpperGenes){
-        		madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
-    		}
-        	if (preset) {
-        		additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
-                                 "analysis","cells","cell","expression","doi",
-                                 "deg","degs")
-        	}
-        	if (!is.list(redo)) {
-	        	fetched <- list() # store results
-	        	if (length(queries)>10){
-	        		stop("please limit the gene number to 10")}
-				
-	        	query <- paste(queries, collapse=paste0(" ",delim," "))
-			    clearQuery <- gsub('\"', '', queries)
-				allDataDf <- getPubMed(query, clearQuery, type=target, apiKey=apiKey,
-					retMax=retMax)
-				fetched[["rawdf"]] <- allDataDf
-			} else {
-				qqcat("Resuming from the previous results ...\n")
-				fetched <- redo
-				allDataDf <- fetched[["rawdf"]]
-			}
-			if (geneUpper){
-				## Maybe duplicate to madeUpperGenes
-				aq <- allDataDf$query
-				aq <- aq[aq!=""]
-				madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
-				# print(madeUpper)
-			}
-			if (target=="abstract"){
-				docs <- VCorpus(VectorSource(allDataDf$text))
-			} else if (target=="title"){
-				docs <- VCorpus(VectorSource(allDataDf$text))
-			} else {
-				stop("specify target or abstract")
-			}
+{
 
-			if (!is.na(usefil)){
-				if (usefil=="gstfidf") {
-					qqcat("filter based on GeneSummary\n")
-					filterWords <- allTfIdfGeneSummary[
-                                allTfIdfGeneSummary$tfidf > filnum,]$word
-				} else if (usefil=="bsdbtfidf"){
-					qqcat("filter based on BugSigDB\n")
-					filterWords <- allTfIdfBSDB[
-                                allTfIdfBSDB$tfidf > filnum,]$word
-				} else {
-					stop("please specify gstfidf or bsdbtfidf")
-				}
-			} else {
-				filterWords <- NA
-			}
-
-			docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
-			if (onlyCorpus){
-				return(docs)
-			}
-		    if (!is.na(ngram)){
-		        NgramTokenizer <- function(x)
-		            unlist(lapply(ngrams(words(x), ngram),
-		                paste, collapse = " "),
-		                use.names = FALSE)
-		        if (tfidf) {
-		            docs <- TermDocumentMatrix(docs,
-		                control = list(tokenize = NgramTokenizer,
-		                    weighting = weightTfIdf))
-		        } else {
-		            docs <- TermDocumentMatrix(docs,
-		                control = list(tokenize = NgramTokenizer))
-		        }
-		    } else {
-		        if (tfidf) {
-		            docs <- TermDocumentMatrix(docs,
-		                control = list(weighting = weightTfIdf))
-		        } else {
-		            docs <- TermDocumentMatrix(docs)
-		        }
-		    }
-
-		    if (onlyTDM){
-		    	return(docs)
-		    }
-
-			mat <- as.matrix(docs)
-			matSorted <- sort(rowSums(mat), decreasing=TRUE)
-			fetched[["rawfrequency"]] <- matSorted
-			fetched[["TDM"]] <- docs
-
-
-		    if (plotType=="network"){
-		        matSorted <- matSorted[1:numWords]
-
-		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
-		        for (i in madeUpper) {
-		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
-		            returnDf[returnDf$word == i,"word"] <- toupper(i)
-		        }
-		        fetched[["df"]] <- returnDf
-
-		        freqWords <- names(matSorted)
-		        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-		        ## TODO: before or after?
-		        freqWordsDTM <- t(as.matrix(docs))
-				row.names(freqWordsDTM) <- allDataDf$query
-                if (tag) {
-                	if (is.list(redo) & "pvcl" %in% names(fetched)){
-                		qqcat("Using previous pvclust results ...")
-                		pvcl <- fetched[["pvcl"]]
-                	} else {
-                		if (tagWhole){
-                			pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
-                		} else {
-			            # pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
-	                        pvc <- pvclust(as.matrix(dist(
-						                t(
-						                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-						                    )
-						                )))
-	                    }
-			            pvcl <- pvpick(pvc, alpha=pvclAlpha)
-			            fetched[["pvcl"]] <- pvcl
-			        }
-		        }
-
-		        ## Check correlation
-		        if (bn) {
-		            qqcat("bn specified, R=@{R} ...\n")
-		            # To avoid computaitonal time, subset to numWords
-		            bnboot <- boot.strength(
-		                data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
-		                algorithm = "hc", R=R)
-		            fetched[["strength"]] <- bnboot
-		            av <- averaged.network(bnboot)
-		            avig <- bnlearn::as.igraph(av)
-		            el <- data.frame(as_edgelist(avig))
-		            colnames(el) <- c("from","to")
-		            mgd <- merge(el, bnboot, by=c("from","to"))
-		            colnames(mgd) <- c("from","to","weight","direction")
-		            coGraph <- graph_from_data_frame(mgd, directed=TRUE)
-		        } else {
-		            ## Check correlation
-		            if (onWholeDTM){
-		                corData <- cor(freqWordsDTM)
-		            } else {
-		                corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
-		            }
-		            fetched[["corMat"]] <- corData
-
-		            ## Set correlation below threshold to zero
-		            corData[corData<corThresh] <- 0
-		            coGraph <- graph.adjacency(corData, weighted=TRUE,
-		                        mode="undirected", diag = FALSE)
-		        }
-		        ## before or after?
-		        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
-		        V(coGraph)$Freq <- matSorted[V(coGraph)$name]
-
-		        if (deleteZeroDeg){
-		            coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
-		        }
-
-		        nodeName <- V(coGraph)$name
-		        dtmCol <- colnames(freqWordsDTM)
-		        for (i in madeUpper) {
-		            dtmCol[dtmCol == i] <- toupper(i)
-		            nodeName[nodeName == i] <- toupper(i)
-		        }
-		        V(coGraph)$name <- nodeName
-		        colnames(freqWordsDTM) <- dtmCol
-
-		        if (genePlot) {
-		            genemap <- c()
-		            for (rn in nodeName){
-		                tmp <- freqWordsDTM[ ,rn]
-		                for (nm in names(tmp[tmp!=0])){
-		                	if (nm!=""){
-		                		if (grepl(",",nm,fixed=TRUE)){
-		                			for (nm2 in unlist(strsplit(nm, ","))){
-		                				genemap <- rbind(genemap, c(rn, paste(nm2, "(Q)")))
-		                			}
-		                		} else {
-				                    genemap <- rbind(genemap, c(rn, paste(nm, "(Q)")))
-				                }
-		                	}
-		                }
-		            }
-                    fetched[["geneMap"]] <- genemap
-		            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
-		            coGraph <- igraph::union(coGraph, genemap)
-		            tmpW <- E(coGraph)$weight
-		            if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
-		                corThreshGenePlot <- corThresh - 0.1}
-		            tmpW[is.na(tmpW)] <- corThreshGenePlot
-		            E(coGraph)$weight <- tmpW
-		        }
-
-		        if (tag) {
-		            netCol <- tolower(names(V(coGraph)))
-		            for (i in seq_along(pvcl$clusters)){
-		                for (j in pvcl$clusters[[i]])
-		                    netCol[netCol==j] <- paste0("cluster",i)
-		            }
-		            netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
-		            V(coGraph)$tag <- netCol
-		        }
-
-		        ## Main plot
-		        fetched[["ig"]] <- coGraph
-		        netPlot <- ggraph(coGraph, layout=layout)
-
-		        if (bn){
-		            if (edgeLink){
-		                if (edgeLabel){
-		                    netPlot <- netPlot +
-		                                geom_edge_link(
-		                                    aes(width=weight,
-		                                    color=weight,
-		                                    label=round(weight,3)),
-		                                    angle_calc = 'along',
-		                                    label_dodge = unit(2.5, 'mm'),
-		                                    arrow = arrow(length = unit(4, 'mm')), 
-		                                    start_cap = circle(3, 'mm'),
-		                                    end_cap = circle(3, 'mm'),
-		                                    alpha=0.5,
-		                                    show.legend = showLegend)
-		                } else {
-		                    netPlot <- netPlot +
-		                                geom_edge_link(aes(width=weight, color=weight),
-		                                    arrow = arrow(length = unit(4, 'mm')), 
-		                                    start_cap = circle(3, 'mm'),
-		                                    end_cap = circle(3, 'mm'),
-		                                    alpha=0.5, show.legend = showLegend)
-		                }
-		            } else {
-		                if (edgeLabel){
-		                    netPlot <- netPlot +
-		                                geom_edge_diagonal(
-		                                    aes(width=weight,
-		                                    color=weight,
-		                                    label=round(weight,3)),
-		                                    angle_calc = 'along',
-		                                    label_dodge = unit(2.5, 'mm'),
-		                                    arrow = arrow(length = unit(4, 'mm')), 
-		                                    start_cap = circle(3, 'mm'),
-		                                    end_cap = circle(3, 'mm'),
-		                                    alpha=0.5,
-		                                    show.legend = showLegend)
-		                } else {
-		                    netPlot <- netPlot +
-		                                geom_edge_diagonal(aes(width=weight, color=weight),
-		                                    arrow = arrow(length = unit(4, 'mm')), 
-		                                    start_cap = circle(3, 'mm'),
-		                                    end_cap = circle(3, 'mm'),                                    
-		                                    alpha=0.5, show.legend = showLegend)                
-		                }
-		            }
-		        } else {
-		            if (edgeLink){
-		                if (edgeLabel){
-		                    netPlot <- netPlot +
-		                                geom_edge_link(
-		                                    aes(width=weight,
-		                                    color=weight,
-		                                    label=round(weight,3)),
-		                                    angle_calc = 'along',
-		                                    label_dodge = unit(2.5, 'mm'),
-		                                    alpha=0.5,
-		                                    show.legend = showLegend)
-		                } else {
-		                    netPlot <- netPlot +
-		                                geom_edge_link(aes(width=weight, color=weight),
-		                                    alpha=0.5, show.legend = showLegend)
-		                }
-		            } else {
-		                if (edgeLabel){
-		                    netPlot <- netPlot +
-		                                geom_edge_diagonal(
-		                                    aes(width=weight,
-		                                    color=weight,
-		                                    label=round(weight,3)),
-		                                    angle_calc = 'along',
-		                                    label_dodge = unit(2.5, 'mm'),
-		                                    alpha=0.5,
-		                                    show.legend = showLegend)
-		                } else {
-		                    netPlot <- netPlot +
-		                                geom_edge_diagonal(aes(width=weight, color=weight),
-		                                    alpha=0.5, show.legend = showLegend)                
-		                }
-		            }
-		        }
-		        if (tag) {
-		            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
-		                                                show.legend = showLegend)
-		        } else { 
-		            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
-		                                                show.legend = showLegend)+
-		                                 scale_color_gradient(low=pal[1],high=pal[2],
-		                                                      name = "Frequency")
-		        }
-		        if (colorText){
-		        	if (tag) {
-			            netPlot <- netPlot + 
-			                geom_node_text(aes(label=name, size=Freq, color=tag),
-			                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
-	                            bg.color = "white", segment.color="black",
-	                            bg.r = .15, show.legend=showLegend)
-		            } else {
-			            netPlot <- netPlot + 
-			                geom_node_text(aes(label=name, size=Freq, color=Freq),
-			                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
-	                            bg.color = "white", segment.color="black",
-	                            bg.r = .15, show.legend=showLegend)
-		            }
-		        } else {
-		            netPlot <- netPlot + 
-		                geom_node_text(aes(label=name, size=Freq),
-		                	check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                            color = "black",
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend) 
-		        }
-		        netPlot <- netPlot+
-		            scale_size(range=scaleRange, name="Frequency")+
-		            scale_edge_width(range=c(1,3), name = "Correlation")+
-		            scale_edge_color_gradient(low=pal[1],high=pal[2],
-		            	name = "Correlation")+
-		            theme_graph()
-		        fetched[["net"]] <- netPlot
-		    } else {
-		    	matSorted <- matSorted[1:numWords]
-		        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
-	            freqWords <- names(matSorted)
-	            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-
-		        if (tag) {
-                	if (is.list(redo) & "pvcl" %in% names(fetched)){
-                		qqcat("Using previous pvclust results ...")
-                		pvcl <- fetched[["pvcl"]]
-                	} else {
-                		if (tagWhole){
-                			pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
-                		} else {
-	                        pvc <- pvclust(as.matrix(dist(
-						                t(
-						                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-						                    )
-						                )))
-	                    }
-			            pvcl <- pvpick(pvc, alpha=pvclAlpha)
-			            fetched[["pvc"]] <- pvc
-			            fetched[["pvcl"]] <- pvcl
-			        }
-		            wcCol <- returnDf$word
-		            for (i in seq_along(pvcl$clusters)){
-		                for (j in pvcl$clusters[[i]])
-		                    wcCol[wcCol==j] <- pal[i]
-		            }
-		            wcCol[!wcCol %in% pal] <- "grey"
-
-		        }
-		        for (i in madeUpper) {
-		            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
-		            returnDf[returnDf$word == i,"word"] <- toupper(i)
-		        }
-		        if (tag){
-		            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-		                                               freq = returnDf$freq,
-		                                               colors = wcCol,
-		                                               random.order=FALSE,
-		                                               ordered.colors = TRUE)))
-		        } else {
-		            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-		                                               freq = returnDf$freq, ...)))
-		        }
-                fetched[["df"]] <- returnDf
-        		fetched[["wc"]] <- wc
-		    }
-    return(fetched)
+  if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
+  if (madeUpperGenes){
+    madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
+  }
+  if (preset) {
+    additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
+                          "analysis","cells","cell","expression","doi",
+                          "deg","degs","author","authors")
+  }
+  if (is.null(redo)) {
+    ret <- new("osplot")
+    ret@type <- paste0("pubmed_",target)
+    if (length(queries)>10){
+      stop("please limit the gene number to 10")}
+    # ret@query <- queries
+    # ret@delim <- delim
+    if (quote) {
+      query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)), collapse=paste0(" ",delim," "))
+    } else {
+      query <- paste(queries, collapse=paste0(" ",delim," "))
+    }
+    ret@query <- query
+    clearQuery <- gsub('\"', '', queries)
+    allDataDf <- getPubMed(query, clearQuery, type=target, apiKey=apiKey,
+                           retMax=retMax)
+    ret@retMax <- retMax
+    ret@rawText <- allDataDf
+  } else {
+    qqcat("Resuming from the previous results ...\n")
+    ret <- redo
+    allDataDf <- ret@rawText
+  }
+  if (geneUpper){
+    ## Maybe duplicate to madeUpperGenes
+    aq <- allDataDf$query
+    aq <- aq[aq!=""]
+    madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
+    # print(madeUpper)
+  }
+  if (target=="abstract"){
+    docs <- VCorpus(VectorSource(allDataDf$text))
+  } else if (target=="title"){
+    docs <- VCorpus(VectorSource(allDataDf$text))
+  } else {
+    stop("specify target or abstract")
+  }
+  
+  if (!is.na(usefil)){
+    if (usefil=="gstfidf") {
+      qqcat("filter based on GeneSummary\n")
+      filterWords <- allTfIdfGeneSummary[
+        allTfIdfGeneSummary$tfidf > filnum,]$word
+    } else if (usefil=="bsdbtfidf"){
+      qqcat("filter based on BugSigDB\n")
+      filterWords <- allTfIdfBSDB[
+        allTfIdfBSDB$tfidf > filnum,]$word
+    } else {
+      stop("please specify gstfidf or bsdbtfidf")
+    }
+  } else {
+    filterWords <- NA
+  }
+  if (length(filterWords)!=0 & length(additionalRemove)!=0){
+     allfils <- c(filterWords, additionalRemove)
+     allfils <- allfils[!is.na(allfils)]
+     if (length(allfils)!=0) {
+       ret@filtered <- allfils
+     }
+  }
+  docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
+  ret@corpus <- docs
+  if (onlyCorpus){
+    return(docs)
+  }
+  if (!is.na(ngram)){
+    NgramTokenizer <- function(x)
+      unlist(lapply(ngrams(words(x), ngram),
+                    paste, collapse = " "),
+             use.names = FALSE)
+    if (tfidf) {
+      docs <- TermDocumentMatrix(docs,
+                                 control = list(tokenize = NgramTokenizer,
+                                                weighting = weightTfIdf))
+    } else {
+      docs <- TermDocumentMatrix(docs,
+                                 control = list(tokenize = NgramTokenizer))
+    }
+  } else {
+    if (tfidf) {
+      docs <- TermDocumentMatrix(docs,
+                                 control = list(weighting = weightTfIdf))
+    } else {
+      docs <- TermDocumentMatrix(docs)
+    }
+  }
+  
+  if (onlyTDM){
+    return(docs)
+  }
+  
+  mat <- as.matrix(docs)
+  matSorted <- sort(rowSums(mat), decreasing=TRUE)
+  # fetched[["rawfrequency"]] <- matSorted
+  ret@TDM <- docs
+  
+  
+  if (plotType=="network"){
+    matSorted <- matSorted[1:numWords]
+    
+    returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+    for (i in madeUpper) {
+      # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
+      returnDf[returnDf$word == i,"word"] <- toupper(i)
+    }
+    ret@freqDf <- returnDf
+    
+    freqWords <- names(matSorted)
+    # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+    ## TODO: before or after?
+    freqWordsDTM <- t(as.matrix(docs))
+    row.names(freqWordsDTM) <- allDataDf$query
+    if (tag) {
+      if (!is.null(ret) & length(ret@pvclust)!=0){
+        qqcat("Using previous pvclust results ...")
+        pvcl <- ret@pvpick
+      } else {
+        if (tagWhole){
+          pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+        } else {
+          # pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
+          pvc <- pvclust(as.matrix(dist(
+            t(
+              freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+            )
+          )))
+        }
+        pvcl <- pvpick(pvc, alpha=pvclAlpha)
+        ret@pvclust <- pvc
+        ret@pvpick <- pvcl
+      }
+    }
+    
+    ## Check correlation
+    if (bn) {
+      qqcat("bn specified, R=@{R} ...\n")
+      # To avoid computaitonal time, subset to numWords
+      bnboot <- boot.strength(
+        data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
+        algorithm = "hc", R=R)
+      ret@strength <- bnboot
+      av <- averaged.network(bnboot)
+      avig <- bnlearn::as.igraph(av)
+      el <- data.frame(as_edgelist(avig))
+      colnames(el) <- c("from","to")
+      mgd <- merge(el, bnboot, by=c("from","to"))
+      colnames(mgd) <- c("from","to","weight","direction")
+      coGraph <- graph_from_data_frame(mgd, directed=TRUE)
+    } else {
+      ## Check correlation
+      if (onWholeDTM){
+        corData <- cor(freqWordsDTM)
+      } else {
+        corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+      }
+      ret@corMat <- corData
+      
+      ## Set correlation below threshold to zero
+      corData[corData<corThresh] <- 0
+      coGraph <- graph.adjacency(corData, weighted=TRUE,
+                                 mode="undirected", diag = FALSE)
+    }
+    ## before or after?
+    coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
+    V(coGraph)$Freq <- matSorted[V(coGraph)$name]
+    
+    if (deleteZeroDeg){
+      coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
+    }
+    
+    nodeName <- V(coGraph)$name
+    dtmCol <- colnames(freqWordsDTM)
+    for (i in madeUpper) {
+      dtmCol[dtmCol == i] <- toupper(i)
+      nodeName[nodeName == i] <- toupper(i)
+    }
+    V(coGraph)$name <- nodeName
+    colnames(freqWordsDTM) <- dtmCol
+    
+    if (genePlot) {
+      genemap <- c()
+      for (rn in nodeName){
+        tmp <- freqWordsDTM[ ,rn]
+        for (nm in names(tmp[tmp!=0])){
+          if (nm!=""){
+            if (grepl(",",nm,fixed=TRUE)){
+              for (nm2 in unlist(strsplit(nm, ","))){
+                genemap <- rbind(genemap, c(rn, paste(nm2, "(Q)")))
+              }
+            } else {
+              genemap <- rbind(genemap, c(rn, paste(nm, "(Q)")))
+            }
+          }
+        }
+      }
+      ret@geneMap <- genemap
+      genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
+      coGraph <- igraph::union(coGraph, genemap)
+      tmpW <- E(coGraph)$weight
+      if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
+        corThreshGenePlot <- corThresh - 0.1}
+      tmpW[is.na(tmpW)] <- corThreshGenePlot
+      E(coGraph)$weight <- tmpW
+    }
+    
+    if (tag) {
+      netCol <- tolower(names(V(coGraph)))
+      for (i in seq_along(pvcl$clusters)){
+        for (j in pvcl$clusters[[i]])
+          netCol[netCol==j] <- paste0("cluster",i)
+      }
+      netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+      V(coGraph)$tag <- netCol
+    }
+    
+    ## Main plot
+    ret@igraph <- coGraph
+    netPlot <- ggraph(coGraph, layout=layout)
+    
+    if (bn){
+      if (edgeLink){
+        if (edgeLabel){
+          netPlot <- netPlot +
+            geom_edge_link(
+              aes(width=weight,
+                  color=weight,
+                  label=round(weight,3)),
+              angle_calc = 'along',
+              label_dodge = unit(2.5, 'mm'),
+              arrow = arrow(length = unit(4, 'mm')), 
+              start_cap = circle(3, 'mm'),
+              end_cap = circle(3, 'mm'),
+              alpha=0.5,
+              show.legend = showLegend)
+        } else {
+          netPlot <- netPlot +
+            geom_edge_link(aes(width=weight, color=weight),
+                           arrow = arrow(length = unit(4, 'mm')), 
+                           start_cap = circle(3, 'mm'),
+                           end_cap = circle(3, 'mm'),
+                           alpha=0.5, show.legend = showLegend)
+        }
+      } else {
+        if (edgeLabel){
+          netPlot <- netPlot +
+            geom_edge_diagonal(
+              aes(width=weight,
+                  color=weight,
+                  label=round(weight,3)),
+              angle_calc = 'along',
+              label_dodge = unit(2.5, 'mm'),
+              arrow = arrow(length = unit(4, 'mm')), 
+              start_cap = circle(3, 'mm'),
+              end_cap = circle(3, 'mm'),
+              alpha=0.5,
+              show.legend = showLegend)
+        } else {
+          netPlot <- netPlot +
+            geom_edge_diagonal(aes(width=weight, color=weight),
+                               arrow = arrow(length = unit(4, 'mm')), 
+                               start_cap = circle(3, 'mm'),
+                               end_cap = circle(3, 'mm'),                                    
+                               alpha=0.5, show.legend = showLegend)                
+        }
+      }
+    } else {
+      if (edgeLink){
+        if (edgeLabel){
+          netPlot <- netPlot +
+            geom_edge_link(
+              aes(width=weight,
+                  color=weight,
+                  label=round(weight,3)),
+              angle_calc = 'along',
+              label_dodge = unit(2.5, 'mm'),
+              alpha=0.5,
+              show.legend = showLegend)
+        } else {
+          netPlot <- netPlot +
+            geom_edge_link(aes(width=weight, color=weight),
+                           alpha=0.5, show.legend = showLegend)
+        }
+      } else {
+        if (edgeLabel){
+          netPlot <- netPlot +
+            geom_edge_diagonal(
+              aes(width=weight,
+                  color=weight,
+                  label=round(weight,3)),
+              angle_calc = 'along',
+              label_dodge = unit(2.5, 'mm'),
+              alpha=0.5,
+              show.legend = showLegend)
+        } else {
+          netPlot <- netPlot +
+            geom_edge_diagonal(aes(width=weight, color=weight),
+                               alpha=0.5, show.legend = showLegend)                
+        }
+      }
+    }
+    if (tag) {
+      netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+                                           show.legend = showLegend)
+    } else { 
+      netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+                                           show.legend = showLegend)+
+        scale_color_gradient(low=pal[1],high=pal[2],
+                             name = "Frequency")
+    }
+    if (colorText){
+      if (tag) {
+        netPlot <- netPlot + 
+          geom_node_text(aes(label=name, size=Freq, color=tag),
+                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                         bg.color = "white", segment.color="black",
+                         bg.r = .15, show.legend=showLegend)
+      } else {
+        netPlot <- netPlot + 
+          geom_node_text(aes(label=name, size=Freq, color=Freq),
+                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                         bg.color = "white", segment.color="black",
+                         bg.r = .15, show.legend=showLegend)
+      }
+    } else {
+      netPlot <- netPlot + 
+        geom_node_text(aes(label=name, size=Freq),
+                       check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                       color = "black",
+                       bg.color = "white", segment.color="black",
+                       bg.r = .15, show.legend=showLegend) 
+    }
+    netPlot <- netPlot+
+      scale_size(range=scaleRange, name="Frequency")+
+      scale_edge_width(range=c(1,3), name = "Correlation")+
+      scale_edge_color_gradient(low=pal[1],high=pal[2],
+                                name = "Correlation")+
+      theme_graph()
+    ret@net <- netPlot
+  } else {
+    ## WC part
+    matSorted <- matSorted[1:numWords]
+    returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+    freqWords <- names(matSorted)
+    freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+    
+    if (tag) {
+      if (!is.null(redo) & length(redo@pvclust)!=0) {
+        qqcat("Using previous pvclust results ...")
+        pvcl <- redo@pvpick
+      } else {
+        if (tagWhole){
+          pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+        } else {
+          pvc <- pvclust(as.matrix(dist(
+            t(
+              freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+            )
+          )))
+        }
+        pvcl <- pvpick(pvc, alpha=pvclAlpha)
+        redo@pvclust <- pvc
+        redo@pvpick <- pvcl
+      }
+      wcCol <- returnDf$word
+      for (i in seq_along(pvcl$clusters)){
+        for (j in pvcl$clusters[[i]])
+          wcCol[wcCol==j] <- pal[i]
+      }
+      wcCol[!wcCol %in% pal] <- "grey"
+      
+    }
+    for (i in madeUpper) {
+      # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
+      returnDf[returnDf$word == i,"word"] <- toupper(i)
+    }
+    if (tag){
+      wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+                                         freq = returnDf$freq,
+                                         colors = wcCol,
+                                         random.order=FALSE,
+                                         ordered.colors = TRUE)))
+    } else {
+      wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+                                         freq = returnDf$freq, ...)))
+    }
+    ret@freqDf <- returnDf
+    ret@wc <- wc
+  }
+  return(ret)
 }
 
 #' @rdname ospa
