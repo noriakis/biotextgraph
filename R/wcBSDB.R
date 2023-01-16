@@ -156,7 +156,13 @@ wcBSDB <- function (mbList,
     }
     qqcat("filtering @{length(filterWords)} words (frequency | tfidf) ...\n")
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
-    ret@filtered <- filterWords
+    if (length(filterWords)!=0 & length(additionalRemove)!=0){
+        allfils <- c(filterWords, additionalRemove)
+        allfils <- allfils[!is.na(allfils)]
+        if (length(allfils)!=0) {
+            ret@filtered <- allfils
+        }
+    }
     ret@corpus <- docs
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
