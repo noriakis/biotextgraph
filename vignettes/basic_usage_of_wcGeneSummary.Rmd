@@ -209,20 +209,21 @@ keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
 
-net1 <- wcGeneSummary(keggList$`05210`,
+net1 <- wcGeneSummary(keggList$`04110`,
                       keyType="ENTREZID",
                       plotType="network",
                       corThresh=0.3,
                       numWords=30,
                       tag=TRUE,
-                      excludeTfIdf=150)
-net2 <- wcGeneSummary(keggList$`05211`,
+                      tfidf=TRUE)
+
+net2 <- wcGeneSummary(keggList$`04210`,
                       keyType="ENTREZID",
                       plotType="network",
                       corThresh=0.3,
                       numWords=30,
-                      tag=TRUE,
-                      excludeTfIdf=150)
+                      tfidf=TRUE,
+                      tag=TRUE)
 
 compareWordNet(list(net1, net2), tag=TRUE)
 ```
@@ -514,6 +515,8 @@ conetDeg[order(conetDeg, decreasing=TRUE)] |> head(15)
 
 wt <- igraph::walktrap.community(conet)
 igraph::V(conet)$walktrap <- wt$membership
+pal <- brewer.pal(length(wt$membership), "Set3") 
+
 ggraph(conet)+
     geom_node_point(aes(color=factor(walktrap)), size=3)+
     geom_edge_link()+
@@ -521,7 +524,8 @@ ggraph(conet)+
                    check_overlap=TRUE, repel=TRUE,
                    bg.color = "white", segment.color="black",
                    bg.r = .15)+
-    scale_color_discrete(name="Walktrap")+
+    scale_color_manual(value=pal,
+                         name="Walktrap")+
     theme_graph()
 ```
 

@@ -209,7 +209,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
       }
       catNum <- length(unique(V(uig)$col))
       ## You can change it later
-      cs <- RColorBrewer::brewer.pal(catNum, "PuOr")
+      cs <- RColorBrewer::brewer.pal(catNum, "Pastel1")
       # if (catNum==2){
       #   cs <- c("tomato","steelblue")
       # } else if (catNum==3){
