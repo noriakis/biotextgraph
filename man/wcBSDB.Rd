@@ -99,6 +99,8 @@ on whole dataset or top-words specified by numWords}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
+\item{cl}{cluster object passed to pvclust}
+
 \item{...}{parameters to pass to wordcloud()}
 }
 \value{

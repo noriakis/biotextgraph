@@ -21,7 +21,7 @@
 #' e.g. "K08097" and "phosphosulfolactate synthase"
 #' @param areas used in patchwork
 #' @param ... passed to wc functions
-#' @import png grid pathview
+#' @import grid
 #' @export
 #'
 #' 
