@@ -13,7 +13,10 @@ pathviewText(
   target = "refseq",
   searchTerms = NULL,
   node.types = "gene",
+  termMap = NULL,
+  orgDb = org.Hs.eg.db,
   numWords = 20,
+  areas = NULL,
   ...
 )
 }
@@ -31,9 +34,21 @@ for coloring of nodes}
 
 \item{target}{target DB for word}
 
-\item{node.types}{passed to node.map}
+\item{searchTerms}{search terms to be used in wcAbst,
+if different than query geneList}
+
+\item{node.types}{passed to node.map e.g. "genes" and "ortholog"}
+
+\item{termMap}{data.frame consisting of columns
+"query" and "description", which shows query as "geneList",
+and description as "searchTerms".
+e.g. "K08097" and "phosphosulfolactate synthase"}
+
+\item{orgDb}{organism database to convert symbol}
 
 \item{numWords}{number of words in barplot}
+
+\item{areas}{used in patchwork}
 
 \item{...}{passed to wc functions}
 }

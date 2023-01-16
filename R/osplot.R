@@ -51,7 +51,8 @@ setClass("osplot", slots=list(
         geneCount="table",
         geneMap="matrix",
         net="ggraph",
-        wc="gg"
+        wc="gg",
+        ec="data.frame"
         ))
 setMethod("show",
   signature(object="osplot"),

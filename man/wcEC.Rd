@@ -4,14 +4,17 @@
 \alias{wcEC}
 \title{wcEC}
 \usage{
-wcEC(file, ecnum, onlyTerm = FALSE, ...)
+wcEC(file, ecnum, onlyTerm = FALSE, onlyDf = FALSE, ...)
 }
 \arguments{
 \item{file}{file downloaded from expasy}
 
 \item{ecnum}{candidate ecnum, like those obtained from eggNOG-mapper}
 
-\item{onlyTerm}{only return quoted queries}
+\item{onlyTerm}{only return quoted queries to wcAbst}
+
+\item{onlyDf}{only return ec description data.frame
+if onlyTerm and onlyDf are both specified, onlyTerm have priority}
 
 \item{...}{passed to osplot(target="pubmed")}
 }
