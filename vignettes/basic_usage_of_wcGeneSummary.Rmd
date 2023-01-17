@@ -515,7 +515,8 @@ conetDeg[order(conetDeg, decreasing=TRUE)] |> head(15)
 
 wt <- igraph::walktrap.community(conet)
 igraph::V(conet)$walktrap <- wt$membership
-pal <- brewer.pal(length(wt$membership), "Set3") 
+pal <- RColorBrewer::brewer.pal(length(unique(wt$membership)),
+                                "Set3") 
 
 ggraph(conet)+
     geom_node_point(aes(color=factor(walktrap)), size=3)+
@@ -524,7 +525,7 @@ ggraph(conet)+
                    check_overlap=TRUE, repel=TRUE,
                    bg.color = "white", segment.color="black",
                    bg.r = .15)+
-    scale_color_manual(value=pal,
+    scale_color_manual(values=pal,
                          name="Walktrap")+
     theme_graph()
 ```
