@@ -61,8 +61,7 @@
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
-#' @import pvclust
-#' @import ggforce
+#' @importFrom pvclust pvclust pvpick
 #' @import methods
 #' @importFrom dplyr filter
 #' @importFrom stats dist
@@ -72,8 +71,6 @@
 #' @importFrom cowplot as_grob
 #' @importFrom NLP ngrams words
 #' @importFrom ggplotify as.ggplot
-#' @importFrom ReactomePA enrichPathway
-#' @importFrom clusterProfiler enrichKEGG setReadable
 #' 
 #' @export
 #' @examples

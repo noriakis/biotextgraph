@@ -25,6 +25,12 @@ osplot <- function(target, ...) {
 	}
 }
 
+setOldClass("pvclust")
+setOldClass("igraph")
+setOldClass("VCorpus")
+setOldClass("TermDocumentMatrix")
+setOldClass("gg")
+setOldClass("ggraph")
 setClass("osplot", slots=list(
         query="character",
         delim="character",
@@ -59,6 +65,11 @@ setMethod("show",
   function(object) {
     qqcat("type: @{object@type}\n")
     qqcat("Number of words: @{object@numWords}\n")
-    cat(paste(object@query, collapse="/"));cat("\n")
+    if (length(object@query)<10) {
+      cat(paste(object@query, collapse="/"));cat("\n")
+    } else {
+      cat(paste0(paste(object@query[1:10],
+        collapse="/"), "/truncated"));cat("\n")
+    }
     print(object.size(object), units="auto")
   })
