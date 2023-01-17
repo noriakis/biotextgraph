@@ -241,6 +241,7 @@ wcBSDB <- function (mbList,
 
         ## genePlot: plot associated genes
         if (disPlot) {mbPlot <- TRUE}
+        if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
         if (mbPlot) {
             row.names(freqWordsDTM) <- fil$query
         }
