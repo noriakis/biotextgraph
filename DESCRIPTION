@@ -8,8 +8,12 @@ License: MIT
 Encoding: UTF-8
 Depends:
     R (>= 4.2.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, ReactomePA, org.Hs.eg.db, clusterProfiler, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, ggforce, bugsigdbr, stringr, XML, graphlayouts, methods, concaveman
-Suggests: 
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, graphlayouts, methods
+Suggests:
+    ggforce,
+    concaveman,
+    ReactomePA,
+    clusterProfiler,
     RColorBrewer,
     bnlearn,
     pathview,

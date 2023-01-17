@@ -41,8 +41,6 @@
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
-#' @import pvclust
-#' @import ggforce
 #' @import XML
 #' @importFrom dplyr filter
 #' @importFrom stats dist

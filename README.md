@@ -20,7 +20,7 @@ library(wcGeneSummary)
 erccs <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 gwc <- wcGeneSummary(erccs, excludeFreq = 5000, max.words=200, random.order=FALSE,
                      colors=palettetown::pokepal(150), rot.per=0.4)
-# ggsave("erccWc.png", gwc$wc, width=8, height=8)
+# ggsave("erccWc.png", gwc@wc, width=8, height=8)
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/erccWc.png?raw=true" width="800px">
 
@@ -34,7 +34,7 @@ gwc <- wcGeneSummary(cxcls, excludeFreq=14000,
                      madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                      max.words=200, random.order=FALSE,
                      colors=palettetown::pokepal(151), rot.per=0.4)
-# ggsave("cxclWc.png", gwc$wc, width=8, height=8)
+# ggsave("cxclWc.png", gwc@wc, width=8, height=8)
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/cxclWc.png?raw=true" width="800px">
 
@@ -51,7 +51,7 @@ cclNet <- wcGeneSummary(ccls, plotType="network",
                         layout="nicely",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                         numWords = 15, excludeFreq = 5000, edgeLink=FALSE, showLegend=FALSE)
-cclNetTrans <- cclNet$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+cclNetTrans <- cclNet@net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
 # ggsave(file="cclNet.png", cclNetTrans, width=7, height=7, bg="transparent")
 ```
 
@@ -69,7 +69,7 @@ hCNet <- wcGeneSummary(keggList$`05160`, plotType="network",
                         madeUpper=c("dna","rna",tolower(keys(org.Hs.eg.db, keytype="SYMBOL"))),
                         numWords = 30, excludeFreq = 5000, colorText=TRUE,
                         edgeLink=FALSE, showLegend=FALSE)
-hCNetTrans <- hCNet$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+hCNetTrans <- hCNet@net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
 # ggsave(file="hCNet.png", hCNetTrans, width=12, height=12, bg="transparent")
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/hCNet.png?raw=true" width="800px">
@@ -79,7 +79,7 @@ Additionally perform enrichment analysis on the same gene list and plot a correl
 hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZID"
                            topPath=30, numWords=30,
                            plotType="network", corThresh=0.2)
-hCNetReacTrans <- hCNetReac$net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
+hCNetReacTrans <- hCNetReac@net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
 # ggsave(file="hCNetTrans.png", hCNetReacTrans, width=12, height=12, bg="transparent")
 ```
 <img src="https://github.com/noriakis/software/blob/main/images/hCNetTrans.png?raw=true" width="800px">

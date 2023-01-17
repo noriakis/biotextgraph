@@ -22,7 +22,6 @@
 #' net2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
 #' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
-#' @import ggforce
 #' @importFrom stringr str_replace
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size=4, conc=1,
