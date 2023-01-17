@@ -153,7 +153,7 @@ wcBSDB <- function (mbList,
             allTfIdfBSDB[
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
-    qqcat("filtering @{length(filterWords)} words (frequency | tfidf) ...\n")
+    qqcat("filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
     if (length(filterWords)!=0 & length(additionalRemove)!=0){
         allfils <- c(filterWords, additionalRemove)
