@@ -23,6 +23,7 @@ wcBSDB(
   showLegend = FALSE,
   edgeLabel = FALSE,
   mbPlot = FALSE,
+  onlyTDM = FALSE,
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
@@ -75,6 +76,8 @@ default to 0}
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{mbPlot}{plot microbe names}
+
+\item{onlyTDM}{return only TDM}
 
 \item{ngram}{default to NA (1)}
 

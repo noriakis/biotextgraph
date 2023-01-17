@@ -32,6 +32,7 @@
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
 #' @param numOnly delete number only
+#' @param onlyTDM return only TDM
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param ... parameters to pass to wordcloud()
@@ -64,7 +65,7 @@ wcBSDB <- function (mbList,
                     madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15,
                     scaleRange=c(5,10), showLegend=FALSE,
-                    edgeLabel=FALSE, mbPlot=FALSE,
+                    edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
@@ -73,7 +74,7 @@ wcBSDB <- function (mbList,
     ret@type <- "BSDB"
     if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated","taxa","taxon")}
-    if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
+    # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
         tb <- importBugSigDB()
@@ -129,18 +130,30 @@ wcBSDB <- function (mbList,
             }
             onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
             xmlString <- readLines(onequery, encoding="UTF8")
-            parsedXML <- xmlTreeParse(xmlString)
-            abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
-                                            "Abstract",
-                                            recursive = TRUE)
-            absttext <- as.character(xmlValue(abstset))
-            ret@rawTextBSDB <- absttext
+            parsedXML <- xmlParse(xmlString)
+            obtainText <- function(pmid) {xpathSApply(parsedXML, paste('//PubmedArticle/MedlineCitation[PMID=',pmid,']/Article/Abstract/AbstractText'), xmlValue)}
+            PMIDs <- as.numeric(xpathSApply(parsedXML, "//PubmedArticle/MedlineCitation/PMID", xmlValue))
+            abstDf <- NULL
+            for (pmid in PMIDs) {
+                if (length(obtainText(pmid))!=0) {
+                    for (text in obtainText(pmid)) {
+                        tax <- unique(subset(fil, PMID==pmid)$query)
+                        abstDf <- rbind(abstDf, c(pmid, text, tax))
+                    }
+                }
+            }
+            abstDf <- data.frame(abstDf) |> `colnames<-`(c("PMID","AbstractText","query"))
+            # abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+            #                                 "Abstract",
+            #                                 recursive = TRUE)
+            # absttext <- as.character(xmlValue(abstset))
+            ret@rawTextBSDB <- abstDf
         } else {
-            absttext <- redo@rawTextBSDB
+            abstDf <- redo@rawTextBSDB
             filterWords <- ret@filtered
             subTb <- ret@rawText
         }
-        docs <- VCorpus(VectorSource(absttext))
+        docs <- VCorpus(VectorSource(abstDf$AbstractText))
     } else {
         docs <- VCorpus(VectorSource(fil$Title))
     }
@@ -194,7 +207,9 @@ wcBSDB <- function (mbList,
         numWords <- length(matSorted)
     }
     ret@numWords <- numWords
-
+    if (onlyTDM) {
+        return(docs)
+    }
     # returnList[["rawfrequency"]] <- matSorted
     ret@TDM <- docs
 
@@ -241,9 +256,13 @@ wcBSDB <- function (mbList,
 
         ## genePlot: plot associated genes
         if (disPlot) {mbPlot <- TRUE}
-        if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
+        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
         if (mbPlot) {
-            row.names(freqWordsDTM) <- fil$query
+            if (target=="abstract") {
+                row.names(freqWordsDTM) <- abstDf$query
+            } else {
+                row.names(freqWordsDTM) <- fil$query
+            }
         }
         
         if (disPlot) {## This does not need to be deduplicated

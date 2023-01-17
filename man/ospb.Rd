@@ -23,6 +23,7 @@ ospb(
   showLegend = FALSE,
   edgeLabel = FALSE,
   mbPlot = FALSE,
+  onlyTDM = FALSE,
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
