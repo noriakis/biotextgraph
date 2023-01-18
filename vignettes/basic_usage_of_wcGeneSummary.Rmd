@@ -547,15 +547,17 @@ ggraph(ddrRelated)+
 
 The network can be obtained by `returnNet=TRUE`, which can be used for downstream analysis like assessment of degrees and community detection.
 
-```{r combineNet, cache=F, fig.height=10, fig.width=20}
+```{r combineNet, cache=F, fig.height=10, fig.width=10}
 
 conetDeg <- igraph::degree(conet)
 conetDeg[order(conetDeg, decreasing=TRUE)] |> head(15)
 
+conet <- induced_subgraph(conet, conetDeg>1)
+
 wt <- igraph::walktrap.community(conet)
 igraph::V(conet)$walktrap <- wt$membership
 pal <- RColorBrewer::brewer.pal(length(unique(wt$membership)),
-                                "Set3") 
+                                "Dark2") 
 pal <- colorRampPalette(pal)(20)
 
 ggraph(conet)+
