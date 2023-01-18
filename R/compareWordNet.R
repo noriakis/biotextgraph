@@ -83,7 +83,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
     }
   }
 
-  col <- c()
+  col <- NULL
+  ovl <- NULL
   for (node in names(V(uig))){
       if (node %in% commonNodes) {
           col <- c(col, "Common")
@@ -98,11 +99,14 @@ compareWordNet <- function(listOfNets, titles=NULL,
                   }
               }
           }
+          howm <- length(tmpcol)
           tmpcol <- paste(tmpcol, collapse="_")
           col <- c(col, tmpcol)
+          ovl <- c(ovl, howm)
       }
   }
   V(uig)$col <- col
+  V(uig)$ovl <- ovl
   if (returnNet){
     return(uig)
   }
