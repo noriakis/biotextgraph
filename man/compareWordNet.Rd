@@ -9,12 +9,11 @@ compareWordNet(
   titles = NULL,
   layout = "nicely",
   hull = FALSE,
-  size = 4,
+  size = "freq",
   conc = 1,
   tag = FALSE,
   tagLevel = 1,
   edgeLink = TRUE,
-  freq = TRUE,
   freqMean = FALSE,
   scaleRange = c(5, 10),
   returnNet = FALSE,
@@ -32,7 +31,7 @@ compareWordNet(
 
 \item{hull}{show category by hull}
 
-\item{size}{node size}
+\item{size}{node size, freq, overlap or numeric number}
 
 \item{conc}{concavity parameter}
 
@@ -41,8 +40,6 @@ compareWordNet(
 \item{tagLevel}{words that tagged in this many networks will be included}
 
 \item{edgeLink}{whether to use link or diagonal}
-
-\item{freq}{concatenate frequency and show it on plot}
 
 \item{freqMean}{how to concatenate frequency (TRUE: mean, FALSE: sum)}
 
