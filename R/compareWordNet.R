@@ -87,6 +87,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   for (node in names(V(uig))){
       if (node %in% commonNodes) {
           col <- c(col, "Common")
+          howm <- length(listOfNets)
       } else {
           tmpcol <- c()
           for (e in seq_along(listOfIGs)){
@@ -101,8 +102,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
           howm <- length(tmpcol)
           tmpcol <- paste(tmpcol, collapse="_")
           col <- c(col, tmpcol)
-          ovl <- c(ovl, howm)
       }
+      ovl <- c(ovl, howm)
   }
   V(uig)$col <- col
   V(uig)$ovl <- ovl
@@ -172,7 +173,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
     ## specifying label produces an error,
     ## thus show.legend=TRUE is specified
     comNet <- comNet + 
-      geom_node_point(aes(color=col), size=size)+
+      geom_node_point(aes(color=col, size=size))+
         scale_color_discrete(name="Group")
     # comNet <- comNet + geom_mark_hull(
     #   aes(comNet$data$x,
@@ -210,7 +211,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
       )
     } else {
       comNet <- comNet + 
-        geom_node_point(aes(color=col), size=size)+
+        geom_node_point(aes(color=col, size=size))+
         scale_color_discrete(name="Group")
       catNum <- length(unique(V(uig)$col))
       ## You can change it later
@@ -218,15 +219,6 @@ compareWordNet <- function(listOfNets, titles=NULL,
       if (length(cs)<colNum) {
         cs <- colorRampPalette(cs)(colNum)
       }
-      # if (catNum==2){
-      #   cs <- c("tomato","steelblue")
-      # } else if (catNum==3){
-      #   cs <- c("tomato","gold","steelblue")
-      # } else if (catNum==4) {
-      #   cs <- c("tomato","gold","steelblue","mediumseagreen")
-      # } else {
-      #   cs <- palette()
-      # }
       comNet <- comNet +
         scale_color_manual(name="Group",values=cs)
     }

@@ -186,7 +186,7 @@ abtag2@net
 
 One can compare two or more networks by providing list of objects produced by wc* functions, like `wcGeneSummary` and `wcAbst`. This can be useful for assessing the similarity and dissimilarity of the various text sources, like PubMed, RefSeq, and Reactome pathway names.
 
-```{r compare, cache=TRUE, fig.height=8, fig.width=8}
+```{r compare, cache=TRUE, fig.height=12, fig.width=12}
 cxcls <- c()
 for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
     cxcls <- c(cxcls, paste0("CXCL",i))
@@ -210,7 +210,7 @@ compareWordNet(list(net1, net2, net3),
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
 
-```{r tagcomp, cache=TRUE, fig.height=10, fig.width=8}
+```{r tagcomp, cache=TRUE, fig.height=12, fig.width=15}
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
@@ -483,7 +483,7 @@ top
 These genes are further queried for PubMed information.
 First, show the network for the article titles.
 
-```{r absttitleapp}
+```{r absttitleapp, fig.height=9, fig.width=9}
 titlenet <- wcAbst(top,
                    target="title",
                    plotType="network",
@@ -498,7 +498,7 @@ titlenet@net
 
 Obtain and show the network for the article abstract.
 
-```{r abstmainapp}
+```{r abstmainapp, fig.height=9, fig.width=9}
 abstnet <- wcAbst(top,
                   target="abstract",
                   plotType="network",
@@ -515,7 +515,7 @@ abstnet@net
 
 From the RefSeq summary and articles related to important genes, the cluster could have functionality of DNA damage response, which is also upregulated by BKPyV infection. These networks can be combined to find intersections and differences. We can see that in addition to Reactome pathway names, plenty of information could be obtained and summarized by querying other databases, which could aid in interpreting clusters of genes and hypothesis generation.
 
-```{r combineapp, cache=F, fig.height=10, fig.width=10}
+```{r combineapp, cache=F, fig.height=20, fig.width=20}
 compareWordNet(list(abstnet, titlenet, netreac, net1),
                titles=c("Abstract","Title","Reactome","RefSeq"))
 ```
@@ -547,7 +547,7 @@ ggraph(ddrRelated)+
 
 The network can be obtained by `returnNet=TRUE`, which can be used for downstream analysis like assessment of degrees and community detection.
 
-```{r combineNet, cache=F, fig.height=10, fig.width=10}
+```{r combineNet, cache=F, fig.height=10, fig.width=20}
 
 conetDeg <- igraph::degree(conet)
 conetDeg[order(conetDeg, decreasing=TRUE)] |> head(15)
@@ -574,8 +574,8 @@ Dynamic layout can be also used to compare the networks, by `graphlayouts`, for 
 
 ```{r dyn, warning=FALSE, fig.height=8, fig.width=15}
 library(igraph)
-dyn <- plotDynamic(list(abstnet, titlenet, net1),
-                   titles=c("Abstract","Title","RefSeq"), alpha=1)
+dyn <- plotDynamic(list(abstnet, titlenet), concat="intersection",
+                   titles=c("Abstract","Title"), alpha=0.8)
 dyn
 ```
 
