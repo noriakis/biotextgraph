@@ -17,6 +17,7 @@ wcAbst(
   geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
+  cl = FALSE,
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
@@ -71,6 +72,8 @@ or "bsdbtfidf" (whole bugsigdb tf-idf)}
 \item{apiKey}{api key for eutilities}
 
 \item{tfidf}{use TfIdf when making TDM}
+
+\item{cl}{cluster to pass to pvclust (snow::makeCluster(n))}
 
 \item{pal}{palette for color gradient in correlation network}
 

@@ -17,7 +17,10 @@ compareWordNet(
   freq = TRUE,
   freqMean = FALSE,
   scaleRange = c(5, 10),
-  returnNet = FALSE
+  returnNet = FALSE,
+  colPal = "Pastel1",
+  colNum = 20,
+  colorText = FALSE
 )
 }
 \arguments{
@@ -46,6 +49,12 @@ compareWordNet(
 \item{scaleRange}{point size scaling}
 
 \item{returnNet}{return only the network (ig)}
+
+\item{colPal}{color palette to be used in RColorBrewer}
+
+\item{colNum}{color number to be used in plot}
+
+\item{colorText}{whether to color text based on category}
 }
 \value{
 plot comparing gene clusters

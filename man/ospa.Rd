@@ -17,6 +17,7 @@ ospa(
   geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
+  cl = FALSE,
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
