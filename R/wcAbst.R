@@ -35,6 +35,7 @@
 #' @param onlyTDM return only TDM
 #' @param preset filter preset words
 #' @param numOnly delete number only
+#' @param cl cluster to pass to pvclust (snow::makeCluster(n))
 #' @param bn perform bootstrap-based Bayesian network inference 
 #' instead of correlation using bnlearn
 #' @param R how many bootstrap when bn is stated
@@ -64,7 +65,7 @@
 wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    target="abstract", usefil=NA, filnum=0,
                    pvclAlpha=0.95, numOnly=TRUE, delim="OR",
-                   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE,
+                   geneUpper=TRUE, apiKey=NULL, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE, quote=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
@@ -121,6 +122,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     stop("specify target or abstract")
   }
   
+  ## Probably set default filnum?
   if (!is.na(usefil)){
     if (usefil=="gstfidf") {
       qqcat("filter based on GeneSummary\n")
@@ -200,19 +202,19 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     freqWordsDTM <- t(as.matrix(docs))
     row.names(freqWordsDTM) <- allDataDf$query
     if (tag) {
-      if (!is.null(ret) & length(ret@pvclust)!=0){
+      if (!is.null(ret) & length(ret@pvpick)!=0){
         qqcat("Using previous pvclust results ...")
         pvcl <- ret@pvpick
       } else {
         if (tagWhole){
-          pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+          pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
         } else {
           # pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
           pvc <- pvclust(as.matrix(dist(
             t(
               freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
             )
-          )))
+          )), parallel=cl)
         }
         pvcl <- pvpick(pvc, alpha=pvclAlpha)
         ret@pvclust <- pvc
@@ -433,22 +435,22 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
     
     if (tag) {
-      if (!is.null(redo) & length(redo@pvclust)!=0) {
+      if (!is.null(redo) & length(redo@pvpick)!=0) {
         qqcat("Using previous pvclust results ...")
         pvcl <- redo@pvpick
       } else {
         if (tagWhole){
-          pvc <- pvclust(as.matrix(dist(as.matrix(docs))))
+          pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
         } else {
           pvc <- pvclust(as.matrix(dist(
             t(
               freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
             )
-          )))
+          )), parallel=cl)
         }
         pvcl <- pvpick(pvc, alpha=pvclAlpha)
-        redo@pvclust <- pvc
-        redo@pvpick <- pvcl
+        ret@pvclust <- pvc
+        ret@pvpick <- pvcl
       }
       wcCol <- returnDf$word
       for (i in seq_along(pvcl$clusters)){

@@ -24,6 +24,8 @@ library(org.Hs.eg.db)
 library(ggplot2)
 library(ggraph)
 library(RColorBrewer)
+library(ReactomePA)
+library(clusterProfiler)
 ```
 
 ## Producing word clouds
@@ -147,6 +149,8 @@ The associated enriched pathways (if present) can be shown by specifying `genePa
 In this option, the function first performs over-representation analysis on the whole gene set, and plot enriched terms for included genes in the plot. Enrichment analysis here is performed by the library `clusterProfiler` or `ReactomePA`, and one can control which pathways to plot by `genePathPlotSig` value.
 
 ```{r gpplot, warning=FALSE, message=FALSE, cache=TRUE, fig.width=8, fig.height=8}
+library(concaveman)
+library(ggforce)
 net <- wcGeneSummary(inpSymbol, plotType="network",
                      genePathPlot="reactome", corThresh=0.5,
                      tag=TRUE, edgeLink=FALSE,
@@ -161,14 +165,16 @@ net@net
 Using `rentrez`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried.
 
 ```{r wcabst_wc, cache=FALSE, fig.height=8, fig.width=8}
-ab <- wcAbst(inpSymbol[1:3])
+ab <- wcAbst(inpSymbol[1:3], retMax=20)
 ab@wc
 ```
 
 As fetching the same information is not desirable and time consuming, the same object can be passed to `redo` option and re-perform the analysis like tagging, or changing the visualization options.
 
-```{r wcabst_wc_2, cache=FALSE, fig.height=8, fig.width=8}
-abtag <- wcAbst(redo=ab, tag=TRUE)
+```{r wcabst_wc_2, cache=TRUE, fig.height=8, fig.width=8}
+pal <- brewer.pal(5, "PuOr") 
+abtag <- wcAbst(redo=ab, tag=TRUE,
+                cl=snow::makeCluster(10), pal=pal)
 abtag2 <- wcAbst(redo=abtag, tag=TRUE, genePlot=TRUE,
                  plotType="network", corThresh=0.2, preset=TRUE)
 abtag@wc
@@ -204,7 +210,7 @@ compareWordNet(list(net1, net2, net3),
 
 If `tag` information is available in both gene clusters, combined tags can be visualized by `tag=TRUE`.
 
-```{r tagcomp, cache=FALSE, fig.height=10, fig.width=8}
+```{r tagcomp, cache=TRUE, fig.height=10, fig.width=8}
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
@@ -410,7 +416,7 @@ p
 
 # Application examples
 
-We demonstrate an use case, which investigates transcriptomic changes induced by BK polyomavirus (BKPyV) infection in renal proximal tubular epithelial cells ([An et al. 2019](https://pubmed.ncbi.nlm.nih.gov/30620752/)). Differentially expressed genes in 3 days post-infection were obtained, and down-regulated genes in BKPyV infected cells were examined.
+We demonstrate an use case, which investigates transcriptomic changes induced by BK polyomavirus (BKPyV) infection in renal proximal tubular epithelial cells ([Assetta et al. 2016](https://pubmed.ncbi.nlm.nih.gov/27381292/)). Differentially expressed mRNAs in 3 days post-infection were obtained, and down-regulated mRNAs in BKPyV infected cells were examined.
 
 ## Load the necessary packages and genes
 
@@ -454,61 +460,94 @@ netreac <- wcGeneSummary(degs,
 ```
 
 ## Text mining the gene summaries
-Next we perform the plain function producing a correlation network, with showing the genes related to high-frequency words in the text.
+Next we perform the plain function producing a correlation network, with showing the top-genes related to high-frequency words in the text in RefSeq summary. We obtained the list of these genes from geneCount slot.
 
-```{r basic2app, warning=FALSE, message=FALSE, cache=TRUE}
-net1 <- wcGeneSummary(degs, plotType="network",
-                      colorText=TRUE, numWords=20,
-                      genePlot=TRUE, genePlotNum=5,
+```{r basic2app, warning=FALSE, message=FALSE, cache=TRUE, fig.width=10, fig.height=10}
+net1 <- wcGeneSummary(degs,
+                      plotType="network",
+                      colorText=TRUE,
+                      numWords=30,
+                      corThresh=0.4,
+                      genePlot=TRUE,
+                      genePlotNum=5,
+                      edgeLink=FALSE,
                       genePathPlot="reactome")
 net1@net
-top5 <- names(head(net1@geneCount, n=5))
-top5
+net1@geneCount
+top <- names(net1@geneCount[net1@geneCount>=6])
+top
 ```
 
 ## Text mining the available literature
 
 These genes are further queried for PubMed information.
-
-```{r tableapp, cache=TRUE}
-abst <- wcAbst(top5)
-```
-
-Show the network for the article titles.
+First, show the network for the article titles.
 
 ```{r absttitleapp}
-titlenet <- wcAbst(redo=abst, target="title", tfidf=TRUE,
-       plotType="network", colorText=TRUE, corThresh=0.1,
-       preset=TRUE)
+titlenet <- wcAbst(top,
+                   target="title",
+                   plotType="network",
+                   colorText=TRUE,
+                   corThresh=0.2,
+                   preset=TRUE,
+                   retMax=50,
+                   numWords=50,
+                   edgeLink=FALSE)
 titlenet@net
 ```
 
-Show the network for the article abstract.
+Obtain and show the network for the article abstract.
 
 ```{r abstmainapp}
-abstnet <- wcAbst(redo=abst, target="abstract", tfidf=TRUE,
-       plotType="network", colorText=TRUE, corThresh=0.1,
-       preset=TRUE)
+abstnet <- wcAbst(top,
+                  target="abstract",
+                  plotType="network",
+                  colorText=TRUE,
+                  corThresh=0.2,
+                  preset=TRUE,
+                  numWords=50,
+                  retMax=50,
+                  edgeLink=FALSE)
 abstnet@net
 ```
-
 
 ## Combine and compare networks
 
 From the RefSeq summary and articles related to important genes, the cluster could have functionality of DNA damage response, which is also upregulated by BKPyV infection. These networks can be combined to find intersections and differences. We can see that in addition to Reactome pathway names, plenty of information could be obtained and summarized by querying other databases, which could aid in interpreting clusters of genes and hypothesis generation.
-
 
 ```{r combineapp, cache=F, fig.height=10, fig.width=10}
 compareWordNet(list(abstnet, titlenet, netreac, net1),
                titles=c("Abstract","Title","Reactome","RefSeq"))
 ```
 
+From the network, DNA damage repair pathway, especially nucleotide excision repair related to DDB2, BAP1,and RAD17 might be related to BKPyV infection, which cannot be prioritize based on log2FoldChange or enrichment analysis.
+
+```{r ddr, cache=T}
+conet <- compareWordNet(list(netreac,
+                    net1,
+                    titlenet,
+                    abstnet),
+               returnNet = TRUE)
+
+ddrRelated <- induced.subgraph(conet,
+                 names(V(conet)) %in% c(names(neighbors(conet, "DNA")),
+                                    names(neighbors(conet, "damage")),
+                                    names(neighbors(conet, "repair"))))
+V(ddrRelated)$SYMBOL <- names(V(ddrRelated)) %in% keys(org.Hs.eg.db,"SYMBOL")
+ggraph(ddrRelated)+
+    geom_node_point(aes(color=SYMBOL))+
+    geom_edge_diagonal2()+
+    geom_node_text(aes(label=name, color=SYMBOL),check_overlap=TRUE, repel=TRUE,
+                   bg.color = "white", segment.color="black",
+                   bg.r = .15)+
+    scale_color_manual(values=c("steelblue","tomato"))+
+    theme_graph()
+```
+
+
 The network can be obtained by `returnNet=TRUE`, which can be used for downstream analysis like assessment of degrees and community detection.
 
 ```{r combineNet, cache=F, fig.height=10, fig.width=10}
-
-conet <- compareWordNet(list(abstnet, titlenet, netreac, net1), returnNet=TRUE)
-conet
 
 conetDeg <- igraph::degree(conet)
 conetDeg[order(conetDeg, decreasing=TRUE)] |> head(15)
@@ -517,6 +556,7 @@ wt <- igraph::walktrap.community(conet)
 igraph::V(conet)$walktrap <- wt$membership
 pal <- RColorBrewer::brewer.pal(length(unique(wt$membership)),
                                 "Set3") 
+pal <- colorRampPalette(pal)(20)
 
 ggraph(conet)+
     geom_node_point(aes(color=factor(walktrap)), size=3)+
@@ -530,10 +570,9 @@ ggraph(conet)+
     theme_graph()
 ```
 
-
 Dynamic layout can be also used to compare the networks, by `graphlayouts`, for comparing the multiple graphs, especially useful for time-series analysis. See the documentation of [`layout_as_dynamic`](http://graphlayouts.schochastics.net/reference/layout_dynamic.html) for specifying the alpha, which is default to 0.5. 
 
-```{r dyn, warning=FALSE, fig.height=8, fig.width=10}
+```{r dyn, warning=FALSE, fig.height=8, fig.width=15}
 library(igraph)
 dyn <- plotDynamic(list(abstnet, titlenet, net1),
                    titles=c("Abstract","Title","RefSeq"), alpha=1)

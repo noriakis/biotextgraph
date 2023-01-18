@@ -15,6 +15,9 @@
 #' @param freqMean how to concatenate frequency (TRUE: mean, FALSE: sum)
 #' @param scaleRange point size scaling
 #' @param returnNet return only the network (ig)
+#' @param colPal color palette to be used in RColorBrewer
+#' @param colNum color number to be used in plot
+#' @param colorText whether to color text based on category
 #' 
 #' @export
 #' @examples
@@ -27,7 +30,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size=4, conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
                            freq=TRUE, freqMean=FALSE, scaleRange=c(5,10),
-                           returnNet=FALSE) {
+                           returnNet=FALSE, colPal="Pastel1", colNum=20,
+                           colorText=FALSE) {
   listOfIGs <- list()
   listOfNodes <- list()
 
@@ -208,7 +212,10 @@ compareWordNet <- function(listOfNets, titles=NULL,
       }
       catNum <- length(unique(V(uig)$col))
       ## You can change it later
-      cs <- RColorBrewer::brewer.pal(catNum, "Pastel1")
+      cs <- RColorBrewer::brewer.pal(catNum, colPal)
+      if (length(cs)<colNum) {
+        cs <- colorRampPalette(cs)(colNum)
+      }
       # if (catNum==2){
       #   cs <- c("tomato","steelblue")
       # } else if (catNum==3){
@@ -222,15 +229,25 @@ compareWordNet <- function(listOfNets, titles=NULL,
         scale_color_manual(name="Group",values=cs)
     }
   }
-
-  comNet +
-  geom_node_text(
-    aes(label=name),
-    check_overlap=TRUE, repel=TRUE,# size = labelSize,
-    bg.color = "white", segment.color="black",
-    bg.r = .15, show.legend=FALSE)+
-  scale_size(range=scaleRange, name="Frequency")+
-  theme_graph()
+  if (colorText) {
+    comNet +
+    geom_node_text(
+      aes(label=name, color=col),
+      check_overlap=TRUE, repel=TRUE,# size = labelSize,
+      bg.color = "white", segment.color="black",
+      bg.r = .15, show.legend=FALSE)+
+    scale_size(range=scaleRange, name="Frequency")+
+    theme_graph()
+  } else {
+    comNet +
+    geom_node_text(
+      aes(label=name),
+      check_overlap=TRUE, repel=TRUE,# size = labelSize,
+      bg.color = "white", segment.color="black",
+      bg.r = .15, show.legend=FALSE)+
+    scale_size(range=scaleRange, name="Frequency")+
+    theme_graph()
+  }
 }
 
 

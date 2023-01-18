@@ -3,7 +3,7 @@ Type: Package
 Title: easy visualization and interpretation of omics summary data
 Version: 0.99.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
-Description: This package makes a summarized visualization of gene set using textual information from various sources.
+Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization.
 License: MIT
 Encoding: UTF-8
 Depends:

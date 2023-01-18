@@ -71,7 +71,7 @@ wcBSDB <- function (mbList,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
     ret <- new("osplot")
     ret@query <- mbList
-    ret@type <- "BSDB"
+    ret@type <- paste0("BSDB_",target)
     if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated","taxa","taxon")}
     # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
