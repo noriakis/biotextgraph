@@ -8,7 +8,7 @@ License: MIT
 Encoding: UTF-8
 Depends:
     R (>= 4.2.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, dendextend, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, graphlayouts, methods
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, graphlayouts, methods, dendextend
 Suggests:
     ggforce,
     concaveman,

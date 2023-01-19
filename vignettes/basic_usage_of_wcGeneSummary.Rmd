@@ -26,6 +26,7 @@ library(ggraph)
 library(RColorBrewer)
 library(ReactomePA)
 library(clusterProfiler)
+library(dendextend)
 ```
 
 ## Producing word clouds
@@ -426,7 +427,7 @@ library(org.Hs.eg.db)
 library(ggplot2)
 library(ReactomePA);library(clusterProfiler)
 library(ggraph)
-degs <- wcGeneSummary:::d3degDownAn2019
+degs <- wcGeneSummary:::d3degDownAssetta2016
 length(degs)
 degs
 ```
