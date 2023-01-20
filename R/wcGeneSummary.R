@@ -53,6 +53,7 @@
 #' @param verbPOS Part of Speech tags in verbs, like "VBN", "VBZ"
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
+#' @param stem whether to use stemming
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -86,7 +87,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
-                            ngram=NA, plotType="wc", onlyTDM=FALSE,
+                            ngram=NA, plotType="wc", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
@@ -108,8 +109,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     }
     if (ora & !numOnly) {
-        stop("ora should be used with numOnly=FALSE, as the background is calculated based on numOnly=TRUE")
+        stop("ora should be used with numOnly=TRUE, as the background is calculated based on numOnly=TRUE")
     }
+    if (ora & stem) {
+        stop("ora should be used with stem=FALSE, as the background is calculated based on stem=FALSE")
+    }
+
     if (is.null(mergeCorpus)) {
         qqcat("input genes: @{length(geneList)}\n")
         if (keyType!="ENTREZID"){
@@ -158,7 +163,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@enrichResults <- pathRes@result
             ## Make corpus
             docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
+            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         } else {
             ## Load from GeneSummary
             tb <- loadGeneSummary(organism = organism)
@@ -190,7 +195,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@rawText <- fil
             ## Make corpus
             docs <- VCorpus(VectorSource(fil$Gene_summary))
-            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
+            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         }
 
         if (onlyCorpus){

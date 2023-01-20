@@ -32,6 +32,7 @@ ospb(
   corThresh = 0.2,
   tag = FALSE,
   tagWhole = FALSE,
+  stem = FALSE,
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,

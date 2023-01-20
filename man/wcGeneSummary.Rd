@@ -28,6 +28,7 @@ wcGeneSummary(
   ngram = NA,
   plotType = "wc",
   onlyTDM = FALSE,
+  stem = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   genePlot = FALSE,
@@ -99,6 +100,8 @@ default to 5000}
 \item{plotType}{"wc" or "network"}
 
 \item{onlyTDM}{return only TDF}
+
+\item{stem}{whether to use stemming}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

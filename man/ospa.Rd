@@ -11,9 +11,11 @@ ospa(
   target = "abstract",
   usefil = NA,
   filnum = 0,
+  sortOrder = "relevance",
   pvclAlpha = 0.95,
   numOnly = TRUE,
   delim = "OR",
+  limit = 10,
   geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
@@ -44,6 +46,7 @@ ospa(
   preset = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
+  stem = FALSE,
   ...
 )
 }
