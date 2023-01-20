@@ -35,6 +35,7 @@
 #' @param onlyTDM return only TDM
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
+#' @param stem whether to use stemming
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -67,7 +68,7 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
-                    colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE,
+                    colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
     ret <- new("osplot")
     ret@query <- mbList
@@ -167,7 +168,7 @@ wcBSDB <- function (mbList,
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
     qqcat("filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
-    docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
+    docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
     if (length(filterWords)!=0 & length(additionalRemove)!=0){
         allfils <- c(filterWords, additionalRemove)
         allfils <- allfils[!is.na(allfils)]

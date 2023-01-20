@@ -28,6 +28,7 @@ osp(
   ngram = NA,
   plotType = "wc",
   onlyTDM = FALSE,
+  stem = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   genePlot = FALSE,

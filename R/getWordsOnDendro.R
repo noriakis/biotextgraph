@@ -225,38 +225,6 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 }
 
 
-#' makeCorpus
-#' 
-#' Clean-up the corpus
-#' 
-#' @param docs corpus to clean
-#' @param filterWords words to filter based on frequency
-#' @param additionalRemove words to filter
-#' @param numOnly delete number only
-#' 
-#' @return cleaned corpus
-#' @import tm
-#' 
-#' 
-makeCorpus <- function (docs, filterWords, additionalRemove, numOnly) {
-    docs <- docs %>%
-        tm_map(FUN=content_transformer(tolower))
-    if (numOnly) {
-        docs <- docs %>% tm_map(FUN=removeAloneNumbers)
-    } else {
-        docs <- docs %>% tm_map(FUN=removeNumbers)
-    }
-    docs <- docs %>%
-        tm_map(removeWords, stopwords::stopwords("english",
-            "stopwords-iso")) %>%
-        tm_map(removeWords, filterWords) %>% 
-        tm_map(FUN=removePunctuation) %>%
-        tm_map(FUN=stripWhitespace)
-    if (prod(is.na(additionalRemove))!=1){
-        docs <- docs %>% tm_map(removeWords, additionalRemove)
-    }
-    return(docs)
-}
 
 #' removeAloneNumbers
 #' 

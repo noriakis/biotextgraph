@@ -32,6 +32,7 @@ wcBSDB(
   corThresh = 0.2,
   tag = FALSE,
   tagWhole = FALSE,
+  stem = FALSE,
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
@@ -95,6 +96,8 @@ on whole dataset or top-words specified by numWords}
 \item{tag}{perform pvclust on words and colorlize them in wordcloud}
 
 \item{tagWhole}{tag whole set or subset}
+
+\item{stem}{whether to use stemming}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 

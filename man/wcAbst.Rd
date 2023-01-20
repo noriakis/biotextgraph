@@ -11,9 +11,11 @@ wcAbst(
   target = "abstract",
   usefil = NA,
   filnum = 0,
+  sortOrder = "relevance",
   pvclAlpha = 0.95,
   numOnly = TRUE,
   delim = "OR",
+  limit = 10,
   geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
@@ -44,6 +46,7 @@ wcAbst(
   preset = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
+  stem = FALSE,
   ...
 )
 }
@@ -61,11 +64,15 @@ or "bsdbtfidf" (whole bugsigdb tf-idf)}
 
 \item{filnum}{specify filter tfidf}
 
+\item{sortOrder}{sort order, passed to rentrez function}
+
 \item{pvclAlpha}{alpha for pvpick()}
 
 \item{numOnly}{delete number only}
 
 \item{delim}{delimiter for queries}
+
+\item{limit}{limit number for query count, default to 10}
 
 \item{geneUpper}{make queries uppercase}
 
@@ -128,6 +135,8 @@ instead of correlation using bnlearn}
 on whole dataset or top-words specified by numWords}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
+
+\item{stem}{whether to use stemming}
 
 \item{...}{parameters to pass to wordcloud()}
 }

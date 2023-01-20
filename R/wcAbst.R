@@ -45,6 +45,9 @@
 #' @param quote whether to quote the queries
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
+#' @param limit limit number for query count, default to 10
+#' @param sortOrder sort order, passed to rentrez function
+#' @param stem whether to use stemming
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -63,8 +66,8 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
-                   target="abstract", usefil=NA, filnum=0,
-                   pvclAlpha=0.95, numOnly=TRUE, delim="OR",
+                   target="abstract", usefil=NA, filnum=0, sortOrder="relevance",
+                   pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
                    geneUpper=TRUE, apiKey=NULL, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE, quote=FALSE,
@@ -72,23 +75,24 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
-                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, ...)
+                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, ...)
 {
 
-  if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
+  # if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
   if (madeUpperGenes){
     madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
   }
   if (preset) {
     additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
                           "analysis","cells","cell","expression","doi",
-                          "deg","degs","author","authors")
+                          "deg","degs","author","authors","elsevier",
+                          "oxford","wiley")
   }
   if (is.null(redo)) {
     ret <- new("osplot")
     ret@type <- paste0("pubmed_",target)
-    if (length(queries)>10){
-      stop("please limit the gene number to 10")}
+    if (length(queries)>limit){
+      stop("Number of queries exceeded specified limit number")}
     # ret@query <- queries
     # ret@delim <- delim
     if (quote) {
@@ -99,7 +103,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     ret@query <- query
     clearQuery <- gsub('\"', '', queries)
     allDataDf <- getPubMed(query, clearQuery, type=target, apiKey=apiKey,
-                           retMax=retMax)
+                           retMax=retMax, sortOrder=sortOrder)
     ret@retMax <- retMax
     ret@rawText <- allDataDf
   } else {
@@ -145,7 +149,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
        ret@filtered <- allfils
      }
   }
-  docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly)
+  docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
   ret@corpus <- docs
   if (onlyCorpus){
     return(docs)
