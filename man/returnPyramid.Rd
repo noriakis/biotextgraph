@@ -18,7 +18,8 @@ returnPyramid(
   lowCol = "blue",
   tfidf = FALSE,
   highCol = "red",
-  madeUpper = c("rna", "dna")
+  madeUpper = c("rna", "dna"),
+  stem = FALSE
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ returnPyramid(
 \item{highCol}{gradient high color}
 
 \item{madeUpper}{words with uppercase}
+
+\item{stem}{use stemming or not}
 }
 \value{
 list of pyramid plot grobs and its positions

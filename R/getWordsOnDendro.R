@@ -255,6 +255,7 @@ removeAloneNumbers <-
 #' @param madeUpper words with uppercase
 #' @param tfidf use tfidf
 #' @param numOnly delete number only
+#' @param stem use stemming or not
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -269,7 +270,7 @@ removeAloneNumbers <-
 returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
                         numberOfWords, orgDb, additionalRemove=NA, numOnly=TRUE,
                         widths=c(0.3,0.3,0.3), lowCol="blue", tfidf=FALSE,
-                        highCol="red", madeUpper=c("rna","dna")) {
+                        highCol="red", madeUpper=c("rna","dna"), stem=FALSE) {
     tb <- loadGeneSummary()
     ## Convert to ENTREZ ID
     geneList <- AnnotationDbi::select(orgDb,
@@ -292,7 +293,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
     all_corpus <- VCorpus(all_bet)
     
     ## Clean the corpus
-    all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly)
+    all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
     if (tfidf){
         stop("Use of tfidf on returnPyramid is currently not supported ...")
         all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
