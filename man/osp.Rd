@@ -48,6 +48,7 @@ osp(
   onWholeDTM = FALSE,
   autoFilter = FALSE,
   verbPOS = c("VBZ"),
+  nodePal = palette(),
   verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ...

@@ -3,7 +3,7 @@
 #' make word cloud or correlation network from PubMed
 #' 
 #' 
-#' @param queries gene symbols (max: 5)
+#' @param queries gene symbols
 #' @param redo if plot in other parameters, input the previous list
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
@@ -48,6 +48,8 @@
 #' @param limit limit number for query count, default to 10
 #' @param sortOrder sort order, passed to rentrez function
 #' @param stem whether to use stemming
+#' @param onlyDf return only the raw data.frame of searching PubMed
+#' @param nodePal node palette when tag is TRUE
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -74,6 +76,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
+                   onlyDf=FALSE, nodePal=palette(),
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, ...)
 {
@@ -111,6 +114,11 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     ret <- redo
     allDataDf <- ret@rawText
   }
+
+  if (onlyDf) {
+    return(allDataDf)
+  }
+
   if (geneUpper){
     ## Maybe duplicate to madeUpperGenes
     aq <- allDataDf$query
@@ -142,7 +150,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   } else {
     filterWords <- NA
   }
-  if (length(filterWords)!=0 & length(additionalRemove)!=0){
+  if (length(filterWords)!=0 | length(additionalRemove)!=0){
      allfils <- c(filterWords, additionalRemove)
      allfils <- allfils[!is.na(allfils)]
      if (length(allfils)!=0) {
@@ -395,7 +403,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     if (tag) {
       netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
-                                           show.legend = showLegend)
+                                           show.legend = showLegend)+
+      scale_color_manual(values=nodePal)
     } else { 
       netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
                                            show.legend = showLegend)+
