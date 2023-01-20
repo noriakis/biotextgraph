@@ -35,7 +35,12 @@
 #' @param onlyTDM return only TDM
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
+#' @param metab tibble of metabolite - taxon association
+#' @param metabThresh threshold of association
 #' @param stem whether to use stemming
+#' @param curate include articles in bugsigdb
+#' @param abstArg passed to PubMed function when using curate=FALSE
+#' @param nodePal node palette when tag is TRUE
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -65,6 +70,8 @@ wcBSDB <- function (mbList,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
                     madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15,
+                    metab=NULL, metabThresh=0.2, curate=TRUE,
+                    abstArg=list(), nodePal=palette(),
                     scaleRange=c(5,10), showLegend=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
@@ -73,8 +80,10 @@ wcBSDB <- function (mbList,
     ret <- new("osplot")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
-    if (pre) {additionalRemove <- c("microbiota","microbiome","relative","abundance","abundances",
-        "including","samples","sample","otu","otus","investigated","taxa","taxon")}
+    if (pre) {additionalRemove <- c(additionalRemove, "microbiota",
+        "microbiome","relative","abundance","abundances",
+        "including","samples","sample","otu","otus","investigated",
+        "taxa","taxon")}
     # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
@@ -83,10 +92,13 @@ wcBSDB <- function (mbList,
         for (m in mbList) {
             tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,
                      fixed = TRUE),]
-            tmp$query <- m
-            subTb <- rbind(subTb, tmp)
+            if (dim(tmp)[1]>0) {
+                qqcat("  Found @{length(unique(tmp$PMID))} entries for @{m}\n")
+                tmp$query <- m
+                subTb <- rbind(subTb, tmp)
+            }
         }
-        qqcat("including @{dim(subTb)[1]} articles ...\n")
+        qqcat("Including @{dim(subTb)[1]} entries ...\n")
         # returnList[["subsetBSDB"]] <- subTb
 
         titles <- unique(subTb$Title)
@@ -108,55 +120,67 @@ wcBSDB <- function (mbList,
         fil <- fil[!is.na(fil$PMID),] # Some PMIDs have NA
         # returnList[["filterWords"]] <- filterWords
         ret@pmids <- fil$PMID
-        ret@rawText <- fil
+        ret@rawText <- subTb
 
     } else {
         qqcat("Redoing abstract query for microbes ...\n")
         ret <- redo
         target <- "abstract"
     }
-
-    if (target=="abstract"){
-        qqcat("target is abstract ...\n")
-        if (is.null(redo)) {
-            pmids <- fil$PMID
-            # pmids <- pmids[!is.na(pmids)]
-            qqcat("querying PubMed for @{length(pmids)} pmids ...\n")
-            queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=XML&id=",
-                                   paste(pmids, collapse=","))
-            if (!is.null(apiKey)){
-                queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
-            } else {
-                qqcat("querying without API key ...\n")
-            }
-            onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
-            xmlString <- readLines(onequery, encoding="UTF8")
-            parsedXML <- xmlParse(xmlString)
-            obtainText <- function(pmid) {xpathSApply(parsedXML, paste('//PubmedArticle/MedlineCitation[PMID=',pmid,']/Article/Abstract/AbstractText'), xmlValue)}
-            PMIDs <- as.numeric(xpathSApply(parsedXML, "//PubmedArticle/MedlineCitation/PMID", xmlValue))
-            abstDf <- NULL
-            for (pmid in PMIDs) {
-                if (length(obtainText(pmid))!=0) {
-                    for (text in obtainText(pmid)) {
-                        tax <- unique(subset(fil, PMID==pmid)$query)
-                        abstDf <- rbind(abstDf, c(pmid, text, tax))
+    if (curate) {
+        if (target=="abstract"){
+            qqcat("Target is abstract ...\n")
+            if (is.null(redo)) {
+                pmids <- unique(fil$PMID)
+                # pmids <- pmids[!is.na(pmids)]
+                qqcat("  Querying PubMed for @{length(pmids)} pmids ...\n")
+                queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
+                                   "efetch.fcgi?db=pubmed&retmode=XML&id=",
+                                       paste(pmids, collapse=","))
+                if (!is.null(apiKey)){
+                    queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
+                } else {
+                    qqcat("  Querying without API key ...\n")
+                }
+                onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
+                xmlString <- readLines(onequery, encoding="UTF8")
+                parsedXML <- xmlParse(xmlString)
+                obtainText <- function(pmid) {xpathSApply(parsedXML,
+                    paste('//PubmedArticle/MedlineCitation[PMID=',pmid,
+                        ']/Article/Abstract/AbstractText'),
+                    xmlValue)}
+                PMIDs <- as.numeric(xpathSApply(parsedXML,
+                    "//PubmedArticle/MedlineCitation/PMID",
+                    xmlValue))
+                abstDf <- NULL
+                for (pmid in PMIDs) {
+                    if (length(obtainText(pmid))!=0) {
+                        for (text in obtainText(pmid)) {
+                            tax <- unique(subset(fil, PMID==pmid)$query)
+                            abstDf <- rbind(abstDf, c(pmid, text, tax))
+                        }
                     }
                 }
+                abstDf <- data.frame(abstDf) |> `colnames<-`(c("PMID","AbstractText","query"))
+                # abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+                #                                 "Abstract",
+                #                                 recursive = TRUE)
+                # absttext <- as.character(xmlValue(abstset))
+                ret@rawTextBSDB <- abstDf
+            } else {
+                abstDf <- ret@rawTextBSDB
+                filterWords <- ret@filtered
+                subTb <- ret@rawText
             }
-            abstDf <- data.frame(abstDf) |> `colnames<-`(c("PMID","AbstractText","query"))
-            # abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
-            #                                 "Abstract",
-            #                                 recursive = TRUE)
-            # absttext <- as.character(xmlValue(abstset))
-            ret@rawTextBSDB <- abstDf
+            docs <- VCorpus(VectorSource(abstDf$AbstractText))
         } else {
-            abstDf <- redo@rawTextBSDB
-            filterWords <- ret@filtered
-            subTb <- ret@rawText
+            docs <- VCorpus(VectorSource(fil$Title))
         }
-        docs <- VCorpus(VectorSource(abstDf$AbstractText))
     } else {
-        docs <- VCorpus(VectorSource(fil$Title))
+        abstDf <- do.call(wcAbst, c(list(queries=mbList,
+            quote=TRUE, target=target, onlyDf=TRUE), abstArg))
+        ret@rawTextBSDB <- abstDf
+        docs <- VCorpus(VectorSource(abstDf$text))
     }
     ## Make corpus
     ## Filter high frequency words
@@ -167,9 +191,9 @@ wcBSDB <- function (mbList,
             allTfIdfBSDB[
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
-    qqcat("filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
+    qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
-    if (length(filterWords)!=0 & length(additionalRemove)!=0){
+    if (length(filterWords)!=0 | length(additionalRemove)!=0){
         allfils <- c(filterWords, additionalRemove)
         allfils <- allfils[!is.na(allfils)]
         if (length(allfils)!=0) {
@@ -220,7 +244,9 @@ wcBSDB <- function (mbList,
         # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         ## TODO: before or after?
         freqWordsDTM <- t(as.matrix(docs))
-        
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        ret@freqDf <- returnDf
+
         if (tag) {# Needs rework
             if (!is.null(redo)){
                 if (!is.null(redo@pvpick)) {
@@ -262,7 +288,11 @@ wcBSDB <- function (mbList,
             if (target=="abstract") {
                 row.names(freqWordsDTM) <- abstDf$query
             } else {
-                row.names(freqWordsDTM) <- fil$query
+                if (curate) {
+                    row.names(freqWordsDTM) <- fil$query
+                } else {
+                    row.names(freqWordsDTM) <- abstDf$query
+                }
             }
         }
         
@@ -321,22 +351,58 @@ wcBSDB <- function (mbList,
                     }
                 }
             }
+            mbmap <- mbmap[mbmap[,2]!="",]
 
-            mbmap <- simplify(graph_from_edgelist(mbmap, directed = FALSE))
+            mbmap <- simplify(graph_from_edgelist(mbmap,
+                directed = FALSE))
             coGraph <- igraph::union(coGraph, mbmap)
             
+            ## Add disease if present
             if (disPlot) {
                 coGraph <- igraph::union(coGraph, dmg)
+                alldis <- unique(dis[,1])
+            } else {
+                alldis <- NULL
+            }
+
+            ## Add metab if present
+            ## TODO: somehow show edge weights other than
+            ## correlation between words
+            if (!is.null(metab)) {
+                qqcat("Checking metabolites ...\n")
+                metabGraph <- NULL
+                for (sp in mbList) {
+                    tmp <- metab[grepl(sp,metab$`Metagenomic species`),]
+                    tmp <- tmp[abs(tmp$`Spearman's ρ`)>metabThresh,]
+                    if (dim(tmp)[1]!=0) {
+                        for (met in tmp$Metabolite) {
+                            metabGraph <- rbind(metabGraph, c(sp, met))
+                        }
+                    } else {
+                        qqcat("  Found no metabolites for @{sp}\n")
+                    }
+                }
+                if (!is.null(metabGraph)) {
+                    allmetabs <- metabGraph[,2]
+                    metabGraph <- simplify(graph_from_edgelist(metabGraph,
+                        directed=FALSE))
+                    coGraph <- igraph::union(coGraph, metabGraph)
+                } else {
+                    allmetabs <- NULL
+                }
+            } else {
+                allmetabs <- NULL
             }
             
             tmpW <- E(coGraph)$weight
-            if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
+            if (corThresh < 0.1) {corThreshMbPlot <- 0.01} else {
                 corThreshMbPlot <- corThresh - 0.1}
             tmpW[is.na(tmpW)] <- corThreshMbPlot
             E(coGraph)$weight <- tmpW
+        } else {
+            alldis <- NULL
+            allmetabs <- NULL
         }
-        
-
 
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
@@ -346,6 +412,21 @@ wcBSDB <- function (mbList,
             }
             netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
             V(coGraph)$tag <- netCol
+
+            ## Add disease and other labs
+            addC <- V(coGraph)$tag
+            for (nn in seq_along(names(V(coGraph)))) {
+                if (names(V(coGraph))[nn] %in% alldis) {
+                    addC[nn] <- "disease"
+                } else if (names(V(coGraph))[nn] %in% allmetabs) {
+                    addC[nn] <- "metabolites"
+                } else if (names(V(coGraph))[nn] %in% mbList) {
+                    addC[nn] <- "microbes"
+                } else {
+                    next
+                }
+            }
+            V(coGraph)$tag <- addC
         }
 
         ret@igraph <- coGraph
@@ -390,7 +471,8 @@ wcBSDB <- function (mbList,
 
         if (tag) {
             netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
-                                                show.legend = showLegend)
+                                                show.legend = showLegend) +
+                                 scale_color_manual(values=nodePal)
         } else { 
             netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
                                                 show.legend = showLegend)+

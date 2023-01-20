@@ -40,6 +40,8 @@ wcAbst(
   edgeLink = TRUE,
   ngram = NA,
   genePlot = FALSE,
+  onlyDf = FALSE,
+  nodePal = palette(),
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
@@ -51,7 +53,7 @@ wcAbst(
 )
 }
 \arguments{
-\item{queries}{gene symbols (max: 5)}
+\item{queries}{gene symbols}
 
 \item{redo}{if plot in other parameters, input the previous list}
 
@@ -122,6 +124,10 @@ instead of correlation using bnlearn}
 \item{ngram}{default to NA (1)}
 
 \item{genePlot}{plot associated genes (default: FALSE)}
+
+\item{onlyDf}{return only the raw data.frame of searching PubMed}
+
+\item{nodePal}{node palette when tag is TRUE}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 

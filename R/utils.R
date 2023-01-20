@@ -1,3 +1,17 @@
+#' preserveDict
+#' 
+#' 
+#' @param docs corpus
+#' @param ngram ngram params
+#' @param tfidf whether to use tfidf
+#' 
+#' @noRd
+#' 
+preseveDict <- function(docs, ngram, tfidf) {
+    return(docs)
+}
+
+
 #' getPubMed
 #' 
 #' obtain pubmed information
@@ -14,7 +28,7 @@
 getPubMed <- function(searchQuery, rawQuery,
     type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance") {
     if (is.null(apiKey)){
-      qqcat("proceeding without API key\n")
+      qqcat("Proceeding without API key\n")
     } else {
       set_entrez_key(apiKey)
     }

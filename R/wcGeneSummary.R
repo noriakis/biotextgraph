@@ -54,6 +54,8 @@
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
 #' @param stem whether to use stemming
+#' @param nodePal node palette when tag is TRUE
+#' @param preserve preserve original characters
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -81,6 +83,7 @@
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, excludeTfIdf=NULL,
                             tfidf=FALSE, genePlotNum=10,
+                            preserve=TRUE,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
@@ -94,6 +97,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeDTM=FALSE, autoFilter=FALSE, verbPOS=c("VBZ"),
+                            nodePal=palette(),
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             ...) {
     ret <- new("osplot")
@@ -136,7 +140,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (autoFilter){
             filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
         }
-        if (length(filterWords)!=0 & length(additionalRemove)!=0){
+        if (length(filterWords)!=0 | length(additionalRemove)!=0){
             allfils <- c(filterWords, additionalRemove)
             allfils <- allfils[!is.na(allfils)]
             if (length(allfils)!=0) {
@@ -212,6 +216,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
+    if (preserve) {
+        presDict <- preserveDict(docs, ngram, tfidf)
+    }
     if (!is.na(ngram)){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
@@ -599,7 +606,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
         if (tag) {
             netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
-                                                show.legend = showLegend)
+                                                show.legend = showLegend) +
+            scale_color_manual(values=nodePal)
         } else { 
             netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
                                                 show.legend = showLegend)+

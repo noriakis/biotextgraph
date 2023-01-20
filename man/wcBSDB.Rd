@@ -19,6 +19,11 @@ wcBSDB(
   redo = NULL,
   pal = c("blue", "red"),
   numWords = 15,
+  metab = NULL,
+  metabThresh = 0.2,
+  curate = TRUE,
+  abstArg = list(),
+  nodePal = palette(),
   scaleRange = c(5, 10),
   showLegend = FALSE,
   edgeLabel = FALSE,
@@ -69,6 +74,16 @@ default to 0}
 \item{pal}{palette for color gradient in correlation network and tag coloring}
 
 \item{numWords}{the number of words to be shown}
+
+\item{metab}{tibble of metabolite - taxon association}
+
+\item{metabThresh}{threshold of association}
+
+\item{curate}{include articles in bugsigdb}
+
+\item{abstArg}{passed to PubMed function when using curate=FALSE}
+
+\item{nodePal}{node palette when tag is TRUE}
 
 \item{scaleRange}{scale for label and node size in correlation network}
 

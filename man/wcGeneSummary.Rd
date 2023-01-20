@@ -48,6 +48,7 @@ wcGeneSummary(
   onWholeDTM = FALSE,
   autoFilter = FALSE,
   verbPOS = c("VBZ"),
+  nodePal = palette(),
   verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ...
@@ -143,6 +144,8 @@ on whole dataset or top-words specified by numWords}
 \item{autoFilter}{remove words "pmids", "geneids"}
 
 \item{verbPOS}{Part of Speech tags in verbs, like "VBN", "VBZ"}
+
+\item{nodePal}{node palette when tag is TRUE}
 
 \item{verb}{show verb on edges (using udpipe)
 peform udpipe_download_model(language = "english") beforehand,
