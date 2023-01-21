@@ -199,6 +199,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@rawText <- fil
             ## Make corpus
             docs <- VCorpus(VectorSource(fil$Gene_summary))
+            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         }
 
@@ -216,9 +217,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
-    if (preserve) {
-        presDict <- preserveDict(docs, ngram, tfidf)
-    }
     if (!is.na(ngram)){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
@@ -493,6 +491,17 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             V(coGraph)$tag <- netCol
         }
 
+        if (preserve) {
+            newGname <- NULL
+            for (nm in names(V(coGraph))) {
+              if (nm %in% names(pdic)) {
+                newGname <- c(newGname, pdic[nm])
+              } else {
+                newGname <- c(newGname, nm)
+              }
+            }
+            coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+        }
         ret@igraph <- coGraph
 
         ## Main plot
@@ -689,7 +698,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
-
+        if (preserve) {
+            for (nm in unique(returnDf$word)) {
+                if (nm %in% names(pdic)) {
+                    returnDf[returnDf$word == nm, "word"] <- pdic[nm]
+                }
+            }
+        }
         if (tfidf) {
             showFreq <- returnDf$freq*10
         } else {

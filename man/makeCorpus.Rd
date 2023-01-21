@@ -4,7 +4,7 @@
 \alias{makeCorpus}
 \title{makeCorpus}
 \usage{
-makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
+makeCorpus(docs, filterWords, additionalRemove, numOnly, stem, lower = TRUE)
 }
 \arguments{
 \item{docs}{corpus to clean}
@@ -14,6 +14,10 @@ makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
 \item{additionalRemove}{words to filter}
 
 \item{numOnly}{delete number only}
+
+\item{stem}{use stem or not}
+
+\item{lower}{transform lower for corpus}
 }
 \value{
 cleaned corpus
