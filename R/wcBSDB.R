@@ -32,6 +32,7 @@
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
 #' @param numOnly delete number only
+#' @param preserve try to preserve the original characters
 #' @param onlyTDM return only TDM
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
@@ -69,7 +70,7 @@ wcBSDB <- function (mbList,
                     target="title", apiKey=NULL,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
                     madeUpper=c("dna","rna"), redo=NULL,
-                    pal=c("blue","red"), numWords=15,
+                    pal=c("blue","red"), numWords=15, preserve=TRUE,
                     metab=NULL, metabThresh=0.2, curate=TRUE,
                     abstArg=list(), nodePal=palette(),
                     scaleRange=c(5,10), showLegend=FALSE,
@@ -192,6 +193,7 @@ wcBSDB <- function (mbList,
                 allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
     }
     qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
+    if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
     if (length(filterWords)!=0 | length(additionalRemove)!=0){
         allfils <- c(filterWords, additionalRemove)
@@ -429,6 +431,19 @@ wcBSDB <- function (mbList,
             V(coGraph)$tag <- addC
         }
 
+        if (preserve) {
+            newGname <- NULL
+            for (nm in names(V(coGraph))) {
+              if (nm %in% names(pdic)) {
+                newGname <- c(newGname, pdic[nm])
+              } else {
+                newGname <- c(newGname, nm)
+              }
+            }
+            coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+        }
+
+
         ret@igraph <- coGraph
 
         ## Main plot
@@ -560,6 +575,13 @@ wcBSDB <- function (mbList,
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
+        }
+        if (preserve) {
+            for (nm in unique(returnDf$word)) {
+                if (nm %in% names(pdic)) {
+                    returnDf[returnDf$word == nm, "word"] <- pdic[nm]
+                }
+            }
         }
         if (tag){
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 

@@ -34,6 +34,7 @@
 #' @param onlyCorpus return only corpus
 #' @param onlyTDM return only TDM
 #' @param preset filter preset words
+#' @param preserve try to preserve the original characters
 #' @param numOnly delete number only
 #' @param cl cluster to pass to pvclust (snow::makeCluster(n))
 #' @param bn perform bootstrap-based Bayesian network inference 
@@ -76,7 +77,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
-                   onlyDf=FALSE, nodePal=palette(),
+                   onlyDf=FALSE, nodePal=palette(), preserve=TRUE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, ...)
 {
@@ -157,6 +158,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
        ret@filtered <- allfils
      }
   }
+  if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
   docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
   ret@corpus <- docs
   if (onlyCorpus){
@@ -315,8 +317,20 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
       V(coGraph)$tag <- netCol
     }
-    
+    if (preserve) {
+      newGname <- NULL
+      for (nm in names(V(coGraph))) {
+        if (nm %in% names(pdic)) {
+          newGname <- c(newGname, pdic[nm])
+        } else {
+          newGname <- c(newGname, nm)
+        }
+      }
+      coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+    }
+
     ## Main plot
+
     ret@igraph <- coGraph
     netPlot <- ggraph(coGraph, layout=layout)
     
@@ -477,6 +491,14 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
       returnDf[returnDf$word == i,"word"] <- toupper(i)
     }
+    if (preserve) {
+        for (nm in unique(returnDf$word)) {
+            if (nm %in% names(pdic)) {
+                returnDf[returnDf$word == nm, "word"] <- pdic[nm]
+            }
+        }
+    }
+
     if (tag){
       wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
                                          freq = returnDf$freq,

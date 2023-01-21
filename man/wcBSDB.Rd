@@ -19,6 +19,7 @@ wcBSDB(
   redo = NULL,
   pal = c("blue", "red"),
   numWords = 15,
+  preserve = TRUE,
   metab = NULL,
   metabThresh = 0.2,
   curate = TRUE,
@@ -74,6 +75,8 @@ default to 0}
 \item{pal}{palette for color gradient in correlation network and tag coloring}
 
 \item{numWords}{the number of words to be shown}
+
+\item{preserve}{try to preserve the original characters}
 
 \item{metab}{tibble of metabolite - taxon association}
 

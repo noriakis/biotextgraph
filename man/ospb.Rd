@@ -19,6 +19,7 @@ ospb(
   redo = NULL,
   pal = c("blue", "red"),
   numWords = 15,
+  preserve = TRUE,
   metab = NULL,
   metabThresh = 0.2,
   curate = TRUE,
