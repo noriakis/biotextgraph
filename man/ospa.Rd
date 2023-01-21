@@ -42,6 +42,7 @@ ospa(
   genePlot = FALSE,
   onlyDf = FALSE,
   nodePal = palette(),
+  preserve = TRUE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,

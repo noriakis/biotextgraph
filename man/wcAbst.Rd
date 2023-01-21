@@ -42,6 +42,7 @@ wcAbst(
   genePlot = FALSE,
   onlyDf = FALSE,
   nodePal = palette(),
+  preserve = TRUE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
@@ -128,6 +129,8 @@ instead of correlation using bnlearn}
 \item{onlyDf}{return only the raw data.frame of searching PubMed}
 
 \item{nodePal}{node palette when tag is TRUE}
+
+\item{preserve}{try to preserve the original characters}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
