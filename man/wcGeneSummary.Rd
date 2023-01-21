@@ -11,6 +11,7 @@ wcGeneSummary(
   excludeTfIdf = NULL,
   tfidf = FALSE,
   genePlotNum = 10,
+  preserve = TRUE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
@@ -67,6 +68,8 @@ default to 5000}
 \item{tfidf}{use TfIdf when making TDM}
 
 \item{genePlotNum}{number of genes to be plotted}
+
+\item{preserve}{preserve original characters}
 
 \item{additionalRemove}{specific words to be excluded}
 

@@ -3,14 +3,60 @@
 #' 
 #' @param docs corpus
 #' @param ngram ngram params
-#' @param tfidf whether to use tfidf
+#' @param numOnly remove number only
+#' @param stem use stemming
 #' 
 #' @noRd
 #' 
-preseveDict <- function(docs, ngram, tfidf) {
-    return(docs)
-}
+preserveDict <- function(docs, ngram, numOnly, stem) {
+    NgramTokenizer <- function(x)
+    unlist(lapply(ngrams(words(x), ngram),
+        paste, collapse = " "),
+        use.names = FALSE)
 
+  ldocs <- docs %>%
+      tm_map(FUN=content_transformer(tolower))
+  if (numOnly) {
+    ldocs <- ldocs %>% tm_map(FUN=removeAloneNumbers)
+    docs <- docs %>% tm_map(FUN=removeAloneNumbers)
+  } else {
+    ldocs <- ldocs %>% tm_map(FUN=removeNumbers)
+    docs <- docs %>% tm_map(FUN=removeNumbers)
+  }
+  docs <- docs %>%
+    tm_map(FUN=removePunctuation) %>%
+    tm_map(FUN=stripWhitespace)
+  ldocs <- ldocs %>%
+    tm_map(FUN=removePunctuation) %>%
+    tm_map(FUN=stripWhitespace)
+  if (stem) {
+    docs <- docs %>% tm_map(stemDocument) 
+    ldocs <- ldocs %>% tm_map(stemDocument)
+  }
+  if (!is.na(ngram)){
+      docs <- TermDocumentMatrix(docs,
+                                 control = list(tokenize = NgramTokenizer,
+                                                tolower=FALSE))
+      ldocs <- TermDocumentMatrix(ldocs,
+                                    control = list(tokenize = NgramTokenizer,
+                                                   tolower=TRUE))
+  } else {
+      docs <- TermDocumentMatrix(docs, control=list(tolower=FALSE))
+      ldocs <- TermDocumentMatrix(ldocs, control=list(tolower=TRUE))
+  }
+  rawrn <- row.names(docs)
+  lrn <- row.names(ldocs)
+  dic <- list()
+  for (i in rawrn) {
+    if (tolower(i) %in% lrn) {
+      dic[[tolower(i)]] <- i      
+    }
+  }
+  rawWords <- names(dic)
+  newWords <- unlist(dic)
+  names(newWords) <- rawWords
+  return(newWords)
+}
 
 #' getPubMed
 #' 
@@ -556,14 +602,18 @@ returnExample <- function() {
 #' @param filterWords words to filter based on frequency
 #' @param additionalRemove words to filter
 #' @param numOnly delete number only
+#' @param stem use stem or not
+#' @param lower transform lower for corpus
 #' 
 #' @return cleaned corpus
 #' @import tm
 #' 
 #' 
-makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem) {
-    docs <- docs %>%
-        tm_map(FUN=content_transformer(tolower))
+makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lower=TRUE) {
+    if (lower) {
+        docs <- docs %>%
+            tm_map(FUN=content_transformer(tolower))
+    }
     if (numOnly) {
         docs <- docs %>% tm_map(FUN=removeAloneNumbers)
     } else {

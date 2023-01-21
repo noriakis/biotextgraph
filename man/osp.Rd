@@ -11,6 +11,7 @@ osp(
   excludeTfIdf = NULL,
   tfidf = FALSE,
   genePlotNum = 10,
+  preserve = TRUE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
