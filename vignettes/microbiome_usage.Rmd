@@ -1,0 +1,33 @@
+---
+title: "Mining microbiome-related literature"
+author: "Noriaki Sato"
+package: wcGeneSummary
+output: 
+    BiocStyle::html_document:
+    toc_float: true
+vignette: >
+    %\VignetteIndexEntry{wcGeneSummary}
+    %\VignetteEngine{knitr::knitr}
+    %\VignetteEncoding{UTF-8}  
+---
+    
+The general usage for mining the information related to microbiome-related signatures.
+
+
+```{r load, warning=FALSE, message=FALSE}
+library(wcGeneSummary)
+library(ggplot2)
+library(ggraph)
+library(RColorBrewer)
+```
+
+```{r bsdb_basic, warning=FALSE, message=FALSE}
+basic <- wcBSDB(c("Veillonella dispar","Neisseria flava"),tag=TRUE,
+    curate=TRUE,target="abstract",pre=TRUE,cl=snow::makeCluster(12),
+    pal=RColorBrewer::brewer.pal(10, "Set2"),numWords=80)
+basic@wc
+```
+
+```{r}
+sessionInfo()
+```

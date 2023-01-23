@@ -167,6 +167,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@enrichResults <- pathRes@result
             ## Make corpus
             docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         } else {
             ## Load from GeneSummary
