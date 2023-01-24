@@ -38,10 +38,17 @@
 #'                   on whole dataset or top-words specified by numWords
 #' @param metab tibble of metabolite - taxon association
 #' @param metabThresh threshold of association
+#' @param metCol metabolite data frame column name in the order of
+#' "candidate taxon", "metabolite", "quantitative values for thresholding"
 #' @param stem whether to use stemming
 #' @param curate include articles in bugsigdb
 #' @param abstArg passed to PubMed function when using curate=FALSE
 #' @param nodePal node palette when tag is TRUE
+#' @param ecPlot plot link between enzyme and microbes
+#' this option requires two files to be passed to wcEC() and getUPTax().
+#' @param ecFile enzyme database file
+#' @param upTaxFile UniProt taxonomy file
+#' 
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -72,9 +79,10 @@ wcBSDB <- function (mbList,
                     madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
                     metab=NULL, metabThresh=0.2, curate=TRUE,
-                    abstArg=list(), nodePal=palette(),
-                    scaleRange=c(5,10), showLegend=FALSE,
+                    abstArg=list(), nodePal=palette(), metCol=NULL,
+                    scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
+                    ecFile=NULL, upTaxFile=NULL,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
@@ -285,6 +293,9 @@ wcBSDB <- function (mbList,
 
         ## genePlot: plot associated genes
         if (disPlot) {mbPlot <- TRUE}
+        if (!is.null(metab)) {mbPlot <- TRUE}
+        if (ecPlot) {mbPlot <- TRUE}
+
         # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
         if (mbPlot) {
             if (target=="abstract") {
@@ -367,17 +378,39 @@ wcBSDB <- function (mbList,
                 alldis <- NULL
             }
 
+            ## Add EC if present
+            if (ecPlot) {
+                mbPlot <- TRUE
+                if (is.null(ecFile)) {stop("Please provide EC file")}
+                if (is.null(upTaxFile)) {stop("Please provide UniProt taxonomy file")}
+                ecDf <- wcEC(file=ecFile, ecnum="all", taxec=TRUE,
+                    taxFile=upTaxFile, candTax=mbList)
+                ecg <- simplify(graph_from_data_frame(ecDf[,c("desc","query")], 
+                    directed=FALSE))
+                coGraph <- igraph::union(coGraph, ecg)
+                allecs <- unique(ecDf$desc)
+            } else {
+                allecs <- NULL
+            }
+
+
             ## Add metab if present
             ## TODO: somehow show edge weights other than
             ## correlation between words
             if (!is.null(metab)) {
+                if (is.null(metCol)) {
+                    metCol <- c("Metagenomic species",
+                        "Metabolite",
+                        "Spearman's ρ"
+                        )
+                }
                 qqcat("Checking metabolites ...\n")
                 metabGraph <- NULL
                 for (sp in mbList) {
-                    tmp <- metab[grepl(sp,metab$`Metagenomic species`),]
-                    tmp <- tmp[abs(tmp$`Spearman's ρ`)>metabThresh,]
+                    tmp <- metab[grepl(sp,metab[[metCol[1]]]),]
+                    tmp <- tmp[abs(tmp[[metCol[3]]])>metabThresh,]
                     if (dim(tmp)[1]!=0) {
-                        for (met in tmp$Metabolite) {
+                        for (met in tmp[[metCol[2]]]) {
                             metabGraph <- rbind(metabGraph, c(sp, met))
                         }
                     } else {
@@ -406,6 +439,7 @@ wcBSDB <- function (mbList,
             allmetabs <- NULL
         }
 
+
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
             for (i in seq_along(pvcl$clusters)){
@@ -424,6 +458,8 @@ wcBSDB <- function (mbList,
                     addC[nn] <- "metabolites"
                 } else if (names(V(coGraph))[nn] %in% mbList) {
                     addC[nn] <- "microbes"
+                } else if (names(V(coGraph))[nn] %in% allecs) {
+                    addC[nn] <- "enzymes"
                 } else {
                     next
                 }

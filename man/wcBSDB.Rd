@@ -25,11 +25,15 @@ wcBSDB(
   curate = TRUE,
   abstArg = list(),
   nodePal = palette(),
+  metCol = NULL,
   scaleRange = c(5, 10),
   showLegend = FALSE,
+  ecPlot = FALSE,
   edgeLabel = FALSE,
   mbPlot = FALSE,
   onlyTDM = FALSE,
+  ecFile = NULL,
+  upTaxFile = NULL,
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
@@ -88,15 +92,25 @@ default to 0}
 
 \item{nodePal}{node palette when tag is TRUE}
 
+\item{metCol}{metabolite data frame column name in the order of
+"candidate taxon", "metabolite", "quantitative values for thresholding"}
+
 \item{scaleRange}{scale for label and node size in correlation network}
 
 \item{showLegend}{whether to show legend in correlation network}
+
+\item{ecPlot}{plot link between enzyme and microbes
+this option requires two files to be passed to wcEC() and getUPTax().}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{mbPlot}{plot microbe names}
 
 \item{onlyTDM}{return only TDM}
+
+\item{ecFile}{enzyme database file}
+
+\item{upTaxFile}{UniProt taxonomy file}
 
 \item{ngram}{default to NA (1)}
 

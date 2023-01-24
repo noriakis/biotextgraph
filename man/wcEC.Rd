@@ -4,7 +4,16 @@
 \alias{wcEC}
 \title{wcEC}
 \usage{
-wcEC(file, ecnum, onlyTerm = FALSE, onlyDf = FALSE, ...)
+wcEC(
+  file,
+  ecnum,
+  onlyTerm = FALSE,
+  onlyDf = FALSE,
+  taxec = FALSE,
+  taxFile = NULL,
+  candTax = NULL,
+  ...
+)
 }
 \arguments{
 \item{file}{file downloaded from expasy}
@@ -15,6 +24,10 @@ wcEC(file, ecnum, onlyTerm = FALSE, onlyDf = FALSE, ...)
 
 \item{onlyDf}{only return ec description data.frame
 if onlyTerm and onlyDf are both specified, onlyTerm have priority}
+
+\item{taxec}{link taxonomy to EC using UniProt Taxonomy ID file}
+
+\item{candTax}{when taxec=TRUE, search only for these species.}
 
 \item{...}{passed to osplot(target="pubmed")}
 }
