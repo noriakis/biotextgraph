@@ -73,7 +73,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
   candecs <- data.frame(candecs) |>
     `colnames<-`(c("number","desc","comment","DRs"))
   if (taxec) {
-    qqcat("Linking taxonomy to EC ...\n")
+    qqcat("  Linking taxonomy to EC ...\n")
     retTaxEC <- NULL
     if (is.null(taxFile)) {stop("Please provide UniProt Taxonomy file")}
     if (!is.null(candTax)) {
@@ -91,24 +91,8 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
         }
       }
     } else {
-      stop("please specify candTax when taxec=TRUE")
+      stop("Please specify candTax when taxec=TRUE")
     }
-    #   # if (length(allCharIDs)!=0) {
-    #   #   if (is.null(candTax)) {
-    #   #     taxo <- getUPtax(taxFile, allCharIDs)
-    #   #     if (!is.null(taxo)){
-    #   #       for (ta in taxo$Taxonomy) {
-    #         }
-    #       }
-    #     } else {
-    #       if (!is.null(taxo)) {
-    #         for (ta in taxo$Taxonomy) {
-    #           retTaxEC <- rbind(retTaxEC, c(num, desc, ta))
-    #         }
-    #       }
-    #     }
-    #   }
-    # }
     if (is.null(retTaxEC)) {stop("No EC could be found for query")}
     retTaxEC <- data.frame(retTaxEC) |> 
       `colnames<-`(c("number","desc","taxonomy","scientificName"))

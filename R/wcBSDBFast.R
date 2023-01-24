@@ -1,6 +1,7 @@
 #' wcBSDB
 #' 
 #' Visualize BugSigDB
+#' (Use data.table and parallel correlation to speed up)
 #' 
 #' @param mbList microbe list
 #' @param excludeFreq exclude words with overall frequency above excludeFreq
@@ -61,7 +62,7 @@
 #' 
 #' @examples
 #' mbList <- c("Veillonella dispar")
-#' wcBSDB(mbList)
+#' wcBSDBFast(mbList)
 #' @export
 #' 
 wcBSDBFast <- function (mbList,

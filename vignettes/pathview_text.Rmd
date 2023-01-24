@@ -1,0 +1,28 @@
+---
+title: "Pathview text function"
+author: "Noriaki Sato"
+package: wcGeneSummary
+output: 
+    BiocStyle::html_document:
+    toc_float: true
+vignette: >
+    %\VignetteIndexEntry{wcGeneSummary}
+    %\VignetteEngine{knitr::knitr}
+    %\VignetteEncoding{UTF-8}  
+---
+
+KEGG mapping plots produced by pathview can be populated with text information ([Luo and Brouwer. 2013](https://academic.oup.com/bioinformatics/article/29/14/1830/232698])).
+
+```{r load, warning=FALSE, message=FALSE}
+library(wcGeneSummary)
+library(pathview)
+```
+
+Suppose an example for KEGG Orthology obtained from some microbiome-related experiments.
+By using [MicrobiomeProfiler](https://github.com/YuLab-SMU/MicrobiomeProfiler), enriched pathway using over-representation analysis can be obtained as follows.
+
+```{r micro, warning=FALSE, message=FALSE}
+kos <- c("K00640","K23304","K01760","K01697","K00549","K00899")
+enriched <- MicrobiomeProfiler::enrichKO(kos)
+clusterProfiler::cnetplot(enriched)
+```
