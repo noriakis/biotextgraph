@@ -106,10 +106,10 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     ret@query <- query
     clearQuery <- gsub('\"', '', queries)
-    allDataDf <- getPubMed(query, clearQuery, type=target, apiKey=apiKey,
+    ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,
                            retMax=retMax, sortOrder=sortOrder)
     ret@retMax <- retMax
-    ret@rawText <- allDataDf
+    allDataDf <- ret@rawText
   } else {
     qqcat("Resuming from the previous results ...\n")
     ret <- redo

@@ -20,22 +20,22 @@ library(ggraph)
 library(RColorBrewer)
 ```
 
-We use BugSigDB, and its R port bugsigdbr to obtain the curated dataset of the relationship with bacterial taxonomy and human diseases ((Geistlinger et al. 2022)[https://bugsigdb.org/Main_Page]). Users can query microbiome names, which will be searched for MetaPhlAn taxonomic annotation. If `target="title"`, the title of the corresponding articles will be summarized.
+We use BugSigDB, and its R port bugsigdbr to obtain the curated dataset of the relationship with bacterial taxonomy and human diseases ([Geistlinger et al. 2022](https://bugsigdb.org/Main_Page)). Users can query microbiome names, which will be searched for MetaPhlAn taxonomic annotation. If `target="title"`, the title of the corresponding articles will be summarized.
 
-```{r bsdb_basic, warning=FALSE, message=FALSE}
+```{r bsdb_basic, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
 basic <- wcBSDB(c("Veillonella dispar","Neisseria flava"),tag=TRUE,
     curate=TRUE,target="title",pre=TRUE,cl=snow::makeCluster(12),
     pal=RColorBrewer::brewer.pal(10, "Set2"),numWords=80)
-basic@freqDf
+basic@freqDf |> head()
 basic@wc
 ```
 If `target="abstract"`, the corresponding abstract will be fetched and be summarized.
 
-```{r bsdb_basic2, warning=FALSE, message=FALSE}
+```{r bsdb_basic2, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
 basic2 <- wcBSDB(c("Veillonella dispar","Neisseria flava"),tag=TRUE,
     curate=TRUE,target="abstract",pre=TRUE,cl=snow::makeCluster(12),
     pal=RColorBrewer::brewer.pal(10, "Set2"),numWords=80)
-basic2@freqDf
+basic2@freqDf |> head()
 basic2@wc
 ```
 For successful visualization, pre-caculated TF-IDF and frequency data frame is available and one can use them to filter the highly occurring words, or the other prefiltering option used in `wcGeneSummary`.
@@ -43,11 +43,11 @@ For successful visualization, pre-caculated TF-IDF and frequency data frame is a
 ```{r filters, warning=FALSE, message=FALSE}
 rmwords <- wcGeneSummary:::allTfIdfBSDB
 filter <- rmwords[rmwords$tfidf>quantile(rmwords$tfidf, 0.95),]
-filter
+filter |> head()
 ```
 The network visualization is possible by enabling `plotType="network"`.
 
-```{r bsdb_basic_network, warning=FALSE, message=FALSE}
+```{r bsdb_basic_network, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
 net <- wcBSDB(c("Veillonella dispar","Neisseria flava"),
     curate=TRUE,target="title",pre=TRUE,plotType="network",
     additionalRemove=filter$word, corThresh=0.2,
@@ -57,7 +57,7 @@ net@net
 
 The words-to-species relationship can be plotted by `mbPlot=TRUE`.
 
-```{r bsdb_basic_network_mb, warning=FALSE, message=FALSE}
+```{r bsdb_basic_network_mb, warning=FALSE, message=FALSE, fig.height=8, fig.width=8}
 net2 <- wcBSDB(c("Veillonella dispar","Neisseria flava",
     "Veillonella parvula","Akkermansia muciniphila"), mbPlot=TRUE,
     curate=TRUE,target="title",pre=TRUE,plotType="network",
@@ -69,7 +69,7 @@ net2@net
 As the BugSigDB contains the relationship between bacterial taxonomy and disease, disease name can also be plotted. When `disPlot=TRUE`, the `mbPlot`
  will be set to `TRUE` by default.
  
-```{r bsdb_basic_network_dis, warning=FALSE, message=FALSE}
+```{r bsdb_basic_network_dis, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
 net3 <- wcBSDB(c("Veillonella dispar","Neisseria flava",
     "Veillonella parvula","Akkermansia muciniphila"), mbPlot=TRUE,
     curate=TRUE,target="title",pre=TRUE,plotType="network",
@@ -77,6 +77,19 @@ net3 <- wcBSDB(c("Veillonella dispar","Neisseria flava",
     numWords=40, corThresh=0.2, colorText=TRUE)
 net3@net
 ```
+
+Other than curated databases, the PubMed query can also be performed with setting `curate=FALSE`. This way, the text information of the latest literature for the microbes and diseases can be plotted. The options for use in function obtaining PubMed information can be specified to `abstArg` in list format.
+
+```{r no_curate, warning=FALSE, message=FALSE, fig.height=10, fig.width=10}
+net4 <- wcBSDB(c("Veillonella dispar","Neisseria flava",
+    "Veillonella parvula","Akkermansia muciniphila"), mbPlot=TRUE,
+    curate=FALSE,target="title",pre=TRUE,plotType="network",
+    additionalRemove=filter$word, disPlot=TRUE,
+    numWords=40, corThresh=0.2, colorText=TRUE,
+    abstArg = list(retMax=80, sortOrder="pubdate"))
+net4@net
+```
+
 
 ```{r}
 sessionInfo()

@@ -62,6 +62,7 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
 #' 
 #' obtain pubmed information
 #' 
+#' @param ret osplot object
 #' @param searchQuery search query
 #' @param rawQuery raw query
 #' @param type abstract or title
@@ -71,7 +72,7 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
 #' 
 #' @noRd
 
-getPubMed <- function(searchQuery, rawQuery,
+getPubMed <- function(ret, searchQuery, rawQuery,
     type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance") {
     if (is.null(apiKey)){
       qqcat("Proceeding without API key\n")
@@ -82,19 +83,20 @@ getPubMed <- function(searchQuery, rawQuery,
                                   term = searchQuery, 
                                   retmax = retMax,
                                   sort = sortOrder)
+    ret@pmids <- pubmedSearch$ids
     searchResults <- entrez_fetch(db="pubmed",
                                   pubmedSearch$ids, rettype="xml", 
                                   parsed=FALSE)
     parsedXML <- xmlTreeParse(as.character(searchResults))
 
     if (type=="abstract") {
-      ret <- "Abstract"
+      obt <- "Abstract"
     } else {
-      ret <- "ArticleTitle"
+      obt <- "ArticleTitle"
     }
 
     charset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
-                                    ret,
+                                    obt,
                                     recursive = TRUE)
 
     obtainedText <- as.character(xmlValue(charset))
@@ -113,7 +115,8 @@ getPubMed <- function(searchQuery, rawQuery,
       obtainedText,
       apply(incs, 1, function(x) paste(unique(x[x!="FALSE"]), collapse=","))
     )) |> `colnames<-`(c("ID","text","query"))
-    return(obtainedDf)
+    ret@rawText <- obtainedDf
+    return(ret)
 }
 
 
@@ -632,4 +635,56 @@ makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lowe
         docs <- docs %>% tm_map(stemDocument)   
     }
     return(docs)
+}
+
+
+#' getUPtax
+#' 
+#' Obtain the list of UniProt taxonomy ID.
+#' https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt
+#' The file above must be specified to file argument.
+#' 
+#' @param file downloaded file
+#' @param candUP candidate UniProt identifiers
+#' @param candTax candidate taxonomy name
+#' 
+#' @export
+#' 
+getUPtax <- function(file, candUP, candTax=NULL) {
+  tmp <- NULL
+  con = file(file, "r")
+  while ( TRUE ) {
+    line = readLines(con, n = 1)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if (grepl("N=",line)) {
+      code <- strsplit(line, " ")[[1]][1]
+      sn <- unlist(strsplit(line, "N="))[2]
+      if (length(candUP)==1) {
+        if (candUP=="all") {
+          if (!is.null(candTax)) {
+            for (ct in candTax) {
+              if (grepl(ct, sn)){
+                tmp <- rbind(tmp, c(code, sn))
+              }
+            }
+          } else {
+            tmp <- rbind(tmp, c(code, sn))
+          }
+        }
+      }
+      if (code %in% candUP) {
+        tmp <- rbind(tmp, c(code, sn))
+      }
+    }
+  }
+  close(con)
+  if (!is.null(tmp)) {
+    tmp <- data.frame(tmp) |> `colnames<-`(c("UPID","Taxonomy"))
+    return(tmp)
+  } else {
+    qqcat("No tax could be obtained for @{cand}...\n")
+    return(NULL)
+  }
 }
