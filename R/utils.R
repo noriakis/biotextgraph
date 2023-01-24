@@ -640,12 +640,12 @@ makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lowe
 
 #' getUPtax
 #' 
-#' Obtain the list of UniProt taxonomy ID.
+#' Obtain the list of UniProt organism identification codes, by querying taxonomy or UniProt codes.
 #' https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt
-#' The file above must be specified to file argument.
+#' The file above must be downloaded and specified to file argument.
 #' 
 #' @param file downloaded file
-#' @param candUP candidate UniProt identifiers
+#' @param candUP candidate UniProt organism identification codes
 #' @param candTax candidate taxonomy name
 #' 
 #' @export
@@ -684,7 +684,6 @@ getUPtax <- function(file, candUP, candTax=NULL) {
     tmp <- data.frame(tmp) |> `colnames<-`(c("UPID","Taxonomy"))
     return(tmp)
   } else {
-    qqcat("No tax could be obtained for @{cand}...\n")
     return(NULL)
   }
 }

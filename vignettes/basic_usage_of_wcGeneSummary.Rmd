@@ -31,7 +31,7 @@ library(dendextend)
 
 ## Producing word clouds
 
-We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too. By default, `preserve=TRUE`, which indicates the funciton tries to preserve the original cases of characters.
+We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
 
 ```{r basic, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 ## Configure input genes
@@ -52,9 +52,22 @@ gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
 gwc@wc
 ```
 
+By default, `preserve=TRUE`, which indicates the funciton tries to preserve the original cases of characters.
+
+```{r basic_pres_false, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+gwc_p <- wcGeneSummary(inpSymbol, random.order=FALSE,
+                     numWords=100,
+                     excludeTfIdf = 150,
+                     colors=brewer.pal(8, "Set2"),
+                     preserve=FALSE,
+                     rot.per=0.4)
+gwc_p@wc
+```
+
 It also returns a data frame consisting of frequency of each term.
 
 ```{r table, cache=TRUE}
+gwc
 knitr::kable(
   head(gwc@freqDf), caption = 'Term frequencies.',
   row.names = FALSE
@@ -163,8 +176,8 @@ net@net
 
 ## Visualization of PubMed information.
 
-Using `rentrez`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried.
-
+Using `rentrez`, one can perform the same analysis on PubMed text like the article title and abstract. The function queries for the input gene symbols (or microbes) and visualize. For typical use cases, the genes identified by showing `genePlot`, or hub genes identified in gene network analysis can be queried. The basic parameters for searching PubMed, like max number of articles retrieved and how to sort the articles can be specified by `retMax` and `sortOrder`. Be sure to obtain [an api key](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/) when querying heavily, and specify in `apiKey` argument.
+ 
 ```{r wcabst_wc, cache=FALSE, fig.height=8, fig.width=8}
 ab <- wcAbst(inpSymbol[1:3], retMax=20)
 ab@wc
