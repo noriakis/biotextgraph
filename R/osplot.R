@@ -76,3 +76,38 @@ setMethod("show",
     }
     print(object.size(object), units="auto")
   })
+
+
+setMethod("plot",
+          signature = "osplot",
+          definition = function(x) {
+            retSc <- function(x, min=4,max=9){
+              (max-min) * ((x-min(x)) / 
+                             (max(x)-min(x))) + min
+              
+            }
+            g <- x@igraph
+            
+            fillna <- V(g)$Freq
+            fillna[is.na(fillna)] <- min(fillna[!is.na(fillna)])
+            V(g)$Freq <- fillna
+            
+            if (length(x@pvpick)!=0) {
+              pal <- colorRampPalette(brewer.pal(8,"Set2"))
+              gradn <- adjustcolor(pal(unique(length(V(g)$tag)))[as.numeric(factor(V(g)$tag))], 0.8)
+            } else {
+              pal <- colorRampPalette(c("blue","red"))
+              gradn <- adjustcolor(pal(length(V(g)))[V(g)$Freq],0.5)
+            }
+            vs <- retSc(V(g)$Freq, 4,9)
+            tsz <- retSc(V(g)$Freq, 1,2)
+            
+            plot(g,
+                 vertex.color=gradn,
+                 vertex.label.color=gradn,
+                 vertex.size=vs,
+                 vertex.label.cex=tsz,
+                 vertex.label.dist=1,
+                 vertex.label.family="arial",
+                 edge.curved=0)
+          })

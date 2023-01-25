@@ -90,7 +90,21 @@ net4 <- wcBSDB(c("Veillonella dispar","Neisseria flava",
 net4@net
 ```
 
+For microbiome analysis, it is often the case that investigating coded enzymes is important. Using `wcEC` function and `getUPtax` function, the queried species or genus can be linked to possible interaction with enzymes using following databases. The downloaded file path should be specified to the function like below to link the queried taxonomy and enzymes. Specifically, enzymes listed in `enzyme.dat` are searched, and corresponding UniProt identifiers are obtained, followed by mapping using `speclist.txt`. This way, the links to microbe - textual information - enzyme can be plotted. 
 
+- [enzyme.dat from Expasy](https://enzyme.expasy.org/)
+- [UniProt Controlled vocabulary of species](https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt)
+
+```{r enzyme, warning=FALSE, message=FALSE, fig.height=10, fig.width=10, cache=TRUE}
+## Not run
+vp <- wcBSDB(c("Veillonella parvula"),
+                 plotType="network",
+                curate=TRUE, target="title", edgeLink=FALSE,
+                mbPlot = TRUE, ecPlot=TRUE, disPlot=TRUE, tag=TRUE,
+                cl=snow::makeCluster(10),colorText=TRUE, pre=TRUE, numWords=30,
+                nodePal=RColorBrewer::brewer.pal(10, "Set2"),
+                ecFile="enzyme.dat",
+                upTaxFile = "speclist.txt")
 ```{r}
 sessionInfo()
 ```
