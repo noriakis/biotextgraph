@@ -43,7 +43,7 @@ wcBSDBFast(
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
   cl = FALSE,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -125,7 +125,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{cl}{cluster object passed to pvclust}
 
-\item{...}{parameters to pass to wordcloud()}
+\item{argList}{parameters to pass to wordcloud()}
 }
 \value{
 list of data frame and ggplot2 object

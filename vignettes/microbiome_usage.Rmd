@@ -25,8 +25,8 @@ We use BugSigDB, and its R port bugsigdbr to obtain the curated dataset of the r
 ```{r bsdb_basic, warning=FALSE, message=FALSE, fig.height=8, fig.width=8, cache=TRUE}
 basic <- wcBSDB(c("Veillonella dispar","Neisseria flava"),tag=FALSE,
     curate=TRUE,target="title",pre=TRUE,cl=snow::makeCluster(12),
-    pal=RColorBrewer::brewer.pal(10, "Set2"),numWords=80,min.freq=1)
-basic@freqDf |> head()
+    pal=RColorBrewer::brewer.pal(10, "Set2"),numWords=80,argList=list(min.freq=1))
+basic@freqDf |> head(n=20)
 basic@wc
 ```
 If `target="abstract"`, the corresponding abstract will be fetched and be summarized.
@@ -41,17 +41,18 @@ basic2@wc
 For successful visualization, pre-caculated TF-IDF and frequency data frame is available and one can use them to filter the highly occurring words, or the other prefiltering option used in `wcGeneSummary`.
 
 ```{r filters, warning=FALSE, message=FALSE, cache=TRUE}
-rmwords <- wcGeneSummary:::allTfIdfBSDB
-filter <- rmwords[rmwords$tfidf>quantile(rmwords$tfidf, 0.95),]
-filter |> head()
+rmwords <- wcGeneSummary:::allFreqBSDB
+filter <- rmwords[rmwords$freq>quantile(rmwords$freq, 0.95),]
+filter |> head(n=20)
 ```
 The network visualization is possible by enabling `plotType="network"`.
+The same parameters that can be passed to `wcGeneSummary` can be used.
 
 ```{r bsdb_basic_network, warning=FALSE, message=FALSE, fig.height=8, fig.width=8, cache=TRUE}
-net <- wcBSDB(c("Veillonella dispar","Neisseria flava"),
+net <- wcBSDB(c("Neisseria","Veillonella"),
     curate=TRUE,target="title",pre=TRUE,plotType="network",
-    additionalRemove=filter$word, corThresh=0.2,
-    numWords=40)
+    additionalRemove=filter$word, corThresh=0.2, edgeLink=FALSE,
+    numWords=60)
 net@net
 ```
 
@@ -105,6 +106,9 @@ vp <- wcBSDB(c("Veillonella parvula"),
                 nodePal=RColorBrewer::brewer.pal(10, "Set2"),
                 ecFile="enzyme.dat",
                 upTaxFile = "speclist.txt")
+
+```
+
 ```{r}
 sessionInfo()
 ```

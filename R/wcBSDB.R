@@ -52,7 +52,7 @@
 #' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
 #' Otherwise take sum.
 #' 
-#' @param ... parameters to pass to wordcloud()
+#' @param argList parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -89,7 +89,7 @@ wcBSDB <- function (mbList,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
-                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
+                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
     ret <- new("osplot")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
@@ -97,7 +97,6 @@ wcBSDB <- function (mbList,
         "microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated",
         "taxa","taxon")}
-    # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
         tb <- importBugSigDB()
@@ -111,7 +110,7 @@ wcBSDB <- function (mbList,
                 subTb <- rbind(subTb, tmp)
             }
         }
-        qqcat("Including @{dim(subTb)[1]} entries ...\n")
+        qqcat("Including @{dim(subTb)[1]} entries\n")
         # returnList[["subsetBSDB"]] <- subTb
 
         titles <- unique(subTb$Title)
@@ -136,24 +135,24 @@ wcBSDB <- function (mbList,
         ret@rawText <- subTb
 
     } else {
-        qqcat("Redoing abstract query for microbes ...\n")
+        qqcat("Redoing abstract query for microbes\n")
         ret <- redo
         target <- "abstract"
     }
     if (curate) {
         if (target=="abstract"){
-            qqcat("Target is abstract ...\n")
+            qqcat("Target is abstract\n")
             if (is.null(redo)) {
                 pmids <- unique(fil$PMID)
                 # pmids <- pmids[!is.na(pmids)]
-                qqcat("  Querying PubMed for @{length(pmids)} pmids ...\n")
+                qqcat("  Querying PubMed for @{length(pmids)} pmids\n")
                 queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
                                    "efetch.fcgi?db=pubmed&retmode=XML&id=",
                                        paste(pmids, collapse=","))
                 if (!is.null(apiKey)){
                     queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
                 } else {
-                    qqcat("  Querying without API key ...\n")
+                    qqcat("  Querying without API key\n")
                 }
                 onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
                 xmlString <- readLines(onequery, encoding="UTF8")
@@ -208,7 +207,7 @@ wcBSDB <- function (mbList,
     }
     filterWords <- retFiltWords(useFil=pref, filType=excludeType, filNum=excludeFreq)
 
-    qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
+    qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf)\n")
     if (preserve) {
         pdic <- preserveDict(docs, ngram, numOnly, stem)
         ret@dic <- pdic
@@ -314,7 +313,7 @@ wcBSDB <- function (mbList,
         if (!is.null(metab)) {mbPlot <- TRUE}
         if (ecPlot) {mbPlot <- TRUE}
 
-        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
+        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target.")}
         if (mbPlot) {
             if (target=="abstract") {
                 row.names(freqWordsDTM) <- abstDf$query
@@ -422,7 +421,7 @@ wcBSDB <- function (mbList,
                         "Spearman's ρ"
                         )
                 }
-                qqcat("Checking metabolites ...\n")
+                qqcat("Checking metabolites\n")
                 metabGraph <- NULL
                 for (sp in mbList) {
                     tmp <- metab[grepl(sp,metab[[metCol[1]]]),]
@@ -644,8 +643,9 @@ wcBSDB <- function (mbList,
                                                random.order=FALSE,
                                                ordered.colors=TRUE)))
         } else {
-            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = returnDf$freq, ...)))
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- returnDf$freq
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
         }
         ret@freqDf <- returnDf
         ret@wc <- wc

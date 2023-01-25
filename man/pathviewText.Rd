@@ -18,7 +18,7 @@ pathviewText(
   numWords = 20,
   trans = FALSE,
   areas = NULL,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -53,7 +53,7 @@ e.g. "K08097" and "phosphosulfolactate synthase"}
 
 \item{areas}{used in patchwork}
 
-\item{...}{passed to wc functions}
+\item{argList}{passed to wc functions}
 }
 \description{
 colorize pathview map, and link to word frequency

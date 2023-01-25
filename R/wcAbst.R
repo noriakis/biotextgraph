@@ -54,7 +54,7 @@
 #' @param nodePal node palette when tag is TRUE
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
-#' @param ... parameters to pass to wordcloud()
+#' @param argList parameters to pass to wordcloud()
 #' 
 #' @export
 #' @examples wcAbst("DDX41")
@@ -83,7 +83,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
-                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, ...)
+                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
 
   # if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
@@ -115,7 +115,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     ret@retMax <- retMax
     allDataDf <- ret@rawText
   } else {
-    qqcat("Resuming from the previous results ...\n")
+    qqcat("Resuming from the previous results\n")
     ret <- redo
     allDataDf <- ret@rawText
   }
@@ -221,7 +221,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     row.names(freqWordsDTM) <- allDataDf$query
     if (tag) {
       if (!is.null(ret) & length(ret@pvpick)!=0){
-        qqcat("Using previous pvclust results ...")
+        qqcat("Using previous pvclust results")
         pvcl <- ret@pvpick
       } else {
         if (tagWhole){
@@ -242,7 +242,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     
     ## Check correlation
     if (bn) {
-      qqcat("bn specified, R=@{R} ...\n")
+      qqcat("bn specified, R=@{R}\n")
       # To avoid computaitonal time, subset to numWords
       bnboot <- boot.strength(
         data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
@@ -482,7 +482,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     
     if (tag) {
       if (!is.null(redo) & length(redo@pvpick)!=0) {
-        qqcat("Using previous pvclust results ...")
+        qqcat("Using previous pvclust results")
         pvcl <- redo@pvpick
       } else {
         if (tagWhole){
@@ -525,8 +525,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                                          random.order=FALSE,
                                          ordered.colors = TRUE)))
     } else {
-      wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                         freq = returnDf$freq, ...)))
+      argList[["words"]] <- returnDf$word
+      argList[["freq"]] <- returnDf$freq
+      wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
     }
     ret@freqDf <- returnDf
     ret@wc <- wc

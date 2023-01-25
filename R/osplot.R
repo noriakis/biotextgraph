@@ -3,7 +3,7 @@
 #' wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
 #' 
 #' @param target "pubmed", "bugsigdb", "refseq", "ec"
-#' @param ... passed to each function
+#' @param argList passed to each function
 #' @return list of data frames and ggplot2 object
 #' 
 #' @examples
@@ -11,15 +11,15 @@
 #' osplot("refseq", geneList)
 #' @export
 #' 
-osplot <- function(target, ...) {
+osplot <- function(target, argList) {
 	if (target=="pubmed"){
-		return(wcAbst(...))
+		return(do.call("wcAbst", argList))
 	} else if (target=="bugsigdb"){
-		return(wcBSDB(...))
+		return(do.call("wcBSDB", argList))
 	} else if (target=="refseq"){
-		return(wcGeneSummary(...))
+		return(do.call("wcGeneSummary", argList))
 	} else if (target=="ec") {
-		return(wcEC(...))
+		return(do.call("wcEC", argList))
 	} else {
 		stop("Please specify pubmed, bugsigdbr, or refseq")
 	}

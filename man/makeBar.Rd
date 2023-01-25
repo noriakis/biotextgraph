@@ -15,7 +15,7 @@ makeBar(
   flip = FALSE,
   grad = FALSE,
   retList = FALSE,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -39,7 +39,7 @@ makeBar(
 
 \item{retList}{return result of wcGeneSummary}
 
-\item{...}{passed to wcGeneSummary()}
+\item{argList}{passed to wcGeneSummary()}
 }
 \value{
 barplot of word frequency

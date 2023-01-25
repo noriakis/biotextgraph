@@ -12,7 +12,7 @@ findTerm(
   tfidf = TRUE,
   calc = "sum",
   keyType = "SYMBOL",
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ findTerm(
 
 \item{keyType}{key type of listOfGenes}
 
-\item{...}{passed to wcGeneSummary}
+\item{argList}{passed to wcGeneSummary}
 }
 \value{
 named list of frequency

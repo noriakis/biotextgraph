@@ -11,7 +11,7 @@ getWordsOnDendro(
   geneVecType = "ENSEMBL",
   numberOfWords = 25,
   type = "words",
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -28,7 +28,7 @@ pyramid plots are not produced}
 
 \item{type}{"words" or "enrich"}
 
-\item{...}{passed to wcGeneSummary}
+\item{argList}{passed to wcGeneSummary}
 }
 \value{
 list of pyramid plot grobs and its positions

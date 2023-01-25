@@ -4,7 +4,7 @@
 \alias{returnSim}
 \title{returnSim}
 \usage{
-returnSim(cllist, keyType = "ENTREZID", numLimit = 5000, ...)
+returnSim(cllist, keyType = "ENTREZID", numLimit = 5000, argList = list())
 }
 \arguments{
 \item{cllist}{cluster list (named vector or list)}
@@ -14,7 +14,7 @@ returnSim(cllist, keyType = "ENTREZID", numLimit = 5000, ...)
 \item{numLimit}{threshold for gene number limit
 default to 5000}
 
-\item{...}{parameters to pass to wcGeneSummary()}
+\item{argList}{parameters to pass to wcGeneSummary()}
 }
 \value{
 similarity matrix

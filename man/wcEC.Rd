@@ -12,7 +12,7 @@ wcEC(
   taxec = FALSE,
   taxFile = NULL,
   candTax = NULL,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -30,7 +30,7 @@ If this is TRUE, data.frame is returned}
 
 \item{candTax}{when taxec=TRUE, search only for these species.}
 
-\item{...}{passed to osplot(target="pubmed")}
+\item{argList}{passed to osplot(target="pubmed")}
 }
 \description{
 Query the Enzyme Comission number and obtain description,

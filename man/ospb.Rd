@@ -50,7 +50,7 @@ ospb(
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
   cl = FALSE,
-  ...
+  argList = list()
 )
 
 ospb(
@@ -99,7 +99,7 @@ ospb(
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
   cl = FALSE,
-  ...
+  argList = list()
 )
 }
 \description{

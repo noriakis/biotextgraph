@@ -52,7 +52,7 @@ wcAbst(
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
   stem = FALSE,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -154,7 +154,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{stem}{whether to use stemming}
 
-\item{...}{parameters to pass to wordcloud()}
+\item{argList}{parameters to pass to wordcloud()}
 }
 \value{
 list of data frame and ggplot2 object

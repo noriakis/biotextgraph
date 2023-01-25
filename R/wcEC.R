@@ -13,12 +13,12 @@
 #' @param taxec link taxonomy to EC using UniProt Taxonomy ID file
 #' If this is TRUE, data.frame is returned
 #' @param candTax when taxec=TRUE, search only for these species.
-#' @param ... passed to osplot(target="pubmed")
+#' @param argList passed to osplot(target="pubmed")
 #' @export
 #' 
 
 wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
-                 taxec=FALSE, taxFile=NULL, candTax=NULL, ...) {
+                 taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list()) {
   flg <- FALSE
   candecs <- NULL
   allFlag <- FALSE
@@ -27,7 +27,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
       allFlag <- TRUE
     }
   }
-  qqcat("Processing EC file...\n")
+  qqcat("Processing EC file\n")
   con = file(file, "r")
   while ( TRUE ) {
     line = readLines(con, n = 1)
@@ -74,7 +74,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
   candecs <- data.frame(candecs) |>
     `colnames<-`(c("number","desc","comment","DRs"))
   if (taxec) {
-    qqcat("  Linking taxonomy to EC ...\n")
+    qqcat("  Linking taxonomy to EC\n")
     retTaxEC <- NULL
     if (is.null(taxFile)) {stop("Please provide UniProt Taxonomy file")}
     if (!is.null(candTax)) {
@@ -114,8 +114,9 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
   quoted <- dQuote(candecs$desc,options(useFancyQuotes = FALSE))
   if (onlyTerm) {return(quoted)}
   if (onlyDf) {return(candecs)}
-  abst <- osplot(target="pubmed",
-                 quoted, ...)
+  argList[["target"]] <- "pubmed"
+  argList[["queries"]] <- quoted
+  abst <- do.call("osplot", argList)
   abst@ec <- candecs
   abst@type <- "EC"
   return(abst)

@@ -45,23 +45,28 @@ It accepts values of the `wordcloud()` function. `numWords` specifies how many w
 
 ```{r basic2, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
-gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
+gwc <- wcGeneSummary(inpSymbol,
                      numWords=100,
                      excludeFreq=5000,
-                     colors=palette(),
-                     rot.per=0.4)
+                     argList=list(
+                      "random.order"=FALSE,
+                     "colors"=palette(),
+                     "rot.per"=0.4))
 gwc@wc
 ```
 
 By default, `preserve=TRUE`, which indicates the funciton tries to preserve the original cases of characters.
 
 ```{r basic_pres_false, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-gwc_p <- wcGeneSummary(inpSymbol, random.order=FALSE,
+gwc_p <- wcGeneSummary(inpSymbol, 
                      numWords=100,
                      excludeFreq=5000,
-                     colors=brewer.pal(8, "Set2"),
                      preserve=FALSE,
-                     rot.per=0.4)
+                     argList=list(
+                       rot.per=0.4,
+                       colors=RColorBrewer::brewer.pal(8, "Set2"),
+                       random.order=FALSE
+                     ))
 gwc_p@wc
 ```
 
@@ -79,7 +84,9 @@ N-gram is supported by library `tm`, specified by `ngram`.
 Default is `1`, and the example specifying `2` is shown below.
 
 ```{r ngramwc, warning=FALSE, fig.height=8, fig.width=8, cache=TRUE}
-gwc2 <- wcGeneSummary(inpSymbol, ngram=2, numWords=50)
+gwc2 <- wcGeneSummary(inpSymbol,
+                      ngram=2,
+                      numWords=50)
 gwc2@wc
 ```
 
@@ -87,15 +94,16 @@ Using `clusterProfiler` functions, one can use enriched pathway names for visual
 The `enrich` option can be specified for `'kegg'` or `'reactome'`, this time we specify `'reactome'`.
 
 ```{r ngrampath, warning=FALSE, fig.height=8, fig.width=8, cache=TRUE}
-gwc3 <- wcGeneSummary(inpSymbol, enrich="reactome", tfidf=TRUE, numWords=50)
+gwc3 <- wcGeneSummary(inpSymbol,
+                      enrich="reactome", tfidf=TRUE, numWords=50)
 gwc3@wc
 ```
 
-One of the main questions is which words can be clustered together among the words contained in the queried gene cluster. Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`. For the significance threshold, `pvclAlpha` can be specified. The default parameters perform `pvclust` on the subset of dataset for words with high frequency specified by `numWords`. If one want to perform on whole matrix (which is a natural way), `tagWhole=TRUE` can be specified, although it is computationally intensive.
+One of the main questions is which words can be clustered together among the words contained in the queried gene cluster. Word clustering (`pvclust`) and identified significant clusters based on the occurrence in the text can be visualized by specifying `tag=TRUE`. For the significance threshold, `pvclAlpha` can be specified. The default parameters perform `pvclust` on the subset of dataset for words with high frequency specified by `numWords`. If one want to perform on whole matrix (which is a natural way), `tagWhole=TRUE` can be specified, although it is computationally intensive. One can pass clusters to perform parallel computing owning to `pvclust` function, by specifying `cl` as below.
 
 ```{r tagging, warning=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 
-pal <- brewer.pal(4, "PuOr") 
+pal <- RColorBrewer::brewer.pal(4, "PuOr") 
 pal <- colorRampPalette(pal)(20)
 
 
@@ -104,7 +112,7 @@ gwcl <- wcGeneSummary(inpSymbol,
                      numWords=30,
                      tag=TRUE,
                      pal = pal,
-                     rot.per=0.4)
+                     argList=list(rot.per=0.4))
 gwcl@wc
 gwcl@pvpick
 
@@ -115,7 +123,7 @@ gwclWhole <- wcGeneSummary(inpSymbol,
                      tag=TRUE, tagWhole=TRUE,
                      pal = pal,
                      cl=snow::makeCluster(8),
-                     rot.per=0.4)
+                     argList=list(rot.per=0.4))
 gwclWhole@wc
 gwclWhole@pvpick
 ```
@@ -140,13 +148,14 @@ net <- wcGeneSummary(inpSymbol, plotType="network",
 net@net
 ```
 
-The clustering results based on `pvclust` can be shown also on the correlation network, by the node color (`tag=TRUE`).
+The clustering results based on `pvclust` can be shown also on the correlation network, by the node color (`tag=TRUE`). We can plot `igraph` object as well, using basic `plot` function implemented.
 
 ```{r tagnet, warning=FALSE, message=FALSE, cache=T, fig.height=8, fig.width=8}
 net <- wcGeneSummary(inpSymbol, plotType="network", corThresh=0.2,
                      numWords=20, tag=TRUE)
 net@net
 net@pvpick
+plot(net)
 ```
 
 The genes associated with the corresponding words can be shown by specifying `genePlot=TRUE`, useful for assessing which words is associated with interesting genes. The edges connecting words to corresponding genes are shown.
@@ -253,7 +262,7 @@ compareWordNet(list(net1, net2), tag=TRUE)
 
 ## Text over represenatation analysis (experimental)
 
-```{r ora}
+```{r ora, fig.width=5, fig.height=5}
 geneList <- keggList$`00785` # Lipoic acid metabolism
 pvs <- textORA(geneList)
 hist(pvs)
@@ -280,7 +289,7 @@ net@net
 
 ```{r textclus, warning=FALSE, message=FALSE}
 simExample <- returnSim(returnExample()$color,
-                        keyType="ENSEMBL", ora=TRUE)
+                        keyType="ENSEMBL", argList=list(ora=TRUE))
 heatmap(simExample)
 ```
 
@@ -404,11 +413,17 @@ The relationship between gene clusters are often investigated in clustering anal
 plotEigengeneNetworksWithWords(MEs, modColors)
 ```
 
+For examining enriched pathway names in the dendrograms, specify `argList` to `wcGeneSummary`, like `list(enrich="kegg")`.
+
+```{r wgcnapath, warning=FALSE, message=FALSE, cache=TRUE, fig.width=6, fig.height=9}
+plotEigengeneNetworksWithWords(MEs, modColors, type="words", argList=list(enrich="kegg"))
+```
+
+
 Other than textual information, we can simply annotate the dendrogram using enrichment analysis.
 Useful for inspecting how the branches of dendrogram contains pathway information.
 
 ```{r wgcna2, warning=FALSE, message=FALSE, cache=TRUE, fig.width=6, fig.height=9}
-# WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
 plotEigengeneNetworksWithWords(MEs, modColors, type="enrich")
 ```
 
@@ -423,6 +438,7 @@ listOfGenes <- list()
 for (path in unique(tab$PathwayID)){
     listOfGenes[[path]] <- subset(tab, PathwayID==path)$GeneID
 }
+## Random subset! The results would be different.
 frq <- findTerm(query, listOfGenes[sample(length(listOfGenes), 20)],
                 split=TRUE,
                 keyType="ENTREZID")

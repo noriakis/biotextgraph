@@ -10,59 +10,59 @@
 retFiltWords <- function(useFil, filType, filNum) {
     if (filType=="above" | filType==">") {
         if (useFil=="GS_TfIdf") {
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummary[
             allTfIdfGeneSummary$tfidf > filNum,]$word
         } else if (useFil=="BSDB_TfIdf"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDB[
             allTfIdfBSDB$tfidf > filNum,]$word
         } else if (useFil=="GS_TfIdf_Max"){
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummaryMax[
             allTfIdfGeneSummaryMax$tfidf > filNum,]$word
         } else if (useFil=="BSDB_TfIdf_Max"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDBMax[
             allTfIdfBSDBMax$tfidf > filNum,]$word
         } else if (useFil=="GS_Freq"){
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allFreqGeneSummary[
             allFreqGeneSummary$freq > filNum,]$word
         } else if (useFil=="BSDB_Freq"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allFreqBSDB[
             allFreqBSDB$freq > filNum,]$word
         } else {
-          stop("please specify useFil")
+          stop("Please specify useFil")
         }
     } else {
         if (useFil=="GS_TfIdf") {
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummary[
             allTfIdfGeneSummary$tfidf < filNum,]$word
         } else if (useFil=="BSDB_TfIdf"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDB[
             allTfIdfBSDB$tfidf < filNum,]$word
         } else if (useFil=="GS_TfIdf_Max"){
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummaryMax[
             allTfIdfGeneSummaryMax$tfidf < filNum,]$word
         } else if (useFil=="BSDB_TfIdf_Max"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDBMax[
             allTfIdfBSDBMax$tfidf < filNum,]$word
         } else if (useFil=="GS_Freq"){
-          qqcat("filter based on GeneSummary\n")
+          qqcat("Filter based on GeneSummary\n")
           filterWords <- allFreqGeneSummary[
             allFreqGeneSummary$freq < filNum,]$word
         } else if (useFil=="BSDB_Freq"){
-          qqcat("filter based on BugSigDB\n")
+          qqcat("Filter based on BugSigDB\n")
           filterWords <- allFreqBSDB[
             allFreqBSDB$freq < filNum,]$word
         } else {
-          stop("please specify useFil")
+          stop("Please specify useFil")
         }
     }
     return(filterWords)
@@ -211,7 +211,7 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 #' @param tfidf use tfidf when creating TDM or not
 #' @param keyType key type of listOfGenes
 #' @param calc "sum", "mean" or "highest"
-#' @param ... passed to wcGeneSummary
+#' @param argList passed to wcGeneSummary
 #' @return named list of frequency
 #' @export
 #' @examples
@@ -221,7 +221,7 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 #' findTerm(query, lg)
 #' 
 findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
-                      tfidf=TRUE, calc="sum", keyType="SYMBOL", ...) {
+                      tfidf=TRUE, calc="sum", keyType="SYMBOL", argList=list()) {
     qqcat("Finding query in @{length(listOfGenes)} clusters ...\n")
     if (split) {
         querySplit <- tolower(unlist(strsplit(query, " ")))
@@ -230,9 +230,15 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
     }
     frq <- list()
     for (clus in names(listOfGenes)) {
-        tmptdm <- wcGeneSummary(listOfGenes[[clus]],
-                                keyType = keyType, ngram=ngram,
-                                tfidf=tfidf, onlyTDM=TRUE, ...)
+        argList[["geneList"]] <- listOfGenes[[clus]]
+        argList[["keyType"]] <- keyType
+        argList[["ngram"]] <- ngram
+        argList[["tfidf"]] <- tfidf
+        argList[["onlyTDM"]] <- TRUE
+        tmptdm <- do.call("wcGeneSummary", argList)
+        # tmptdm <- wcGeneSummary(listOfGenes[[clus]],
+        #                         keyType = keyType, ngram=ngram,
+        #                         tfidf=tfidf, onlyTDM=TRUE)
         querytdm <- t(as.matrix(tmptdm[Terms(tmptdm) %in% querySplit, ]))
         tmp <- rep(0, length(querySplit))
         names(tmp) <- querySplit
@@ -262,14 +268,14 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
 #' @param keyType keytype
 #' @param numLimit threshold for gene number limit
 #'                 default to 5000
-#' @param ... parameters to pass to wcGeneSummary()
+#' @param argList parameters to pass to wcGeneSummary()
 #' @return similarity matrix
 #' @export
 #' @examples
 #' ex <- returnExample()
 #' returnSim(ex$color, keyType="ENSEMBL")
 #' @importFrom GetoptLong qqcat
-returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
+returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, argList=list()) {
     store <- list()
     if (!is.list(cllist)){
         converted <- list()
@@ -286,10 +292,10 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
         ## Time consuming cluster
         if (length(converted[[i]])<numLimit){
             qqcat("@{i}\n")
+            argList[["geneList"]] <- converted[[i]]
+            argList[["keyType"]] <- keyType
             store[[i]] <-
-                wcGeneSummary(converted[[i]],
-                              keyType=keyType,
-                              ...)@freqDf
+                do.call("wcGeneSummary", argList)@freqDf
         }
     }
     sim <- sapply(store, function(x) sapply(store,
@@ -316,14 +322,14 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, ...) {
 #' @param flip flip the barplot (gene name in y-axis)
 #' @param orgDb orgDb
 #' @param retList return result of wcGeneSummary
-#' @param ... passed to wcGeneSummary()
+#' @param argList passed to wcGeneSummary()
 #' @import org.Hs.eg.db
 #' @return barplot of word frequency
 #' @export
 #' 
 makeBar <- function(queries, top=10, keyType="SYMBOL",
                     pal=NULL, textSize=20, reorder=TRUE, orgDb=org.Hs.eg.db,
-                    flip=FALSE, grad=FALSE, retList=FALSE, ...) {
+                    flip=FALSE, grad=FALSE, retList=FALSE, argList=list()) {
   if (is.null(pal)) {
     # palNum <- sample(1:151,1)
     # pal <- pokepal(palNum)
@@ -332,11 +338,14 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
       pal <- rep(pal, ceiling(top/length(pal)))
     }
   }
-  wc <- wcGeneSummary(queries, keyType=keyType, orgDb=orgDb,
-                      madeUpper=c("dna","rna",
+
+  argList[["geneList"]] <- queries
+  argList[["keyType"]] <- keyType
+  argList[["orgDb"]] <- orgDb
+  argList[["madeUpper"]] <- c("dna","rna",
                                   tolower(AnnotationDbi::keys(orgDb,
-                                                              keytype="SYMBOL"))),
-                      ...)
+                                                              keytype="SYMBOL")))
+  wc <- do.call("wcGeneSummary",argList)
   barp <- utils::head(wc@freqDf, n=top)
   ## Need rewrite
   if (reorder){

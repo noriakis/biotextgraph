@@ -43,7 +43,7 @@
 #' @param curate include articles in bugsigdb
 #' @param abstArg passed to PubMed function when using curate=FALSE
 #' @param nodePal node palette when tag is TRUE
-#' @param ... parameters to pass to wordcloud()
+#' @param argList parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -78,7 +78,7 @@ wcBSDBFast <- function (mbList,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
-                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
+                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
     ret <- new("osplot")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
@@ -86,7 +86,7 @@ wcBSDBFast <- function (mbList,
         "microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated",
         "taxa","taxon")}
-    # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
+    # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target.")}
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
         tb <- data.table(importBugSigDB())
@@ -100,7 +100,7 @@ wcBSDBFast <- function (mbList,
                 subTb <- rbind(subTb, tmp)
             }
         }
-        qqcat("Including @{dim(subTb)[1]} entries ...\n")
+        qqcat("Including @{dim(subTb)[1]} entries\n")
         # returnList[["subsetBSDB"]] <- subTb
 
         titles <- unique(subTb$Title)
@@ -125,24 +125,24 @@ wcBSDBFast <- function (mbList,
         ret@rawText <- subTb
 
     } else {
-        qqcat("Redoing abstract query for microbes ...\n")
+        qqcat("Redoing abstract query for microbes\n")
         ret <- redo
         target <- "abstract"
     }
     if (curate) {
         if (target=="abstract"){
-            qqcat("Target is abstract ...\n")
+            qqcat("Target is abstract\n")
             if (is.null(redo)) {
                 pmids <- unique(fil$PMID)
                 # pmids <- pmids[!is.na(pmids)]
-                qqcat("  Querying PubMed for @{length(pmids)} pmids ...\n")
+                qqcat("  Querying PubMed for @{length(pmids)} pmids\n")
                 queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
                                    "efetch.fcgi?db=pubmed&retmode=XML&id=",
                                        paste(pmids, collapse=","))
                 if (!is.null(apiKey)){
                     queryUrl <- paste0(queryUrl, "&api_key=", apiKey)
                 } else {
-                    qqcat("  Querying without API key ...\n")
+                    qqcat("  Querying without API key\n")
                 }
                 onequery <- url(queryUrl, open = "rb", encoding = "UTF8")
                 xmlString <- readLines(onequery, encoding="UTF8")
@@ -191,7 +191,7 @@ wcBSDBFast <- function (mbList,
                          allTfIdfBSDBDT[
                            allTfIdfBSDBDT$tfidf > excludeTfIdf,]$word)
     }
-    qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
+    qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf)\n")
     if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
     if (length(filterWords)!=0 | length(additionalRemove)!=0){
@@ -284,7 +284,7 @@ wcBSDBFast <- function (mbList,
 
         ## genePlot: plot associated genes
         if (disPlot) {mbPlot <- TRUE}
-        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target. ...")}
+        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target.")}
         if (mbPlot) {
             if (target=="abstract") {
                 row.names(freqWordsDTM) <- abstDf$query
@@ -371,7 +371,7 @@ wcBSDBFast <- function (mbList,
             ## TODO: somehow show edge weights other than
             ## correlation between words
             if (!is.null(metab)) {
-                qqcat("Checking metabolites ...\n")
+                qqcat("Checking metabolites\n")
                 metab <- data.table(metab)
                 metabGraph <- NULL
                 for (sp in mbList) {
@@ -591,8 +591,9 @@ wcBSDBFast <- function (mbList,
                                                random.order=FALSE,
                                                ordered.colors = TRUE)))
         } else {
-            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = returnDf$freq, ...)))
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- returnDf$freq
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
         }
         ret@freqDf <- returnDf
         ret@wc <- wc
