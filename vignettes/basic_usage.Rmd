@@ -1,0 +1,53 @@
+---
+title: "wcGeneSummary"
+author: "Noriaki Sato"
+package: wcGeneSummary
+output: 
+    BiocStyle::html_document:
+        toc_float: true
+vignette: >
+    %\VignetteIndexEntry{wcGeneSummary}
+    %\VignetteEngine{knitr::knitr}
+    %\VignetteEncoding{UTF-8}  
+---
+
+This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization. In this vignette, the two basic plots are introduced. The detailed usage is available in the package's bookdown, and the web server is available for the easy querying.
+
+# Basic usage
+
+Load the package and the database for converting identifiers.
+In this example, we use mostly human-derived data, and use `org.Hs.eg.db`.
+
+```{r load, warning=FALSE, message=FALSE}
+library(wcGeneSummary)
+library(org.Hs.eg.db)
+library(ggplot2)
+library(ggraph)
+```
+
+## Producing word clouds
+
+We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `exclude="tfidf"` can be specified too.
+
+```{r basic, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+## Configure input genes
+inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
+gwc <- wcGeneSummary(inpSymbol)
+gwc
+gwc@wc
+```
+
+## Producing correlation networks
+
+The next main function is producing correlation networks between words based on the co-occurrence of the words in the text.
+
+```{r basic3, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+net <- wcGeneSummary(inpSymbol, plotType="network")
+net
+net@net
+```
+
+
+```{r}
+sessionInfo()
+```
