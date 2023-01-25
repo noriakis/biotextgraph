@@ -52,7 +52,7 @@ ospa(
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
   stem = FALSE,
-  ...
+  argList = list()
 )
 }
 \description{

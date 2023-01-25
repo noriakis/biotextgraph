@@ -17,7 +17,7 @@ returnPyramid(
   wrap = 15,
   enrichID = "ID",
   orgDb = org.Hs.eg.db,
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -43,7 +43,7 @@ returnPyramid(
 
 \item{orgDb}{organism database to use in enrich}
 
-\item{...}{parameters passed to wcGeneSummary()}
+\item{argList}{parameters passed to wcGeneSummary()}
 }
 \value{
 list of pyramid plot grobs and its positions

@@ -61,7 +61,7 @@
 #' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
 #' Otherwise take sum.
 #' @param collapse default to FALSE, collapse all the sentences
-#' @param ... parameters to pass to wordcloud()
+#' @param argList parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -105,13 +105,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             onWholeTDM=FALSE, pre=TRUE, verbPOS=c("VBZ"),
                             nodePal=palette(), collapse=FALSE,
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
-                            ...) {
+                            argList=list()) {
     ret <- new("osplot")
     ret@query <- geneList
     ret@type <- "refseq"
 
     if (verb) {
-        qqcat("using verb mode ...\n")
+        qqcat("Using verb mode\n")
         if (bn) {stop("verb can be only used with undirected graph")}
         edgeLabel <- TRUE
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)}
@@ -126,13 +126,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     # }
 
     if (is.null(mergeCorpus)) {
-        qqcat("input genes: @{length(geneList)}\n")
+        qqcat("Input genes: @{length(geneList)}\n")
         if (keyType!="ENTREZID"){
             geneList <- AnnotationDbi::select(orgDb,
                 keys = geneList, columns = c("ENTREZID"),
                 keytype = keyType)$ENTREZID
             geneList <- geneList[!is.na(geneList)]
-            qqcat("converted input genes: @{length(geneList)}\n")
+            qqcat("  Converted input genes: @{length(geneList)}\n")
         }
 
         ## Filter high frequency words if needed
@@ -156,12 +156,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 ret@filtered <- allfils
             }
         }
-        qqcat("filtered @{length(filterWords)} words (frequency and/or tfidf) ...\n")
+        qqcat("Filtered @{length(filterWords)} words (frequency and/or tfidf)\n")
 
         ## If specified pathway option
         if (!is.null(enrich)) {
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
-            qqcat("performing enrichment analysis ...")
+            qqcat("Performing enrichment analysis")
             if (enrich=="reactome"){
                 pathRes <- enrichPathway(geneList)
                 pathRes@result$Description <- gsub("Homo sapiens\r: ",
@@ -171,11 +171,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 pathRes <- enrichKEGG(geneList)
             } else {
                 ## Currently only supports some pathways
-                stop("please specify 'reactome' or 'kegg'")
+                stop("Please specify 'reactome' or 'kegg'")
             }
             ret@enrichResults <- pathRes@result
             ## Make corpus
-            docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+            if (collapse) {
+                docs <- VCorpus(VectorSource(paste(pathRes@result$Description[1:topPath], collapse=" ")))
+            } else {
+                docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
+            }
             if (preserve) {
                 pdic <- preserveDict(docs, ngram, numOnly, stem)
                 ret@dic <- pdic
@@ -191,10 +195,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@rawText <- fil
 
             if (ora){
-                qqcat("performing ORA\n")
+                qqcat("Performing ORA\n")
                 sig <- textORA(geneList)
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-                qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
+                qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
                 filterWords <- c(filterWords, sigFilter)
                 ret@ora <- sig
                 # if (oraPlot) {
@@ -318,7 +322,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (!is.na(genePathPlot)) {genePlot <- TRUE}
         if (genePlot) {
             if (!is.null(mergeCorpus)) {
-                stop("cannot perform genePlot when merging corpus ...")
+                stop("Cannot perform genePlot when merging corpus")
             }
             revID <- AnnotationDbi::select(orgDb,
                 keys = as.character(fil$Gene_ID), 
@@ -340,13 +344,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 pathRes <- enrichKEGG(geneList)
             }
             else {
-                stop("please specify 'reactome' or 'kegg'")
+                stop("Please specify 'reactome' or 'kegg'")
             }
             
             if (dim(subset(pathRes@result, p.adjust<0.05))[1]==0) {
-                stop("no enriched term found.")
+                stop("No enriched term found.")
             } else {
-                qqcat("found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term ...\n")
+                qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term\n")
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
             ret@enrichResults <- pathRes@result
@@ -361,7 +365,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         if (bn) {
-            qqcat("bn specified, R=@{R} ...\n")
+            qqcat("bn specified, R=@{R}\n")
             # To avoid computaitonal time, subset to numWords
             bnboot <- boot.strength(
                 data.frame(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]),
@@ -746,8 +750,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                                random.order=FALSE,
                                                ordered.colors = TRUE)))
         } else {
-            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = showFreq, ...)))
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- showFreq
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
         }
         ret@freqDf <- returnDf
         ret@wc <- wc

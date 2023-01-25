@@ -56,7 +56,7 @@ osp(
   collapse = FALSE,
   verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
-  ...
+  argList = list()
 )
 }
 \description{

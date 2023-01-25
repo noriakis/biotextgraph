@@ -11,7 +11,7 @@
 #' @param border whether to draw border on pyramid plots
 #' @param nboot pvclust bootstrap number
 #' @param type "words" or "enrich"
-#' @param ... passed to wcGeneSummary()
+#' @param argList passed to wcGeneSummary()
 #' 
 #' @export
 #' @import grid gridExtra
@@ -25,7 +25,7 @@
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL",
-                                            border=TRUE, type="words", ...) {
+                                            border=TRUE, type="words", argList=list()) {
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
         method.hclust="average", nboot=nboot)
@@ -45,7 +45,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
-                                 type=type, ...)
+                                 type=type, argList=argList)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
@@ -84,7 +84,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
 #' @param numberOfWords the number of words to plot (default: 25)
 #' @param type "words" or "enrich"
-#' @param ... passed to wcGeneSummary
+#' @param argList passed to wcGeneSummary
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -108,7 +108,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL",
                             numberOfWords=25,
-                            type="words", ...) {
+                            type="words", argList=list()) {
     
     ## Filter high frequency words if needed
     # filterWords <- allFreqGeneSummary[
@@ -119,7 +119,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     #                         allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
     # }
     # filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
-    # qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
+    # qqcat("filtered @{length(filterWords)} words (frequency | tfidf)\n")
 
     
     grobList <- list()
@@ -175,7 +175,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     {
 
                         pyrm <- returnPyramid(L, R, geneVec, geneVecType,
-                            numberOfWords=numberOfWords, type=type,...)
+                            numberOfWords=numberOfWords, type=type,argList=argList)
 
                         if (!is.null(pyrm)){
                             grobList[[as.character(grobNum)]]$plot <- pyrm
@@ -227,7 +227,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param type "words" or "enrich"
 #' @param enrichID "Description" or "ID"
 #' @param orgDb organism database to use in enrich
-#' @param ... parameters passed to wcGeneSummary()
+#' @param argList parameters passed to wcGeneSummary()
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -245,7 +245,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         highCol="red",
                         type="words", wrap=15,
                         enrichID="ID",
-                        orgDb=org.Hs.eg.db, ...) {
+                        orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
     #     keys = names(geneVec)[geneVec %in% L],
@@ -266,16 +266,21 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     # all_bet <- VectorSource(all_bet)
     # all_corpus <- VCorpus(all_bet)
     if (type=="words") {
-        all_L <- as.matrix(wcGeneSummary(names(geneVec)[geneVec %in% L],
-            keyType=geneVecType, collapse=TRUE, onlyTDM=TRUE, ...))
-        all_R <- as.matrix(wcGeneSummary(names(geneVec)[geneVec %in% R],
-            keyType=geneVecType, collapse=TRUE, onlyTDM=TRUE, ...))
+        argList[["geneList"]] <- names(geneVec)[geneVec %in% L]
+        argList[["collapse"]] <- TRUE
+        argList[["onlyTDM"]] <- TRUE
+        argList[["keyType"]] <- geneVecType
+        all_L <- as.matrix(do.call("wcGeneSummary",argList))
+        
+        argList[["geneList"]] <- names(geneVec)[geneVec %in% R]
+        all_R <- as.matrix(do.call("wcGeneSummary",argList))
+
         common <- intersect(row.names(all_L), row.names(all_R))
         all_m <- cbind(all_L[common, ], all_R[common, ])
         # ## Clean the corpus
         # all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
         # if (tfidf){
-        #     stop("Use of tfidf on returnPyramid is currently not supported ...")
+        #     stop("Use of tfidf on returnPyramid is currently not supported")
         #     all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
         # } else {
         #     all_tdm <- TermDocumentMatrix(all_corpus)
@@ -301,7 +306,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         }
 
         if (numberOfWords==0){
-            qqcat("No common words ...\n")
+            qqcat("No common words found\n")
             return(NULL)
         } else {    
             topDf <- data.frame(

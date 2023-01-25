@@ -56,7 +56,7 @@ wcGeneSummary(
   collapse = FALSE,
   verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -168,7 +168,7 @@ and path udpipe file to udpipeModel}
 
 \item{udpipeModel}{udpipe model file name}
 
-\item{...}{parameters to pass to wordcloud()}
+\item{argList}{parameters to pass to wordcloud()}
 }
 \value{
 list of data frame and ggplot2 object

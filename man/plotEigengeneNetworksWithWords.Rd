@@ -13,7 +13,7 @@ plotEigengeneNetworksWithWords(
   geneVecType = "ENSEMBL",
   border = TRUE,
   type = "words",
-  ...
+  argList = list()
 )
 }
 \arguments{
@@ -33,7 +33,7 @@ plotEigengeneNetworksWithWords(
 
 \item{type}{"words" or "enrich"}
 
-\item{...}{passed to wcGeneSummary()}
+\item{argList}{passed to wcGeneSummary()}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

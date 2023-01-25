@@ -21,7 +21,7 @@
 #' e.g. "K08097" and "phosphosulfolactate synthase"
 #' @param areas used in patchwork
 #' @param trans transpose the barplot
-#' @param ... passed to wc functions
+#' @param argList passed to wc functions
 #' @import grid
 #' @export
 #'
@@ -30,7 +30,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                          pal="RdBu",target="refseq",
                          searchTerms=NULL, node.types="gene",
                          termMap=NULL, orgDb=org.Hs.eg.db,
-                         numWords=20, trans=FALSE, areas=NULL, ...) {
+                         numWords=20, trans=FALSE, areas=NULL, argList=list()) {
     returnList <- list()
     if (!keyType %in% c("KO","ENTREZID")) {
         qqcat("converting to ENTREZID\n")
@@ -104,20 +104,24 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         if (!is.null(searchTerms)) {
             rawGenes <- searchTerms
         }
-        barp <- wcAbst(rawGenes, keyType="ENTREZID",
-                       numWords=numWords,
-                       plotType="network",
-                       genePlot=TRUE,
-                       preserve=TRUE,
-                       genePlotNum=length(geneList), ...)
+        argList[["queries"]] <- rawGenes
+        argList[["keyType"]] <- "ENTREZID"
+        argList[["numWords"]] <- numWords
+        argList[["plotType"]] <- "network"
+        argList[["genePlot"]] <- TRUE
+        argList[["preserve"]] <- TRUE
+        argList[["genePlotNum"]] <- length(geneList)
+        barp <- do.call("wcAbst", argList)
         barp@geneMap[,2] <- gsub(" \\(Q\\)", "", barp@geneMap[,2])
     } else {
-        barp <- wcGeneSummary(geneList, keyType="ENTREZID",
-                              numWords=numWords,
-                              plotType="network",
-                              genePlot=TRUE,
-                              preserve=TRUE,
-                              genePlotNum=length(geneList), ...)
+        argList[["geneList"]] <- geneList
+        argList[["keyType"]] <- "ENTREZID"
+        argList[["numWords"]] <- numWords
+        argList[["plotType"]] <- "network"
+        argList[["genePlot"]] <- TRUE
+        argList[["preserve"]] <- TRUE
+        argList[["genePlotNum"]] <- length(geneList)
+        barp <- do.call("wcGeneSummary", argList)
     }
     
     ## Obtain words related to genes listed in map

@@ -4,12 +4,12 @@
 \alias{osplot}
 \title{osplot}
 \usage{
-osplot(target, ...)
+osplot(target, argList)
 }
 \arguments{
 \item{target}{"pubmed", "bugsigdb", "refseq", "ec"}
 
-\item{...}{passed to each function}
+\item{argList}{passed to each function}
 }
 \value{
 list of data frames and ggplot2 object
