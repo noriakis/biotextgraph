@@ -9,13 +9,9 @@ getWordsOnDendro(
   geneVec,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
-  excludeTfIdf = NA,
   numberOfWords = 25,
-  excludeFreq = 5000,
-  orgDb = org.Hs.eg.db,
-  tfidf = FALSE,
-  numOnly = TRUE,
-  madeUpper = c("rna", "dna")
+  type = "words",
+  ...
 )
 }
 \arguments{
@@ -28,20 +24,11 @@ pyramid plots are not produced}
 
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
-\item{excludeTfIdf}{filter using tfidf}
-
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
-\item{excludeFreq}{words with the frequency above
-this threshold is excluded beforehand}
+\item{type}{"words" or "enrich"}
 
-\item{orgDb}{organism database}
-
-\item{tfidf}{use tfidf when making TDM}
-
-\item{numOnly}{delete number only}
-
-\item{madeUpper}{words with uppercase}
+\item{...}{passed to wcGeneSummary}
 }
 \value{
 list of pyramid plot grobs and its positions

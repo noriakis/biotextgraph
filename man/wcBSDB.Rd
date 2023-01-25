@@ -7,11 +7,13 @@
 wcBSDB(
   mbList,
   excludeFreq = 1000,
-  excludeTfIdf = NA,
+  exclude = "frequency",
+  excludeType = ">",
   additionalRemove = NA,
   tfidf = FALSE,
   target = "title",
   apiKey = NULL,
+  takeMax = FALSE,
   pre = FALSE,
   pvclAlpha = 0.95,
   numOnly = TRUE,
@@ -34,6 +36,7 @@ wcBSDB(
   onlyTDM = FALSE,
   ecFile = NULL,
   upTaxFile = NULL,
+  filterMax = FALSE,
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
@@ -53,10 +56,11 @@ wcBSDB(
 \arguments{
 \item{mbList}{microbe list}
 
-\item{excludeFreq}{exclude words with overall frequency above excludeFreq
-default to 0}
+\item{excludeFreq}{default to 1000 (no words are excluded)}
 
-\item{excludeTfIdf}{exclude based on tfidf (default: NA)}
+\item{exclude}{"frequency" or "tfidf",}
+
+\item{excludeType}{">" or "<"}
 
 \item{additionalRemove}{specific words to be excluded}
 
@@ -65,6 +69,8 @@ default to 0}
 \item{target}{"title" or "abstract"}
 
 \item{apiKey}{api key for eutilities}
+
+\item{takeMax}{when summarizing term-document matrix, take max.}
 
 \item{pre}{predefined filter words}
 
@@ -111,6 +117,9 @@ this option requires two files to be passed to wcEC() and getUPTax().}
 \item{ecFile}{enzyme database file}
 
 \item{upTaxFile}{UniProt taxonomy file}
+
+\item{filterMax}{use pre-calculated filter based on max-values when excluding TfIdf
+Otherwise take sum.}
 
 \item{ngram}{default to NA (1)}
 

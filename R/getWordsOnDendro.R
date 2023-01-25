@@ -8,13 +8,10 @@
 #' @param numberOfWords number of words to be included in pyramid plots
 #' @param geneNumLimit clusters with gene number above this threshold are ignored
 #' @param geneVecType type of IDs in `colors`
-#' @param excludeFreq exclude the words above this threshold
-#' @param excludeTfIdf exclude the words above this threshold
-#' @param tfidf use tfidf when making TDM
 #' @param border whether to draw border on pyramid plots
-#' @param madeUpper words with uppercase
 #' @param nboot pvclust bootstrap number
-#' @param numOnly delete number only
+#' @param type "words" or "enrich"
+#' @param ... passed to wcGeneSummary()
 #' 
 #' @export
 #' @import grid gridExtra
@@ -27,15 +24,13 @@
 #' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
-                                            geneVecType="ENSEMBL", numOnly=TRUE,
-                                            excludeFreq=5000, excludeTfIdf=NA,
-                                            border=TRUE, tfidf=FALSE,
-                                            madeUpper=c("rna","dna")) {
+                                            geneVecType="ENSEMBL",
+                                            border=TRUE, type="words", ...) {
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
         method.hclust="average", nboot=nboot)
     
-    # make dendrogram    
+    ## Make dendrogram    
     dhc <- result |>
         as.dendrogram() |>
         hang.dendrogram()
@@ -46,13 +41,11 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
     
     ## Get pyramid plot list using the function.
     ## It takes time when geneNumLimit is large.
-    grobList <- getWordsOnDendro(dhc, geneVec, numberOfWords = numberOfWords,
+    grobList <- getWordsOnDendro(dhc, geneVec,
+                                 numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
-                                 excludeFreq = excludeFreq, excludeTfIdf=excludeTfIdf,
-                                 tfidf = tfidf,
-                                 numOnly = numOnly,
-                                 madeUpper = madeUpper)
+                                 type=type, ...)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
@@ -90,13 +83,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #'                     pyramid plots are not produced 
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
 #' @param numberOfWords the number of words to plot (default: 25)
-#' @param excludeFreq words with the frequency above
-#'                    this threshold is excluded beforehand
-#' @param excludeTfIdf filter using tfidf
-#' @param orgDb organism database
-#' @param tfidf use tfidf when making TDM
-#' @param madeUpper words with uppercase
-#' @param numOnly delete number only
+#' @param type "words" or "enrich"
+#' @param ... passed to wcGeneSummary
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -118,21 +106,19 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @export
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
-                            geneVecType="ENSEMBL", excludeTfIdf=NA,
-                            numberOfWords=25, excludeFreq=5000,
-                            orgDb=org.Hs.eg.db, tfidf=FALSE, numOnly=TRUE,
-                            madeUpper=c("rna","dna")){
+                            geneVecType="ENSEMBL",
+                            numberOfWords=25,
+                            type="words", ...) {
     
     ## Filter high frequency words if needed
-    filterWords <- allFreqGeneSummary[
-                            allFreqGeneSummary$freq > excludeFreq,]$word
-    if (!is.na(excludeTfIdf)){
-        filterWords <- c(filterWords,
-            allTfIdfGeneSummary[
-                            allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
-    }
-    filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
-
+    # filterWords <- allFreqGeneSummary[
+    #                         allFreqGeneSummary$freq > excludeFreq,]$word
+    # if (!is.na(excludeTfIdf)){
+    #     filterWords <- c(filterWords,
+    #         allTfIdfGeneSummary[
+    #                         allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
+    # }
+    # filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
     # qqcat("filtered @{length(filterWords)} words (frequency | tfidf) ...\n")
 
     
@@ -188,9 +174,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
 
-                        pyrm <- returnPyramid(L,R, geneVec, geneVecType,
-                                filterWords, numberOfWords, orgDb=orgDb, numOnly=numOnly,
-                                additionalRemove=NA, madeUpper=madeUpper, tfidf=tfidf)
+                        pyrm <- returnPyramid(L, R, geneVec, geneVecType,
+                            numberOfWords=numberOfWords, type=type,...)
+
                         if (!is.null(pyrm)){
                             grobList[[as.character(grobNum)]]$plot <- pyrm
                             grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -225,17 +211,6 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 }
 
 
-
-#' removeAloneNumbers
-#' 
-#' @noRd
-#' 
-removeAloneNumbers <- 
-    function (x) PlainTextDocument(
-        gsub('\\s*(?<!\\B|-)\\d+(?!\\B|-)\\s*', " ",
-                      x, perl=TRUE))
-
-
 #' returnPyramid
 #' 
 #' Return pyramid plots
@@ -245,17 +220,14 @@ removeAloneNumbers <-
 #' @param R genes in the other cluster
 #' @param geneVec gene-named vector of node names in dendrogram
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
-#' @param filterWords words to filter based on frequency
-#' @param additionalRemove words to filter
 #' @param numberOfWords the number of words to plot
-#' @param orgDb database to change the ID to ENTREZ ID
 #' @param widths parameters to pass to patchwork
 #' @param lowCol gradient low color
 #' @param highCol gradient high color
-#' @param madeUpper words with uppercase
-#' @param tfidf use tfidf
-#' @param numOnly delete number only
-#' @param stem use stemming or not
+#' @param type "words" or "enrich"
+#' @param enrichID "Description" or "ID"
+#' @param orgDb organism database to use in enrich
+#' @param ... parameters passed to wcGeneSummary()
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -267,117 +239,204 @@ removeAloneNumbers <-
 #' @importFrom dendextend get_nodes_attr get_subdendrograms get_nodes_attr nnodes
 #' 
 #' 
-returnPyramid <- function(L, R, geneVec, geneVecType, filterWords,
-                        numberOfWords, orgDb, additionalRemove=NA, numOnly=TRUE,
-                        widths=c(0.3,0.3,0.3), lowCol="blue", tfidf=FALSE,
-                        highCol="red", madeUpper=c("rna","dna"), stem=FALSE) {
-    tb <- loadGeneSummary()
+returnPyramid <- function(L, R, geneVec, geneVecType,
+                        numberOfWords=25, widths=c(0.3,0.3,0.3),
+                        lowCol="blue",
+                        highCol="red",
+                        type="words", wrap=15,
+                        enrichID="ID",
+                        orgDb=org.Hs.eg.db, ...) {
     ## Convert to ENTREZ ID
-    geneList <- AnnotationDbi::select(orgDb,
-        keys = names(geneVec)[geneVec %in% L],
-        columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
-    filL <- tb %>% filter(Gene_ID %in% geneList)
-    filL <- filL[!duplicated(filL$Gene_ID),]
+    # geneList <- AnnotationDbi::select(orgDb,
+    #     keys = names(geneVec)[geneVec %in% L],
+    #     columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    # filL <- tb %>% filter(Gene_ID %in% geneList)
+    # filL <- filL[!duplicated(filL$Gene_ID),]
 
-    geneList <- AnnotationDbi::select(orgDb,
-        keys = names(geneVec)[geneVec %in% R],
-        columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
-    filR <- tb %>% filter(Gene_ID %in% geneList)
-    filR <- filR[!duplicated(filR$Gene_ID),]
+    # geneList <- AnnotationDbi::select(orgDb,
+    #     keys = names(geneVec)[geneVec %in% R],
+    #     columns = c("ENTREZID"), keytype = geneVecType)$ENTREZID
+    # filR <- tb %>% filter(Gene_ID %in% geneList)
+    # filR <- filR[!duplicated(filR$Gene_ID),]
     
-    all_L <- paste(filL$Gene_summary, collapse = " ")
-    all_R <- paste(filR$Gene_summary, collapse = " ")
-    all_bet <- c(all_L, all_R)
+    # all_L <- paste(filL$Gene_summary, collapse = " ")
+    # all_R <- paste(filR$Gene_summary, collapse = " ")
+    # all_bet <- c(all_L, all_R)
     
-    all_bet <- VectorSource(all_bet)
-    all_corpus <- VCorpus(all_bet)
-    
-    ## Clean the corpus
-    all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
-    if (tfidf){
-        stop("Use of tfidf on returnPyramid is currently not supported ...")
-        all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
-    } else {
-        all_tdm <- TermDocumentMatrix(all_corpus)
-    }
-    all_m <- as.matrix(all_tdm)
-    
-    ## Modified from: https://rpubs.com/williamsurles/316682
-    common_words <- subset(all_m, all_m[, 1] > 0 & all_m[, 2] > 0)
-
-    difference <- abs(common_words[, 1] - common_words[, 2])
-    common_words <- cbind(common_words, difference)
-    common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
-    
-    L <- paste0(L, collapse="_")
-    R <- paste0(R, collapse="_")
-    
-    # Referencing:
-    # https://stackoverflow.com/questions/54191369/
-    # how-to-create-pyramid-bar-chart-in-r-with-y-axis-labels-between-the-bars
-
-    if (dim(common_words)[1]<numberOfWords){
-        numberOfWords <- dim(common_words)[1]
-    }
-
-    if (numberOfWords==0){
-        qqcat("No common words ...\n")
-        return(NULL)
-    } else {    
-        topDf <- data.frame(
-            ME = factor(c(rep(L,numberOfWords),
-                rep(R,numberOfWords)),
-                levels = c(L,R)),
-            Word = c(common_words[1:numberOfWords, 1],
-                common_words[1:numberOfWords, 2]),
-            Label = c(rownames(common_words[1:numberOfWords, ]),
-                rownames(common_words[1:numberOfWords, ]))
-        )
+    # all_bet <- VectorSource(all_bet)
+    # all_corpus <- VCorpus(all_bet)
+    if (type=="words") {
+        all_L <- as.matrix(wcGeneSummary(names(geneVec)[geneVec %in% L],
+            keyType=geneVecType, collapse=TRUE, onlyTDM=TRUE, ...))
+        all_R <- as.matrix(wcGeneSummary(names(geneVec)[geneVec %in% R],
+            keyType=geneVecType, collapse=TRUE, onlyTDM=TRUE, ...))
+        common <- intersect(row.names(all_L), row.names(all_R))
+        all_m <- cbind(all_L[common, ], all_R[common, ])
+        # ## Clean the corpus
+        # all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
+        # if (tfidf){
+        #     stop("Use of tfidf on returnPyramid is currently not supported ...")
+        #     all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
+        # } else {
+        #     all_tdm <- TermDocumentMatrix(all_corpus)
+        # }
+        # all_m <- as.matrix(all_tdm)
         
-        ## Convert to uppercase
-        nodeName <- topDf$Label   
-        for (i in madeUpper) {
-            nodeName[nodeName == i] <- toupper(i)
+        ## Modified from: https://rpubs.com/williamsurles/316682
+        common_words <- subset(all_m, all_m[, 1] > 0 & all_m[, 2] > 0)
+
+        difference <- abs(common_words[, 1] - common_words[, 2])
+        common_words <- cbind(common_words, difference)
+        common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
+        
+        L <- paste0(L, collapse="_")
+        R <- paste0(R, collapse="_")
+        
+        # Referencing:
+        # https://stackoverflow.com/questions/54191369/
+        # how-to-create-pyramid-bar-chart-in-r-with-y-axis-labels-between-the-bars
+
+        if (dim(common_words)[1]<numberOfWords){
+            numberOfWords <- dim(common_words)[1]
         }
-        topDf$Label <- nodeName
-        
-        gg1 <- topDf %>%
-            mutate(Count = if_else(ME == L, Word, 0)) %>%
-            ggplot(aes( Label, Count, fill = Count)) +
-            geom_col(width = 0.6) +
-            coord_flip() +
-            scale_y_reverse()+
-            scale_fill_gradient(low=lowCol,high=highCol)+
-            # scale_fill_manual(values = c("Red", "Blue")) +
-            theme_void()+
-            theme(
-                axis.title.y=element_blank(),
-                axis.text.y=element_blank(),
-                axis.ticks.y=element_blank(),
-                legend.position = "none")
-        
-        gg2 <- topDf %>%
-            filter(ME == L) %>%
-            ggplot(aes(Label, 0, label = Label)) +
-            geom_text(size=3.5) +
-            coord_flip() +
-            theme_void()
-        
-        gg3 <- topDf %>%
-            mutate(Count = if_else(ME == R, Word, 0)) %>%
-            ggplot(aes( Label, Count, fill = Count)) +
-            geom_col(width = 0.6) +
-            coord_flip() +
-            theme_void() +
-            scale_fill_gradient(low=lowCol,high=highCol)+
-        theme(
-                axis.title.y=element_blank(),
-                axis.text.y=element_blank(),
-                axis.ticks.y=element_blank(),
-                legend.position = "none")
-        
 
-        pyramid <- gg1+gg2+gg3+plot_layout(widths=widths)
+        if (numberOfWords==0){
+            qqcat("No common words ...\n")
+            return(NULL)
+        } else {    
+            topDf <- data.frame(
+                ME = factor(c(rep(L,numberOfWords),
+                    rep(R,numberOfWords)),
+                    levels = c(L,R)),
+                Word = c(common_words[1:numberOfWords, 1],
+                    common_words[1:numberOfWords, 2]),
+                Label = c(rownames(common_words[1:numberOfWords, ]),
+                    rownames(common_words[1:numberOfWords, ]))
+            )
+            
+            ## Convert to uppercase
+            nodeName <- topDf$Label   
+            # for (i in madeUpper) {
+            #     nodeName[nodeName == i] <- toupper(i)
+            # }
+            topDf$Label <- nodeName
+            
+            gg1 <- topDf %>%
+                mutate(Count = if_else(ME == L, Word, 0)) %>%
+                ggplot(aes( Label, Count, fill = Count)) +
+                geom_col(width = 0.6) +
+                coord_flip() +
+                scale_y_reverse()+
+                scale_fill_gradient(low=lowCol,high=highCol)+
+                # scale_fill_manual(values = c("Red", "Blue")) +
+                theme_void()+
+                theme(
+                    axis.title.y=element_blank(),
+                    axis.text.y=element_blank(),
+                    axis.ticks.y=element_blank(),
+                    legend.position = "none")
+            
+            gg2 <- topDf %>%
+                filter(ME == L) %>%
+                ggplot(aes(Label, 0, label = Label)) +
+                geom_text(size=3.5) +
+                coord_flip() +
+                theme_void()
+            
+            gg3 <- topDf %>%
+                mutate(Count = if_else(ME == R, Word, 0)) %>%
+                ggplot(aes( Label, Count, fill = Count)) +
+                geom_col(width = 0.6) +
+                coord_flip() +
+                theme_void() +
+                scale_fill_gradient(low=lowCol,high=highCol)+
+            theme(
+                    axis.title.y=element_blank(),
+                    axis.text.y=element_blank(),
+                    axis.ticks.y=element_blank(),
+                    legend.position = "none")
+            
+
+            pyramid <- gg1+gg2+gg3+plot_layout(widths=widths)
+            pyramidGrob <- patchworkGrob(pyramid)
+            return(pyramidGrob)
+        }
+    } else {
+        ## Use KEGG
+        LI <- names(geneVec)[geneVec %in% L]
+        RI <- names(geneVec)[geneVec %in% L]
+        if (geneVecType!="ENTREZID") {
+            LI <- clusterProfiler::bitr(LI, fromType=geneVecType, toType="ENTREZID", OrgDb=orgDb)$ENTREZID
+            RI <- clusterProfiler::bitr(RI, fromType=geneVecType, toType="ENTREZID", OrgDb=orgDb)$ENTREZID
+        }
+        leftE <- clusterProfiler::enrichKEGG(LI)
+        rightE <- clusterProfiler::enrichKEGG(RI)
+        lSig <- leftE@result[1:numberOfWords,]
+        rSig <- rightE@result[1:numberOfWords,]
+        lSig <- lSig[!is.na(lSig$ID),]
+        rSig <- rSig[!is.na(rSig$ID),]
+        if (dim(lSig)[1]==0 & dim(rSig)[1]==0) {
+          stop("No enriched term found for these clusters")
+          return(NULL)
+        }
+        lSig$value <- -1 * -log10(lSig$p.adjust)
+        rSig$value <- -log10(rSig$p.adjust)
+
+        if (enrichID=="Description") {
+            if (!is.null(wrap)) {
+              lSig$plotID <- stringr::str_wrap(lSig$Description, wrap)
+              rSig$plotID <- stringr::str_wrap(rSig$Description, wrap)
+            }            
+        } else {
+            lSig$plotID <- lSig$ID
+            rSig$plotID <- rSig$ID
+        }
+
+
+        gg1 <- lSig %>%
+          ggplot(aes( plotID, value, fill = value)) +
+          geom_col(width = 0.6) +
+          coord_flip() +
+          scale_fill_gradient(low=lowCol,high=highCol)+
+          # scale_fill_manual(values = c("Red", "Blue")) +
+          theme_void()+
+          theme(
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            legend.position = "none")
+
+        gg2 <- lSig %>%
+          ggplot(aes(plotID, 0, label = plotID)) +
+          geom_text(size=3.5) +
+          coord_flip() +
+          theme_void()
+
+        gg3 <- rSig %>%
+          ggplot(aes( plotID, value, fill = value)) +
+          geom_col(width = 0.6) +
+          coord_flip() +
+          theme_void() +
+          scale_fill_gradient(low=lowCol,high=highCol)+
+          theme(
+            axis.title.y=element_blank(),
+            axis.text.y=element_blank(),
+            axis.ticks.y=element_blank(),
+            legend.position = "none")
+
+        gg4 <- rSig %>%
+          ggplot(aes(plotID, 0, label = plotID)) +
+          geom_text(size=3.5) +
+          coord_flip() +
+          theme_void()
+
+        areas <- "
+        AA#
+        AA#
+        #BB
+        #BB
+        "
+        pyramid <- (gg1 + gg2) / (gg4 + gg3) + plot_layout(design=areas)
         pyramidGrob <- patchworkGrob(pyramid)
         return(pyramidGrob)
     }

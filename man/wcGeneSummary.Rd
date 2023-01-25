@@ -8,10 +8,13 @@ wcGeneSummary(
   geneList,
   keyType = "SYMBOL",
   excludeFreq = 2000,
-  excludeTfIdf = NULL,
+  exclude = "frequency",
+  filterMax = FALSE,
+  excludeType = ">",
   tfidf = FALSE,
   genePlotNum = 10,
   preserve = TRUE,
+  takeMax = FALSE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
   madeUpper = c("dna", "rna"),
@@ -46,10 +49,11 @@ wcGeneSummary(
   mergeCorpus = NULL,
   numOnly = TRUE,
   madeUpperGenes = TRUE,
-  onWholeDTM = FALSE,
-  autoFilter = FALSE,
+  onWholeTDM = FALSE,
+  pre = TRUE,
   verbPOS = c("VBZ"),
   nodePal = palette(),
+  collapse = FALSE,
   verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ...
@@ -60,16 +64,22 @@ wcGeneSummary(
 
 \item{keyType}{default to SYMBOL}
 
-\item{excludeFreq}{exclude words with overall frequency above excludeFreq
-default to 5000}
+\item{excludeFreq}{default to 5000}
 
-\item{excludeTfIdf}{exclude based on tfidf (default: NA)}
+\item{exclude}{"frequency" or "tfidf",}
+
+\item{filterMax}{use pre-calculated filter based on max-values when excluding TfIdf
+Otherwise take sum.}
+
+\item{excludeType}{">" or "<"}
 
 \item{tfidf}{use TfIdf when making TDM}
 
 \item{genePlotNum}{number of genes to be plotted}
 
 \item{preserve}{preserve original characters}
+
+\item{takeMax}{take max values for each term in term-document matrix}
 
 \item{additionalRemove}{specific words to be excluded}
 
@@ -141,14 +151,16 @@ like PubMed information and RefSeq summary}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
 
-\item{onWholeDTM}{calculate correlation network
+\item{onWholeTDM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
 
-\item{autoFilter}{remove words "pmids", "geneids"}
+\item{pre}{remove words "pmids", "geneids"}
 
 \item{verbPOS}{Part of Speech tags in verbs, like "VBN", "VBZ"}
 
 \item{nodePal}{node palette when tag is TRUE}
+
+\item{collapse}{default to FALSE, collapse all the sentences}
 
 \item{verb}{show verb on edges (using udpipe)
 peform udpipe_download_model(language = "english") beforehand,

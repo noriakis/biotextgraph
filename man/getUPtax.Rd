@@ -9,12 +9,12 @@ getUPtax(file, candUP, candTax = NULL)
 \arguments{
 \item{file}{downloaded file}
 
-\item{candUP}{candidate UniProt identifiers}
+\item{candUP}{candidate UniProt organism identification codes}
 
 \item{candTax}{candidate taxonomy name}
 }
 \description{
-Obtain the list of UniProt taxonomy ID.
+Obtain the list of UniProt organism identification codes, by querying taxonomy or UniProt codes.
 https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt
-The file above must be specified to file argument.
+The file above must be downloaded and specified to file argument.
 }

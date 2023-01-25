@@ -24,9 +24,10 @@
 #' @param tag cluster the words based on text using pvclust
 #' @param tagWhole tag based on whole data or subset
 #' @param genePlot plot associated genes (default: FALSE)
-#' @param usefil filter based on "gstfidf" (whole gene summary tf-idf)
-#'  or "bsdbtfidf" (whole bugsigdb tf-idf)
-#' @param filnum specify filter tfidf
+#' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
+#'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
+#' @param filNum specify filter tfidf
+#' @param filType "above" or "below"
 #' @param geneUpper make queries uppercase
 #' @param apiKey api key for eutilities
 #' @param tfidf use TfIdf when making TDM
@@ -51,6 +52,8 @@
 #' @param stem whether to use stemming
 #' @param onlyDf return only the raw data.frame of searching PubMed
 #' @param nodePal node palette when tag is TRUE
+#' @param takeMax when summarizing term-document matrix, take max.
+#' Otherwise take sum.
 #' @param ... parameters to pass to wordcloud()
 #' 
 #' @export
@@ -69,7 +72,8 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
-                   target="abstract", usefil=NA, filnum=0, sortOrder="relevance",
+                   target="abstract", useFil=NA, filType="above",
+                   filNum=0, sortOrder="relevance",
                    pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
                    geneUpper=TRUE, apiKey=NULL, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
@@ -77,7 +81,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
-                   onlyDf=FALSE, nodePal=palette(), preserve=TRUE,
+                   onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, ...)
 {
@@ -136,18 +140,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   }
   
   ## Probably set default filnum?
-  if (!is.na(usefil)){
-    if (usefil=="gstfidf") {
-      qqcat("filter based on GeneSummary\n")
-      filterWords <- allTfIdfGeneSummary[
-        allTfIdfGeneSummary$tfidf > filnum,]$word
-    } else if (usefil=="bsdbtfidf"){
-      qqcat("filter based on BugSigDB\n")
-      filterWords <- allTfIdfBSDB[
-        allTfIdfBSDB$tfidf > filnum,]$word
-    } else {
-      stop("please specify gstfidf or bsdbtfidf")
-    }
+  if (!is.na(useFil)){
+    filterWords <- retFiltWords(useFil, filType, filNum)
   } else {
     filterWords <- NA
   }
@@ -158,7 +152,10 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
        ret@filtered <- allfils
      }
   }
-  if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
+  if (preserve) {
+    pdic <- preserveDict(docs, ngram, numOnly, stem)
+    ret@dic <- pdic
+  }
   docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
   ret@corpus <- docs
   if (onlyCorpus){
@@ -191,7 +188,14 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   }
   
   mat <- as.matrix(docs)
-  matSorted <- sort(rowSums(mat), decreasing=TRUE)
+  if (takeMax) {
+      perterm <- apply(mat, 1, max, na.rm=TRUE)
+  } else {
+      perterm <- rowSums(mat)
+  }
+  matSorted <- sort(perterm, decreasing=TRUE)
+  ret@wholeFreq <- matSorted
+
   # fetched[["rawfrequency"]] <- matSorted
   ret@TDM <- docs
 
@@ -298,7 +302,22 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           }
         }
       }
-      ret@geneMap <- genemap
+      # if (preserve) {
+      #   retGenemap <- genemap
+      #   gmnew <- NULL
+      #   for (q in retGenemap[,1]) {
+      #     if (q %in% names(pdic)){
+      #       gmnew <- c(gmnew, pdic[q])
+      #     } else {
+      #       gmnew <- c(gmnew, q)
+      #     }
+      #   }
+      #   retGenemap[,1] <- gmnew
+      # } else {
+      #   retGenemap <- genemap
+      # }
+      retGenemap <- genemap
+      ret@geneMap <- retGenemap
       genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
       coGraph <- igraph::union(coGraph, genemap)
       tmpW <- E(coGraph)$weight

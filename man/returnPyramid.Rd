@@ -9,17 +9,15 @@ returnPyramid(
   R,
   geneVec,
   geneVecType,
-  filterWords,
-  numberOfWords,
-  orgDb,
-  additionalRemove = NA,
-  numOnly = TRUE,
+  numberOfWords = 25,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
-  tfidf = FALSE,
   highCol = "red",
-  madeUpper = c("rna", "dna"),
-  stem = FALSE
+  type = "words",
+  wrap = 15,
+  enrichID = "ID",
+  orgDb = org.Hs.eg.db,
+  ...
 )
 }
 \arguments{
@@ -31,27 +29,21 @@ returnPyramid(
 
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
-\item{filterWords}{words to filter based on frequency}
-
 \item{numberOfWords}{the number of words to plot}
-
-\item{orgDb}{database to change the ID to ENTREZ ID}
-
-\item{additionalRemove}{words to filter}
-
-\item{numOnly}{delete number only}
 
 \item{widths}{parameters to pass to patchwork}
 
 \item{lowCol}{gradient low color}
 
-\item{tfidf}{use tfidf}
-
 \item{highCol}{gradient high color}
 
-\item{madeUpper}{words with uppercase}
+\item{type}{"words" or "enrich"}
 
-\item{stem}{use stemming or not}
+\item{enrichID}{"Description" or "ID"}
+
+\item{orgDb}{organism database to use in enrich}
+
+\item{...}{parameters passed to wcGeneSummary()}
 }
 \value{
 list of pyramid plot grobs and its positions

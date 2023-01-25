@@ -16,6 +16,7 @@ pathviewText(
   termMap = NULL,
   orgDb = org.Hs.eg.db,
   numWords = 20,
+  trans = FALSE,
   areas = NULL,
   ...
 )
@@ -32,7 +33,7 @@ pathviewText(
 \item{pal}{palette to be passed to RColorBrewer
 for coloring of nodes}
 
-\item{target}{target DB for word}
+\item{target}{target DB for word, "refseq" or "abstract"}
 
 \item{searchTerms}{search terms to be used in wcAbst,
 if different than query geneList}
@@ -47,6 +48,8 @@ e.g. "K08097" and "phosphosulfolactate synthase"}
 \item{orgDb}{organism database to convert symbol}
 
 \item{numWords}{number of words in barplot}
+
+\item{trans}{transpose the barplot}
 
 \item{areas}{used in patchwork}
 
