@@ -3,9 +3,10 @@
 #' Visualize BugSigDB
 #' 
 #' @param mbList microbe list
-#' @param excludeFreq exclude words with overall frequency above excludeFreq
-#'                    default to 0
 #' @param additionalRemove specific words to be excluded
+#' @param exclude "frequency" or "tfidf",
+#' @param excludeFreq default to 1000 (no words are excluded)
+#' @param excludeType ">" or "<"
 #' @param mbPlot plot microbe names
 #' @param disPlot plot diseases
 #' @param madeUpper make the words uppercase in resulting plot
@@ -23,7 +24,6 @@
 #' @param ngram default to NA (1)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param tagWhole tag whole set or subset
-#' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param target "title" or "abstract"
 #' @param cl cluster object passed to pvclust
 #' @param apiKey api key for eutilities
@@ -48,6 +48,9 @@
 #' this option requires two files to be passed to wcEC() and getUPTax().
 #' @param ecFile enzyme database file
 #' @param upTaxFile UniProt taxonomy file
+#' @param takeMax when summarizing term-document matrix, take max.
+#' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
+#' Otherwise take sum.
 #' 
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
@@ -72,9 +75,10 @@
 #' @export
 #' 
 wcBSDB <- function (mbList,
-                    excludeFreq=1000, excludeTfIdf=NA,
+                    excludeFreq=1000, exclude="frequency",
+                    excludeType=">",
                     additionalRemove=NA, tfidf=FALSE,
-                    target="title", apiKey=NULL,
+                    target="title", apiKey=NULL, takeMax=FALSE,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
                     madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
@@ -82,7 +86,7 @@ wcBSDB <- function (mbList,
                     abstArg=list(), nodePal=palette(), metCol=NULL,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
-                    ecFile=NULL, upTaxFile=NULL,
+                    ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, ...) {
@@ -193,15 +197,22 @@ wcBSDB <- function (mbList,
     }
     ## Make corpus
     ## Filter high frequency words
-    filterWords <- allFreqBSDB[
-        allFreqBSDB$freq > excludeFreq,]$word
-    if (!is.na(excludeTfIdf)){
-        filterWords <- c(filterWords,
-            allTfIdfBSDB[
-                allTfIdfBSDB$tfidf > excludeTfIdf,]$word)
+    ## Filter high frequency words if needed
+    if (exclude=="frequency") {
+        pref = "BSDB_Freq"
+    } else {
+        pref = "BSDB_TfIdf"
     }
+    if (filterMax) {
+        pref <- paste0(pref, "_Max")
+    }
+    filterWords <- retFiltWords(useFil=pref, filType=excludeType, filNum=excludeFreq)
+
     qqcat("Filtering @{length(filterWords)} words (frequency and/or tfidf) ...\n")
-    if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
+    if (preserve) {
+        pdic <- preserveDict(docs, ngram, numOnly, stem)
+        ret@dic <- pdic
+    }
     docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
     if (length(filterWords)!=0 | length(additionalRemove)!=0){
         allfils <- c(filterWords, additionalRemove)
@@ -235,8 +246,15 @@ wcBSDB <- function (mbList,
             docs <- TermDocumentMatrix(docs)
         }
     }
+
     mat <- as.matrix(docs)
-    matSorted <- sort(rowSums(mat), decreasing=TRUE)
+    if (takeMax) {
+        perterm <- apply(mat, 1, max, na.rm=TRUE)
+    } else {
+        perterm <- rowSums(mat)
+    }
+    matSorted <- sort(perterm, decreasing=TRUE)
+    ret@wholeFreq <- matSorted
 
     if (numWords > length(matSorted)){
         numWords <- length(matSorted)
@@ -624,7 +642,7 @@ wcBSDB <- function (mbList,
                                                freq = returnDf$freq,
                                                colors = wcCol,
                                                random.order=FALSE,
-                                               ordered.colors = TRUE)))
+                                               ordered.colors=TRUE)))
         } else {
             wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
                                                freq = returnDf$freq, ...)))

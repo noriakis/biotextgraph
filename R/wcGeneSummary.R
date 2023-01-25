@@ -4,13 +4,14 @@
 #' Testing function for new class
 #' 
 #' @param geneList gene ID list
-#' @param excludeFreq exclude words with overall frequency above excludeFreq
-#'                    default to 5000
+#' @param exclude "frequency" or "tfidf",
+#' @param excludeFreq default to 5000
+#' @param excludeType ">" or "<"
 #' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
-#' @param autoFilter remove words "pmids", "geneids"
+#' @param pre remove words "pmids", "geneids"
 #' @param pal palette for color gradient in correlation network and tag coloring
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
@@ -32,11 +33,11 @@
 #' @param genePlotNum number of genes to be plotted
 #' @param genePathPlot plot associated genes and pathways (default: FALSE)
 #'                     "kegg" or "reactome"
+#' @param filterMax use pre-calculated filter based on max-values when excludeTfIdf is not null
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud
 #' @param tagWhole whether to perform pvclust on whole matrix or subset
 #' @param pvclAlpha alpha for pvpick()
-#' @param excludeTfIdf exclude based on tfidf (default: NA)
 #' @param onlyTDM return only TDF
 #' @param onlyCorpus return only corpus
 #' @param tfidf use TfIdf when making TDM
@@ -45,7 +46,7 @@
 #' @param numOnly delete number only (not deleting XXX123)
 #' @param bn perform bootstrap-based Bayesian network inference instead of correlation using bnlearn
 #' @param R how many bootstrap when bn is stated
-#' @param onWholeDTM calculate correlation network
+#' @param onWholeTDM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param verb show verb on edges (using udpipe)
 #'             peform udpipe_download_model(language = "english") beforehand,
@@ -56,6 +57,10 @@
 #' @param stem whether to use stemming
 #' @param nodePal node palette when tag is TRUE
 #' @param preserve preserve original characters
+#' @param takeMax take max values for each term in term-document matrix
+#' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
+#' Otherwise take sum.
+#' @param collapse default to FALSE, collapse all the sentences
 #' @param ... parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -81,9 +86,10 @@
 #' wcGeneSummary(geneList)
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",
-                            excludeFreq=2000, excludeTfIdf=NULL,
+                            excludeFreq=2000, exclude="frequency",
+                            filterMax=FALSE, excludeType=">",
                             tfidf=FALSE, genePlotNum=10,
-                            preserve=TRUE,
+                            preserve=TRUE, takeMax=FALSE,
                             additionalRemove=NA, onlyCorpus=FALSE,
                             madeUpper=c("dna","rna"), organism=9606,
                             pal=c("blue","red"), numWords=15,
@@ -96,8 +102,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
-                            onWholeDTM=FALSE, autoFilter=FALSE, verbPOS=c("VBZ"),
-                            nodePal=palette(),
+                            onWholeTDM=FALSE, pre=TRUE, verbPOS=c("VBZ"),
+                            nodePal=palette(), collapse=FALSE,
                             verb=FALSE, udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             ...) {
     ret <- new("osplot")
@@ -112,12 +118,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     }
-    if (ora & !numOnly) {
-        stop("ora should be used with numOnly=TRUE, as the background is calculated based on numOnly=TRUE")
-    }
-    if (ora & stem) {
-        stop("ora should be used with stem=FALSE, as the background is calculated based on stem=FALSE")
-    }
+    # if (ora & !numOnly) {
+    #     stop("ora should be used with numOnly=TRUE, as the background is calculated based on numOnly=TRUE")
+    # }
+    # if (ora & stem) {
+    #     stop("ora should be used with stem=FALSE, as the background is calculated based on stem=FALSE")
+    # }
 
     if (is.null(mergeCorpus)) {
         qqcat("input genes: @{length(geneList)}\n")
@@ -130,15 +136,18 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         ## Filter high frequency words if needed
-        filterWords <- allFreqGeneSummary[
-                                allFreqGeneSummary$freq > excludeFreq,]$word
-        if (!is.null(excludeTfIdf)){
-            filterWords <- c(filterWords,
-                allTfIdfGeneSummary[
-                                allTfIdfGeneSummary$tfidf > excludeTfIdf,]$word)
+        if (exclude=="frequency") {
+            pref = "GS_Freq"
+        } else {
+            pref = "GS_TfIdf"
         }
-        if (autoFilter){
-            filterWords <- c(filterWords, "pmids", "geneid") ## Excluded by default
+        if (filterMax) {
+            pref <- paste0(pref, "_Max")
+        }
+        filterWords <- retFiltWords(useFil=pref, filType=excludeType, filNum=excludeFreq)
+
+        if (pre){
+            filterWords <- c(filterWords, "pmids", "geneid", "pmid", "geneids") ## Excluded by default
         }
         if (length(filterWords)!=0 | length(additionalRemove)!=0){
             allfils <- c(filterWords, additionalRemove)
@@ -167,14 +176,19 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@enrichResults <- pathRes@result
             ## Make corpus
             docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
+            if (preserve) {
+                pdic <- preserveDict(docs, ngram, numOnly, stem)
+                ret@dic <- pdic
+            }
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         } else {
             ## Load from GeneSummary
-            tb <- loadGeneSummary(organism = organism)
-
             ## Already performed, and automatically loaded
             # load("allFreqGeneSummary.rda") 
+            tb <- loadGeneSummary(organism = organism)
+            fil <- tb %>% filter(Gene_ID %in% geneList)
+            fil <- fil[!duplicated(fil$Gene_ID),]
+            ret@rawText <- fil
 
             if (ora){
                 qqcat("performing ORA\n")
@@ -183,10 +197,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 qqcat("filtered @{length(sigFilter)} words (ORA) ...\n")
                 filterWords <- c(filterWords, sigFilter)
                 ret@ora <- sig
+                # if (oraPlot) {
+                #     ret <- returnORAPlot(ret)
+                # }
             }
-
-            fil <- tb %>% filter(Gene_ID %in% geneList)
-            fil <- fil[!duplicated(fil$Gene_ID),]
 
             if (verb) {
                 ## Annotate verbs
@@ -197,9 +211,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 verbs <- tolower(unique(x3$token))
             }
 
-            ret@rawText <- fil
             ## Make corpus
-            docs <- VCorpus(VectorSource(fil$Gene_summary))
+            if (collapse) {
+                docs <- VCorpus(VectorSource(paste(fil$Gene_summary, collapse=" ")))
+            } else {
+                docs <- VCorpus(VectorSource(fil$Gene_summary))
+            }
             if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         }
@@ -240,7 +257,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
     }
     mat <- as.matrix(docs)
-    matSorted <- sort(rowSums(mat), decreasing=TRUE)
+
+    if (takeMax) {
+        perterm <- apply(mat, 1, max, na.rm=TRUE)
+    } else {
+        perterm <- rowSums(mat)
+    }
+
+    matSorted <- sort(perterm, decreasing=TRUE)
+    ret@wholeFreq <- matSorted
 
     if (numWords > length(matSorted)){
         numWords <- length(matSorted)
@@ -264,21 +289,23 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
+        ## Do we need to return converted freqDf? 
+        ## TODO: Force all functions to return lower freqDf.
         ret@freqDf <- returnDf
 
         # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
         ## TODO: before or after?
-        freqWordsDTM <- t(as.matrix(docs))
+        freqWordsTDM <- t(as.matrix(docs))
         
         if (tag) {
             ## TODO: tagging based on cluster_walktrap
             ## TODO: tag based on all words (currently top words for computational time)
             if (tagWhole){
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
+                pvc <- pvclust(as.matrix(dist(t(freqWordsTDM))), parallel=cl)
             } else {
             pvc <- pvclust(as.matrix(dist(
                 t(
-                    freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                    freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]
                     )
                 )), parallel=cl)
             }
@@ -297,7 +324,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 keys = as.character(fil$Gene_ID), 
                 columns = c("SYMBOL"),
                 keytype = "ENTREZID")$SYMBOL
-            row.names(freqWordsDTM) <- revID
+            row.names(freqWordsTDM) <- revID
         }
 
         ## genePathPlot: plot associated genes and pathways
@@ -337,7 +364,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             qqcat("bn specified, R=@{R} ...\n")
             # To avoid computaitonal time, subset to numWords
             bnboot <- boot.strength(
-                data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
+                data.frame(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]),
                 algorithm = "hc", R=R)
             ret@strength <- bnboot
             av <- averaged.network(bnboot)
@@ -350,10 +377,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         } else {
             ## Check correlation
             ## TODO: speed up calculation using Rcpp 
-            if (onWholeDTM){
-                corData <- cor(freqWordsDTM)
+            if (onWholeTDM){
+                corData <- cor(freqWordsTDM)
             } else {
-                corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+                corData <- cor(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords])
             }
             ret@corMat <- corData
 
@@ -425,18 +452,18 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         nodeName <- V(coGraph)$name
-        dtmCol <- colnames(freqWordsDTM)
+        tdmCol <- colnames(freqWordsTDM)
         for (i in madeUpper) {
-            dtmCol[dtmCol == i] <- toupper(i)
+            tdmCol[tdmCol == i] <- toupper(i)
             nodeName[nodeName == i] <- toupper(i)
         }
         V(coGraph)$name <- nodeName
-        colnames(freqWordsDTM) <- dtmCol
+        colnames(freqWordsTDM) <- tdmCol
 
         if (genePlot) {
             genemap <- c()
             for (rn in nodeName){
-                tmp <- freqWordsDTM[ ,rn]
+                tmp <- freqWordsTDM[ ,rn]
                 for (nm in names(tmp[tmp!=0])){
                     genemap <- rbind(genemap, c(rn, nm))
                 }
@@ -677,11 +704,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
         if (tag) {
             freqWords <- names(matSorted)
-            freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+            freqWordsTDM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             if (tagWhole){
                 pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
             } else {
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
+                pvc <- pvclust(as.matrix(dist(t(freqWordsTDM))), parallel=cl)
             }
             pvcl <- pvpick(pvc)
             ret@pvclust <- pvc

@@ -11,12 +11,9 @@ plotEigengeneNetworksWithWords(
   numberOfWords = 10,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
-  numOnly = TRUE,
-  excludeFreq = 5000,
-  excludeTfIdf = NA,
   border = TRUE,
-  tfidf = FALSE,
-  madeUpper = c("rna", "dna")
+  type = "words",
+  ...
 )
 }
 \arguments{
@@ -32,17 +29,11 @@ plotEigengeneNetworksWithWords(
 
 \item{geneVecType}{type of IDs in `colors`}
 
-\item{numOnly}{delete number only}
-
-\item{excludeFreq}{exclude the words above this threshold}
-
-\item{excludeTfIdf}{exclude the words above this threshold}
-
 \item{border}{whether to draw border on pyramid plots}
 
-\item{tfidf}{use tfidf when making TDM}
+\item{type}{"words" or "enrich"}
 
-\item{madeUpper}{words with uppercase}
+\item{...}{passed to wcGeneSummary()}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

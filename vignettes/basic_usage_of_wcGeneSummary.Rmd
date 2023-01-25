@@ -27,11 +27,12 @@ library(RColorBrewer)
 library(ReactomePA)
 library(clusterProfiler)
 library(dendextend)
+library(dplyr)
 ```
 
 ## Producing word clouds
 
-We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `excludeTfIdf` can be specified too.
+We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `exclude="tfidf"` can be specified too.
 
 ```{r basic, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 ## Configure input genes
@@ -46,7 +47,7 @@ It accepts values of the `wordcloud()` function. `numWords` specifies how many w
 ## Use palette from palettetown, palettetown::pokepal(150) (Mewtwo!)
 gwc <- wcGeneSummary(inpSymbol, random.order=FALSE,
                      numWords=100,
-                     excludeTfIdf = 150,
+                     excludeFreq=5000,
                      colors=palette(),
                      rot.per=0.4)
 gwc@wc
@@ -57,7 +58,7 @@ By default, `preserve=TRUE`, which indicates the funciton tries to preserve the 
 ```{r basic_pres_false, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 gwc_p <- wcGeneSummary(inpSymbol, random.order=FALSE,
                      numWords=100,
-                     excludeTfIdf = 150,
+                     excludeFreq=5000,
                      colors=brewer.pal(8, "Set2"),
                      preserve=FALSE,
                      rot.per=0.4)
@@ -396,11 +397,19 @@ The example visualization is shown below (not by the code above).
 
 ## Annotating module eigengenes dendrogram
 
-As users of WGCNA typically plot dendrogramm and heatmap of module eigengenes using `plotEigengeneNetworks`, it is useful to combine with wcGeneSummary, which plot additional word information on a dendrogram with one line.
+The relationship between gene clusters are often investigated in clustering analysis like WGCNA. As users of WGCNA typically plot dendrogram and heatmap of module eigengenes using `plotEigengeneNetworks`, it is useful to combine with wcGeneSummary, which plot additional word information on a dendrogram with one line.
 
 ```{r wgcna, warning=FALSE, message=FALSE, cache=TRUE, fig.width=6, fig.height=9}
 # WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
 plotEigengeneNetworksWithWords(MEs, modColors)
+```
+
+Other than textual information, we can simply annotate the dendrogram using enrichment analysis.
+Useful for inspecting how the branches of dendrogram contains pathway information.
+
+```{r wgcna2, warning=FALSE, message=FALSE, cache=TRUE, fig.width=6, fig.height=9}
+# WGCNA::plotEigengeneNetworks(mod$MEs, mod$colors, plotHeatmaps = FALSE)
+plotEigengeneNetworksWithWords(MEs, modColors, type="enrich")
 ```
 
 ## Assess the occurrence of the speicific words across gene clusters

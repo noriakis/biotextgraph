@@ -25,7 +25,8 @@ wcEC(
 \item{onlyDf}{only return ec description data.frame
 if onlyTerm and onlyDf are both specified, onlyTerm have priority}
 
-\item{taxec}{link taxonomy to EC using UniProt Taxonomy ID file}
+\item{taxec}{link taxonomy to EC using UniProt Taxonomy ID file
+If this is TRUE, data.frame is returned}
 
 \item{candTax}{when taxec=TRUE, search only for these species.}
 

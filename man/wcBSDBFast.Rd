@@ -132,8 +132,9 @@ list of data frame and ggplot2 object
 }
 \description{
 Visualize BugSigDB
+(Use data.table and parallel correlation to speed up)
 }
 \examples{
 mbList <- c("Veillonella dispar")
-wcBSDB(mbList)
+wcBSDBFast(mbList)
 }

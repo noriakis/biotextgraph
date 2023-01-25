@@ -10,7 +10,7 @@
 #' for coloring of nodes
 #' @param org organism ID in KEGG, default to hsa
 #' @param orgDb organism database to convert symbol
-#' @param target target DB for word
+#' @param target target DB for word, "refseq" or "abstract"
 #' @param numWords number of words in barplot
 #' @param node.types passed to node.map e.g. "genes" and "ortholog"
 #' @param searchTerms search terms to be used in wcAbst,
@@ -20,6 +20,7 @@
 #' and description as "searchTerms".
 #' e.g. "K08097" and "phosphosulfolactate synthase"
 #' @param areas used in patchwork
+#' @param trans transpose the barplot
 #' @param ... passed to wc functions
 #' @import grid
 #' @export
@@ -29,7 +30,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                          pal="RdBu",target="refseq",
                          searchTerms=NULL, node.types="gene",
                          termMap=NULL, orgDb=org.Hs.eg.db,
-                         numWords=20, areas=NULL, ...) {
+                         numWords=20, trans=FALSE, areas=NULL, ...) {
     returnList <- list()
     if (!keyType %in% c("KO","ENTREZID")) {
         qqcat("converting to ENTREZID\n")
@@ -107,6 +108,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                        numWords=numWords,
                        plotType="network",
                        genePlot=TRUE,
+                       preserve=TRUE,
                        genePlotNum=length(geneList), ...)
         barp@geneMap[,2] <- gsub(" \\(Q\\)", "", barp@geneMap[,2])
     } else {
@@ -114,6 +116,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                               numWords=numWords,
                               plotType="network",
                               genePlot=TRUE,
+                              preserve=TRUE,
                               genePlotNum=length(geneList), ...)
     }
     
@@ -142,6 +145,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             }
         }    
     }
+    
     
     inBar <- candWords[candWords$word %in% barp@freqDf$word,]
     rePlot <- barp@freqDf[1:numWords,]
@@ -191,24 +195,52 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         names(colVec) <- colMat[,2]
     }
     
-    
-    replot <- rePlotColor |> ggplot(aes(x=reorder(X1,X3),y=stack,fill=X2))+
-        geom_bar(position="stack", stat="identity")+
-        scale_fill_manual(values=colVec, name="Gene")+
-        xlab("Words")+ylab("Frequency")+theme_minimal()+
-        theme(axis.text =element_text(angle=90))
-    
-    if (is.null(areas)) {
-        areas <- "
-      AAAAAA
-      AAAAAA
-      AAAAAA
-      AAAAAA
-      #BBBB#
-    "
+    changeX1 <- NULL
+    for (cn in tolower(rePlotColor$X1)) {
+        if (cn %in% names(barp@dic)) {
+            changeX1 <- c(changeX1, barp@dic[cn])
+        } else {
+            changeX1 <- c(changeX1, cn)
+        }
     }
-    plt <- patchwork::wrap_plots(g, replot, ncol=1)+
-        plot_layout(design=areas)
+    rePlotColor$X1 <- changeX1
+
+
+    if (trans) {
+    
+        replot <- rePlotColor |> ggplot(aes(x=reorder(X1,X3),y=stack,fill=X2))+
+            geom_bar(position="stack", stat="identity")+
+            scale_fill_manual(values=colVec, name="Gene")+
+            xlab("Words")+ylab("Frequency")+theme_minimal()+
+            theme(axis.text =element_text(angle=90))
+        
+        if (is.null(areas)) {
+            areas <- "
+          AAAAAA
+          AAAAAA
+          AAAAAA
+          AAAAAA
+          #BBBB#
+        "
+        }
+        plt <- patchwork::wrap_plots(g, replot, ncol=1)+
+            plot_layout(design=areas)
+    } else {
+        replot <- rePlotColor |> ggplot(aes(y=reorder(X1,X3),x=stack,fill=X2))+
+            geom_bar(position="stack", stat="identity")+
+            scale_fill_manual(values=colVec, name="Gene")+
+            ylab("Words")+xlab("Frequency")+theme_minimal()
+        if (is.null(areas)) {
+            areas <- "
+            AAAAAABB
+            AAAAAABB
+            AAAAAABB
+            AAAAAABB
+            "
+        }
+        plt <- patchwork::wrap_plots(g, replot, nrow=1)+
+            plot_layout(design=areas)
+    }
     
     returnList[["text"]] <- barp
     returnList[["bar"]] <- replot

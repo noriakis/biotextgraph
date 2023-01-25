@@ -9,8 +9,9 @@ wcAbst(
   redo = NULL,
   madeUpper = c("dna", "rna"),
   target = "abstract",
-  usefil = NA,
-  filnum = 0,
+  useFil = NA,
+  filType = "above",
+  filNum = 0,
   sortOrder = "relevance",
   pvclAlpha = 0.95,
   numOnly = TRUE,
@@ -43,6 +44,7 @@ wcAbst(
   onlyDf = FALSE,
   nodePal = palette(),
   preserve = TRUE,
+  takeMax = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
@@ -62,10 +64,12 @@ wcAbst(
 
 \item{target}{"abstract" or "title"}
 
-\item{usefil}{filter based on "gstfidf" (whole gene summary tf-idf)
-or "bsdbtfidf" (whole bugsigdb tf-idf)}
+\item{useFil}{filter based on "GS_TfIdf" (whole gene summary tf-idf)
+or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
-\item{filnum}{specify filter tfidf}
+\item{filType}{"above" or "below"}
+
+\item{filNum}{specify filter tfidf}
 
 \item{sortOrder}{sort order, passed to rentrez function}
 
@@ -131,6 +135,9 @@ instead of correlation using bnlearn}
 \item{nodePal}{node palette when tag is TRUE}
 
 \item{preserve}{try to preserve the original characters}
+
+\item{takeMax}{when summarizing term-document matrix, take max.
+Otherwise take sum.}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
