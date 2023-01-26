@@ -8,7 +8,7 @@
 #' 
 #' @examples
 #' geneList <- c("DDX41")
-#' osplot("refseq", geneList)
+#' osplot("refseq", argList=list(geneList=geneList))
 #' @export
 #' 
 osplot <- function(target, argList) {
@@ -111,3 +111,32 @@ setMethod("plot",
                  vertex.label.family="arial",
                  edge.curved=0)
           })
+
+
+#' plotORA
+#' 
+#' plot volcano-plot like plot for ORA results
+#' 
+#' @param x osplot object
+#' @param thresh hline to draw
+#' 
+#' @export
+#' @noRd
+#' 
+plotORA <- function(x, thresh=0.001) {
+    subr <- intersect(row.names(x@freqDf),names(x@ora))
+  vp <- x@freqDf[subr, ]
+  vp$p <- -log10(x@ora[subr])
+  
+  ggplot(vp, aes(x=freq,y=p, fill=p))+
+    geom_point(shape=21,size=3,show.legend=FALSE) +
+    geom_text_repel(aes(color=p, label=word),bg.color = "white",
+                    segment.color="black",size=3,max.overlaps = Inf,
+                    bg.r = .15, show.legend=FALSE)+
+    scale_color_gradient(low="blue",high="red")+
+    scale_fill_gradient(low="blue",high="red")+
+    geom_hline(yintercept=-log10(thresh), linetype="dashed")+
+    xlab("Frequency")+ylab("-log10(p.adjust)")+
+    theme_minimal()
+}
+

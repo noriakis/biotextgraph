@@ -105,12 +105,11 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             rawGenes <- searchTerms
         }
         argList[["queries"]] <- rawGenes
-        argList[["keyType"]] <- "ENTREZID"
         argList[["numWords"]] <- numWords
         argList[["plotType"]] <- "network"
         argList[["genePlot"]] <- TRUE
         argList[["preserve"]] <- TRUE
-        argList[["genePlotNum"]] <- length(geneList)
+        # argList[["genePlotNum"]] <- length(geneList)
         barp <- do.call("wcAbst", argList)
         barp@geneMap[,2] <- gsub(" \\(Q\\)", "", barp@geneMap[,2])
     } else {
