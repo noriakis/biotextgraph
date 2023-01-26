@@ -19,5 +19,5 @@ wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
 }
 \examples{
 geneList <- c("DDX41")
-osplot("refseq", geneList)
+osplot("refseq", argList=list(geneList=geneList))
 }
