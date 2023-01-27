@@ -379,17 +379,20 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     } else {
         ## Use KEGG
         LI <- names(geneVec)[geneVec %in% L]
-        RI <- names(geneVec)[geneVec %in% L]
+        RI <- names(geneVec)[geneVec %in% R]
         if (geneVecType!="ENTREZID") {
             LI <- clusterProfiler::bitr(LI, fromType=geneVecType, toType="ENTREZID", OrgDb=orgDb)$ENTREZID
             RI <- clusterProfiler::bitr(RI, fromType=geneVecType, toType="ENTREZID", OrgDb=orgDb)$ENTREZID
         }
         leftE <- clusterProfiler::enrichKEGG(LI)
         rightE <- clusterProfiler::enrichKEGG(RI)
+
         lSig <- leftE@result[1:numberOfWords,]
         rSig <- rightE@result[1:numberOfWords,]
+
         lSig <- lSig[!is.na(lSig$ID),]
         rSig <- rSig[!is.na(rSig$ID),]
+        
         if (dim(lSig)[1]==0 & dim(rSig)[1]==0) {
           stop("No enriched term found for these clusters")
           return(NULL)
