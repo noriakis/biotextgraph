@@ -268,6 +268,7 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
 #' @param keyType keytype
 #' @param numLimit threshold for gene number limit
 #'                 default to 5000
+#' @param target target to query
 #' @param argList parameters to pass to wcGeneSummary()
 #' @return similarity matrix
 #' @export
@@ -275,7 +276,8 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
 #' ex <- returnExample()
 #' returnSim(ex$color, keyType="ENSEMBL")
 #' @importFrom GetoptLong qqcat
-returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000, argList=list()) {
+returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000,
+  target="refseq", argList=list()) {
     store <- list()
     if (!is.list(cllist)){
         converted <- list()
