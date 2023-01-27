@@ -54,6 +54,8 @@
 #' @param nodePal node palette when tag is TRUE
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
+#' @param onlyGene plot only the gene symbol
+#' (orgDb with SYMBOL key can be used)
 #' @param argList parameters to pass to wordcloud()
 #' 
 #' @export
@@ -82,7 +84,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
-                   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
+                   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
 
@@ -349,6 +351,12 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
 
     ## Main plot
+
+    if (onlyGene) {
+      qqcat("Subsetting to the gene symbol in orgDb\n")
+      included <- names(V(coGraph))[tolower(names(V(coGraph))) %in% tolower(keys(orgDb, "SYMBOL"))]
+      coGraph <- induced_subgraph(coGraph, included)
+    }
 
     ret@igraph <- coGraph
     netPlot <- ggraph(coGraph, layout=layout)

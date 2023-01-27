@@ -60,9 +60,6 @@
 #' @importFrom NLP ngrams words
 #' @importFrom ggplotify as.ggplot
 #' 
-#' @examples
-#' mbList <- c("Veillonella dispar")
-#' wcBSDBFast(mbList)
 #' @export
 #' 
 wcBSDBFast <- function (mbList,

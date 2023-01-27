@@ -12,10 +12,11 @@ returnPyramid(
   numberOfWords = 25,
   widths = c(0.3, 0.3, 0.3),
   lowCol = "blue",
+  showType = "ID",
   highCol = "red",
+  highlight = NULL,
   type = "words",
   wrap = 15,
-  enrichID = "ID",
   orgDb = org.Hs.eg.db,
   argList = list()
 )
@@ -35,11 +36,13 @@ returnPyramid(
 
 \item{lowCol}{gradient low color}
 
+\item{showType}{which labels to show in enrich}
+
 \item{highCol}{gradient high color}
 
-\item{type}{"words" or "enrich"}
+\item{highlight}{words to highlight}
 
-\item{enrichID}{"Description" or "ID"}
+\item{type}{"words" or "enrich"}
 
 \item{orgDb}{organism database to use in enrich}
 

@@ -11,6 +11,8 @@
 #' @param border whether to draw border on pyramid plots
 #' @param nboot pvclust bootstrap number
 #' @param type "words" or "enrich"
+#' @param highlight words to highlight
+#' @param showType when "enrich", which labels to show
 #' @param argList passed to wcGeneSummary()
 #' 
 #' @export
@@ -25,7 +27,9 @@
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL",
-                                            border=TRUE, type="words", argList=list()) {
+                                            border=TRUE, type="words",
+                                            showType="ID",
+                                            highlight=NULL, argList=list()) {
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
         method.hclust="average", nboot=nboot)
@@ -45,7 +49,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
-                                 type=type, argList=argList)
+                                 type=type, highlight=highlight,
+                                 showType=showType,
+                                 argList=argList)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
@@ -84,6 +90,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param geneVecType type of the name of geneVec (default: ENSEMBL)
 #' @param numberOfWords the number of words to plot (default: 25)
 #' @param type "words" or "enrich"
+#' @param showType when "enrich", which labels to show
+#' @param highlight words to highlight
 #' @param argList passed to wcGeneSummary
 #' 
 #' @return list of pyramid plot grobs and its positions
@@ -107,7 +115,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL",
-                            numberOfWords=25,
+                            numberOfWords=25, showType="ID",
+                            highlight=NULL,
                             type="words", argList=list()) {
     
     ## Filter high frequency words if needed
@@ -174,8 +183,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
 
-                        pyrm <- returnPyramid(L, R, geneVec, geneVecType,
-                            numberOfWords=numberOfWords, type=type,argList=argList)
+                        pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
+                            numberOfWords=numberOfWords, type=type, showType=showType,
+                            argList=argList)
 
                         if (!is.null(pyrm)){
                             grobList[[as.character(grobNum)]]$plot <- pyrm
@@ -225,7 +235,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param lowCol gradient low color
 #' @param highCol gradient high color
 #' @param type "words" or "enrich"
-#' @param enrichID "Description" or "ID"
+#' @param showType which labels to show in enrich
+#' @param highlight words to highlight
 #' @param orgDb organism database to use in enrich
 #' @param argList parameters passed to wcGeneSummary()
 #' 
@@ -241,10 +252,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType,
                         numberOfWords=25, widths=c(0.3,0.3,0.3),
-                        lowCol="blue",
-                        highCol="red",
+                        lowCol="blue", showType="ID",
+                        highCol="red", highlight=NULL,
                         type="words", wrap=15,
-                        enrichID="ID",
                         orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -387,16 +397,47 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         lSig$value <- -1 * -log10(lSig$p.adjust)
         rSig$value <- -log10(rSig$p.adjust)
 
-        if (enrichID=="Description") {
+        if (showType=="Description") {
             if (!is.null(wrap)) {
               lSig$plotID <- stringr::str_wrap(lSig$Description, wrap)
               rSig$plotID <- stringr::str_wrap(rSig$Description, wrap)
             }            
-        } else {
+        } else if (showType=="ID") {
             lSig$plotID <- lSig$ID
             rSig$plotID <- rSig$ID
+        } else {
+            stop("showType must be ID or Description")
         }
 
+        if (!is.null(highlight)) {
+            sigCol <- NULL
+            for (id in lSig$plotID) {
+                if (id %in% highlight) {
+                    sigCol <- c(sigCol, "highlight")
+                } else {
+                    sigCol <- c(sigCol, "not_highlight")
+                }
+            }
+            lSig$plotCol <- sigCol
+
+            sigCol <- NULL
+            for (id in rSig$plotID) {
+                if (id %in% highlight) {
+                    sigCol <- c(sigCol, "highlight")
+                } else {
+                    sigCol <- c(sigCol, "not_highlight")
+                }
+            }
+            rSig$plotCol <- sigCol
+            highlightCol <- c("black","red")
+            names(highlightCol) <- c("not_highlight","highlight")
+        } else {
+            lSig$plotCol <- rep("not_highlight",length(lSig$plotID))
+            rSig$plotCol <- rep("not_highlight",length(rSig$plotID))
+            highlightCol <- c("black")
+            names(highlightCol) <- c("not_highlight")
+
+        }
 
         gg1 <- lSig %>%
           ggplot(aes( plotID, value, fill = value)) +
@@ -412,8 +453,9 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             legend.position = "none")
 
         gg2 <- lSig %>%
-          ggplot(aes(plotID, 0, label = plotID)) +
+          ggplot(aes(plotID, 0, label = plotID, color=plotCol)) +
           geom_text(size=3.5) +
+          scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
 
@@ -430,8 +472,9 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             legend.position = "none")
 
         gg4 <- rSig %>%
-          ggplot(aes(plotID, 0, label = plotID)) +
+          ggplot(aes(plotID, 0, label = plotID, color=plotCol)) +
           geom_text(size=3.5) +
+          scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
 

@@ -48,6 +48,7 @@ wcAbst(
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
+  onlyGene = FALSE,
   preset = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
@@ -144,6 +145,9 @@ Otherwise take sum.}
 \item{additionalRemove}{specific words to be excluded}
 
 \item{orgDb}{org database, default to org.Hs.eg.db}
+
+\item{onlyGene}{plot only the gene symbol
+(orgDb with SYMBOL key can be used)}
 
 \item{preset}{filter preset words}
 

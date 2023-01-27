@@ -60,13 +60,12 @@ setClass("osplot", slots=list(
         wc="gg",
         ec="data.frame",
         wholeFreq="numeric",
-        oraPlot="gg",
         dic="vector"
         ))
 setMethod("show",
   signature(object="osplot"),
   function(object) {
-    qqcat("type: @{object@type}\n")
+    qqcat("Type: @{object@type}\n")
     qqcat("Number of words: @{object@numWords}\n")
     if (length(object@query)<10) {
       cat(paste(object@query, collapse="/"));cat("\n")
