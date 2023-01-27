@@ -33,13 +33,13 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                          numWords=20, trans=FALSE, areas=NULL, argList=list()) {
     returnList <- list()
     if (!keyType %in% c("KO","ENTREZID")) {
-        qqcat("converting to ENTREZID\n")
+        qqcat("Converting to ENTREZID\n")
         rawGenes <- geneList
         geneList <- AnnotationDbi::select(orgDb,
                                           keys = geneList, columns = c("ENTREZID"),
                                           keytype = keyType)$ENTREZID
         geneList <- geneList[!is.na(geneList)]
-        qqcat("converted input genes: @{length(geneList)}\n")
+        qqcat("  Converted input genes: @{length(geneList)}\n")
     } else {
         rawGenes <- geneList
     }

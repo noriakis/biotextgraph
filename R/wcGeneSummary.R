@@ -221,7 +221,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             } else {
                 docs <- VCorpus(VectorSource(fil$Gene_summary))
             }
-            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)}
+            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)
+                        ret@dic <- pdic}
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         }
 
