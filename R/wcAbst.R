@@ -208,8 +208,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   
   if (plotType=="network"){
     matSorted <- matSorted[1:numWords]
-    
-    returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+    returnDf <- data.frame(word=names(matSorted),freq=matSorted)
     for (i in madeUpper) {
       # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
       returnDf[returnDf$word == i,"word"] <- toupper(i)

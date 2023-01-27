@@ -124,12 +124,12 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     }
     
     ## Obtain words related to genes listed in map
-    gmap <- barp@geneMap
+    gmap <- barp@geneMap ## This not set to all lower
     candWords <- NULL
     if (is.null(termMap)) {
         for (gn in plot.data.gene[,2]) {
-            if (gn %in% barp@geneMap[, 2]) {
-                candWords <- rbind(candWords, gmap[gmap[,2] %in% gn,])
+            if (tolower(gn) %in% tolower(gmap[, 2])) {
+                candWords <- rbind(candWords, gmap[tolower(gmap[,2]) %in% tolower(gn),])
             }
         }
         candWords <- data.frame(candWords) |> `colnames<-`(c("word","query"))
@@ -138,8 +138,8 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             if (gn %in% termMap$query) {
                 mappedDesc <- unique(subset(termMap, query==gn)$description)
                 for (dc in mappedDesc) {
-                    if (dc %in% gmap[, 2]) {
-                        tmpgmap <- data.frame(gmap[gmap[,2] %in% dc,]) |>
+                    if (tolower(dc) %in% tolower(gmap[, 2])) {
+                        tmpgmap <- data.frame(gmap[tolower(gmap[,2]) %in% tolower(dc),]) |>
                             `colnames<-`(c("word","description"))
                         tmpgmap$query <- rep(gn, dim(tmpgmap)[1])
                         candWords <- rbind(candWords, tmpgmap)
@@ -149,15 +149,16 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         }    
     }
     
-    
-    inBar <- candWords[candWords$word %in% barp@freqDf$word,]
-    rePlot <- barp@freqDf[1:numWords,]
+    frDf <- barp@freqDf
+    inBar <- candWords[tolower(candWords$word) %in% tolower(frDf$word),]
+    rePlot <- frDf[1:numWords,]
     barCols <- NULL
     rePlotColor <- NULL
+
     for (rn in row.names(rePlot)) {
         wn <- rePlot[rn,]$word
-        if (rn %in% inBar$word) {
-            takeGene <- inBar[inBar$word %in% rn,]
+        if (tolower(wn) %in% tolower(inBar$word)) {
+            takeGene <- inBar[tolower(inBar$word) %in% tolower(wn),]
             if (is.null(dim(takeGene))) {
                 gn <- takeGene$query
             } else {
