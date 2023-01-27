@@ -80,9 +80,9 @@ setMethod("show",
 setMethod("plot",
           signature = "osplot",
           definition = function(x) {
-            retSc <- function(x, min=4,max=9){
-              (max-min) * ((x-min(x)) / 
-                             (max(x)-min(x))) + min
+            retSc <- function(va, min=4,max=9){
+              (max-min) * ((va-min(va)) / 
+                             (max(va)-min(va))) + min
               
             }
             g <- x@igraph

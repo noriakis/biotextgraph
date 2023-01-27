@@ -1,4 +1,55 @@
-
+#'
+#' parseMetaCycPathway
+#' 
+#' parse MetaCyc "pathways.dat"
+#' 
+#' 
+#' @param file path to pathways.dat
+#' @param candSp species to grepl
+#' 
+#' @export
+#' 
+parseMetaCycPathway <- function(file, candSp) {
+  flg <- FALSE
+  allmeta <- NULL
+  con = file(file, "r")
+  while ( TRUE ) {
+    line = readLines(con, n = 1)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if (startsWith(line,"UNIQUE-ID - ")) {
+      com <- NA
+      commn <- NA
+      pwy <- gsub("UNIQUE-ID - ","",line)
+      flg <- TRUE
+    }
+    if (flg) {
+      if (startsWith(line, "/")) {
+        com <- c(com, line)
+      }
+      if (startsWith(line, "COMMON-NAME")) {
+        commn <- gsub("COMMON-NAME - ","",line)
+      }
+      if (startsWith(line,"//")) {
+        coms <- paste(com[!is.na(com)], collapse=" ")
+        if (grepl(paste(candSp,collapse="|"),coms)) {
+          allmeta <- rbind(allmeta, c(pwy, coms, commn))
+        }
+        flg <- FALSE
+      }
+    }
+  }
+  close(con)
+  allmeta <- data.frame(allmeta) |> `colnames<-`(c("pathwayID","text","commonName"))
+  allmeta |> dim()
+  queries <- NULL
+  for (q in candSp) {
+    queries <- cbind(queries, grepl(q, allmeta$text))
+  }
+  allmeta$query <- apply(queries, 1, function(x) paste0(candSp[x], collapse=","))
+  return(allmeta)
+}
 
 #' retFiltWords
 #' return filtered words
