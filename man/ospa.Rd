@@ -48,6 +48,7 @@ ospa(
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
+  onlyGene = FALSE,
   preset = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,

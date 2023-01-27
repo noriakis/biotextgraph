@@ -13,6 +13,8 @@ plotEigengeneNetworksWithWords(
   geneVecType = "ENSEMBL",
   border = TRUE,
   type = "words",
+  showType = "ID",
+  highlight = NULL,
   argList = list()
 )
 }
@@ -32,6 +34,10 @@ plotEigengeneNetworksWithWords(
 \item{border}{whether to draw border on pyramid plots}
 
 \item{type}{"words" or "enrich"}
+
+\item{showType}{when "enrich", which labels to show}
+
+\item{highlight}{words to highlight}
 
 \item{argList}{passed to wcGeneSummary()}
 }

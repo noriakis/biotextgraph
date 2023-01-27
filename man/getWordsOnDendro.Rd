@@ -10,6 +10,8 @@ getWordsOnDendro(
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
   numberOfWords = 25,
+  showType = "ID",
+  highlight = NULL,
   type = "words",
   argList = list()
 )
@@ -25,6 +27,10 @@ pyramid plots are not produced}
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
 \item{numberOfWords}{the number of words to plot (default: 25)}
+
+\item{showType}{when "enrich", which labels to show}
+
+\item{highlight}{words to highlight}
 
 \item{type}{"words" or "enrich"}
 
