@@ -53,6 +53,7 @@ wcGeneSummary(
   pre = TRUE,
   nodePal = palette(),
   collapse = FALSE,
+  useUdpipe = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   argList = list()
 )
@@ -158,11 +159,11 @@ on whole dataset or top-words specified by numWords}
 
 \item{collapse}{default to FALSE, collapse all the sentences}
 
+\item{useUdpipe}{use udpipe to make a network}
+
 \item{udpipeModel}{udpipe model file name}
 
 \item{argList}{parameters to pass to wordcloud()}
-
-\item{udp}{use udpipe to make a network}
 }
 \value{
 list of data frame and ggplot2 object

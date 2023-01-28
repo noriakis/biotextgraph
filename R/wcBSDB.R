@@ -51,6 +51,8 @@
 #' @param takeMax when summarizing term-document matrix, take max.
 #' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
 #' Otherwise take sum.
+#' @param useUdpipe use udpipe to make a network
+#' @param udpipeModel udpipe model file name
 #' 
 #' @param argList parameters to pass to wordcloud()
 #' @return list of data frame and ggplot2 object
@@ -87,9 +89,17 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
+                    useUdpipe=FALSE,
+                    udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
+    if (useUdpipe) {
+        qqcat("Using udpipe mode\n")
+        plotType="network"
+        ngram <- NA
+        udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
+    }
     ret <- new("osplot")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
@@ -128,10 +138,10 @@ wcBSDB <- function (mbList,
             }
         }
         fil <- data.frame(fil)
-        colnames(fil) <- c("query","Title","PMID")
-        fil <- fil[!is.na(fil$PMID),] # Some PMIDs have NA
+        colnames(fil) <- c("query","text","ID")
+        fil <- fil[!is.na(fil$ID),] # Some PMIDs have NA
         # returnList[["filterWords"]] <- filterWords
-        ret@pmids <- fil$PMID
+        ret@pmids <- fil$ID
         ret@rawText <- subTb
 
     } else {
@@ -143,7 +153,7 @@ wcBSDB <- function (mbList,
         if (target=="abstract"){
             qqcat("Target is abstract\n")
             if (is.null(redo)) {
-                pmids <- unique(fil$PMID)
+                pmids <- unique(fil$ID)
                 # pmids <- pmids[!is.na(pmids)]
                 qqcat("  Querying PubMed for @{length(pmids)} pmids\n")
                 queryUrl <- paste0("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/",
@@ -173,7 +183,7 @@ wcBSDB <- function (mbList,
                         }
                     }
                 }
-                abstDf <- data.frame(abstDf) |> `colnames<-`(c("PMID","AbstractText","query"))
+                abstDf <- data.frame(abstDf) |> `colnames<-`(c("ID","text","query"))
                 # abstset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
                 #                                 "Abstract",
                 #                                 recursive = TRUE)
@@ -184,9 +194,9 @@ wcBSDB <- function (mbList,
                 filterWords <- ret@filtered
                 subTb <- ret@rawText
             }
-            docs <- VCorpus(VectorSource(abstDf$AbstractText))
+            docs <- VCorpus(VectorSource(abstDf$text))
         } else {
-            docs <- VCorpus(VectorSource(fil$Title))
+            docs <- VCorpus(VectorSource(fil$text))
         }
     } else {
         abstDf <- do.call(wcAbst, c(list(queries=mbList,
@@ -221,6 +231,21 @@ wcBSDB <- function (mbList,
         }
     }
     ret@corpus <- docs
+
+
+    if (useUdpipe) {
+        if (curate & target!="abstract") {
+            abstDf <- fil
+        }
+        ret <- retUdpipeNet(ret=ret,texts=abstDf,udmodel_english=udmodel_english,
+          orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
+          colorText=colorText,edgeLink=edgeLink,queryPlot=mbPlot, layout=layout,
+          pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+        ## TODO: add disPlot and the other options
+        return(ret)
+    }
+
+
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}

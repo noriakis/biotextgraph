@@ -57,6 +57,11 @@
 #' @param onlyGene plot only the gene symbol
 #' (orgDb with SYMBOL key can be used)
 #' @param argList parameters to pass to wordcloud()
+#' @param useUdpipe use udpipe to make a network
+#' @param udpipeModel udpipe model file name
+#' @param udPipeOnlyFreq when using udpipe, include only high-frequent words
+#' @param udPipeOnlyFreqN when using udpipe, include only the neighbors of
+#' high-frequent words
 #' 
 #' @export
 #' @examples wcAbst("DDX41")
@@ -84,11 +89,17 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
+                   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
+                   udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
-
-  # if (is.null(apiKey)) {qqcat("proceeding without API key\n")}
+  if (useUdpipe) {
+        qqcat("Using udpipe mode\n")
+        plotType="network"
+        ngram <- NA
+        udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
+  }
   if (madeUpperGenes){
     madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
   }
@@ -126,20 +137,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     return(allDataDf)
   }
 
-  if (geneUpper){
-    ## Maybe duplicate to madeUpperGenes
-    aq <- allDataDf$query
-    aq <- aq[aq!=""]
-    madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
-    # print(madeUpper)
-  }
-  if (target=="abstract"){
-    docs <- VCorpus(VectorSource(allDataDf$text))
-  } else if (target=="title"){
-    docs <- VCorpus(VectorSource(allDataDf$text))
-  } else {
-    stop("specify target or abstract")
-  }
   
   ## Probably set default filnum?
   if (!is.na(useFil)){
@@ -154,10 +151,26 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
        ret@filtered <- allfils
      }
   }
+
+  if (geneUpper){
+    ## Maybe duplicate to madeUpperGenes
+    aq <- allDataDf$query
+    aq <- aq[aq!=""]
+    madeUpper <- c(madeUpper, tolower(unique(unlist(strsplit(aq, ",")))))
+    # print(madeUpper)
+  }
+  if (target=="abstract"){
+    docs <- VCorpus(VectorSource(allDataDf$text))
+  } else if (target=="title"){
+    docs <- VCorpus(VectorSource(allDataDf$text))
+  } else {
+    stop("specify target or abstract")
+  }
   if (preserve) {
     pdic <- preserveDict(docs, ngram, numOnly, stem)
     ret@dic <- pdic
   }
+
   docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
   ret@corpus <- docs
   if (onlyCorpus){
@@ -216,6 +229,25 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     ret@freqDf <- returnDf
     
     freqWords <- names(matSorted)
+
+    if (useUdpipe) {
+      if (udpipeOnlyFreq & udpipeOnlyFreqN) {stop("Cannot specify both of these options")}
+      if (udpipeOnlyFreq) {
+        showNeighbors <- NULL
+        showFreq <- freqWords
+      }
+      if (udpipeOnlyFreqN) {
+        showNeighbors <- freqWords
+        showFreq <- NULL
+      }
+      ret <- retUdpipeNet(ret=ret,texts=allDataDf,udmodel_english=udmodel_english,
+          orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
+          colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
+          pal=pal,showNeighbors=showNeighbors, showFreq=showFreq, nodePal=nodePal)
+      return(ret)
+    }
+
+
     # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
     ## TODO: before or after?
     freqWordsDTM <- t(as.matrix(docs))

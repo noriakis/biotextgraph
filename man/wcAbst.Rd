@@ -45,6 +45,10 @@ wcAbst(
   nodePal = palette(),
   preserve = TRUE,
   takeMax = FALSE,
+  useUdpipe = FALSE,
+  udpipeOnlyFreq = FALSE,
+  udpipeOnlyFreqN = FALSE,
+  udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
@@ -140,6 +144,10 @@ instead of correlation using bnlearn}
 \item{takeMax}{when summarizing term-document matrix, take max.
 Otherwise take sum.}
 
+\item{useUdpipe}{use udpipe to make a network}
+
+\item{udpipeModel}{udpipe model file name}
+
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{additionalRemove}{specific words to be excluded}
@@ -159,6 +167,11 @@ on whole dataset or top-words specified by numWords}
 \item{stem}{whether to use stemming}
 
 \item{argList}{parameters to pass to wordcloud()}
+
+\item{udPipeOnlyFreq}{when using udpipe, include only high-frequent words}
+
+\item{udPipeOnlyFreqN}{when using udpipe, include only the neighbors of
+high-frequent words}
 }
 \value{
 list of data frame and ggplot2 object

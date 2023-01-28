@@ -37,6 +37,8 @@ wcBSDB(
   ecFile = NULL,
   upTaxFile = NULL,
   filterMax = FALSE,
+  useUdpipe = FALSE,
+  udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ngram = NA,
   plotType = "wc",
   disPlot = FALSE,
@@ -120,6 +122,10 @@ this option requires two files to be passed to wcEC() and getUPTax().}
 
 \item{filterMax}{use pre-calculated filter based on max-values when excluding TfIdf
 Otherwise take sum.}
+
+\item{useUdpipe}{use udpipe to make a network}
+
+\item{udpipeModel}{udpipe model file name}
 
 \item{ngram}{default to NA (1)}
 

@@ -53,6 +53,7 @@ osp(
   pre = TRUE,
   nodePal = palette(),
   collapse = FALSE,
+  useUdpipe = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   argList = list()
 )
