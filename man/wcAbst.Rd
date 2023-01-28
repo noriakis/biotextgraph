@@ -146,6 +146,11 @@ Otherwise take sum.}
 
 \item{useUdpipe}{use udpipe to make a network}
 
+\item{udpipeOnlyFreq}{when using udpipe, include only high-frequent words}
+
+\item{udpipeOnlyFreqN}{when using udpipe, include only the neighbors of
+high-frequent words}
+
 \item{udpipeModel}{udpipe model file name}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
@@ -167,11 +172,6 @@ on whole dataset or top-words specified by numWords}
 \item{stem}{whether to use stemming}
 
 \item{argList}{parameters to pass to wordcloud()}
-
-\item{udPipeOnlyFreq}{when using udpipe, include only high-frequent words}
-
-\item{udPipeOnlyFreqN}{when using udpipe, include only the neighbors of
-high-frequent words}
 }
 \value{
 list of data frame and ggplot2 object

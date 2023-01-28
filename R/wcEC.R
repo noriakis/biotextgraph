@@ -12,6 +12,7 @@
 #' if onlyTerm and onlyDf are both specified, onlyTerm have priority
 #' @param taxec link taxonomy to EC using UniProt Taxonomy ID file
 #' If this is TRUE, data.frame is returned
+#' @param taxFile UniProt organism ID file path
 #' @param candTax when taxec=TRUE, search only for these species.
 #' @param argList passed to osplot(target="pubmed")
 #' @export

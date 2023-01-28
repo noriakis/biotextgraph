@@ -119,10 +119,9 @@ setMethod("plot",
 #' plot volcano-plot like plot for ORA results
 #' 
 #' @param x osplot object
-#' @param thresh hline to draw
+#' @param thresh hline to draw in plot
 #' 
 #' @export
-#' @noRd
 #' 
 plotORA <- function(x, thresh=0.001) {
     subr <- intersect(row.names(x@freqDf),names(x@ora))

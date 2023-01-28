@@ -44,6 +44,8 @@ returnPyramid(
 
 \item{type}{"words" or "enrich"}
 
+\item{wrap}{wrap the strings}
+
 \item{orgDb}{organism database to use in enrich}
 
 \item{argList}{parameters passed to wcGeneSummary()}

@@ -28,6 +28,8 @@ if onlyTerm and onlyDf are both specified, onlyTerm have priority}
 \item{taxec}{link taxonomy to EC using UniProt Taxonomy ID file
 If this is TRUE, data.frame is returned}
 
+\item{taxFile}{UniProt organism ID file path}
+
 \item{candTax}{when taxec=TRUE, search only for these species.}
 
 \item{argList}{passed to osplot(target="pubmed")}

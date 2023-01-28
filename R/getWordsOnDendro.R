@@ -239,6 +239,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param highlight words to highlight
 #' @param orgDb organism database to use in enrich
 #' @param argList parameters passed to wcGeneSummary()
+#' @param wrap wrap the strings
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
