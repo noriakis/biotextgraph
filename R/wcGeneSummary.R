@@ -48,7 +48,7 @@
 #' @param R how many bootstrap when bn is stated
 #' @param onWholeTDM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
-#' @param udp use udpipe to make a network
+#' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
 #' @param stem whether to use stemming
@@ -101,16 +101,18 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeTDM=FALSE, pre=TRUE,
                             nodePal=palette(), collapse=FALSE,
+                            useUdpipe=FALSE,
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             argList=list()) {
     ret <- new("osplot")
     ret@query <- geneList
     ret@type <- "refseq"
 
-    if (udp) {
+    if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         # if (bn) {stop("verb can be only used with undirected graph")}
-        edgeLabel <- TRUE
+        # edgeLabel <- TRUE
+        plotType="network"
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)}
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
@@ -203,15 +205,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 # }
             }
 
-            if (udp) {
+            # if (udp) {
                 ## Annotate verbs
                 # s <- udpipe::udpipe_annotate(udmodel_english, fil$Gene_summary)
                 # x <- data.frame(s)
                 # x2 <- x |> dplyr::filter(upos=="VERB")
                 # x3 <- x2[x2$xpos %in% verbPOS,]
                 # verbs <- tolower(unique(x3$token))
-                print("Use udpipe model")
-            }
+                # print("Use udpipe model")
+            # }
 
             ## Make corpus
             if (collapse) {
@@ -232,6 +234,16 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             stop("Please provide multile corpus")
         }
         docs <- mergeCorpus
+    }
+
+    if (useUdpipe) {
+        fil$text <- fil$Gene_summary
+        fil$ID <- fil$Gene_ID
+        ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
+            orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
+            colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
+            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+        return(ret)
     }
     ret@corpus <- docs
 
