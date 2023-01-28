@@ -51,10 +51,8 @@ osp(
   madeUpperGenes = TRUE,
   onWholeTDM = FALSE,
   pre = TRUE,
-  verbPOS = c("VBZ"),
   nodePal = palette(),
   collapse = FALSE,
-  verb = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   argList = list()
 )
