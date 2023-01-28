@@ -747,11 +747,3 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
     return(ret)
 }
-
-#' osp
-#' 
-#' alias for wcGeneSummary
-#' 
-#' @examples osp("DDX41")
-#' @export
-osp <- wcGeneSummary

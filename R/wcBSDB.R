@@ -441,10 +441,7 @@ wcBSDB <- function (mbList,
             ## correlation between words
             if (!is.null(metab)) {
                 if (is.null(metCol)) {
-                    metCol <- c("Metagenomic species",
-                        "Metabolite",
-                        "Spearman's ρ"
-                        )
+                    stop("No column names specified")
                 }
                 qqcat("Checking metabolites\n")
                 metabGraph <- NULL
@@ -677,11 +674,3 @@ wcBSDB <- function (mbList,
     }
     return(ret)
 }
-
-#' ospb
-#' 
-#' alias for wcBSDB
-#' 
-#' @examples ospb("Veillonella dispar")
-#' @export
-ospb <- wcBSDB

@@ -59,8 +59,8 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
-#' @param udPipeOnlyFreq when using udpipe, include only high-frequent words
-#' @param udPipeOnlyFreqN when using udpipe, include only the neighbors of
+#' @param udpipeOnlyFreq when using udpipe, include only high-frequent words
+#' @param udpipeOnlyFreqN when using udpipe, include only the neighbors of
 #' high-frequent words
 #' 
 #' @export
@@ -573,11 +573,3 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   }
   return(ret)
 }
-
-#' ospa
-#' 
-#' alias for wcAbst
-#' 
-#' @examples ospa("DDX41")
-#' @export
-ospa <- wcAbst

@@ -28,7 +28,6 @@ wcMan(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
-  retMax = 10,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
