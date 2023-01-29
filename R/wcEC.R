@@ -72,6 +72,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
     }
   }
   close(con)
+  if (is.null(candecs)) {return(NULL)}
   candecs <- data.frame(candecs) |>
     `colnames<-`(c("number","desc","comment","DRs"))
   if (taxec) {

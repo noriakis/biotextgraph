@@ -23,7 +23,7 @@ wcBSDB(
   numWords = 15,
   preserve = TRUE,
   metab = NULL,
-  metabThresh = 0.2,
+  metThresh = 0.2,
   curate = TRUE,
   abstArg = list(),
   nodePal = palette(),
@@ -92,7 +92,7 @@ wcBSDB(
 
 \item{metab}{tibble of metabolite - taxon association}
 
-\item{metabThresh}{threshold of association}
+\item{metThresh}{threshold of association}
 
 \item{curate}{include articles in bugsigdb}
 

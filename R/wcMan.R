@@ -220,11 +220,20 @@ wcMan <- function(df, madeUpper=NULL,
         qqcat("Including columns @{paste(incCols, collapse=' and ')} to link with query\n")
 
         for (ic in incCols) {
-          qmap <- simplify(igraph::graph_from_edgelist(df[,c(ic, query)],
+          qmap <- simplify(igraph::graph_from_data_frame(df[,c(ic, "query")],
             directed = FALSE))
           coGraph <- igraph::union(coGraph, qmap)
         }
       }
+
+      nodeN <- NULL
+      for (coln in c(incCols, "query")) {
+        tmpn <- df[[coln]]
+        tmpnn <- rep(coln, length(tmpn))
+        names(tmpnn) <- tmpn
+        nodeN <- c(nodeN, tmpnn)
+      }
+
 
       genemap <- c()
       for (rn in nodeName){
@@ -249,6 +258,7 @@ wcMan <- function(df, madeUpper=NULL,
         corThreshGenePlot <- corThresh - 0.1}
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
+      
     
       if (tag) {
         netCol <- tolower(names(V(coGraph)))
@@ -258,7 +268,24 @@ wcMan <- function(df, madeUpper=NULL,
         }
         netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
         V(coGraph)$tag <- netCol
+
+        ## Add disease and other labs
+        addC <- V(coGraph)$tag
+        for (nn in seq_along(names(V(coGraph)))) {
+            if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                if (addC[nn]=="not_assigned") {
+                  addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                } else {
+                  addC[nn] <- paste0(addC[nn], ";", nodeN[names(V(coGraph))[nn]])
+                }
+            } else {
+                next
+            }
+        }
+        V(coGraph)$tag <- addC
       }
+
+
       if (preserve) {
         newGname <- NULL
         for (nm in names(V(coGraph))) {
@@ -270,6 +297,9 @@ wcMan <- function(df, madeUpper=NULL,
         }
         coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
       }
+
+
+
     
       ## Main plot
       ret@igraph <- coGraph
@@ -359,7 +389,7 @@ wcMan <- function(df, madeUpper=NULL,
       if (tag) {
         netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
                                              show.legend = showLegend)+
-          scale_color_manual(values=nodePal)
+          scale_color_manual(values=nodePal, name="Category")
       } else { 
         netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
                                              show.legend = showLegend)+

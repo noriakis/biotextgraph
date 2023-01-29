@@ -37,7 +37,7 @@
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param metab tibble of metabolite - taxon association
-#' @param metabThresh threshold of association
+#' @param metThresh threshold of association
 #' @param metCol metabolite data frame column name in the order of
 #' "candidate taxon", "metabolite", "quantitative values for thresholding"
 #' @param stem whether to use stemming
@@ -84,7 +84,7 @@ wcBSDB <- function (mbList,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
                     madeUpper=c("dna","rna"), redo=NULL,
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
-                    metab=NULL, metabThresh=0.2, curate=TRUE,
+                    metab=NULL, metThresh=0.2, curate=TRUE,
                     abstArg=list(), nodePal=palette(), metCol=NULL,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
@@ -94,15 +94,19 @@ wcBSDB <- function (mbList,
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
+
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
         ngram <- NA
+
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
     }
     ret <- new("osplot")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
+    addNet <- list()
+
     if (pre) {additionalRemove <- c(additionalRemove, "microbiota",
         "microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated",
@@ -232,6 +236,59 @@ wcBSDB <- function (mbList,
     }
     ret@corpus <- docs
 
+    if (disPlot & plotType=="network") {## This does not need to be deduplicated
+        dis <- NULL
+        for (i in seq_len(nrow(subTb))){
+            dis <- rbind(dis,
+            c(subTb[i, "Condition"], subTb[i, "query"]))
+        }
+        dis <- dis[!is.na(dis[,1]),]
+        dis <- dis[!is.na(dis[,2]),]
+        dmg <- simplify(graph_from_data_frame(dis, directed=FALSE))
+        addNet[["Diseases"]] <- dmg
+    }
+
+    ## Add metab if present
+    ## TODO: somehow show edge weights other than
+    ## correlation between words
+    if (!is.null(metab) & plotType=="network") {
+        if (is.null(metCol)) {
+            stop("No column names specified")
+        }
+        qqcat("Checking metabolites\n")
+        metabGraph <- NULL
+        for (sp in mbList) {
+            tmp <- metab[grepl(sp,metab[[metCol[1]]]),]
+            tmp <- tmp[abs(tmp[[metCol[3]]])>metThresh,]
+            if (dim(tmp)[1]!=0) {
+                for (met in tmp[[metCol[2]]]) {
+                    metabGraph <- rbind(metabGraph, c(sp, met))
+                }
+            } else {
+                qqcat("  Found no metabolites for @{sp}\n")
+            }
+        }
+        if (!is.null(metabGraph)) {
+            metabGraph <- simplify(graph_from_edgelist(metabGraph,
+                directed=FALSE))
+            addNet[["Metabolites"]] <- metabGraph
+        }
+    }
+
+    ## Add EC if present
+    if (ecPlot & plotType=="network") {
+        mbPlot <- TRUE
+        if (is.null(ecFile)) {stop("Please provide EC file")}
+        if (is.null(upTaxFile)) {stop("Please provide UniProt taxonomy file")}
+        ecDf <- wcEC(file=ecFile, ecnum="all", taxec=TRUE,
+            taxFile=upTaxFile, candTax=mbList)
+        if (!is.null(ecDf)) {
+           ecg <- simplify(graph_from_data_frame(ecDf[,c("desc","query")], 
+                directed=FALSE))
+           addNet[["Enzymes"]] <- ecg
+        }
+    }
+
 
     if (useUdpipe) {
         if (curate & target!="abstract") {
@@ -240,7 +297,7 @@ wcBSDB <- function (mbList,
         ret <- retUdpipeNet(ret=ret,texts=abstDf,udmodel_english=udmodel_english,
           orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
           colorText=colorText,edgeLink=edgeLink,queryPlot=mbPlot, layout=layout,
-          pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+          pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=nodePal,addNet=addNet)
         ## TODO: add disPlot and the other options
         return(ret)
     }
@@ -350,17 +407,6 @@ wcBSDB <- function (mbList,
                 }
             }
         }
-        
-        if (disPlot) {## This does not need to be deduplicated
-            dis <- c()
-            for (i in seq_len(nrow(subTb))){
-                dis <- rbind(dis,
-                c(subTb[i, "Condition"], subTb[i, "query"]))
-            }
-            dis <- dis[!is.na(dis[,1]),]
-            dis <- dis[!is.na(dis[,2]),]
-            dmg <- simplify(graph_from_data_frame(dis, directed=FALSE))
-        }
 
         ## Check correlation
         if (onWholeDTM){
@@ -408,75 +454,39 @@ wcBSDB <- function (mbList,
             }
             mbmap <- mbmap[mbmap[,2]!="",]
 
+            candMb <- unique(mbmap[,2])
+            nodeN <- rep("Microbes",length(candMb))
+            names(nodeN) <- candMb
+
             mbmap <- simplify(graph_from_edgelist(mbmap,
                 directed = FALSE))
             coGraph <- igraph::union(coGraph, mbmap)
             
-            ## Add disease if present
-            if (disPlot) {
-                coGraph <- igraph::union(coGraph, dmg)
-                alldis <- unique(dis[,1])
-            } else {
-                alldis <- NULL
+            ## If present, add additional edges
+            if (length(addNet)!=0) {
+                for (netName in names(addNet)) {
+                    tmpAdd <- addNet[[netName]]
+                    tmpNN <- names(V(tmpAdd))
+                    tmpNN <- tmpNN[!tmpNN %in% names(nodeN)]
+
+                    newNN <- rep(netName, length(tmpNN))
+                    names(newNN) <- tmpNN
+                    nodeN <- c(nodeN, newNN)
+
+                    coGraph <- igraph::union(coGraph, tmpAdd)
+                }
             }
 
-            ## Add EC if present
-            if (ecPlot) {
-                mbPlot <- TRUE
-                if (is.null(ecFile)) {stop("Please provide EC file")}
-                if (is.null(upTaxFile)) {stop("Please provide UniProt taxonomy file")}
-                ecDf <- wcEC(file=ecFile, ecnum="all", taxec=TRUE,
-                    taxFile=upTaxFile, candTax=mbList)
-                ecg <- simplify(graph_from_data_frame(ecDf[,c("desc","query")], 
-                    directed=FALSE))
-                coGraph <- igraph::union(coGraph, ecg)
-                allecs <- unique(ecDf$desc)
-            } else {
-                allecs <- NULL
-            }
-
-
-            ## Add metab if present
-            ## TODO: somehow show edge weights other than
-            ## correlation between words
-            if (!is.null(metab)) {
-                if (is.null(metCol)) {
-                    stop("No column names specified")
-                }
-                qqcat("Checking metabolites\n")
-                metabGraph <- NULL
-                for (sp in mbList) {
-                    tmp <- metab[grepl(sp,metab[[metCol[1]]]),]
-                    tmp <- tmp[abs(tmp[[metCol[3]]])>metabThresh,]
-                    if (dim(tmp)[1]!=0) {
-                        for (met in tmp[[metCol[2]]]) {
-                            metabGraph <- rbind(metabGraph, c(sp, met))
-                        }
-                    } else {
-                        qqcat("  Found no metabolites for @{sp}\n")
-                    }
-                }
-                if (!is.null(metabGraph)) {
-                    allmetabs <- metabGraph[,2]
-                    metabGraph <- simplify(graph_from_edgelist(metabGraph,
-                        directed=FALSE))
-                    coGraph <- igraph::union(coGraph, metabGraph)
-                } else {
-                    allmetabs <- NULL
-                }
-            } else {
-                allmetabs <- NULL
-            }
-            
+            ## Set edge weight
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshMbPlot <- 0.01} else {
-                corThreshMbPlot <- corThresh - 0.1}
+                corThreshMbPlot <- corThresh - 0.1
+            }
             tmpW[is.na(tmpW)] <- corThreshMbPlot
             E(coGraph)$weight <- tmpW
-        } else {
-            alldis <- NULL
-            allmetabs <- NULL
+
         }
+
 
 
         if (tag) {
@@ -491,14 +501,8 @@ wcBSDB <- function (mbList,
             ## Add disease and other labs
             addC <- V(coGraph)$tag
             for (nn in seq_along(names(V(coGraph)))) {
-                if (names(V(coGraph))[nn] %in% alldis) {
-                    addC[nn] <- "disease"
-                } else if (names(V(coGraph))[nn] %in% allmetabs) {
-                    addC[nn] <- "metabolites"
-                } else if (names(V(coGraph))[nn] %in% mbList) {
-                    addC[nn] <- "microbes"
-                } else if (names(V(coGraph))[nn] %in% allecs) {
-                    addC[nn] <- "enzymes"
+                if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                    addC[nn] <- nodeN[names(V(coGraph))[nn]]
                 } else {
                     next
                 }
@@ -513,11 +517,16 @@ wcBSDB <- function (mbList,
                 newGname <- c(newGname, pdic[nm])
               } else {
                 newGname <- c(newGname, nm)
-              }
+                  }
             }
             coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }
 
+
+        ## Add pseudo-freq
+        naRm <- V(coGraph)$Freq
+        naRm[is.na(naRm)] <- min(naRm, na.rm=TRUE)
+        V(coGraph)$Freq <- naRm
 
         ret@igraph <- coGraph
 

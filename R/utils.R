@@ -33,6 +33,7 @@ parseMetaCycPathway <- function(file, candSp) {
       }
       if (startsWith(line,"//")) {
         coms <- paste(com[!is.na(com)], collapse=" ")
+        coms <- gsub("/","",coms)
         if (grepl(paste(candSp,collapse="|"),coms)) {
           allmeta <- rbind(allmeta, c(pwy, coms, commn))
         }
