@@ -11,7 +11,7 @@
 retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
                          filterWords,additionalRemove,colorText,
                          edgeLink, queryPlot, layout, pal,
-                         showNeighbors, showFreq, nodePal) {
+                         showNeighbors, showFreq, nodePal,addNet=NULL) {
 
   ret@model <- "udpipe"
   ## Frequency
@@ -31,9 +31,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
 
   ## Annotate using udpipe
   alledges <- NULL
-  allverbs <- NULL
-  allnouns <- NULL
-  alladjs <- NULL
+  allwordatt <- NULL
   allqueries <- NULL
   
   ## Not include these in graph
@@ -53,9 +51,8 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     x <- data.frame(tmpm)
     
     ## Use token, not lemma
-    verbs <- subset(x, upos=="VERB")$token
-    nouns <- subset(x, upos=="NOUN")$token
-    adjs <- subset(x, upos=="ADJ")$token
+    wordatt <- x$upos
+    names(wordatt) <- x$token
     
     for (sent in x$sentence_id) {
       one <- subset(x, sentence_id==sent)
@@ -79,36 +76,59 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     alledges <- rbind(alledges,edges)
     allqueries <- rbind(allqueries, ges)
     
-    allverbs <- c(allverbs,verbs)
-    alladjs <- c(alladjs, adjs)
-    allnouns <- c(allnouns, nouns)
+    allwordatt <- c(allwordatt, wordatt)
   }
+
+  allwordatt <- tapply(allwordatt,
+    names(allwordatt),
+    function(x) {
+      if(length(unique(x))!=1){
+        paste(unique(x), collapse=",")
+      } else {
+        unique(x)
+      }})
+  print(allwordatt)
+
   geGraph <- simplify(igraph::graph_from_data_frame(allqueries, directed=FALSE))
   udpGraph <- simplify(igraph::graph_from_data_frame(alledges,directed=FALSE))
 
   if (queryPlot) {
     udpGraph <- igraph::union(udpGraph, geGraph)
   }
-  print(sort(allverbs))
+
+  nodeN <- NULL  
+  if (!is.null(addNet)) {
+    for (netName in names(addNet)) {
+        tmpAdd <- addNet[[netName]]
+        tmpNN <- names(V(tmpAdd))
+        tmpNN <- tmpNN[!tmpNN %in% names(nodeN)]
+
+        newNN <- rep(netName, length(tmpNN))
+        names(newNN) <- tmpNN
+        nodeN <- c(nodeN, newNN)
+
+        udpGraph <- igraph::union(udpGraph, tmpAdd)
+    }
+  }
+
+
   cat <- NULL
   fre <- NULL
   for ( i in names(V(udpGraph))) {
     fre <- c(fre, vfreq[i])
-    if (i %in% allverbs) {
-      cat <- c(cat, "VERB")
-    } else if (i %in% allnouns) {
-      cat <- c(cat, "NOUN")
-    } else if (i %in% alladjs) {
-      cat <- c(cat, "ADJECTIVE")
+    if (i %in% names(allwordatt)) {
+      cat <- c(cat, allwordatt[i])
     } else if (i %in% texts$query ){
       cat <- c(cat, "Query")
+    } else if (i %in% names(nodeN)) {
+      cat <- c(cat, nodeN[i])
     } else {
       cat <- c(cat, "Others")
     }
   }
 
-  ## Set query freq as median value of freq
-  fre[is.na(fre)] <- median(fre, na.rm=TRUE)
+  ## Set pseudo freq as min value of freq
+  fre[is.na(fre)] <- min(fre, na.rm=TRUE)
   
   V(udpGraph)$cat <- cat
   V(udpGraph)$freq <- fre
@@ -148,7 +168,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     net <- net + geom_edge_diagonal(color="grey")
   }
   
-  
+
   if (colorText) {
     net <- net + geom_node_point(aes(color=freq, size=freq))
     net <- net + geom_node_text(aes(label=name, color=freq, size=freq),
