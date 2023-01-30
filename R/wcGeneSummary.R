@@ -59,6 +59,8 @@
 #' Otherwise take sum.
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param argList parameters to pass to wordcloud()
+#' @param normalize sum normalize the term frequency document-wise
+#' @param takeMean take mean values for each term in term-document matrix
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -99,9 +101,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
-                            onWholeTDM=FALSE, pre=TRUE,
+                            onWholeTDM=FALSE, pre=TRUE, takeMean=FALSE,
                             nodePal=palette(), collapse=FALSE,
-                            useUdpipe=FALSE,
+                            useUdpipe=FALSE, normalize=FALSE,
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             argList=list()) {
     ret <- new("osplot")
@@ -271,12 +273,21 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             docs <- TermDocumentMatrix(docs)
         }
     }
-    mat <- as.matrix(docs)
 
+    mat <- as.matrix(docs)
+    if (normalize) {
+        mat <- sweep(mat, 2, colSums(mat), `/`)
+    }
+
+    if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
     if (takeMax) {
         perterm <- apply(mat, 1, max, na.rm=TRUE)
     } else {
-        perterm <- rowSums(mat)
+        if (takeMean) {
+            perterm <- apply(mat,1,mean)
+        } else {
+            perterm <- rowSums(mat)
+        }
     }
 
     matSorted <- sort(perterm, decreasing=TRUE)

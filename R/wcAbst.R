@@ -62,7 +62,8 @@
 #' @param udpipeOnlyFreq when using udpipe, include only high-frequent words
 #' @param udpipeOnlyFreqN when using udpipe, include only the neighbors of
 #' high-frequent words
-#' 
+#' @param normalize sum normalize the term frequency document-wise
+#' @param takeMean take mean values for each term in term-document matrix
 #' @export
 #' @examples wcAbst("DDX41")
 #' @return list of data frame and ggplot2 object
@@ -90,7 +91,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
-                   udpipeModel="english-ewt-ud-2.5-191206.udpipe",
+                   udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
@@ -203,11 +204,18 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   }
   
   mat <- as.matrix(docs)
+
+  if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
   if (takeMax) {
       perterm <- apply(mat, 1, max, na.rm=TRUE)
   } else {
-      perterm <- rowSums(mat)
+      if (takeMean) {
+          perterm <- apply(mat,1,mean)
+      } else {
+          perterm <- rowSums(mat)
+      }
   }
+
   matSorted <- sort(perterm, decreasing=TRUE)
   ret@wholeFreq <- matSorted
 

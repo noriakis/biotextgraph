@@ -49,6 +49,8 @@ wcAbst(
   udpipeOnlyFreq = FALSE,
   udpipeOnlyFreqN = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
+  normalize = FALSE,
+  takeMean = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
@@ -152,6 +154,10 @@ Otherwise take sum.}
 high-frequent words}
 
 \item{udpipeModel}{udpipe model file name}
+
+\item{normalize}{sum normalize the term frequency document-wise}
+
+\item{takeMean}{take mean values for each term in term-document matrix}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
