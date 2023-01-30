@@ -87,7 +87,6 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
       } else {
         unique(x)
       }})
-  print(allwordatt)
 
   geGraph <- simplify(igraph::graph_from_data_frame(allqueries, directed=FALSE))
   udpGraph <- simplify(igraph::graph_from_data_frame(alledges,directed=FALSE))

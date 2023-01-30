@@ -6,10 +6,11 @@
 #' 
 #' @param file path to pathways.dat
 #' @param candSp species to grepl
+#' @param withTax parse taxonomy information
 #' 
 #' @export
 #' 
-parseMetaCycPathway <- function(file, candSp) {
+parseMetaCycPathway <- function(file, candSp, withTax=FALSE) {
   flg <- FALSE
   allmeta <- NULL
   con = file(file, "r")
@@ -21,6 +22,8 @@ parseMetaCycPathway <- function(file, candSp) {
     if (startsWith(line,"UNIQUE-ID - ")) {
       com <- NA
       commn <- NA
+      spec <- NULL
+      taxr <- NULL
       pwy <- gsub("UNIQUE-ID - ","",line)
       flg <- TRUE
     }
@@ -31,19 +34,36 @@ parseMetaCycPathway <- function(file, candSp) {
       if (startsWith(line, "COMMON-NAME")) {
         commn <- gsub("COMMON-NAME - ","",line)
       }
+      if (startsWith(line, "SPECIES - ")) {
+        spec <- c(spec, gsub("SPECIES - ","",line))
+      }
+      if (startsWith(line, "TAXONOMIC-RANGE - ")) {
+        taxr <- c(taxr, gsub("TAXONOMIC-RANGE - ","",line))
+      }
       if (startsWith(line,"//")) {
         coms <- paste(com[!is.na(com)], collapse=" ")
         coms <- gsub("/","",coms)
+        if (length(spec)!=0) {spec <- paste0(spec, collapse=",")} else {spec <- ""}
+        if (length(taxr)!=0) {taxr <- paste0(taxr, collapse=",")} else {taxr <- ""}
+
         if (grepl(paste(candSp,collapse="|"),coms)) {
-          allmeta <- rbind(allmeta, c(pwy, coms, commn))
+          if (withTax) {
+            allmeta <- rbind(allmeta, c(pwy, coms, commn, spec, taxr))
+          } else {
+            allmeta <- rbind(allmeta, c(pwy, coms, commn))
+          }
         }
         flg <- FALSE
       }
     }
   }
   close(con)
-  allmeta <- data.frame(allmeta) |> `colnames<-`(c("pathwayID","text","commonName"))
-  allmeta |> dim()
+  if (withTax) {
+    allmeta <- data.frame(allmeta) |> `colnames<-`(c("pathwayID","text","commonName","species","taxonomicRange"))
+  } else {
+    allmeta <- data.frame(allmeta) |> `colnames<-`(c("pathwayID","text","commonName"))
+  }
+  # allmeta |> dim()
   queries <- NULL
   for (q in candSp) {
     queries <- cbind(queries, grepl(q, allmeta$text))
@@ -803,6 +823,7 @@ getUPtax <- function(file, candUP, candTax=NULL) {
     }
     if (grepl("N=",line)) {
       code <- strsplit(line, " ")[[1]][1]
+      if (code=="Code") {next}
       sn <- unlist(strsplit(line, "N="))[2]
       if (length(candUP)==1) {
         if (candUP=="all") {

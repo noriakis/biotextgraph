@@ -4,12 +4,14 @@
 \alias{parseMetaCycPathway}
 \title{parseMetaCycPathway}
 \usage{
-parseMetaCycPathway(file, candSp)
+parseMetaCycPathway(file, candSp, withTax = FALSE)
 }
 \arguments{
 \item{file}{path to pathways.dat}
 
 \item{candSp}{species to grepl}
+
+\item{withTax}{parse taxonomy information}
 }
 \description{
 parse MetaCyc "pathways.dat"
