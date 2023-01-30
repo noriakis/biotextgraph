@@ -51,9 +51,11 @@ wcGeneSummary(
   madeUpperGenes = TRUE,
   onWholeTDM = FALSE,
   pre = TRUE,
+  takeMean = FALSE,
   nodePal = palette(),
   collapse = FALSE,
   useUdpipe = FALSE,
+  normalize = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   argList = list()
 )
@@ -155,11 +157,15 @@ on whole dataset or top-words specified by numWords}
 
 \item{pre}{remove words "pmids", "geneids"}
 
+\item{takeMean}{take mean values for each term in term-document matrix}
+
 \item{nodePal}{node palette when tag is TRUE}
 
 \item{collapse}{default to FALSE, collapse all the sentences}
 
 \item{useUdpipe}{use udpipe to make a network}
+
+\item{normalize}{sum normalize the term frequency document-wise}
 
 \item{udpipeModel}{udpipe model file name}
 

@@ -53,8 +53,9 @@
 #' Otherwise take sum.
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
-#' 
 #' @param argList parameters to pass to wordcloud()
+#' @param normalize sum normalize the term frequency document-wise
+#' @param takeMean take mean values for each term in term-document matrix
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -78,7 +79,7 @@
 #' 
 wcBSDB <- function (mbList,
                     excludeFreq=1000, exclude="frequency",
-                    excludeType=">",
+                    excludeType=">", normalize=FALSE, takeMean=FALSE,
                     additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL, takeMax=FALSE,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
@@ -329,11 +330,18 @@ wcBSDB <- function (mbList,
     }
 
     mat <- as.matrix(docs)
+    
+    if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
     if (takeMax) {
         perterm <- apply(mat, 1, max, na.rm=TRUE)
     } else {
-        perterm <- rowSums(mat)
+        if (takeMean) {
+            perterm <- apply(mat,1,mean)
+        } else {
+            perterm <- rowSums(mat)
+        }
     }
+
     matSorted <- sort(perterm, decreasing=TRUE)
     ret@wholeFreq <- matSorted
 

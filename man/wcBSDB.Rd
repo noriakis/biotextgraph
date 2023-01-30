@@ -9,6 +9,8 @@ wcBSDB(
   excludeFreq = 1000,
   exclude = "frequency",
   excludeType = ">",
+  normalize = FALSE,
+  takeMean = FALSE,
   additionalRemove = NA,
   tfidf = FALSE,
   target = "title",
@@ -63,6 +65,10 @@ wcBSDB(
 \item{exclude}{"frequency" or "tfidf",}
 
 \item{excludeType}{">" or "<"}
+
+\item{normalize}{sum normalize the term frequency document-wise}
+
+\item{takeMean}{take mean values for each term in term-document matrix}
 
 \item{additionalRemove}{specific words to be excluded}
 
