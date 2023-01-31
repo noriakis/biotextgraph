@@ -24,6 +24,7 @@
 #' @param tag cluster the words based on text using pvclust
 #' @param tagWhole tag based on whole data or subset
 #' @param genePlot plot associated genes (default: FALSE)
+#' Query gene name is shown with (Q)
 #' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
 #'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
 #' @param filNum specify filter tfidf
@@ -205,6 +206,10 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   
   mat <- as.matrix(docs)
 
+  if (normalize) {
+      mat <- sweep(mat, 2, colSums(mat), `/`)
+  }
+
   if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
   if (takeMax) {
       perterm <- apply(mat, 1, max, na.rm=TRUE)
@@ -313,7 +318,11 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     ## before or after?
     coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
     V(coGraph)$Freq <- matSorted[V(coGraph)$name]
-    
+    ## Set pseudo freq as min value of freq
+    # fre <- V(coGraph)$Freq
+    # fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+    # V(coGraph)$Freq <- fre
+
     if (deleteZeroDeg){
       coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
     }

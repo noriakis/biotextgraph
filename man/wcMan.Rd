@@ -36,6 +36,8 @@ wcMan(
   takeMax = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
+  normalize = FALSE,
+  takeMean = FALSE,
   onWholeDTM = FALSE,
   stem = FALSE,
   argList = list()
@@ -106,6 +108,10 @@ Otherwise take sum.}
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{additionalRemove}{specific words to be excluded}
+
+\item{normalize}{sum normalize the term frequency document-wise}
+
+\item{takeMean}{take mean values for each term in term-document matrix}
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
