@@ -183,7 +183,7 @@ wcBSDB <- function (mbList,
                 for (pmid in PMIDs) {
                     if (length(obtainText(pmid))!=0) {
                         for (text in obtainText(pmid)) {
-                            tax <- unique(subset(fil, PMID==pmid)$query)
+                            tax <- unique(subset(fil, ID==pmid)$query)
                             abstDf <- rbind(abstDf, c(pmid, text, tax))
                         }
                     }
@@ -331,6 +331,10 @@ wcBSDB <- function (mbList,
 
     mat <- as.matrix(docs)
     
+    if (normalize) {
+        mat <- sweep(mat, 2, colSums(mat), `/`)
+    }
+
     if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
     if (takeMax) {
         perterm <- apply(mat, 1, max, na.rm=TRUE)

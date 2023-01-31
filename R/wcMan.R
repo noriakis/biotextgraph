@@ -41,6 +41,8 @@
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
 #' @param argList parameters to pass to wordcloud()
+#' @param normalize sum normalize the term frequency document-wise
+#' @param takeMean take mean values for each term in term-document matrix
 #' 
 #' @export
 #' @return list of data frame and ggplot2 object
@@ -67,6 +69,7 @@ wcMan <- function(df, madeUpper=NULL,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
+                   normalize=FALSE, takeMean=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list())
 {
     ret <- new("osplot")
@@ -122,10 +125,19 @@ wcMan <- function(df, madeUpper=NULL,
     }
   
     mat <- as.matrix(docs)
+    if (normalize) {
+        mat <- sweep(mat, 2, colSums(mat), `/`)
+    }
+
+    if (takeMax & takeMean) {stop("Should either of specify takeMax or takeMean")}
     if (takeMax) {
-      perterm <- apply(mat, 1, max, na.rm=TRUE)
+        perterm <- apply(mat, 1, max, na.rm=TRUE)
     } else {
-      perterm <- rowSums(mat)
+        if (takeMean) {
+            perterm <- apply(mat,1,mean)
+        } else {
+            perterm <- rowSums(mat)
+        }
     }
     matSorted <- sort(perterm, decreasing=TRUE)
     ret@wholeFreq <- matSorted
@@ -199,6 +211,7 @@ wcMan <- function(df, madeUpper=NULL,
 
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
       V(coGraph)$Freq <- matSorted[V(coGraph)$name]
+
     
       if (deleteZeroDeg){
         coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
@@ -259,7 +272,13 @@ wcMan <- function(df, madeUpper=NULL,
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
       
-    
+
+      ## Set pseudo freq as min value of freq
+      # fre <- V(coGraph)$Freq
+      # fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+      # V(coGraph)$Freq <- fre
+
+
       if (tag) {
         netCol <- tolower(names(V(coGraph)))
         for (i in seq_along(pvcl$clusters)){

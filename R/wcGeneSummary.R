@@ -473,6 +473,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
+
+
+
         if (deleteZeroDeg){
             coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
         }
@@ -534,6 +537,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             V(coGraph)$grp <- grp
         }
            
+        ## Set pseudo freq as min value of freq
+        # fre <- V(coGraph)$Freq
+        # fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+        # V(coGraph)$Freq <- fre
 
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
