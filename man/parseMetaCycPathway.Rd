@@ -4,7 +4,7 @@
 \alias{parseMetaCycPathway}
 \title{parseMetaCycPathway}
 \usage{
-parseMetaCycPathway(file, candSp, withTax = FALSE)
+parseMetaCycPathway(file, candSp, withTax = FALSE, noComma = FALSE)
 }
 \arguments{
 \item{file}{path to pathways.dat}
