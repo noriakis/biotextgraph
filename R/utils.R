@@ -1,3 +1,22 @@
+#' convertMetaCyc
+#'
+#' this function needs taxonomizr package to be installed,
+#' and needs download of databases by prepareDatabase(getAccessions=FALSE)
+#' 
+#' @param ids tax ids from metacyc
+#' @param onlySpecies parse only species
+#' @export
+convertMetaCyc <- function (ids, onlySpecies=FALSE) {
+  convIds <- sapply(ids, function(x) if (grepl("TAX-",x)) unlist(strsplit(x,"-")[[1]])[2] else x)
+  if (onlySpecies) {
+    parsed <- apply(taxonomizr::getTaxonomy(convIds), 1, function(x) x[7])
+  } else {
+    parsed <- apply(taxonomizr::getTaxonomy(convIds), 1, function(x) paste(x, collapse=";"))
+  }
+  as.character(parsed)
+}
+
+
 #'
 #' parseMetaCycPathway
 #' 
@@ -10,8 +29,9 @@
 #' 
 #' @export
 #' 
-parseMetaCycPathway <- function(file, candSp, withTax=FALSE) {
+parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE) {
   flg <- FALSE
+  allFlg <- FALSE
   allmeta <- NULL
   con = file(file, "r")
   while ( TRUE ) {
@@ -43,15 +63,50 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE) {
       if (startsWith(line,"//")) {
         coms <- paste(com[!is.na(com)], collapse=" ")
         coms <- gsub("/","",coms)
-        if (length(spec)!=0) {spec <- paste0(spec, collapse=",")} else {spec <- ""}
-        if (length(taxr)!=0) {taxr <- paste0(taxr, collapse=",")} else {taxr <- ""}
 
-        if (grepl(paste(candSp,collapse="|"),coms)) {
-          if (withTax) {
-            allmeta <- rbind(allmeta, c(pwy, coms, commn, spec, taxr))
-          } else {
-            allmeta <- rbind(allmeta, c(pwy, coms, commn))
+        if (!noComma) {
+          if (length(spec)!=0) {spec <- paste0(spec, collapse=",")} else {spec <- ""}
+          if (length(taxr)!=0) {taxr <- paste0(taxr, collapse=",")} else {taxr <- ""}          
+        } else {
+          if (length(spec)!=0) {} else {spec <- ""}
+          if (length(taxr)!=0) {} else {taxr <- ""}
+        }
+        if (length(candSp)==1) {
+          if (candSp=="all") {
+             allFlg <- TRUE
           }
+        }
+
+        if (!allFlg) {
+          if (grepl(paste(candSp,collapse="|"),coms)) {
+            if (withTax) {
+              if (noComma) {
+                for (sp in spec) {
+                  for (tax in taxr) {
+                    allmeta <- rbind(allmeta, c(pwy, coms, commn, sp, tax))
+                  }
+                }
+              } else {
+                allmeta <- rbind(allmeta, c(pwy, coms, commn, spec, taxr))
+              }
+            } else {
+              allmeta <- rbind(allmeta, c(pwy, coms, commn))
+            }
+          }
+        } else {
+            if (withTax) {
+              if (noComma) {
+                for (sp in spec) {
+                  for (tax in taxr) {
+                    allmeta <- rbind(allmeta, c(pwy, coms, commn, sp, tax))
+                  }
+                }
+              } else {
+                allmeta <- rbind(allmeta, c(pwy, coms, commn, spec, taxr))
+              }
+            } else {
+              allmeta <- rbind(allmeta, c(pwy, coms, commn))
+            }
         }
         flg <- FALSE
       }
@@ -64,11 +119,13 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE) {
     allmeta <- data.frame(allmeta) |> `colnames<-`(c("pathwayID","text","commonName"))
   }
   # allmeta |> dim()
-  queries <- NULL
-  for (q in candSp) {
-    queries <- cbind(queries, grepl(q, allmeta$text))
+  if (!allFlg) {
+    queries <- NULL
+    for (q in candSp) {
+      queries <- cbind(queries, grepl(q, allmeta$text))
+    }
+    allmeta$query <- apply(queries, 1, function(x) paste0(candSp[x], collapse=","))
   }
-  allmeta$query <- apply(queries, 1, function(x) paste0(candSp[x], collapse=","))
   return(allmeta)
 }
 

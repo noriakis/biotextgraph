@@ -135,7 +135,8 @@ instead of correlation using bnlearn}
 
 \item{ngram}{default to NA (1)}
 
-\item{genePlot}{plot associated genes (default: FALSE)}
+\item{genePlot}{plot associated genes (default: FALSE)
+Query gene name is shown with (Q)}
 
 \item{onlyDf}{return only the raw data.frame of searching PubMed}
 
