@@ -4,7 +4,13 @@
 \alias{parseMetaCycPathway}
 \title{parseMetaCycPathway}
 \usage{
-parseMetaCycPathway(file, candSp, withTax = FALSE, noComma = FALSE)
+parseMetaCycPathway(
+  file,
+  candSp,
+  withTax = FALSE,
+  noComma = FALSE,
+  clear = FALSE
+)
 }
 \arguments{
 \item{file}{path to pathways.dat}
@@ -14,6 +20,8 @@ parseMetaCycPathway(file, candSp, withTax = FALSE, noComma = FALSE)
 \item{withTax}{parse taxonomy information}
 
 \item{noComma}{no comma separated when taxonomy parsing}
+
+\item{clear}{delete HTML tags and some symbols}
 }
 \description{
 parse MetaCyc "pathways.dat"
