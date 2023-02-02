@@ -76,6 +76,25 @@ convertMetaCyc <- function (ids, onlySpecies=FALSE) {
 }
 
 
+#' clearPath
+#' 
+#' clear MetaCyc pathway strings
+#' 
+#' @param ex vector of text
+#' @noRd
+clearPath <- function (ex) {
+    ex <- gsub("|FRAME: ", "", ex)
+    ex <- gsub("|CITS: ", "", ex)
+    ex <- gsub("\\[[^][]*]", "", ex)
+    ex <- gsub("\"", "", ex)
+    ## Clean HTML tags
+    ex <- gsub("<.*?>", "", ex)
+    ## lastly remove \\|
+    ex <- gsub("\\|","",ex)
+    ex
+}
+
+
 #'
 #' parseMetaCycPathway
 #' 
@@ -86,10 +105,11 @@ convertMetaCyc <- function (ids, onlySpecies=FALSE) {
 #' @param candSp species to grepl
 #' @param withTax parse taxonomy information
 #' @param noComma no comma separated when taxonomy parsing
+#' @param clear delete HTML tags and some symbols
 #' 
 #' @export
 #' 
-parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE) {
+parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clear=FALSE) {
   flg <- FALSE
   allFlg <- FALSE
   allmeta <- NULL
@@ -185,6 +205,10 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE) {
       queries <- cbind(queries, grepl(q, allmeta$text))
     }
     allmeta$query <- apply(queries, 1, function(x) paste0(candSp[x], collapse=","))
+  }
+
+  if (clear) {
+    allmeta$text <- clearPath(allmeta$text)
   }
   return(allmeta)
 }
