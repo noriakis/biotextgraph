@@ -27,7 +27,7 @@
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
 #' @param onlyCorpus return only corpus
-#' @param onlyTDM return only TDM
+#' @param onlyTDM return only TDM, if quanteda, return DFM
 #' @param preserve try to preserve the original characters
 #' @param numOnly delete number only
 #' @param cl cluster to pass to pvclust (snow::makeCluster(n))
@@ -43,6 +43,9 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
+#' @param queryPlot plot query
+#' @param useQuanteda use quanteda functions to generate
+#' @param quantedaArgs list of arguments to be passed to tokens()
 #' 
 #' @export
 #' @return list of data frame and ggplot2 object
@@ -60,7 +63,7 @@
 #' @importFrom ggplotify as.ggplot
 wcMan <- function(df, madeUpper=NULL,
                    useFil=NA, filType="above",
-                   filNum=0,
+                   filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
                    pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
@@ -69,12 +72,12 @@ wcMan <- function(df, madeUpper=NULL,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA,
-                   normalize=FALSE, takeMean=FALSE,
+                   normalize=FALSE, takeMean=FALSE, queryPlot=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list())
 {
     ret <- new("osplot")
     ret@type <- paste0("manual")
-    docs <- VCorpus(VectorSource(df$text))
+    ret@rawText <- df
 
     ## Probably set default filnum?
     if (!is.na(useFil)){
@@ -89,42 +92,55 @@ wcMan <- function(df, madeUpper=NULL,
         ret@filtered <- allfils
       }
     }
-    if (preserve) {
-      pdic <- preserveDict(docs, ngram, numOnly, stem)
-      ret@dic <- pdic
-    }
-    docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
-    ret@corpus <- docs
-    if (onlyCorpus){
-      return(docs)
-    }
-    if (!is.na(ngram)){
-      NgramTokenizer <- function(x)
-        unlist(lapply(ngrams(words(x), ngram),
-                      paste, collapse = " "),
-               use.names = FALSE)
-      if (tfidf) {
-        docs <- TermDocumentMatrix(docs,
-                                   control = list(tokenize = NgramTokenizer,
-                                                  weighting = weightTfIdf))
-      } else {
-        docs <- TermDocumentMatrix(docs,
-                                   control = list(tokenize = NgramTokenizer))
-      }
+    if (useQuanteda) {
+      preserve <- FALSE
+      ret <- returnQuanteda(ret, quantedaArgs,numWords,ngram,
+                           filterWords,additionalRemove, tfidf)
+      if (onlyCorpus) {return(ret@corpusQuanteda)}
+      if (onlyTDM) {return(ret@dfm)}
+      docs <- t(as.matrix(ret@dfm))
+      mat <- t(as.matrix(ret@dfm))
     } else {
-      if (tfidf) {
-        docs <- TermDocumentMatrix(docs,
-                                   control = list(weighting = weightTfIdf))
-      } else {
-        docs <- TermDocumentMatrix(docs)
+
+      docs <- VCorpus(VectorSource(df$text))
+      if (preserve) {
+        pdic <- preserveDict(docs, ngram, numOnly, stem)
+        ret@dic <- pdic
       }
+      docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
+      ret@corpus <- docs
+      if (onlyCorpus){
+        return(docs)
+      }
+      if (!is.na(ngram)){
+        NgramTokenizer <- function(x)
+          unlist(lapply(ngrams(words(x), ngram),
+                        paste, collapse = " "),
+                 use.names = FALSE)
+        if (tfidf) {
+          docs <- TermDocumentMatrix(docs,
+                                     control = list(tokenize = NgramTokenizer,
+                                                    weighting = weightTfIdf))
+        } else {
+          docs <- TermDocumentMatrix(docs,
+                                     control = list(tokenize = NgramTokenizer))
+        }
+      } else {
+        if (tfidf) {
+          docs <- TermDocumentMatrix(docs,
+                                     control = list(weighting = weightTfIdf))
+        } else {
+          docs <- TermDocumentMatrix(docs)
+        }
+      }
+      ret@TDM <- docs
+      if (onlyTDM){
+        return(docs)
+      }
+      mat <- as.matrix(docs)
     }
+
   
-    if (onlyTDM){
-      return(docs)
-    }
-  
-    mat <- as.matrix(docs)
     if (normalize) {
         mat <- sweep(mat, 2, colSums(mat), `/`)
     }
@@ -139,9 +155,9 @@ wcMan <- function(df, madeUpper=NULL,
             perterm <- rowSums(mat)
         }
     }
+
     matSorted <- sort(perterm, decreasing=TRUE)
     ret@wholeFreq <- matSorted
-    ret@TDM <- docs
   
     if (numWords > length(matSorted)){
       numWords <- length(matSorted)
@@ -248,23 +264,25 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
 
-      genemap <- c()
-      for (rn in nodeName){
-        tmp <- freqWordsDTM[ ,rn]
-        for (nm in names(tmp[tmp!=0])){
-          if (nm!=""){
-            if (grepl(",",nm,fixed=TRUE)){
-              for (nm2 in unlist(strsplit(nm, ","))){
-                genemap <- rbind(genemap, c(rn, paste(nm2)))
+      if (queryPlot) {
+        genemap <- c()
+        for (rn in nodeName){
+          tmp <- freqWordsDTM[ ,rn]
+          for (nm in names(tmp[tmp!=0])){
+            if (nm!=""){
+              if (grepl(",",nm,fixed=TRUE)){
+                for (nm2 in unlist(strsplit(nm, ","))){
+                  genemap <- rbind(genemap, c(rn, paste(nm2)))
+                }
+              } else {
+                genemap <- rbind(genemap, c(rn, paste(nm)))
               }
-            } else {
-              genemap <- rbind(genemap, c(rn, paste(nm)))
             }
           }
         }
+        genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
+        coGraph <- igraph::union(coGraph, genemap)
       }
-      genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
-      coGraph <- igraph::union(coGraph, genemap)
 
       tmpW <- E(coGraph)$weight
       if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
@@ -449,7 +467,7 @@ wcMan <- function(df, madeUpper=NULL,
     matSorted <- matSorted[1:numWords]
     returnDf <- data.frame(word = names(matSorted),freq=matSorted)
     freqWords <- names(matSorted)
-    freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
+    freqWordsDTM <- t(as.matrix(docs[row.names(docs) %in% freqWords, ]))
     
     if (tag) {
       if (!is.null(redo) & length(redo@pvpick)!=0) {

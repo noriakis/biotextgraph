@@ -12,6 +12,8 @@ parseMetaCycPathway(file, candSp, withTax = FALSE, noComma = FALSE)
 \item{candSp}{species to grepl}
 
 \item{withTax}{parse taxonomy information}
+
+\item{noComma}{no comma separated when taxonomy parsing}
 }
 \description{
 parse MetaCyc "pathways.dat"

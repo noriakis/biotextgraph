@@ -187,5 +187,5 @@ list of data frame and ggplot2 object
 make word cloud or correlation network from PubMed
 }
 \examples{
-wcAbst("DDX41")
+\dontrun{wcAbst("DDX41")}
 }
