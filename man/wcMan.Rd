@@ -10,6 +10,8 @@ wcMan(
   useFil = NA,
   filType = "above",
   filNum = 0,
+  useQuanteda = FALSE,
+  quantedaArgs = list(),
   pvclAlpha = 0.95,
   numOnly = TRUE,
   tfidf = FALSE,
@@ -38,6 +40,7 @@ wcMan(
   additionalRemove = NA,
   normalize = FALSE,
   takeMean = FALSE,
+  queryPlot = FALSE,
   onWholeDTM = FALSE,
   stem = FALSE,
   argList = list()
@@ -54,6 +57,10 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 \item{filType}{"above" or "below"}
 
 \item{filNum}{specify filter tfidf}
+
+\item{useQuanteda}{use quanteda functions to generate}
+
+\item{quantedaArgs}{list of arguments to be passed to tokens()}
 
 \item{pvclAlpha}{alpha for pvpick()}
 
@@ -85,7 +92,7 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
 \item{onlyCorpus}{return only corpus}
 
-\item{onlyTDM}{return only TDM}
+\item{onlyTDM}{return only TDM, if quanteda, return DFM}
 
 \item{bn}{perform bootstrap-based Bayesian network inference 
 instead of correlation using bnlearn}
@@ -112,6 +119,8 @@ Otherwise take sum.}
 \item{normalize}{sum normalize the term frequency document-wise}
 
 \item{takeMean}{take mean values for each term in term-document matrix}
+
+\item{queryPlot}{plot query}
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}

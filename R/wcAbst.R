@@ -66,7 +66,7 @@
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
 #' @export
-#' @examples wcAbst("DDX41")
+#' @examples \dontrun{wcAbst("DDX41")}
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary

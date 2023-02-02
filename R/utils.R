@@ -1,3 +1,62 @@
+
+#'
+#' returnQuanteda
+#' 
+#' simple function to generate dfm and export to wc* functions.
+#' It did not utilize full functionality of quanteda, and 
+#' will add better support.
+#' @param ret osplot object
+#' @param quantedaArgs args to passed to tokens function
+#' @param numWords number of words
+#' @param ngram tokens_ngrams
+#' @param tfidf use dfm_tfidf or not
+#' @param filterWords filtered words
+#' @param additionalRemove user-specified filter words
+returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
+                           filterWords,additionalRemove, tfidf) {
+    
+    if (length(quantedaArgList)==0) {
+        quantedaArgList <- list(
+            remove_punct=TRUE,
+            remove_symbols=TRUE,
+            remove_numbers=TRUE,
+            remove_url=TRUE,
+            remove_separators=TRUE,
+            split_hyphens=FALSE
+        )
+    }
+
+    docs <- corpus(ret@rawText$text)
+    ret@corpusQuanteda <- docs
+    
+    ## case_insensitive=TRUE
+    
+    quantedaArgList[["x"]] <- docs
+    tokens <- do.call("tokens", quantedaArgList) |>
+        tokens_remove(quanteda::stopwords("english"))
+
+    if (length(additionalRemove[!is.na(additionalRemove)])!=0) {
+        tokens <- tokens_remove(tokens, additionalRemove)
+    }    
+    if (length(filterWords[!is.na(filterWords)])!=0) {
+        tokens <- tokens_remove(tokens, filterWords)
+    }
+    if (!is.na(ngram)) {
+        tokens <- tokens_ngrams(tokens, n=ngram)
+    }
+
+    freqWordsDFM <- dfm(tokens)
+    if (tfidf) {
+      freqWordsDFM <- dfm_tfidf(freqWordsDFM)
+    }
+    ret@dfm <- freqWordsDFM
+    # freqWordsAll <- sort(quanteda::featfreq(freqWordsDFM),
+    #                   decreasing=TRUE)
+    # freqWords <- names(freqWordsAll[1:numWords])
+    return(ret)
+}
+
+
 #' convertMetaCyc
 #'
 #' this function needs taxonomizr package to be installed,
@@ -26,6 +85,7 @@ convertMetaCyc <- function (ids, onlySpecies=FALSE) {
 #' @param file path to pathways.dat
 #' @param candSp species to grepl
 #' @param withTax parse taxonomy information
+#' @param noComma no comma separated when taxonomy parsing
 #' 
 #' @export
 #' 

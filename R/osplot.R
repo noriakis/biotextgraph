@@ -28,9 +28,11 @@ osplot <- function(target, argList) {
 setOldClass("pvclust")
 setOldClass("igraph")
 setOldClass("VCorpus")
+setOldClass("corpus")
 setOldClass("TermDocumentMatrix")
 setOldClass("gg")
 setOldClass("ggraph")
+setOldClass("dfm")
 setClass("osplot", slots=list(
         query="character",
         delim="character",
@@ -49,7 +51,9 @@ setClass("osplot", slots=list(
         rawAnnot="data.frame",
         rawTextBSDB="data.frame",
         TDM="TermDocumentMatrix",
+        dfm="dfm",
         corpus="VCorpus",
+        corpusQuanteda="corpus",
         freqDf="data.frame",
         pvclust="pvclust",
         pvpick="list",
