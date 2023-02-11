@@ -450,6 +450,7 @@ wcBSDB <- function (mbList,
         V(coGraph)$name <- nodeName
         colnames(freqWordsDTM) <- dtmCol
 
+        nodeN <- NULL
         if (mbPlot) {
             mbmap <- c()
             for (rn in nodeName){
@@ -511,15 +512,17 @@ wcBSDB <- function (mbList,
             V(coGraph)$tag <- netCol
 
             ## Add disease and other labs
-            addC <- V(coGraph)$tag
-            for (nn in seq_along(names(V(coGraph)))) {
-                if (names(V(coGraph))[nn] %in% names(nodeN)) {
-                    addC[nn] <- nodeN[names(V(coGraph))[nn]]
-                } else {
-                    next
+            if (!is.null(nodeN)) {
+                addC <- V(coGraph)$tag
+                for (nn in seq_along(names(V(coGraph)))) {
+                    if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                        addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                    } else {
+                        next
+                    }
                 }
+                V(coGraph)$tag <- addC
             }
-            V(coGraph)$tag <- addC
         }
 
         if (preserve) {
