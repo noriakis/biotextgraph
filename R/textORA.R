@@ -14,7 +14,7 @@ textORA <- function(queries) {
     ##TODO Options to use other backgrounds
     tb <- loadGeneSummary()
     
-    fil <- tb |> dplyr::filter(Gene_ID %in% queries)
+    fil <- tb |> dplyr::filter(tb$Gene_ID %in% queries)
     fil <- fil[!duplicated(fil$Gene_ID),]
 
     ## Make corpus for queried genes

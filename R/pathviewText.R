@@ -23,6 +23,7 @@
 #' @param trans transpose the barplot
 #' @param argList passed to wc functions
 #' @import grid
+#' @importFrom RColorBrewer brewer.pal
 #' @export
 #'
 #' 
@@ -49,11 +50,11 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     vec <- rep(1, length(geneList))
     names(vec) <- geneList
     
-    download.kegg(pathway.id=pid,
+    pathview::download.kegg(pathway.id=pid,
                   species=org)
     xml.file=paste0(org, pid,".xml")
-    node.data=node.info(xml.file)
-    plot.data.gene=node.map(mol.data=vec,
+    node.data=pathview::node.info(xml.file)
+    plot.data.gene=pathview::node.map(mol.data=vec,
                             node.data,
                             node.types=node.types)
     
@@ -90,7 +91,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         }
     }
     
-    pv.pars= keggview.native(plot.data.gene=plot.data.gene,
+    pv.pars= pathview::keggview.native(plot.data.gene=plot.data.gene,
                              cols.ts.gene=molCol,
                              pathway.name=paste0(org,pid),
                              same.layer=TRUE,
@@ -98,7 +99,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
                              out.suffix = "custom.cols")
     
     
-    img <- readPNG(paste0(org,pid,".custom.cols.png"))
+    img <- png::readPNG(paste0(org,pid,".custom.cols.png"))
     g <- rasterGrob(img, interpolate=FALSE)
     if (target=="abstract") {
         if (!is.null(searchTerms)) {
@@ -136,7 +137,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     } else {
         for (gn in plot.data.gene[,2]) {
             if (gn %in% termMap$query) {
-                mappedDesc <- unique(subset(termMap, query==gn)$description)
+                mappedDesc <- unique(subset(termMap, termMap$query==gn)$description)
                 for (dc in mappedDesc) {
                     if (tolower(dc) %in% tolower(gmap[, 2])) {
                         tmpgmap <- data.frame(gmap[tolower(gmap[,2]) %in% tolower(dc),]) |>
@@ -178,18 +179,23 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     }
     
     
-    rePlotColor <- data.frame(rePlotColor)
-    rePlotColor$X3 <- as.numeric(rePlotColor$X3)
-    occuNum <- rePlotColor |> group_by(X1) |> summarise(n=n())
+    rePlotColor <- data.frame(rePlotColor) |> `colnames<-`(c("word","query","freq","color"))
+
+
+    rePlotColor$freq <- as.numeric(rePlotColor$freq)
+    occuNum <- rePlotColor |> dplyr::group_by(rePlotColor$word) |> 
+    dplyr::summarise(n=dplyr::n()) |> `colnames<-`(c("word","n"))
     occuNumVec <- occuNum$n
-    names(occuNumVec) <- occuNum$X1
+    names(occuNumVec) <- occuNum$word
+
     
-    newX3 <- NULL
+    relFreqs <- NULL
     for (i in row.names(rePlotColor)) {
-        newNum <- as.numeric(rePlotColor[i,]$X3 / occuNumVec[rePlotColor[i,]$X1])
-        newX3 <- c(newX3, newNum)
+        relFreq <- as.numeric(rePlotColor[i,]$freq / occuNumVec[rePlotColor[i,]$word])
+        relFreqs <- c(relFreqs, relFreq)
     }
-    rePlotColor$stack <- newX3 
+    rePlotColor$stack <- relFreqs
+
     colMat <- colGeneMap[!duplicated(colGeneMap[,2]),]
     if (is.null(dim(colMat))) {
         colVec <- colMat[1]
@@ -199,20 +205,21 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         names(colVec) <- colMat[,2]
     }
     
-    changeX1 <- NULL
-    for (cn in tolower(rePlotColor$X1)) {
+    changedWord <- NULL
+    for (cn in tolower(rePlotColor$word)) {
         if (cn %in% names(barp@dic)) {
-            changeX1 <- c(changeX1, barp@dic[cn])
+            changedWord <- c(changedWord, barp@dic[cn])
         } else {
-            changeX1 <- c(changeX1, cn)
+            changedWord <- c(changedWord, cn)
         }
     }
-    rePlotColor$X1 <- changeX1
+    rePlotColor$word <- changedWord
 
 
     if (trans) {
     
-        replot <- rePlotColor |> ggplot(aes(x=reorder(X1,X3),y=stack,fill=X2))+
+        replot <- rePlotColor |> ggplot(aes(x=reorder(word,freq),
+            y=rePlotColor$stack,fill=rePlotColor$query))+
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
             xlab("Words")+ylab("Frequency")+theme_minimal()+
@@ -230,7 +237,8 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         plt <- patchwork::wrap_plots(g, replot, ncol=1)+
             plot_layout(design=areas)
     } else {
-        replot <- rePlotColor |> ggplot(aes(y=reorder(X1,X3),x=stack,fill=X2))+
+        replot <- rePlotColor |> ggplot(aes(y=reorder(word,freq),
+            x=rePlotColor$stack,fill=rePlotColor$query))+
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
             ylab("Words")+xlab("Frequency")+theme_minimal()

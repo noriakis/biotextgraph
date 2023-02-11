@@ -10,7 +10,7 @@ makeBar(
   keyType = "SYMBOL",
   pal = NULL,
   textSize = 20,
-  reorder = TRUE,
+  reord = TRUE,
   orgDb = org.Hs.eg.db,
   flip = FALSE,
   grad = FALSE,
@@ -29,7 +29,7 @@ makeBar(
 
 \item{textSize}{text size in barplot}
 
-\item{reorder}{order by frequency or not}
+\item{reord}{order by frequency or not}
 
 \item{orgDb}{orgDb}
 

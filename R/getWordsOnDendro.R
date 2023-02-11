@@ -154,9 +154,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
             NODES <- i %>% get_nodes_attr("label")
             NODES <- NODES[!is.na(NODES)]
             XMIN <- as.numeric(labelPos %>%
-                filter(label==NODES[1]) %>% select(x))
+                filter(label==NODES[1]) %>% select(.data$x))
             XMAX <- as.numeric(labelPos %>%
-                filter(label==NODES[length(NODES)]) %>% select(x))
+                filter(label==NODES[length(NODES)]) %>% select(.data$x))
             HEIGHT <- get_nodes_attr(i, "height")[1]
             
             if (!HEIGHT %in% curHeights){
@@ -168,10 +168,10 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     # "ME"), "[", 2)) # WGCNA
                     if (mean(as.numeric((labelPos %>% filter(
                                     .data$label %in% names(lb[lb==1])) %>%
-                                    select(x))[,1])) >
+                                    select(.data$x))[,1])) >
                         mean(as.numeric((labelPos %>% filter(
                                     .data$label %in% names(lb[lb==2])) %>%
-                                    select(x))[,1]))) {
+                                    select(.data$x))[,1]))) {
                                                         R <- names(lb[lb==1])
                                                         L <- names(lb[lb==2])
                                                     } else {
@@ -338,8 +338,8 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             topDf$Label <- nodeName
             
             gg1 <- topDf %>%
-                mutate(Count = if_else(ME == L, Word, 0)) %>%
-                ggplot(aes( Label, Count, fill = Count)) +
+                mutate(Count = if_else(.data$ME == L, .data$Word, 0)) %>%
+                ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
                 geom_col(width = 0.6) +
                 coord_flip() +
                 scale_y_reverse()+
@@ -353,15 +353,15 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                     legend.position = "none")
             
             gg2 <- topDf %>%
-                filter(ME == L) %>%
-                ggplot(aes(Label, 0, label = Label)) +
+                filter(.data$ME == L) %>%
+                ggplot(aes(.data$Label, 0, label = .data$Label)) +
                 geom_text(size=3.5) +
                 coord_flip() +
                 theme_void()
             
             gg3 <- topDf %>%
-                mutate(Count = if_else(ME == R, Word, 0)) %>%
-                ggplot(aes( Label, Count, fill = Count)) +
+                mutate(Count = if_else(.data$ME == R, .data$Word, 0)) %>%
+                ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
                 geom_col(width = 0.6) +
                 coord_flip() +
                 theme_void() +
@@ -444,7 +444,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         }
 
         gg1 <- lSig %>%
-          ggplot(aes( plotID, value, fill = value)) +
+          ggplot(aes( .data$plotID, .data$value, fill = .data$value)) +
           geom_col(width = 0.6) +
           coord_flip() +
           scale_fill_gradient(low=lowCol,high=highCol)+
@@ -457,14 +457,14 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             legend.position = "none")
 
         gg2 <- lSig %>%
-          ggplot(aes(plotID, 0, label = plotID, color=plotCol)) +
+          ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
           geom_text(size=3.5) +
           scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
 
         gg3 <- rSig %>%
-          ggplot(aes( plotID, value, fill = value)) +
+          ggplot(aes( .data$plotID, .data$value, fill = .data$value)) +
           geom_col(width = 0.6) +
           coord_flip() +
           theme_void() +
@@ -476,7 +476,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             legend.position = "none")
 
         gg4 <- rSig %>%
-          ggplot(aes(plotID, 0, label = plotID, color=plotCol)) +
+          ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
           geom_text(size=3.5) +
           scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
