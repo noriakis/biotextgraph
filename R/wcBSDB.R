@@ -132,7 +132,7 @@ wcBSDB <- function (mbList,
         titles <- titles[!is.na(titles)]
         fil <- c()
         for (title in titles){
-            tmp <- subset(subTb, Title==title)
+            tmp <- subset(subTb, subTb$Title==title)
             if (dim(tmp)[1]>1){
                 tmp$title2 <- paste0(tmp$Title,"_",tmp$query)
                 tmp2 <- tmp[!duplicated(tmp$title2),]
@@ -183,7 +183,7 @@ wcBSDB <- function (mbList,
                 for (pmid in PMIDs) {
                     if (length(obtainText(pmid))!=0) {
                         for (text in obtainText(pmid)) {
-                            tax <- unique(subset(fil, ID==pmid)$query)
+                            tax <- unique(subset(fil, fil$ID==pmid)$query)
                             abstDf <- rbind(abstDf, c(pmid, text, tax))
                         }
                     }
@@ -296,7 +296,7 @@ wcBSDB <- function (mbList,
             abstDf <- fil
         }
         ret <- retUdpipeNet(ret=ret,texts=abstDf,udmodel_english=udmodel_english,
-          orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
+          orgDb=NULL, filterWords=filterWords, additionalRemove=additionalRemove,
           colorText=colorText,edgeLink=edgeLink,queryPlot=mbPlot, layout=layout,
           pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=nodePal,addNet=addNet)
         ## TODO: add disPlot and the other options
@@ -550,42 +550,42 @@ wcBSDB <- function (mbList,
             if (edgeLabel){
                 netPlot <- netPlot +
                             geom_edge_link(
-                                aes(width=weight,
-                                color=weight,
-                                label=round(weight,3)),
+                                aes(width=.data$weight,
+                                color=.data$weight,
+                                label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
                                 alpha=0.5,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
-                            geom_edge_link(aes(width=weight, color=weight),
+                            geom_edge_link(aes(width=.data$weight, color=.data$weight),
                                 alpha=0.5, show.legend = showLegend)
             }
         } else {
             if (edgeLabel){
                 netPlot <- netPlot +
                             geom_edge_diagonal(
-                                aes(width=weight,
-                                color=weight,
-                                label=round(weight,3)),
+                                aes(width=.data$weight,
+                                color=.data$weight,
+                                label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
                                 alpha=0.5,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
-                            geom_edge_diagonal(aes(width=weight, color=weight),
+                            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
                                 alpha=0.5, show.legend = showLegend)                
             }
         }
 
         if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                                 show.legend = showLegend) +
                                  scale_color_manual(values=nodePal)
         } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                                 show.legend = showLegend)+
                                  scale_color_gradient(low=pal[1],high=pal[2],
                                                       name = "Frequency")
@@ -594,20 +594,20 @@ wcBSDB <- function (mbList,
         if (colorText){
             if (tag) {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=name, size=Freq, color=tag),
+                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             } else {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=name, size=Freq, color=Freq),
+                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             }
         } else {
             netPlot <- netPlot +
-                        geom_node_text(aes(label=name, size=Freq),
+                        geom_node_text(aes(label=.data$name, size=.data$Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
                             bg.color = "white", segment.color="black",

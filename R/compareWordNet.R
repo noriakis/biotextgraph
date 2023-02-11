@@ -25,6 +25,7 @@
 #' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
 #' @importFrom stringr str_replace
+#' @importFrom grDevices colorRampPalette
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size="freq", conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
@@ -162,8 +163,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
   
   if (tag){
     comNet <- comNet + 
-              geom_mark_hull(
-                aes(x,y,group=tag,fill=tag,
+              ggforce::geom_mark_hull(
+                aes(comNet$data$x,
+                  comNet$data$y,group=tag,fill=tag,
                 filter=!is.na(tag)),
                 concavity=conc,
                 alpha=0.25, na.rm=FALSE,
@@ -196,7 +198,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
         geom_node_point(aes(color=col), size=size)+
         scale_color_discrete(name="Group")
       comNet <- comNet + 
-        geom_mark_hull(
+        ggforce::geom_mark_hull(
         aes(comNet$data$x,
             comNet$data$y,
             group = col,
@@ -226,7 +228,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   if (colorText) {
     comNet +
     geom_node_text(
-      aes(label=name, color=col, size=size),
+      aes(label=comNet$data$name, color=col, size=size),
       check_overlap=TRUE, repel=TRUE,# size = labelSize,
       bg.color = "white", segment.color="black",
       bg.r = .15, show.legend=FALSE)+
@@ -235,7 +237,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   } else {
     comNet +
     geom_node_text(
-      aes(label=name, size=size),
+      aes(label=comNet$data$name, size=size),
       check_overlap=TRUE, repel=TRUE,# size = labelSize,
       bg.color = "white", segment.color="black",
       bg.r = .15, show.legend=FALSE)+
@@ -304,16 +306,16 @@ plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALS
     pList[[i]] <- ggraph(igList[[i]],layout="manual",x=xy[[i]][,1],y=xy[[i]][,2])+
         geom_edge_link0(edge_width=0.6,edge_colour="grey66")
     if (tag){
-      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=Freq,fill=tag),
+      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=.data$Freq,fill=.data$tag),
         shape=21, show.legend=FALSE)
     } else {
-      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=Freq,fill=Freq),
+      pList[[i]] <- pList[[i]] + geom_node_point(aes(size=.data$Freq,fill=.data$Freq),
         shape=21, show.legend=FALSE)+
                     scale_fill_gradient(low="blue",high="red",
                            name = "Frequency")
     }
       pList[[i]] <- pList[[i]] +
-        geom_node_text(aes(label=name),repel = TRUE,bg.color="white")+
+        geom_node_text(aes(label=.data$name),repel = TRUE,bg.color="white")+
         theme_graph()+
         theme(legend.position="bottom")+
         labs(title=titles[i])

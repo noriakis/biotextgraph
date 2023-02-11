@@ -26,28 +26,28 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
         )
     }
 
-    docs <- corpus(ret@rawText$text)
+    docs <- quanteda::corpus(ret@rawText$text)
     ret@corpusQuanteda <- docs
     
     ## case_insensitive=TRUE
     
     quantedaArgList[["x"]] <- docs
     tokens <- do.call("tokens", quantedaArgList) |>
-        tokens_remove(quanteda::stopwords("english"))
+        quanteda::tokens_remove(quanteda::stopwords("english"))
 
     if (length(additionalRemove[!is.na(additionalRemove)])!=0) {
-        tokens <- tokens_remove(tokens, additionalRemove)
+        tokens <- quanteda::tokens_remove(tokens, additionalRemove)
     }    
     if (length(filterWords[!is.na(filterWords)])!=0) {
-        tokens <- tokens_remove(tokens, filterWords)
+        tokens <- quanteda::tokens_remove(tokens, filterWords)
     }
     if (!is.na(ngram)) {
-        tokens <- tokens_ngrams(tokens, n=ngram)
+        tokens <- quanteda::tokens_ngrams(tokens, n=ngram)
     }
 
-    freqWordsDFM <- dfm(tokens)
+    freqWordsDFM <- quanteda::dfm(tokens)
     if (tfidf) {
-      freqWordsDFM <- dfm_tfidf(freqWordsDFM)
+      freqWordsDFM <- quanteda::dfm_tfidf(freqWordsDFM)
     }
     ret@dfm <- freqWordsDFM
     # freqWordsAll <- sort(quanteda::featfreq(freqWordsDFM),
@@ -533,17 +533,18 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000,
 #' @param grad use gradient of frequency
 #' @param pal palette used in barplot
 #' @param textSize text size in barplot
-#' @param reorder order by frequency or not
+#' @param reord order by frequency or not
 #' @param flip flip the barplot (gene name in y-axis)
 #' @param orgDb orgDb
 #' @param retList return result of wcGeneSummary
 #' @param argList passed to wcGeneSummary()
 #' @import org.Hs.eg.db
 #' @return barplot of word frequency
+#' @importFrom stats reorder
 #' @export
 #' 
 makeBar <- function(queries, top=10, keyType="SYMBOL",
-                    pal=NULL, textSize=20, reorder=TRUE, orgDb=org.Hs.eg.db,
+                    pal=NULL, textSize=20, reord=TRUE, orgDb=org.Hs.eg.db,
                     flip=FALSE, grad=FALSE, retList=FALSE, argList=list()) {
   if (is.null(pal)) {
     # palNum <- sample(1:151,1)
@@ -563,21 +564,21 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
   wc <- do.call("wcGeneSummary",argList)
   barp <- utils::head(wc@freqDf, n=top)
   ## Need rewrite
-  if (reorder){
+  if (reord){
     if (grad) {
-      plt <- ggplot(barp, aes(x=reorder(word, freq),
-                              y=freq, fill=freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
+      plt <- ggplot(barp, aes(x=reorder(barp$word, barp$freq),
+                              y=barp$freq, fill=barp$freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
     } else {
-      plt <- ggplot(barp, aes(x=reorder(word, freq),
-                              y=freq, fill=word))+ scale_fill_manual(values=pal, guide="none")
+      plt <- ggplot(barp, aes(x=reorder(barp$word, barp$freq),
+                              y=barp$freq, fill=barp$word))+ scale_fill_manual(values=pal, guide="none")
     }
   } else {
     if (grad) {
-      plt <- ggplot(barp, aes(x=word,
-                              y=freq, fill=freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
+      plt <- ggplot(barp, aes(x=barp$word,
+                              y=barp$freq, fill=barp$freq))+ scale_fill_gradient(low="blue",high="red", guide="none")
     } else {
-      plt <- ggplot(barp, aes(x=word,
-                              y=freq, fill=word))+ scale_fill_manual(values=pal, guide="none")
+      plt <- ggplot(barp, aes(x=barp$word,
+                              y=barp$freq, fill=barp$word))+ scale_fill_manual(values=pal, guide="none")
     }
   }     
   ## Need rewrite

@@ -164,12 +164,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
             qqcat("Performing enrichment analysis")
             if (enrich=="reactome"){
-                pathRes <- enrichPathway(geneList)
+                pathRes <- ReactomePA::enrichPathway(geneList)
                 pathRes@result$Description <- gsub("Homo sapiens\r: ",
                                 "",
                                 pathRes@result$Description)                
             } else if (enrich=="kegg"){
-                pathRes <- enrichKEGG(geneList)
+                pathRes <- clusterProfiler::enrichKEGG(geneList)
             } else {
                 ## Currently only supports some pathways
                 stop("Please specify 'reactome' or 'kegg'")
@@ -191,7 +191,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ## Already performed, and automatically loaded
             # load("allFreqGeneSummary.rda") 
             tb <- loadGeneSummary(organism = organism)
-            fil <- tb %>% filter(Gene_ID %in% geneList)
+            fil <- tb %>% filter(tb$Gene_ID %in% geneList)
             fil <- fil[!duplicated(fil$Gene_ID),]
             ret@rawText <- fil
 
@@ -357,13 +357,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (!is.na(genePathPlot)) {
             
             if (genePathPlot == "reactome") {
-                pathRes <- enrichPathway(geneList)
+                pathRes <- ReactomePA::enrichPathway(geneList)
                 pathRes@result$Description <- gsub("Homo sapiens\r: ",
                                 "",
                                 pathRes@result$Description)
             }
             else if (genePathPlot == "kegg") {
-                pathRes <- enrichKEGG(geneList)
+                pathRes <- clusterProfiler::enrichKEGG(geneList)
             }
             else {
                 stop("Please specify 'reactome' or 'kegg'")
@@ -376,7 +376,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
             ret@enrichResults <- pathRes@result
-            sigPath <- subset(setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
+            sigPath <- subset(clusterProfiler::setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
             pathGraph <- c()
             for (i in 1:nrow(sigPath)){
                 pa <- sigPath[i, "Description"]
@@ -389,11 +389,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (bn) {
             qqcat("bn specified, R=@{R}\n")
             # To avoid computaitonal time, subset to numWords
-            bnboot <- boot.strength(
+            bnboot <- bnlearn::boot.strength(
                 data.frame(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]),
                 algorithm = "hc", R=R)
             ret@strength <- bnboot
-            av <- averaged.network(bnboot)
+            av <- bnlearn::averaged.network(bnboot)
             avig <- bnlearn::as.igraph(av)
             el <- data.frame(as_edgelist(avig))
             colnames(el) <- c("from","to")
@@ -566,6 +566,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ret@igraph <- coGraph
 
         ## Main plot
+        E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
         netPlot <- ggraph(coGraph, layout=layout)
 
         if (bn){
@@ -573,9 +574,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 if (edgeLabel){
                     netPlot <- netPlot +
                                 geom_edge_link(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
+                                    aes(width=.data$weight,
+                                    color=.data$weight,
+                                    label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     arrow = arrow(length = unit(4, 'mm')), 
@@ -585,7 +586,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     show.legend = showLegend)
                 } else {
                     netPlot <- netPlot +
-                                geom_edge_link(aes(width=weight, color=weight),
+                                geom_edge_link(aes(width=.data$weight,
+                                    color=.data$weight),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
                                     end_cap = circle(3, 'mm'),
@@ -595,9 +597,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 if (edgeLabel){
                     netPlot <- netPlot +
                                 geom_edge_diagonal(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
+                                    aes(width=.data$weight,
+                                    color=.data$weight,
+                                    label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     arrow = arrow(length = unit(4, 'mm')), 
@@ -607,7 +609,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     show.legend = showLegend)
                 } else {
                     netPlot <- netPlot +
-                                geom_edge_diagonal(aes(width=weight, color=weight),
+                                geom_edge_diagonal(aes(width=.data$weight,
+                                    color=.data$weight),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
                                     end_cap = circle(3, 'mm'),                                    
@@ -619,43 +622,45 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 if (edgeLabel){
                     netPlot <- netPlot +
                                 geom_edge_link(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
+                                    aes(width=.data$weight,
+                                    color=.data$weight,
+                                    label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     alpha=0.5,
                                     show.legend = showLegend)                        
                 } else {
                     netPlot <- netPlot +
-                                geom_edge_link(aes(width=weight, color=weight),
+                                geom_edge_link(aes(width=.data$weight,
+                                    color=.data$weight),
                                     alpha=0.5, show.legend = showLegend)
                 }
             } else {
                 if (edgeLabel){
                     netPlot <- netPlot +
                                 geom_edge_diagonal(
-                                    aes(width=weight,
-                                    color=weight,
-                                    label=round(weight,3)),
+                                    aes(width=.data$weight,
+                                    color=.data$weight,
+                                    label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     alpha=0.5,
                                     show.legend = showLegend)                        
                 } else {
                     netPlot <- netPlot +
-                                geom_edge_diagonal(aes(width=weight, color=weight),
+                                geom_edge_diagonal(aes(width=.data$weight,
+                                    color=.data$weight),
                                     alpha=0.5, show.legend = showLegend)                
                 }
             }
         }
 
         if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                                 show.legend = showLegend) +
             scale_color_manual(values=nodePal)
         } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                                 show.legend = showLegend)+
                                  scale_color_gradient(low=pal[1],high=pal[2],
                                                       name = "Frequency")
@@ -664,20 +669,20 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (colorText){
             if (tag) {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=name, size=Freq, color=tag),
+                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             } else {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=name, size=Freq, color=Freq),
+                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             }
         } else {
             netPlot <- netPlot +
-                        geom_node_text(aes(label=name, size=Freq),
+                        geom_node_text(aes(label=.data$name, size=.data$Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
                             bg.color = "white", segment.color="black",
@@ -691,7 +696,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             theme_graph()
 
         if (!is.na(genePathPlot)) {
-            netPlot <- netPlot + geom_mark_hull(
+            netPlot <- netPlot + ggforce::geom_mark_hull(
                 aes(netPlot$data$x,
                     netPlot$data$y,
                     group = grp,

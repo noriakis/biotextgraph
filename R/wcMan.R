@@ -200,11 +200,11 @@ wcMan <- function(df, madeUpper=NULL,
       if (bn) {
         qqcat("bn specified, R=@{R}\n")
         # To avoid computaitonal time, subset to numWords
-        bnboot <- boot.strength(
+        bnboot <- bnlearn::boot.strength(
           data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
           algorithm = "hc", R=R)
         ret@strength <- bnboot
-        av <- averaged.network(bnboot)
+        av <- bnlearn::averaged.network(bnboot)
         avig <- bnlearn::as.igraph(av)
         el <- data.frame(as_edgelist(avig))
         colnames(el) <- c("from","to")
@@ -347,9 +347,9 @@ wcMan <- function(df, madeUpper=NULL,
           if (edgeLabel){
             netPlot <- netPlot +
               geom_edge_link(
-                aes(width=weight,
-                    color=weight,
-                    label=round(weight,3)),
+                aes(width=.data$weight,
+                    color=.data$weight,
+                    label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
                 arrow = arrow(length = unit(4, 'mm')), 
@@ -359,7 +359,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_link(aes(width=weight, color=weight),
+              geom_edge_link(aes(width=.data$weight, color=.data$weight),
                              arrow = arrow(length = unit(4, 'mm')), 
                              start_cap = circle(3, 'mm'),
                              end_cap = circle(3, 'mm'),
@@ -369,9 +369,9 @@ wcMan <- function(df, madeUpper=NULL,
           if (edgeLabel){
             netPlot <- netPlot +
               geom_edge_diagonal(
-                aes(width=weight,
-                    color=weight,
-                    label=round(weight,3)),
+                aes(width=.data$weight,
+                    color=.data$weight,
+                    label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
                 arrow = arrow(length = unit(4, 'mm')), 
@@ -381,7 +381,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=weight, color=weight),
+              geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
                                  arrow = arrow(length = unit(4, 'mm')), 
                                  start_cap = circle(3, 'mm'),
                                  end_cap = circle(3, 'mm'),                                    
@@ -393,42 +393,42 @@ wcMan <- function(df, madeUpper=NULL,
           if (edgeLabel){
             netPlot <- netPlot +
               geom_edge_link(
-                aes(width=weight,
-                    color=weight,
-                    label=round(weight,3)),
+                aes(width=.data$weight,
+                    color=.data$weight,
+                    label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
                 alpha=0.5,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_link(aes(width=weight, color=weight),
+              geom_edge_link(aes(width=.data$weight, color=.data$weight),
                              alpha=0.5, show.legend = showLegend)
           }
         } else {
           if (edgeLabel){
             netPlot <- netPlot +
               geom_edge_diagonal(
-                aes(width=weight,
-                    color=weight,
-                    label=round(weight,3)),
+                aes(width=.data$weight,
+                    color=.data$weight,
+                    label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
                 alpha=0.5,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=weight, color=weight),
+              geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
                                  alpha=0.5, show.legend = showLegend)                
           }
         }
       }
       if (tag) {
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+        netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                              show.legend = showLegend)+
           scale_color_manual(values=nodePal, name="Category")
       } else { 
-        netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+        netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                              show.legend = showLegend)+
           scale_color_gradient(low=pal[1],high=pal[2],
                                name = "Frequency")
@@ -436,20 +436,20 @@ wcMan <- function(df, madeUpper=NULL,
       if (colorText){
         if (tag) {
           netPlot <- netPlot + 
-            geom_node_text(aes(label=name, size=Freq, color=tag),
+            geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            bg.color = "white", segment.color="black",
                            bg.r = .15, show.legend=showLegend)
         } else {
           netPlot <- netPlot + 
-            geom_node_text(aes(label=name, size=Freq, color=Freq),
+            geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
                            bg.color = "white", segment.color="black",
                            bg.r = .15, show.legend=showLegend)
         }
       } else {
         netPlot <- netPlot + 
-          geom_node_text(aes(label=name, size=Freq),
+          geom_node_text(aes(label=.data$name, size=.data$Freq),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
                          color = "black",
                          bg.color = "white", segment.color="black",
@@ -470,30 +470,28 @@ wcMan <- function(df, madeUpper=NULL,
     freqWordsDTM <- t(as.matrix(docs[row.names(docs) %in% freqWords, ]))
     
     if (tag) {
-      if (!is.null(redo) & length(redo@pvpick)!=0) {
-        qqcat("Using previous pvclust results")
-        pvcl <- redo@pvpick
+      # if (!is.null(redo) & length(redo@pvpick)!=0) {
+      #   qqcat("Using previous pvclust results")
+      #   pvcl <- redo@pvpick
+      # } else {
+      if (tagWhole){
+        pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
       } else {
-        if (tagWhole){
-          pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
-        } else {
-          pvc <- pvclust(as.matrix(dist(
-            t(
-              freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-            )
-          )), parallel=cl)
-        }
-        pvcl <- pvpick(pvc, alpha=pvclAlpha)
-        ret@pvclust <- pvc
-        ret@pvpick <- pvcl
+        pvc <- pvclust(as.matrix(dist(
+          t(
+            freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+          )
+        )), parallel=cl)
       }
+      pvcl <- pvpick(pvc, alpha=pvclAlpha)
+      ret@pvclust <- pvc
+      ret@pvpick <- pvcl
       wcCol <- returnDf$word
       for (i in seq_along(pvcl$clusters)){
         for (j in pvcl$clusters[[i]])
           wcCol[wcCol==j] <- pal[i]
       }
       wcCol[!wcCol %in% pal] <- "grey"
-      
     }
     for (i in madeUpper) {
       # returnDf$word <- str_replace(returnDf$word, i, toupper(i))

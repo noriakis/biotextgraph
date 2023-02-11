@@ -290,11 +290,11 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     if (bn) {
       qqcat("bn specified, R=@{R}\n")
       # To avoid computaitonal time, subset to numWords
-      bnboot <- boot.strength(
+      bnboot <- bnlearn::boot.strength(
         data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
         algorithm = "hc", R=R)
       ret@strength <- bnboot
-      av <- averaged.network(bnboot)
+      av <- bnlearn::averaged.network(bnboot)
       avig <- bnlearn::as.igraph(av)
       el <- data.frame(as_edgelist(avig))
       colnames(el) <- c("from","to")
@@ -414,9 +414,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         if (edgeLabel){
           netPlot <- netPlot +
             geom_edge_link(
-              aes(width=weight,
-                  color=weight,
-                  label=round(weight,3)),
+              aes(width=.data$weight,
+                  color=.data$weight,
+                  label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
               arrow = arrow(length = unit(4, 'mm')), 
@@ -426,7 +426,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_link(aes(width=weight, color=weight),
+            geom_edge_link(aes(width=.data$weight, color=.data$weight),
                            arrow = arrow(length = unit(4, 'mm')), 
                            start_cap = circle(3, 'mm'),
                            end_cap = circle(3, 'mm'),
@@ -436,9 +436,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         if (edgeLabel){
           netPlot <- netPlot +
             geom_edge_diagonal(
-              aes(width=weight,
-                  color=weight,
-                  label=round(weight,3)),
+              aes(width=.data$weight,
+                  color=.data$weight,
+                  label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
               arrow = arrow(length = unit(4, 'mm')), 
@@ -448,7 +448,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=weight, color=weight),
+            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
                                arrow = arrow(length = unit(4, 'mm')), 
                                start_cap = circle(3, 'mm'),
                                end_cap = circle(3, 'mm'),                                    
@@ -460,42 +460,42 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         if (edgeLabel){
           netPlot <- netPlot +
             geom_edge_link(
-              aes(width=weight,
-                  color=weight,
-                  label=round(weight,3)),
+              aes(width=.data$weight,
+                  color=.data$weight,
+                  label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
               alpha=0.5,
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_link(aes(width=weight, color=weight),
+            geom_edge_link(aes(width=.data$weight, color=.data$weight),
                            alpha=0.5, show.legend = showLegend)
         }
       } else {
         if (edgeLabel){
           netPlot <- netPlot +
             geom_edge_diagonal(
-              aes(width=weight,
-                  color=weight,
-                  label=round(weight,3)),
+              aes(width=.data$weight,
+                  color=.data$weight,
+                  label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
               alpha=0.5,
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=weight, color=weight),
+            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
                                alpha=0.5, show.legend = showLegend)                
         }
       }
     }
     if (tag) {
-      netPlot <- netPlot + geom_node_point(aes(size=Freq, color=tag),
+      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                            show.legend = showLegend)+
       scale_color_manual(values=nodePal)
     } else { 
-      netPlot <- netPlot + geom_node_point(aes(size=Freq, color=Freq),
+      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                            show.legend = showLegend)+
         scale_color_gradient(low=pal[1],high=pal[2],
                              name = "Frequency")
@@ -503,20 +503,20 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     if (colorText){
       if (tag) {
         netPlot <- netPlot + 
-          geom_node_text(aes(label=name, size=Freq, color=tag),
+          geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
                          bg.color = "white", segment.color="black",
                          bg.r = .15, show.legend=showLegend)
       } else {
         netPlot <- netPlot + 
-          geom_node_text(aes(label=name, size=Freq, color=Freq),
+          geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
                          bg.color = "white", segment.color="black",
                          bg.r = .15, show.legend=showLegend)
       }
     } else {
       netPlot <- netPlot + 
-        geom_node_text(aes(label=name, size=Freq),
+        geom_node_text(aes(label=.data$name, size=.data$Freq),
                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
                        color = "black",
                        bg.color = "white", segment.color="black",

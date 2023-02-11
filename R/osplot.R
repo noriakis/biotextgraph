@@ -68,6 +68,8 @@ setClass("osplot", slots=list(
         wholeFreq="numeric",
         dic="vector"
         ))
+
+#' @importFrom utils object.size
 setMethod("show",
   signature(object="osplot"),
   function(object) {
@@ -83,6 +85,7 @@ setMethod("show",
   })
 
 
+#' @importFrom grDevices adjustcolor
 setMethod("plot",
           signature = "osplot",
           definition = function(x) {
@@ -132,9 +135,9 @@ plotORA <- function(x, thresh=0.001) {
   vp <- x@freqDf[subr, ]
   vp$p <- -log10(x@ora[subr])
   
-  ggplot(vp, aes(x=freq,y=p, fill=p))+
+  ggplot(vp, aes(x=vp$freq,y=vp$p, fill=vp$p))+
     geom_point(shape=21,size=3,show.legend=FALSE) +
-    geom_text_repel(aes(color=p, label=word),bg.color = "white",
+    ggrepel::geom_text_repel(aes(color=vp$p, label=vp$word),bg.color = "white",
                     segment.color="black",size=3,max.overlaps = Inf,
                     bg.r = .15, show.legend=FALSE)+
     scale_color_gradient(low="blue",high="red")+

@@ -16,7 +16,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
   ret@model <- "udpipe"
   ## Frequency
   freq <- udpipe::document_term_frequencies(texts$text) |>
-    group_by(term) |> summarise(sum=sum(freq))
+    dplyr::group_by(.data$term) |> dplyr::summarise(sum=sum(freq))
   vfreq <- freq$sum
   names(vfreq) <- freq$term
 
@@ -42,7 +42,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
 
     edges <- NULL
     ges <- NULL
-    tmp <- subset(texts, ID==gid)
+    tmp <- subset(texts, texts$ID==gid)
     gsym <- tmp$query
     if (grepl(",",gsym)) {
       gsym <- unlist(strsplit(gsym,","))
@@ -55,13 +55,13 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     names(wordatt) <- x$token
     
     for (sent in x$sentence_id) {
-      one <- subset(x, sentence_id==sent)
+      one <- subset(x, x$sentence_id==sent)
       for (tkid in one$token_id) {
-        sampleTkID <- subset(one, token_id==tkid)
+        sampleTkID <- subset(one, one$token_id==tkid)
         if (!sampleTkID$upos %in% notInc){
           e1 <- sampleTkID$token
           e2n <- sampleTkID$head_token_id
-          e2 <- subset(one, token_id==e2n)$token
+          e2 <- subset(one, one$token_id==e2n)$token
           if (length(e1)!=0 & length(e2)!=0) {
             edges <- rbind(edges,c(e1, e2))
             for (cgsym in gsym) {
@@ -170,14 +170,14 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
 
   if (colorText) {
     net <- net + geom_node_point(aes(color=freq, size=freq))
-    net <- net + geom_node_text(aes(label=name, color=freq, size=freq),
+    net <- net + geom_node_text(aes(label=.data$name, color=freq, size=freq),
                                 check_overlap=TRUE, repel=TRUE,
                                 bg.color = "white", segment.color="black",
                                 bg.r = .15, show.legend=FALSE)+
                 scale_color_gradient(low=pal[1],high=pal[2], name="Frequency")
   } else {
     net <- net + geom_node_point(aes(color=cat, size=freq))
-    net <- net + geom_node_text(aes(label=name, size=freq),
+    net <- net + geom_node_text(aes(label=.data$name, size=freq),
                    check_overlap=TRUE, repel=TRUE,
                    bg.color = "white", segment.color="black",
                    bg.r = .15, show.legend=FALSE)+
