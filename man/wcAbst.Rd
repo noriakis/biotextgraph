@@ -55,7 +55,7 @@ wcAbst(
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
   onlyGene = FALSE,
-  preset = FALSE,
+  pre = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
   stem = FALSE,
@@ -169,7 +169,7 @@ high-frequent words}
 \item{onlyGene}{plot only the gene symbol
 (orgDb with SYMBOL key can be used)}
 
-\item{preset}{filter preset words}
+\item{pre}{filter preset words like publisher's names}
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
