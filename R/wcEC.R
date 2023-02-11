@@ -116,9 +116,9 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
   quoted <- dQuote(candecs$desc,options(useFancyQuotes = FALSE))
   if (onlyTerm) {return(quoted)}
   if (onlyDf) {return(candecs)}
-  argList[["target"]] <- "pubmed"
+  argList[["target"]] <- "abstract"
   argList[["queries"]] <- quoted
-  abst <- do.call("osplot", argList)
+  abst <- do.call("wcAbst", argList)
   abst@ec <- candecs
   abst@type <- "EC"
   return(abst)

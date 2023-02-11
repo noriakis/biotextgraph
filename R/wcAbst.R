@@ -35,7 +35,7 @@
 #' @param pvclAlpha alpha for pvpick()
 #' @param onlyCorpus return only corpus
 #' @param onlyTDM return only TDM
-#' @param preset filter preset words
+#' @param pre filter preset words like publisher's names
 #' @param preserve try to preserve the original characters
 #' @param numOnly delete number only
 #' @param cl cluster to pass to pvclust (snow::makeCluster(n))
@@ -94,7 +94,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
-                   preset=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
+                   pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
   if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -105,7 +105,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   if (madeUpperGenes){
     madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
   }
-  if (preset) {
+  if (pre) {
     additionalRemove <- c(additionalRemove,"genes","gene","patients","hub",
                           "analysis","cells","cell","expression","doi",
                           "deg","degs","author","authors","elsevier",
