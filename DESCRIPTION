@@ -3,12 +3,12 @@ Type: Package
 Title: easy visualization and interpretation of omics summary data
 Version: 0.99.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
-Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization.
+Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome. The package identifies important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
     R (>= 4.2.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, graphlayouts, methods, dendextend, RColorBrewer
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, cyjShiny, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, graphlayouts, methods, dendextend, RColorBrewer, utils
 Suggests:
     ggforce,
     concaveman,
@@ -29,4 +29,4 @@ Suggests:
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-biocViews: Visualization
+biocViews: Visualization, Microbiome, Network
