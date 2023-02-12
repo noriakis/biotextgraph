@@ -40,6 +40,7 @@ wcBSDB(
   upTaxFile = NULL,
   filterMax = FALSE,
   useUdpipe = FALSE,
+  colorize = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ngram = NA,
   plotType = "wc",
@@ -130,6 +131,9 @@ this option requires two files to be passed to wcEC() and getUPTax().}
 Otherwise take sum.}
 
 \item{useUdpipe}{use udpipe to make a network}
+
+\item{colorize}{color the nodes and texts based on their category,
+not by their frequency}
 
 \item{udpipeModel}{udpipe model file name}
 

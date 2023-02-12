@@ -56,6 +56,8 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
+#' @param colorize color the nodes and texts based on their category,
+#' not by their frequency
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -90,7 +92,7 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
-                    useUdpipe=FALSE,
+                    useUdpipe=FALSE, colorize=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
@@ -207,6 +209,7 @@ wcBSDB <- function (mbList,
         abstDf <- do.call(wcAbst, c(list(queries=mbList,
             quote=TRUE, target=target, onlyDf=TRUE), abstArg))
         ret@rawTextBSDB <- abstDf
+        ret@type <- paste0("BSDB_PubMed_",target)
         docs <- VCorpus(VectorSource(abstDf$text))
     }
     ## Make corpus
@@ -467,7 +470,8 @@ wcBSDB <- function (mbList,
             }
             mbmap <- mbmap[mbmap[,2]!="",]
 
-            candMb <- unique(mbmap[,2])
+            # candMb <- unique(mbmap[,2])
+            candMb <- unique(mbList)
             nodeN <- rep("Microbes",length(candMb))
             names(nodeN) <- candMb
 
@@ -491,6 +495,8 @@ wcBSDB <- function (mbList,
             }
 
             ## Set edge weight
+            ## Probably set to NA would be better.
+
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshMbPlot <- 0.01} else {
                 corThreshMbPlot <- corThresh - 0.1
@@ -524,6 +530,22 @@ wcBSDB <- function (mbList,
                 V(coGraph)$tag <- addC
             }
         }
+
+        if (colorize) {
+            if (!is.null(nodeN)) {
+                addC <- NULL
+                for (nn in seq_along(names(V(coGraph)))) {
+                    if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                        addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                    } else {
+                        addC[nn] <- "Words"
+                    }
+                }
+                V(coGraph)$tag <- addC
+            }
+            tag <- TRUE
+        }
+
 
         if (preserve) {
             newGname <- NULL
@@ -590,7 +612,7 @@ wcBSDB <- function (mbList,
         } else { 
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                                 show.legend = showLegend)+
-                                 scale_color_gradient(low=pal[1],high=pal[2],
+                                 scale_color_gradient(low=pal[1],high=pal[2],na.value="grey50",
                                                       name = "Frequency")
         }
 
