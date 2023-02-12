@@ -4,21 +4,27 @@
 #' (experimental)
 #' 
 #' @param queries gene list (Entrez ID)
+#' @param notGene boolean specifying type of input, default to gene IDs
+#' @param bg default to NULL
 #' @return p-values for the words
 #' @import GeneSummary tm
 #' @return p-values for the words
 #' @examples textORA(c("2067","2068","2071","2072"))
 #' @export
 #' 
-textORA <- function(queries) {
+textORA <- function(queries, notGene=FALSE, bg=NULL) {
     ##TODO Options to use other backgrounds
     tb <- loadGeneSummary()
-    
-    fil <- tb |> dplyr::filter(tb$Gene_ID %in% queries)
-    fil <- fil[!duplicated(fil$Gene_ID),]
+    if (!notGene) {
+        fil <- tb |> dplyr::filter(tb$Gene_ID %in% queries)
+        fil <- fil[!duplicated(fil$Gene_ID),]
 
-    ## Make corpus for queried genes
-    docs <- VCorpus(VectorSource(fil$Gene_summary))
+        ## Make corpus for queried genes
+        docs <- VCorpus(VectorSource(fil$Gene_summary))
+    } else {
+        docs <- VCorpus(VectorSource(queries))
+    }
+    
     docs <- docs |>
         tm_map(FUN=content_transformer(tolower)) |> 
         tm_map(FUN=removeNumbers) |>
@@ -30,8 +36,12 @@ textORA <- function(queries) {
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
     
+    if (is.null(bg)) {
+        bg <- allFreqGeneSummary
+    }
+
     pvs <- vapply(names(matSorted),
-        function (x) returnP(x, matSorted, allFreqGeneSummary),
+        function (x) returnP(x, matSorted, bg),
         FUN.VALUE=1)
     pvs
 }

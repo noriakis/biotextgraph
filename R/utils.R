@@ -84,7 +84,9 @@ convertMetaCyc <- function (ids, onlySpecies=FALSE) {
 #' @noRd
 clearPath <- function (ex) {
     ex <- gsub("|FRAME: ", "", ex)
+    ex <- gsub("FRAME: ", "", ex)
     ex <- gsub("|CITS: ", "", ex)
+    ex <- gsub("CITS: ", "", ex)
     ex <- gsub("\\[[^][]*]", "", ex)
     ex <- gsub("\"", "", ex)
     ## Clean HTML tags

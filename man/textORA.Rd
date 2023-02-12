@@ -4,10 +4,14 @@
 \alias{textORA}
 \title{textORA}
 \usage{
-textORA(queries)
+textORA(queries, notGene = FALSE, bg = NULL)
 }
 \arguments{
 \item{queries}{gene list (Entrez ID)}
+
+\item{notGene}{boolean specifying type of input, default to gene IDs}
+
+\item{bg}{default to NULL}
 }
 \value{
 p-values for the words
