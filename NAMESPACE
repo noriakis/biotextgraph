@@ -3,6 +3,7 @@
 export(compareWordNet)
 export(convertMetaCyc)
 export(exportCyjs)
+export(exportCyjsWithoutImage)
 export(exportVisjs)
 export(findTerm)
 export(getUPtax)
