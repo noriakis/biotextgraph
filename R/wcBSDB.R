@@ -116,6 +116,7 @@ wcBSDB <- function (mbList,
         "microbiome","relative","abundance","abundances",
         "including","samples","sample","otu","otus","investigated",
         "taxa","taxon")}
+    
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
         tb <- importBugSigDB()
@@ -130,7 +131,6 @@ wcBSDB <- function (mbList,
             }
         }
         qqcat("Including @{dim(subTb)[1]} entries\n")
-        # returnList[["subsetBSDB"]] <- subTb
 
         titles <- unique(subTb$Title)
         titles <- titles[!is.na(titles)]
@@ -138,6 +138,7 @@ wcBSDB <- function (mbList,
         for (title in titles){
             tmp <- subset(subTb, subTb$Title==title)
             if (dim(tmp)[1]>1){
+                ## Duplicated entry is deleted based on query and paper title
                 tmp$title2 <- paste0(tmp$Title,"_",tmp$query)
                 tmp2 <- tmp[!duplicated(tmp$title2),]
                 fil <- rbind(fil, c(paste(tmp2$query, collapse=","),
@@ -203,6 +204,7 @@ wcBSDB <- function (mbList,
                 filterWords <- ret@filtered
                 subTb <- ret@rawText
             }
+            ## TODO: ask taking unique text or not?
             docs <- VCorpus(VectorSource(abstDf$text))
         } else {
             docs <- VCorpus(VectorSource(fil$text))
