@@ -65,6 +65,7 @@
 #' high-frequent words
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
+#' @param naEdgeColor edge color linking query with the other category than text
 #' @export
 #' @examples \dontrun{wcAbst("DDX41")}
 #' @return list of data frame and ggplot2 object
@@ -92,6 +93,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
+                   naEdgeColor="grey50",
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
@@ -370,6 +372,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       ret@geneMap <- retGenemap
       genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
       coGraph <- igraph::union(coGraph, genemap)
+
+      E(coGraph)$edgeColor <- E(coGraph)$weight
       tmpW <- E(coGraph)$weight
       if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
         corThreshGenePlot <- corThresh - 0.1}
@@ -415,7 +419,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           netPlot <- netPlot +
             geom_edge_link(
               aes(width=.data$weight,
-                  color=.data$weight,
+                  color=.data$edgeColor,
                   label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
@@ -426,7 +430,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_link(aes(width=.data$weight, color=.data$weight),
+            geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
                            arrow = arrow(length = unit(4, 'mm')), 
                            start_cap = circle(3, 'mm'),
                            end_cap = circle(3, 'mm'),
@@ -437,7 +441,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           netPlot <- netPlot +
             geom_edge_diagonal(
               aes(width=.data$weight,
-                  color=.data$weight,
+                  color=.data$edgeColor,
                   label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
@@ -448,7 +452,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
+            geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
                                arrow = arrow(length = unit(4, 'mm')), 
                                start_cap = circle(3, 'mm'),
                                end_cap = circle(3, 'mm'),                                    
@@ -461,7 +465,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           netPlot <- netPlot +
             geom_edge_link(
               aes(width=.data$weight,
-                  color=.data$weight,
+                  color=.data$edgeColor,
                   label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
@@ -469,7 +473,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_link(aes(width=.data$weight, color=.data$weight),
+            geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
                            alpha=0.5, show.legend = showLegend)
         }
       } else {
@@ -477,7 +481,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           netPlot <- netPlot +
             geom_edge_diagonal(
               aes(width=.data$weight,
-                  color=.data$weight,
+                  color=.data$edgeColor,
                   label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
@@ -485,7 +489,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
+            geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
                                alpha=0.5, show.legend = showLegend)                
         }
       }
@@ -525,7 +529,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     netPlot <- netPlot+
       scale_size(range=scaleRange, name="Frequency")+
       scale_edge_width(range=c(1,3), name = "Correlation")+
-      scale_edge_color_gradient(low=pal[1],high=pal[2],
+      scale_edge_color_gradient(low=pal[1],high=pal[2],na.value=naEdgeColor,
                                 name = "Correlation")+
       theme_graph()
     ret@net <- netPlot

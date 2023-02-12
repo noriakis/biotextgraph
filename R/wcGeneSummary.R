@@ -61,6 +61,7 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
+#' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -94,6 +95,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
+                            naEdgeColor="grey50",
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
                             ngram=NA, plotType="wc", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
@@ -507,6 +509,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@geneMap <- genemap
             genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
             coGraph <- igraph::union(coGraph, genemap)
+
+            E(coGraph)$edgeColor <- E(coGraph)$weight
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
                 corThreshGenePlot <- corThresh - 0.1}
@@ -575,7 +579,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     netPlot <- netPlot +
                                 geom_edge_link(
                                     aes(width=.data$weight,
-                                    color=.data$weight,
+                                    color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
@@ -587,7 +591,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_link(aes(width=.data$weight,
-                                    color=.data$weight),
+                                    color=.data$edgeColor),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
                                     end_cap = circle(3, 'mm'),
@@ -598,7 +602,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     netPlot <- netPlot +
                                 geom_edge_diagonal(
                                     aes(width=.data$weight,
-                                    color=.data$weight,
+                                    color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
@@ -610,7 +614,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_diagonal(aes(width=.data$weight,
-                                    color=.data$weight),
+                                    color=.data$edgeColor),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
                                     end_cap = circle(3, 'mm'),                                    
@@ -623,7 +627,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     netPlot <- netPlot +
                                 geom_edge_link(
                                     aes(width=.data$weight,
-                                    color=.data$weight,
+                                    color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
@@ -632,7 +636,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_link(aes(width=.data$weight,
-                                    color=.data$weight),
+                                    color=.data$edgeColor),
                                     alpha=0.5, show.legend = showLegend)
                 }
             } else {
@@ -640,7 +644,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     netPlot <- netPlot +
                                 geom_edge_diagonal(
                                     aes(width=.data$weight,
-                                    color=.data$weight,
+                                    color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
@@ -649,7 +653,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 } else {
                     netPlot <- netPlot +
                                 geom_edge_diagonal(aes(width=.data$weight,
-                                    color=.data$weight),
+                                    color=.data$edgeColor),
                                     alpha=0.5, show.legend = showLegend)                
                 }
             }
@@ -669,7 +673,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (colorText){
             if (tag) {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
+                    geom_node_text(aes(label=.data$name,
+                        size=.data$Freq, color=.data$tag),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
@@ -692,7 +697,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
-                name = "Correlation")+
+                name = "Correlation", na.value=naEdgeColor)+
             theme_graph()
 
         if (!is.na(genePathPlot)) {

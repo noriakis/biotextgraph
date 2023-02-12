@@ -46,6 +46,7 @@ wcBSDB(
   plotType = "wc",
   disPlot = FALSE,
   onWholeDTM = FALSE,
+  naEdgeColor = "grey50",
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -145,6 +146,8 @@ not by their frequency}
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
+
+\item{naEdgeColor}{edge color linking query with the other category than text}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

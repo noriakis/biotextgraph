@@ -219,7 +219,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     if (trans) {
     
         replot <- rePlotColor |> ggplot(aes(x=reorder(word,freq),
-            y=rePlotColor$stack,fill=rePlotColor$query))+
+            y=.data$stack,fill=.data$query))+
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
             xlab("Words")+ylab("Frequency")+theme_minimal()+
@@ -238,7 +238,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             plot_layout(design=areas)
     } else {
         replot <- rePlotColor |> ggplot(aes(y=reorder(word,freq),
-            x=rePlotColor$stack,fill=rePlotColor$query))+
+            x=.data$stack,fill=.data$query))+
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
             ylab("Words")+xlab("Frequency")+theme_minimal()

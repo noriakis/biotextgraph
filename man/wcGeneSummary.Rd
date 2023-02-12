@@ -25,6 +25,7 @@ wcGeneSummary(
   showLegend = FALSE,
   orgDb = org.Hs.eg.db,
   edgeLabel = FALSE,
+  naEdgeColor = "grey50",
   pvclAlpha = 0.95,
   bn = FALSE,
   R = 20,
@@ -101,6 +102,8 @@ Otherwise take sum.}
 \item{orgDb}{default to org.Hs.eg.db}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
+
+\item{naEdgeColor}{edge colors for NA values (linking query with the category other than text)}
 
 \item{pvclAlpha}{alpha for pvpick()}
 

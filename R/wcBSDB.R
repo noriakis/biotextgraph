@@ -58,6 +58,7 @@
 #' @param takeMean take mean values for each term in term-document matrix
 #' @param colorize color the nodes and texts based on their category,
 #' not by their frequency
+#' @param naEdgeColor edge color linking query with the other category than text
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -95,6 +96,7 @@ wcBSDB <- function (mbList,
                     useUdpipe=FALSE, colorize=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
+                    naEdgeColor="grey50",
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -206,8 +208,12 @@ wcBSDB <- function (mbList,
             docs <- VCorpus(VectorSource(fil$text))
         }
     } else {
-        abstDf <- do.call(wcAbst, c(list(queries=mbList,
-            quote=TRUE, target=target, onlyDf=TRUE), abstArg))
+        abstArg[["queries"]] <- mbList
+        abstArg[["quote"]] <- TRUE
+        abstArg[["target"]] <- target
+        abstArg[["onlyDf"]] <- TRUE
+
+        abstDf <- do.call(wcAbst, abstArg)
         ret@rawTextBSDB <- abstDf
         ret@type <- paste0("BSDB_PubMed_",target)
         docs <- VCorpus(VectorSource(abstDf$text))
@@ -470,6 +476,16 @@ wcBSDB <- function (mbList,
             }
             mbmap <- mbmap[mbmap[,2]!="",]
 
+            gcnt <- table(mbmap[,2])
+            if (length(mbList)!=1) {
+                gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
+            }
+            ret@geneCount <- gcnt
+            
+            incGene <- names(gcnt)[1:length(mbList)]
+            mbmap <- mbmap[mbmap[,2] %in% incGene,]
+            ret@geneMap <- mbmap
+
             # candMb <- unique(mbmap[,2])
             candMb <- unique(mbList)
             nodeN <- rep("Microbes",length(candMb))
@@ -497,6 +513,7 @@ wcBSDB <- function (mbList,
             ## Set edge weight
             ## Probably set to NA would be better.
 
+            E(coGraph)$edgeColor <- E(coGraph)$weight
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshMbPlot <- 0.01} else {
                 corThreshMbPlot <- corThresh - 0.1
@@ -576,7 +593,7 @@ wcBSDB <- function (mbList,
                 netPlot <- netPlot +
                             geom_edge_link(
                                 aes(width=.data$weight,
-                                color=.data$weight,
+                                color=.data$edgeColor,
                                 label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
@@ -584,7 +601,8 @@ wcBSDB <- function (mbList,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
-                            geom_edge_link(aes(width=.data$weight, color=.data$weight),
+                            geom_edge_link(aes(width=.data$weight,
+                                color=.data$edgeColor),
                                 alpha=0.5, show.legend = showLegend)
             }
         } else {
@@ -592,7 +610,7 @@ wcBSDB <- function (mbList,
                 netPlot <- netPlot +
                             geom_edge_diagonal(
                                 aes(width=.data$weight,
-                                color=.data$weight,
+                                color=.data$edgeColor,
                                 label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
@@ -600,7 +618,8 @@ wcBSDB <- function (mbList,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
-                            geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
+                            geom_edge_diagonal(aes(width=.data$weight,
+                                color=.data$edgeColor),
                                 alpha=0.5, show.legend = showLegend)                
             }
         }
@@ -642,7 +661,7 @@ wcBSDB <- function (mbList,
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
-                name = "Correlation")+
+                name = "Correlation", na.value=naEdgeColor)+
             theme_graph()
 
         ret@net <- netPlot
