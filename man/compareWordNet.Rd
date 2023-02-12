@@ -16,6 +16,7 @@ compareWordNet(
   edgeLink = TRUE,
   freqMean = FALSE,
   scaleRange = c(5, 10),
+  ovlThresh = 0,
   returnNet = FALSE,
   colPal = "Pastel1",
   colNum = 20,
@@ -44,6 +45,8 @@ compareWordNet(
 \item{freqMean}{how to concatenate frequency (TRUE: mean, FALSE: sum)}
 
 \item{scaleRange}{point size scaling}
+
+\item{ovlThresh}{show text with this number of overlap between graphs}
 
 \item{returnNet}{return only the network (ig)}
 
