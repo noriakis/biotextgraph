@@ -48,6 +48,7 @@ wcAbst(
   useUdpipe = FALSE,
   udpipeOnlyFreq = FALSE,
   udpipeOnlyFreqN = FALSE,
+  naEdgeColor = "grey50",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   normalize = FALSE,
   takeMean = FALSE,
@@ -153,6 +154,8 @@ Otherwise take sum.}
 
 \item{udpipeOnlyFreqN}{when using udpipe, include only the neighbors of
 high-frequent words}
+
+\item{naEdgeColor}{edge color linking query with the other category than text}
 
 \item{udpipeModel}{udpipe model file name}
 

@@ -17,6 +17,7 @@
 #' @param colPal color palette to be used in RColorBrewer
 #' @param colNum color number to be used in plot
 #' @param colorText whether to color text based on category
+#' @param ovlThresh show text with this number of overlap between graphs
 #' 
 #' @export
 #' @examples
@@ -29,7 +30,7 @@
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size="freq", conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
-                           freqMean=FALSE, scaleRange=c(5,10),
+                           freqMean=FALSE, scaleRange=c(5,10), ovlThresh=0,
                            returnNet=FALSE, colPal="Pastel1", colNum=20,
                            colorText=FALSE) {
   listOfIGs <- list()
@@ -47,11 +48,22 @@ compareWordNet <- function(listOfNets, titles=NULL,
       listOfNodes[[e]] <- names(V(listOfNets[[e]]@igraph))
   }
 
+  names(listOfIGs) <- titles
+
+  if (tag) {
+    for (g in names(listOfIGs)) {
+      tmpg <- listOfIGs[[g]]
+      V(tmpg)$tag <- paste0(g,"_",V(tmpg)$tag)
+      listOfIGs[[g]] <- tmpg
+    }
+  }
+
   commonNodes <- Reduce(intersect, listOfNodes)
   uig <- simplify(Reduce(igraph::union, listOfIGs))
   nodeAttr <- names(get.vertex.attribute(uig))
   tagName <- nodeAttr[grepl("tag", nodeAttr)]
   freqName <- nodeAttr[grepl("Freq", nodeAttr)]
+
   ## concatenate tags
   if (tag) {
       tags <- c()
@@ -108,9 +120,6 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
   V(uig)$col <- col
   V(uig)$ovl <- ovl
-  if (returnNet){
-    return(uig)
-  }
   
   ## concatenate tags
   # if (tag) {
@@ -151,6 +160,18 @@ compareWordNet <- function(listOfNets, titles=NULL,
     V(uig)$size <- rep(size, length(names(V(uig))))
   }
 
+  if (returnNet){
+    return(uig)
+  }
+
+  catNum <- length(unique(V(uig)$col))
+  ## You can change it later
+  cs <- RColorBrewer::brewer.pal(catNum, colPal)
+  if (length(cs)<colNum) {
+    cs <- colorRampPalette(cs)(colNum)
+  }
+
+
   comNet <- ggraph(uig, layout=layout)
 
   if (edgeLink){
@@ -162,20 +183,25 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
   
   if (tag){
+    ## Hull sometimes make groups inconsistent
     comNet <- comNet + 
               ggforce::geom_mark_hull(
-                aes(comNet$data$x,
-                  comNet$data$y,group=tag,fill=tag,
-                filter=!is.na(tag)),
+                aes(.data$x,
+                  .data$y,
+                  group=.data$tag,
+                  fill=.data$tag,
+                filter=!is.na(.data$tag)),
                 concavity=conc,
-                alpha=0.25, na.rm=FALSE,
+                alpha=0.25,
+                na.rm=FALSE,
                 show.legend=TRUE,
                 inherit.aes=TRUE)
     ## TODO:
     ## specifying label produces an error,
     ## thus show.legend=TRUE is specified
     comNet <- comNet + 
-      geom_node_point(aes(color=col, size=size))+
+      geom_node_point(aes(color=.data$col,
+        size=.data$size))+
         scale_color_discrete(name="Group")
     # comNet <- comNet + geom_mark_hull(
     #   aes(comNet$data$x,
@@ -195,7 +221,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   
     if (hull) {
       comNet <- comNet + 
-        geom_node_point(aes(color=col), size=size)+
+        geom_node_point(aes(color=col, size=size))+
         scale_color_discrete(name="Group")
       comNet <- comNet + 
         ggforce::geom_mark_hull(
@@ -209,41 +235,34 @@ compareWordNet <- function(listOfNets, titles=NULL,
         alpha = 0.25,
         na.rm = TRUE,
         # label.fill="transparent",
-        show.legend = FALSE
+        show.legend = TRUE
       )
     } else {
       comNet <- comNet + 
-        geom_node_point(aes(color=col, size=size))+
-        scale_color_discrete(name="Group")
-      catNum <- length(unique(V(uig)$col))
-      ## You can change it later
-      cs <- RColorBrewer::brewer.pal(catNum, colPal)
-      if (length(cs)<colNum) {
-        cs <- colorRampPalette(cs)(colNum)
-      }
-      comNet <- comNet +
+        geom_node_point(aes(color=col, size=size)) +
         scale_color_manual(name="Group",values=cs)
     }
   }
   if (colorText) {
-    comNet +
+    comNet <- comNet +
     geom_node_text(
-      aes(label=comNet$data$name, color=col, size=size),
+      aes(label=comNet$data$name, color=col, size=size, filter=!is.na(tag) & ovl > ovlThresh),
       check_overlap=TRUE, repel=TRUE,# size = labelSize,
       bg.color = "white", segment.color="black",
       bg.r = .15, show.legend=FALSE)+
     scale_size(range=scaleRange, name="Frequency")+
     theme_graph()
   } else {
-    comNet +
+    comNet <- comNet +
     geom_node_text(
-      aes(label=comNet$data$name, size=size),
+      aes(label=comNet$data$name, size=size, filter=!is.na(tag) & ovl > ovlThresh),
       check_overlap=TRUE, repel=TRUE,# size = labelSize,
       bg.color = "white", segment.color="black",
       bg.r = .15, show.legend=FALSE)+
     scale_size(range=scaleRange, name="Frequency")+
     theme_graph()
   }
+  comNet
 }
 
 

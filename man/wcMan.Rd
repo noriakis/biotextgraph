@@ -33,11 +33,13 @@ wcMan(
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
+  colorize = FALSE,
   nodePal = palette(),
   preserve = TRUE,
   takeMax = FALSE,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
+  naEdgeColor = "grey50",
   normalize = FALSE,
   takeMean = FALSE,
   queryPlot = FALSE,
@@ -105,6 +107,9 @@ instead of correlation using bnlearn}
 
 \item{ngram}{default to NA (1)}
 
+\item{colorize}{color the nodes and texts based on their category,
+not by their frequency}
+
 \item{nodePal}{node palette when tag is TRUE}
 
 \item{preserve}{try to preserve the original characters}
@@ -115,6 +120,8 @@ Otherwise take sum.}
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{additionalRemove}{specific words to be excluded}
+
+\item{naEdgeColor}{edge color values for NA}
 
 \item{normalize}{sum normalize the term frequency document-wise}
 

@@ -46,6 +46,9 @@
 #' @param queryPlot plot query
 #' @param useQuanteda use quanteda functions to generate
 #' @param quantedaArgs list of arguments to be passed to tokens()
+#' @param naEdgeColor edge color values for NA
+#' @param colorize color the nodes and texts based on their category,
+#' not by their frequency
 #' 
 #' @export
 #' @return list of data frame and ggplot2 object
@@ -69,9 +72,9 @@ wcMan <- function(df, madeUpper=NULL,
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA,
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE,
-                   deleteZeroDeg=TRUE, additionalRemove=NA,
+                   deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list())
 {
@@ -284,6 +287,7 @@ wcMan <- function(df, madeUpper=NULL,
         coGraph <- igraph::union(coGraph, genemap)
       }
 
+      E(coGraph)$edgeColor <- E(coGraph)$weight
       tmpW <- E(coGraph)$weight
       if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
         corThreshGenePlot <- corThresh - 0.1}
@@ -292,9 +296,11 @@ wcMan <- function(df, madeUpper=NULL,
       
 
       ## Set pseudo freq as min value of freq
-      # fre <- V(coGraph)$Freq
-      # fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-      # V(coGraph)$Freq <- fre
+      ## Available only in wcMan and wcBSDB, as 
+      ## category other than query is often available
+      fre <- V(coGraph)$Freq
+      fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+      V(coGraph)$Freq <- fre
 
 
       if (tag) {
@@ -322,6 +328,20 @@ wcMan <- function(df, madeUpper=NULL,
         V(coGraph)$tag <- addC
       }
 
+      if (colorize) {
+          if (!is.null(nodeN)) {
+              addC <- NULL
+              for (nn in seq_along(names(V(coGraph)))) {
+                  if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                      addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                  } else {
+                      addC[nn] <- "Words"
+                  }
+              }
+              V(coGraph)$tag <- addC
+          }
+          tag <- TRUE
+      }
 
       if (preserve) {
         newGname <- NULL
@@ -348,7 +368,7 @@ wcMan <- function(df, madeUpper=NULL,
             netPlot <- netPlot +
               geom_edge_link(
                 aes(width=.data$weight,
-                    color=.data$weight,
+                    color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
@@ -359,7 +379,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_link(aes(width=.data$weight, color=.data$weight),
+              geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
                              arrow = arrow(length = unit(4, 'mm')), 
                              start_cap = circle(3, 'mm'),
                              end_cap = circle(3, 'mm'),
@@ -370,7 +390,7 @@ wcMan <- function(df, madeUpper=NULL,
             netPlot <- netPlot +
               geom_edge_diagonal(
                 aes(width=.data$weight,
-                    color=.data$weight,
+                    color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
@@ -381,7 +401,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
+              geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
                                  arrow = arrow(length = unit(4, 'mm')), 
                                  start_cap = circle(3, 'mm'),
                                  end_cap = circle(3, 'mm'),                                    
@@ -394,7 +414,7 @@ wcMan <- function(df, madeUpper=NULL,
             netPlot <- netPlot +
               geom_edge_link(
                 aes(width=.data$weight,
-                    color=.data$weight,
+                    color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
@@ -402,7 +422,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_link(aes(width=.data$weight, color=.data$weight),
+              geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
                              alpha=0.5, show.legend = showLegend)
           }
         } else {
@@ -410,7 +430,7 @@ wcMan <- function(df, madeUpper=NULL,
             netPlot <- netPlot +
               geom_edge_diagonal(
                 aes(width=.data$weight,
-                    color=.data$weight,
+                    color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
                 label_dodge = unit(2.5, 'mm'),
@@ -418,7 +438,7 @@ wcMan <- function(df, madeUpper=NULL,
                 show.legend = showLegend)
           } else {
             netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=.data$weight, color=.data$weight),
+              geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
                                  alpha=0.5, show.legend = showLegend)                
           }
         }
@@ -459,7 +479,8 @@ wcMan <- function(df, madeUpper=NULL,
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+
         scale_edge_color_gradient(low=pal[1],high=pal[2],
-                                  name = "Correlation")+
+                                  name = "Correlation",
+                                  na.value=naEdgeColor)+
         theme_graph()
       ret@net <- netPlot
   } else {
