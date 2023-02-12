@@ -995,3 +995,158 @@ getUPtax <- function(file, candUP, candTax=NULL) {
     return(NULL)
   }
 }
+
+
+
+
+#' exportCyjsWithoutImage
+#' 
+#' Export Cytoscape.js script, HTML and stylesheet for the graph without image
+#' 
+#' @param g igraph object
+#' @param rootDir root directory path
+#' @param netDir directory to store scripts
+#' @param edgeWidth attribute name for edgeWidth
+#' @param nodeColor attribute name for node color
+#' @param nodeSize attribute name for node size
+#' @param nodeColorDiscretePal color mapping palette for discrete variables
+#' @param sizeMin minimum size for scaling node size
+#' @param sizeMax maximum size for scaling node size
+#' @import jsonlite
+#' @importFrom cyjShiny dataFramesToJSON
+#' @return return nothing, export to a specified directory
+#' @examples
+#' library(igraph)
+#' g <- graph_from_literal( ME1-+ME2 )
+#' V(g)$size <- c(1,1)
+#' \dontrun{exportCyjsWithoutImage(g, "./", "net")}
+#' @export
+#' 
+exportCyjsWithoutImage <- function(g, rootDir, netDir,
+  edgeWidth="weight",nodeColor="tag",nodeSize="Freq",nodeColorDiscretePal="RdBu",
+  sizeMin=10, sizeMax=50) {
+    
+    if (is.null(V(g)$shape)){qqcat("No node shape specified, set to 'circle'\n")
+      V(g)$shape <- rep("circle", length(V(g)))}
+    if (is.null(E(g)$strength)){E(g)$strength <- rep(1, length(E(g)))}
+
+
+    ## Make node color
+    nc <- get.vertex.attribute(g, nodeColor)
+    nodeColors <- RColorBrewer::brewer.pal(length(unique(nc)), nodeColorDiscretePal)
+    names(nodeColors) <- unique(nc)
+
+    print(nodeColors[nc])
+
+    ## Make node size
+    V(g)$size <- get.vertex.attribute(g, nodeSize)
+    rawMin <- min(V(g)$size)
+    rawMax <- max(V(g)$size)
+    scf <- (sizeMax-sizeMin)/(rawMax-rawMin)
+    V(g)$size <- scf * V(g)$size + sizeMin - scf * rawMin
+
+    nodes <- data.frame(
+        id=names(V(g)),
+        label=names(V(g)),
+        size=V(g)$size,
+        color=nodeColors[nc],
+        shape=V(g)$shape
+    )
+    
+    edgeList <- as_data_frame(g)
+    edgeListRename <- colnames(edgeList)
+    edgeListRename[1] <- "source";edgeListRename[2] <- "target"
+    colnames(edgeList) <- edgeListRename
+    edgeList$interaction <- rep(NA, nrow(edgeList))
+    edgeList$width <- edgeList[[edgeWidth]]
+    # edges <- data.frame(source=edgeList[,1],
+    #     target=edgeList[,2], interaction=NA)
+    # edges$strength <- E(g)$strength
+    
+    pret <- prettify(dataFramesToJSON(edgeList, nodes))
+    pret <- substr(pret, 18, nchar(pret)-3)
+    pret
+    
+    js <- paste0("
+    var cy = window.cy = cytoscape({
+        container: document.getElementById('cy'),
+          style: cytoscape.stylesheet()
+            .selector('node')
+            .css({
+                      'content': 'data(label)',
+                      'shape' : 'data(shape)',
+                      'text-valign': 'bottom',
+                      'background-color': 'data(color)',
+                      'background-fit': 'cover',
+                      'width': 'data(size)',
+                      'height': 'data(size)',
+                      'font-size' : 'mapData(size, 0, 100, 10, 20)',
+                      'text-outline-width': 1,
+                      'text-outline-color': '#FFF',
+                      'border-color' : '#555',
+                      'border-width': 1
+                  })
+            .selector('edge')
+            .css({
+                    'curve-style': 'bezier',
+                    'width' : 'mapData(width, 0.5, 1, 1, 5)'
+                  }),
+        'elements':
+    ", pret, ",
+        layout:{
+              name: 'cola',
+              padding: 0.5,
+              avoidOverlap: true, 
+              nodeSpacing: function( node ){ return 0.1; },
+              nodeDimensionsIncludeLabels: true
+          }
+        });
+    ")
+    
+    ## Using cola layout by default.
+    html <- '
+    <!DOCTYPE html>
+    <html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.21.1/dist/cytoscape.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.4.0/cytoscape-cola.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css">
+    </head>
+    
+    <body>
+        <div id="cy"></div>
+        <script src="script.js"></script>
+    </body>
+    
+    </html>
+    '
+    
+    style <- "
+    body {
+        font-family: helvetica, sans-serif;
+        font-size: 14px;
+    }
+    
+    #cy {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+    }
+    
+    h1 {
+        opacity: 0.5;
+        font-size: 1em;
+    }"
+    
+    
+    write(js, file = paste0(rootDir, "/",netDir, "/script.js"))
+    write(style, file = paste0(rootDir, "/",netDir, "/style.css"))
+    write(html, file = paste0(rootDir, "/",netDir, "/index.html"))
+    # message(paste0("Exported to ",rootDir,netDir))
+}
