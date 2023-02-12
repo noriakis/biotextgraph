@@ -516,6 +516,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 corThreshGenePlot <- corThresh - 0.1}
             tmpW[is.na(tmpW)] <- corThreshGenePlot
             E(coGraph)$weight <- tmpW
+        } else {
+            E(coGraph)$edgeColor <- E(coGraph)$weight
         }
 
 

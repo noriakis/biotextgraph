@@ -521,6 +521,8 @@ wcBSDB <- function (mbList,
             tmpW[is.na(tmpW)] <- corThreshMbPlot
             E(coGraph)$weight <- tmpW
 
+        } else {
+            E(coGraph)$edgeColor <- E(coGraph)$weight
         }
 
 
