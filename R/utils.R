@@ -115,7 +115,7 @@ clearPath <- function (ex) {
 #' @return data.frame of MetaCyc pathway information
 #' @examples
 #' file <- "pathways.dat"
-#' \donttest{parseMetaCycPathway(file, candSp="all")}
+#' \dontrun{parseMetaCycPathway(file, candSp="all")}
 #' @export
 #' 
 parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clear=FALSE) {
