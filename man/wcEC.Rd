@@ -45,5 +45,5 @@ correlation network. Need "enzyme.dat" from ExPASy
 }
 \examples{
 file <- "enzyme.dat"
-\donttest{wcEC(file, ecnum="1.2.1.1")}
+\dontrun{wcEC(file, ecnum="1.2.1.1")}
 }
