@@ -19,5 +19,5 @@ this function needs taxonomizr package to be installed,
 and needs download of databases by prepareDatabase(getAccessions=FALSE)
 }
 \examples{
-convertMetaCyc("TAX-9606")
+\donttest{convertMetaCyc("TAX-9606")}
 }
