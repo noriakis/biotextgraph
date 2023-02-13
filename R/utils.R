@@ -626,7 +626,7 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \donttest{exportCyjs(g, "./", "net")}
+#' \dontrun{exportCyjs(g, "./", "net")}
 #' @export
 #' 
 exportCyjs <- function(g, rootDir, netDir) {
@@ -755,7 +755,7 @@ exportCyjs <- function(g, rootDir, netDir) {
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \donttest{exportVisjs(g, "./", "net")}
+#' \dontrun{exportVisjs(g, "./", "net")}
 #' @export
 #' 
 exportVisjs <- function(g, rootDir, netDir){
@@ -1029,7 +1029,7 @@ getUPtax <- function(file, candUP, candTax=NULL) {
 #' library(igraph)
 #' g <- graph_from_literal( ME1-+ME2 )
 #' V(g)$size <- c(1,1)
-#' \donttest{exportCyjsWithoutImage(g, "./", "net")}
+#' \dontrun{exportCyjsWithoutImage(g, "./", "net")}
 #' @export
 #' 
 exportCyjsWithoutImage <- function(g, rootDir, netDir,

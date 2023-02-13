@@ -12,6 +12,7 @@ getWordsOnDendro(
   numberOfWords = 25,
   showType = "ID",
   highlight = NULL,
+  textSize = 3.5,
   type = "words",
   argList = list()
 )
@@ -31,6 +32,8 @@ pyramid plots are not produced}
 \item{showType}{when "enrich", which labels to show}
 
 \item{highlight}{words to highlight}
+
+\item{textSize}{text size in pyramid plots}
 
 \item{type}{"words" or "enrich"}
 

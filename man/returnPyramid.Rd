@@ -17,6 +17,7 @@ returnPyramid(
   highlight = NULL,
   type = "words",
   wrap = 15,
+  textSize = 3.5,
   orgDb = org.Hs.eg.db,
   argList = list()
 )
@@ -45,6 +46,8 @@ returnPyramid(
 \item{type}{"words" or "enrich"}
 
 \item{wrap}{wrap the strings}
+
+\item{textSize}{text size in pyramid plots}
 
 \item{orgDb}{organism database to use in enrich}
 
