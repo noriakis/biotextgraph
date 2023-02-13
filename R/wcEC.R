@@ -18,7 +18,7 @@
 #' @return object consisting of data frame and ggplot2 object
 #' @examples
 #' file <- "enzyme.dat"
-#' \donttest{wcEC(file, ecnum="1.2.1.1")}
+#' \dontrun{wcEC(file, ecnum="1.2.1.1")}
 #' @export
 #' 
 
