@@ -14,6 +14,7 @@ plotEigengeneNetworksWithWords(
   border = TRUE,
   type = "words",
   showType = "ID",
+  textSize = 3.5,
   highlight = NULL,
   argList = list()
 )
@@ -36,6 +37,8 @@ plotEigengeneNetworksWithWords(
 \item{type}{"words" or "enrich"}
 
 \item{showType}{when "enrich", which labels to show}
+
+\item{textSize}{text size in pyramid plots}
 
 \item{highlight}{words to highlight}
 

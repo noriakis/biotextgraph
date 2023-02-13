@@ -14,6 +14,7 @@
 #' @param highlight words to highlight
 #' @param showType when "enrich", which labels to show
 #' @param argList passed to wcGeneSummary()
+#' @param textSize text size in pyramid plots
 #' 
 #' @export
 #' @import grid gridExtra
@@ -28,7 +29,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL",
                                             border=TRUE, type="words",
-                                            showType="ID",
+                                            showType="ID", textSize=3.5,
                                             highlight=NULL, argList=list()) {
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
@@ -93,7 +94,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param showType when "enrich", which labels to show
 #' @param highlight words to highlight
 #' @param argList passed to wcGeneSummary
-#' 
+#' @param textSize text size in pyramid plots
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -116,7 +117,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL",
                             numberOfWords=25, showType="ID",
-                            highlight=NULL,
+                            highlight=NULL, textSize=3.5,
                             type="words", argList=list()) {
     
     ## Filter high frequency words if needed
@@ -185,7 +186,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 
                         pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
                             numberOfWords=numberOfWords, type=type, showType=showType,
-                            argList=argList)
+                            argList=argList, textSize=textSize)
 
                         if (!is.null(pyrm)){
                             grobList[[as.character(grobNum)]]$plot <- pyrm
@@ -240,6 +241,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param orgDb organism database to use in enrich
 #' @param argList parameters passed to wcGeneSummary()
 #' @param wrap wrap the strings
+#' @param textSize text size in pyramid plots
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -255,7 +257,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         numberOfWords=25, widths=c(0.3,0.3,0.3),
                         lowCol="blue", showType="ID",
                         highCol="red", highlight=NULL,
-                        type="words", wrap=15,
+                        type="words", wrap=15, textSize=3.5,
                         orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -355,7 +357,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             gg2 <- topDf %>%
                 filter(.data$ME == L) %>%
                 ggplot(aes(.data$Label, 0, label = .data$Label)) +
-                geom_text(size=3.5) +
+                geom_text(size=textSize) +
                 coord_flip() +
                 theme_void()
             
@@ -458,7 +460,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
 
         gg2 <- lSig %>%
           ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
-          geom_text(size=3.5) +
+          geom_text(size=textSize) +
           scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
@@ -477,7 +479,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
 
         gg4 <- rSig %>%
           ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
-          geom_text(size=3.5) +
+          geom_text(size=textSize) +
           scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
