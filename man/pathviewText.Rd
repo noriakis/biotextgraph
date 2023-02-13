@@ -63,5 +63,5 @@ colorize pathview map, and link to word frequency
 }
 \examples{
 query <- c("TP53","CDC45","CDC6")
-\donttest{pathviewText(query, keyType = "SYMBOL", pid = "04110", org = "hsa")}
+\dontrun{pathviewText(query, keyType = "SYMBOL", pid = "04110", org = "hsa")}
 }
