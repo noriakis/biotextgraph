@@ -127,7 +127,11 @@ setMethod("plot",
 #' 
 #' @param x osplot object
 #' @param thresh hline to draw in plot
-#' 
+#' @examples
+#' net1 <- wcGeneSummary(c("DDX41","IRF3"), ora=TRUE)
+#' plotORA(net1)
+#' @return volcano plot for ORA results
+#' @importFrom ggrepel geom_text_repel
 #' @export
 #' 
 plotORA <- function(x, thresh=0.001) {
@@ -137,7 +141,7 @@ plotORA <- function(x, thresh=0.001) {
   
   ggplot(vp, aes(x=vp$freq,y=vp$p, fill=vp$p))+
     geom_point(shape=21,size=3,show.legend=FALSE) +
-    ggrepel::geom_text_repel(aes(color=vp$p, label=vp$word),bg.color = "white",
+    geom_text_repel(aes(color=vp$p, label=vp$word),bg.color = "white",
                     segment.color="black",size=3,max.overlaps = Inf,
                     bg.r = .15, show.legend=FALSE)+
     scale_color_gradient(low="blue",high="red")+

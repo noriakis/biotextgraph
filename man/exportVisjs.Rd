@@ -25,5 +25,5 @@ g <- graph_from_literal( ME1-+ME2 )
 V(g)$image <- c("path1","path2")
 V(g)$shape <- c("image","image")
 V(g)$size <- c(1,1)
-\dontrun{exportVisjs(g, "./", "net")}
+\donttest{exportVisjs(g, "./", "net")}
 }

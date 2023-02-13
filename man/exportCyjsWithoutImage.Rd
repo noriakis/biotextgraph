@@ -45,5 +45,5 @@ Export Cytoscape.js script, HTML and stylesheet for the graph without image
 library(igraph)
 g <- graph_from_literal( ME1-+ME2 )
 V(g)$size <- c(1,1)
-\dontrun{exportCyjsWithoutImage(g, "./", "net")}
+\donttest{exportCyjsWithoutImage(g, "./", "net")}
 }

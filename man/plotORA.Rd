@@ -11,6 +11,13 @@ plotORA(x, thresh = 0.001)
 
 \item{thresh}{hline to draw in plot}
 }
+\value{
+volcano plot for ORA results
+}
 \description{
 plot volcano-plot like plot for ORA results
+}
+\examples{
+net1 <- wcGeneSummary(c("DDX41","IRF3"), ora=TRUE)
+plotORA(net1)
 }

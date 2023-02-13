@@ -59,7 +59,7 @@
 #' @param colorize color the nodes and texts based on their category,
 #' not by their frequency
 #' @param naEdgeColor edge color linking query with the other category than text
-#' @return list of data frame and ggplot2 object
+#' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
 #' @import wordcloud

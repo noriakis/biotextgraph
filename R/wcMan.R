@@ -50,6 +50,9 @@
 #' @param colorize color the nodes and texts based on their category,
 #' not by their frequency
 #' 
+#' @examples
+#' ret <- wcGeneSummary("DDX41")
+#' wcMan(ret@rawText$Gene_summary)
 #' @export
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -78,6 +81,11 @@ wcMan <- function(df, madeUpper=NULL,
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list())
 {
+    if (!is.data.frame(df)) {
+      if (is.vector(df)) {
+        df <- data.frame(df) |> `colnames<-`(c("text"))
+      }
+    }
     ret <- new("osplot")
     ret@type <- paste0("manual")
     ret@rawText <- df

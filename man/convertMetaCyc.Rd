@@ -11,7 +11,13 @@ convertMetaCyc(ids, onlySpecies = FALSE)
 
 \item{onlySpecies}{parse only species}
 }
+\value{
+coverted species name
+}
 \description{
 this function needs taxonomizr package to be installed,
 and needs download of databases by prepareDatabase(getAccessions=FALSE)
+}
+\examples{
+convertMetaCyc("TAX-9606")
 }
