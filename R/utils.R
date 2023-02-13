@@ -67,7 +67,7 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
 #' @param onlySpecies parse only species
 #' @return coverted species name
 #' @examples
-#' \donttest{convertMetaCyc("TAX-9606")}
+#' \dontrun{convertMetaCyc("TAX-9606")}
 #' @export
 convertMetaCyc <- function (ids, onlySpecies=FALSE) {
   convIds <- sapply(ids, function(x) if (grepl("TAX-",x)) unlist(strsplit(x,"-")[[1]])[2] else x)

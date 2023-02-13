@@ -59,7 +59,6 @@
 #' @import GeneSummary
 #' @import wordcloud
 #' @import igraph
-#' @import stringr
 #' @import ggraph ggplot2
 #' @importFrom GetoptLong qqcat
 #' @importFrom AnnotationDbi keys
