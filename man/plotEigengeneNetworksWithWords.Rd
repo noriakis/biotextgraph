@@ -13,6 +13,8 @@ plotEigengeneNetworksWithWords(
   geneVecType = "ENSEMBL",
   border = TRUE,
   type = "words",
+  candidateNodes = NULL,
+  takeIntersect = TRUE,
   showType = "ID",
   textSize = 3.5,
   highlight = NULL,
@@ -20,7 +22,7 @@ plotEigengeneNetworksWithWords(
 )
 }
 \arguments{
-\item{MEs}{module eigengene data}
+\item{MEs}{module eigengene data (data.frame of row as sample and col as gene cluster IDs)}
 
 \item{colors}{named vector of cluster}
 
@@ -35,6 +37,10 @@ plotEigengeneNetworksWithWords(
 \item{border}{whether to draw border on pyramid plots}
 
 \item{type}{"words" or "enrich"}
+
+\item{candidateNodes}{if NULL, all nodes are investigated}
+
+\item{takeIntersect}{take intersection or frequent words}
 
 \item{showType}{when "enrich", which labels to show}
 

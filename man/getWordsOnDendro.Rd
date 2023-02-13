@@ -13,6 +13,8 @@ getWordsOnDendro(
   showType = "ID",
   highlight = NULL,
   textSize = 3.5,
+  candidateNodes = NULL,
+  takeIntersect = TRUE,
   type = "words",
   argList = list()
 )
@@ -34,6 +36,10 @@ pyramid plots are not produced}
 \item{highlight}{words to highlight}
 
 \item{textSize}{text size in pyramid plots}
+
+\item{candidateNodes}{if NULL, all nodes are investigated}
+
+\item{takeIntersect}{take intersection or frequent words}
 
 \item{type}{"words" or "enrich"}
 

@@ -23,5 +23,5 @@ The file above must be downloaded and specified to file argument.
 }
 \examples{
 file <- "speclist.txt"
-\donttest{getUPtax(file, candUP="all")}
+\dontrun{getUPtax(file, candUP="all")}
 }
