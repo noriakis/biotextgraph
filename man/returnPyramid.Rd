@@ -18,6 +18,7 @@ returnPyramid(
   type = "words",
   wrap = 15,
   textSize = 3.5,
+  takeIntersect = TRUE,
   orgDb = org.Hs.eg.db,
   argList = list()
 )
@@ -48,6 +49,8 @@ returnPyramid(
 \item{wrap}{wrap the strings}
 
 \item{textSize}{text size in pyramid plots}
+
+\item{takeIntersect}{take intersection or frequent words}
 
 \item{orgDb}{organism database to use in enrich}
 

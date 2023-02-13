@@ -964,7 +964,7 @@ makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lowe
 #' @return data.frame consisting of taxonomy name and UniProt IDs
 #' @examples
 #' file <- "speclist.txt"
-#' \donttest{getUPtax(file, candUP="all")}
+#' \dontrun{getUPtax(file, candUP="all")}
 #' @export
 #' 
 getUPtax <- function(file, candUP, candTax=NULL) {

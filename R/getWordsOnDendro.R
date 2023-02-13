@@ -3,7 +3,7 @@
 #' plot an eigengene dendrogram with word annotation
 #' 
 #' 
-#' @param MEs module eigengene data
+#' @param MEs module eigengene data (data.frame of row as sample and col as gene cluster IDs)
 #' @param colors named vector of cluster
 #' @param numberOfWords number of words to be included in pyramid plots
 #' @param geneNumLimit clusters with gene number above this threshold are ignored
@@ -15,6 +15,8 @@
 #' @param showType when "enrich", which labels to show
 #' @param argList passed to wcGeneSummary()
 #' @param textSize text size in pyramid plots
+#' @param candidateNodes if NULL, all nodes are investigated
+#' @param takeIntersect take intersection or frequent words
 #' 
 #' @export
 #' @import grid gridExtra
@@ -29,8 +31,17 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL",
                                             border=TRUE, type="words",
+                                            candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5,
                                             highlight=NULL, argList=list()) {
+
+    if (is.null(candidateNodes)) {
+        candidateNodes <- colnames(MEs)
+    } else {
+        # No limit when nodes are specified
+        geneNumLimit <- Inf
+    }
+
     ## Perform pvclust on ME data.frame
     result <- pvclust(MEs, method.dist="cor",
         method.hclust="average", nboot=nboot)
@@ -51,7 +62,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
                                  type=type, highlight=highlight,
-                                 showType=showType,
+                                 textSize=textSize,
+                                 candidateNodes=candidateNodes,
+                                 showType=showType, takeIntersect=takeIntersect,
                                  argList=argList)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
@@ -95,6 +108,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param highlight words to highlight
 #' @param argList passed to wcGeneSummary
 #' @param textSize text size in pyramid plots
+#' @param candidateNodes if NULL, all nodes are investigated
+#' @param takeIntersect take intersection or frequent words
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -118,6 +133,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL",
                             numberOfWords=25, showType="ID",
                             highlight=NULL, textSize=3.5,
+                            candidateNodes=NULL, takeIntersect=TRUE,
                             type="words", argList=list()) {
     
     ## Filter high frequency words if needed
@@ -183,33 +199,34 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit &
                         length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
+                        if (sum(L %in% candidateNodes)==1 | sum(R %in% candidateNodes)==1) {
+                            pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
+                                numberOfWords=numberOfWords, type=type, showType=showType,
+                                argList=argList, textSize=textSize, takeIntersect=takeIntersect)
 
-                        pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
-                            numberOfWords=numberOfWords, type=type, showType=showType,
-                            argList=argList, textSize=textSize)
+                            if (!is.null(pyrm)){
+                                grobList[[as.character(grobNum)]]$plot <- pyrm
+                                grobList[[as.character(grobNum)]]$height <- HEIGHT
+                                grobList[[as.character(grobNum)]]$xmin <- XMIN
+                                grobList[[as.character(grobNum)]]$xmax <- XMAX
 
-                        if (!is.null(pyrm)){
-                            grobList[[as.character(grobNum)]]$plot <- pyrm
-                            grobList[[as.character(grobNum)]]$height <- HEIGHT
-                            grobList[[as.character(grobNum)]]$xmin <- XMIN
-                            grobList[[as.character(grobNum)]]$xmax <- XMAX
-
-                            hind <- which(alHeights==HEIGHT)
-                            revNodes <- rev(alNodes[1:(hind-1)])
-                            revHeights <- rev(alHeights[1:(hind-1)])
-                            for (tmp in seq_len(length(revHeights))){
-                                if (revHeights[tmp]>HEIGHT){
-                                    if (is.na(revNodes[tmp])) {
-                                        HEIGHTUP <- revHeights[tmp]
-                                        break
+                                hind <- which(alHeights==HEIGHT)
+                                revNodes <- rev(alNodes[1:(hind-1)])
+                                revHeights <- rev(alHeights[1:(hind-1)])
+                                for (tmp in seq_len(length(revHeights))){
+                                    if (revHeights[tmp]>HEIGHT){
+                                        if (is.na(revNodes[tmp])) {
+                                            HEIGHTUP <- revHeights[tmp]
+                                            break
+                                        }
                                     }
                                 }
+                                
+                                grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
+                                
+                                curHeights <- c(curHeights, HEIGHT)
+                                grobNum <- grobNum + 1
                             }
-                            
-                            grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
-                            
-                            curHeights <- c(curHeights, HEIGHT)
-                            grobNum <- grobNum + 1
                         }
                     }
                     
@@ -242,6 +259,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param argList parameters passed to wcGeneSummary()
 #' @param wrap wrap the strings
 #' @param textSize text size in pyramid plots
+#' @param takeIntersect take intersection or frequent words
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -258,6 +276,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         lowCol="blue", showType="ID",
                         highCol="red", highlight=NULL,
                         type="words", wrap=15, textSize=3.5,
+                        takeIntersect=TRUE,
                         orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -288,24 +307,33 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         argList[["geneList"]] <- names(geneVec)[geneVec %in% R]
         all_R <- as.matrix(do.call("wcGeneSummary",argList))
 
-        common <- intersect(row.names(all_L), row.names(all_R))
-        all_m <- cbind(all_L[common, ], all_R[common, ])
-        # ## Clean the corpus
-        # all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
-        # if (tfidf){
-        #     stop("Use of tfidf on returnPyramid is currently not supported")
-        #     all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
-        # } else {
-        #     all_tdm <- TermDocumentMatrix(all_corpus)
-        # }
-        # all_m <- as.matrix(all_tdm)
-        
-        ## Modified from: https://rpubs.com/williamsurles/316682
-        common_words <- subset(all_m, all_m[, 1] > 0 & all_m[, 2] > 0)
+        if (takeIntersect) {
 
-        difference <- abs(common_words[, 1] - common_words[, 2])
-        common_words <- cbind(common_words, difference)
-        common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
+            common <- intersect(row.names(all_L), row.names(all_R))
+            all_m <- cbind(all_L[common, ], all_R[common, ])
+            # ## Clean the corpus
+            # all_corpus <- makeCorpus(all_corpus, filterWords, additionalRemove, numOnly, stem)
+            # if (tfidf){
+            #     stop("Use of tfidf on returnPyramid is currently not supported")
+            #     all_tdm <- TermDocumentMatrix(all_corpus, list(weighting = weightTfIdf))
+            # } else {
+            #     all_tdm <- TermDocumentMatrix(all_corpus)
+            # }
+            # all_m <- as.matrix(all_tdm)
+            
+            ## Modified from: https://rpubs.com/williamsurles/316682
+            common_words <- subset(all_m, all_m[, 1] > 0 & all_m[, 2] > 0)
+
+            difference <- abs(common_words[, 1] - common_words[, 2])
+            common_words <- cbind(common_words, difference)
+            common_words <- common_words[order(common_words[, 3], decreasing = TRUE), ]
+            if (dim(common_words)[1]<numberOfWords){
+               numberOfWords <- dim(common_words)[1]
+            }
+        } else {
+            sorted_L <- all_L[order(all_L[,1], decreasing = TRUE),] 
+            sorted_R <- all_R[order(all_R[,1], decreasing = TRUE),]
+        }
         
         L <- paste0(L, collapse="_")
         R <- paste0(R, collapse="_")
@@ -314,24 +342,33 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         # https://stackoverflow.com/questions/54191369/
         # how-to-create-pyramid-bar-chart-in-r-with-y-axis-labels-between-the-bars
 
-        if (dim(common_words)[1]<numberOfWords){
-            numberOfWords <- dim(common_words)[1]
-        }
-
         if (numberOfWords==0){
             qqcat("No common words found\n")
             return(NULL)
-        } else {    
-            topDf <- data.frame(
-                ME = factor(c(rep(L,numberOfWords),
-                    rep(R,numberOfWords)),
-                    levels = c(L,R)),
-                Word = c(common_words[1:numberOfWords, 1],
-                    common_words[1:numberOfWords, 2]),
-                Label = c(rownames(common_words[1:numberOfWords, ]),
-                    rownames(common_words[1:numberOfWords, ]))
-            )
-            
+        } else {
+            if (takeIntersect) {
+                topDf <- data.frame(
+                    ME = factor(c(rep(L,numberOfWords),
+                        rep(R,numberOfWords)),
+                        levels = c(L,R)),
+                    Word = c(common_words[1:numberOfWords, 1],
+                        common_words[1:numberOfWords, 2]),
+                    Label = c(rownames(common_words[1:numberOfWords, ]),
+                        rownames(common_words[1:numberOfWords, ]))
+                )
+            } else {
+               topDf <- data.frame(
+                    ME = factor(c(rep(L,numberOfWords),
+                                    rep(R,numberOfWords)),
+                                    levels = c(L,R)),
+                    Word = c(sorted_L[1:numberOfWords],
+                             sorted_R[1:numberOfWords]),
+                    Label = c(names(sorted_L[1:numberOfWords]),
+                            names(sorted_R[1:numberOfWords]))
+                    )
+
+            }
+
             ## Convert to uppercase
             nodeName <- topDf$Label   
             # for (i in madeUpper) {
@@ -339,41 +376,78 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             # }
             topDf$Label <- nodeName
             
-            gg1 <- topDf %>%
-                mutate(Count = if_else(.data$ME == L, .data$Word, 0)) %>%
-                ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
-                geom_col(width = 0.6) +
-                coord_flip() +
-                scale_y_reverse()+
-                scale_fill_gradient(low=lowCol,high=highCol)+
-                # scale_fill_manual(values = c("Red", "Blue")) +
-                theme_void()+
-                theme(
-                    axis.title.y=element_blank(),
-                    axis.text.y=element_blank(),
-                    axis.ticks.y=element_blank(),
-                    legend.position = "none")
-            
-            gg2 <- topDf %>%
-                filter(.data$ME == L) %>%
-                ggplot(aes(.data$Label, 0, label = .data$Label)) +
-                geom_text(size=textSize) +
-                coord_flip() +
-                theme_void()
-            
-            gg3 <- topDf %>%
+            if (takeIntersect) {
+                gg1 <- topDf %>%
+                    mutate(Count = if_else(.data$ME == L, .data$Word, 0)) %>%
+                    ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
+                    geom_col(width = 0.6) +
+                    coord_flip() +
+                    scale_y_reverse()+
+                    scale_fill_gradient(low=lowCol,high=highCol)+
+                    # scale_fill_manual(values = c("Red", "Blue")) +
+                    theme_void()+
+                    theme(
+                        axis.title.y=element_blank(),
+                        axis.text.y=element_blank(),
+                        axis.ticks.y=element_blank(),
+                        legend.position = "none")
+                gg2 <- topDf %>%
+                    filter(.data$ME == L) %>%
+                    ggplot(aes(.data$Label, 0, label = .data$Label)) +
+                    geom_text(size=textSize) +
+                    coord_flip() +
+                    theme_void()
+
+                gg3 <- topDf %>%
                 mutate(Count = if_else(.data$ME == R, .data$Word, 0)) %>%
                 ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
                 geom_col(width = 0.6) +
                 coord_flip() +
                 theme_void() +
                 scale_fill_gradient(low=lowCol,high=highCol)+
-            theme(
+                theme(
                     axis.title.y=element_blank(),
                     axis.text.y=element_blank(),
                     axis.ticks.y=element_blank(),
                     legend.position = "none")
-            
+
+            } else {
+                ## TODO: some re-ordering
+
+                gg1 <- topDf %>%
+                    mutate(Count = if_else(.data$ME == L, .data$Word, 0)) %>%
+                    ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
+                    geom_col(width = 0.6) +
+                    coord_flip() +
+                    scale_y_reverse()+
+                    scale_fill_gradient(low=lowCol,high=highCol)+
+                    # scale_fill_manual(values = c("Red", "Blue")) +
+                    theme_void()+
+                    theme(
+                        axis.title.y=element_blank(),
+                        axis.text.y=element_blank(),
+                        axis.ticks.y=element_blank(),
+                        legend.position = "none")
+
+                gg2 <- topDf %>%
+                    ggplot(aes(.data$Label, 0, label = .data$Label)) +
+                    geom_text(size=textSize) +
+                    coord_flip() +
+                    theme_void()
+
+                gg3 <- topDf %>%
+                mutate(Count = if_else(.data$ME == R, .data$Word, 0)) %>%
+                ggplot(aes( .data$Label, .data$Count, fill = .data$Count)) +
+                geom_col(width = 0.6) +
+                coord_flip() +
+                theme_void() +
+                scale_fill_gradient(low=lowCol,high=highCol)+
+                theme(
+                    axis.title.y=element_blank(),
+                    axis.text.y=element_blank(),
+                    axis.ticks.y=element_blank(),
+                    legend.position = "none")
+            }
 
             pyramid <- gg1+gg2+gg3+plot_layout(widths=widths)
             pyramidGrob <- patchworkGrob(pyramid)
