@@ -199,7 +199,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     if (length(names(geneVec)[geneVec %in% L])<geneNumLimit &
                         length(names(geneVec)[geneVec %in% R])<geneNumLimit)
                     {
-                        if (sum(L %in% candidateNodes)==1 | sum(R %in% candidateNodes)==1) {
+                        if (sum(L %in% candidateNodes)==length(L) | sum(R %in% candidateNodes)==length(R)) {
                             pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
                                 argList=argList, textSize=textSize, takeIntersect=takeIntersect)
@@ -272,7 +272,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' 
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType,
-                        numberOfWords=25, widths=c(0.3,0.3,0.3),
+                        numberOfWords=25, widths=c(0.3,0.6,0.3),
                         lowCol="blue", showType="ID",
                         highCol="red", highlight=NULL,
                         type="words", wrap=15, textSize=3.5,
