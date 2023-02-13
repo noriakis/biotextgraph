@@ -10,7 +10,7 @@ returnPyramid(
   geneVec,
   geneVecType,
   numberOfWords = 25,
-  widths = c(0.3, 0.3, 0.3),
+  widths = c(0.3, 0.6, 0.3),
   lowCol = "blue",
   showType = "ID",
   highCol = "red",

@@ -31,5 +31,5 @@ parse MetaCyc "pathways.dat"
 }
 \examples{
 file <- "pathways.dat"
-\donttest{parseMetaCycPathway(file, candSp="all")}
+\dontrun{parseMetaCycPathway(file, candSp="all")}
 }
