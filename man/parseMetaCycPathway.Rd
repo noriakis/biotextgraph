@@ -23,6 +23,13 @@ parseMetaCycPathway(
 
 \item{clear}{delete HTML tags and some symbols}
 }
+\value{
+data.frame of MetaCyc pathway information
+}
 \description{
 parse MetaCyc "pathways.dat"
+}
+\examples{
+file <- "pathways.dat"
+\donttest{parseMetaCycPathway(file, candSp="all")}
 }

@@ -55,6 +55,13 @@ e.g. "K08097" and "phosphosulfolactate synthase"}
 
 \item{argList}{passed to wc functions}
 }
+\value{
+osplot object, list of plots of pathway, and barplot and concatentaed image
+}
 \description{
 colorize pathview map, and link to word frequency
+}
+\examples{
+query <- c("TP53","CDC45","CDC6")
+\donttest{pathviewText(query, keyType = "SYMBOL", pid = "04110", org = "hsa")}
 }

@@ -184,11 +184,11 @@ on whole dataset or top-words specified by numWords}
 \item{argList}{parameters to pass to wordcloud()}
 }
 \value{
-list of data frame and ggplot2 object
+object consisting of data frame and ggplot2 object
 }
 \description{
 make word cloud or correlation network from PubMed
 }
 \examples{
-\dontrun{wcAbst("DDX41")}
+\donttest{wcAbst("DDX41")}
 }

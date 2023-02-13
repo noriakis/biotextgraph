@@ -29,6 +29,9 @@ returnQuanteda(
 
 \item{tfidf}{use dfm_tfidf or not}
 }
+\value{
+osplot object after filtering using quanteda
+}
 \description{
 simple function to generate dfm and export to wc* functions.
 It did not utilize full functionality of quanteda, and 

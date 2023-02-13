@@ -15,6 +15,10 @@
 #' @param taxFile UniProt organism ID file path
 #' @param candTax when taxec=TRUE, search only for these species.
 #' @param argList passed to osplot(target="pubmed")
+#' @return object consisting of data frame and ggplot2 object
+#' @examples
+#' file <- "enzyme.dat"
+#' \donttest{wcEC(file, ecnum="1.2.1.1")}
 #' @export
 #' 
 

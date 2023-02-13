@@ -67,8 +67,8 @@
 #' @param takeMean take mean values for each term in term-document matrix
 #' @param naEdgeColor edge color linking query with the other category than text
 #' @export
-#' @examples \dontrun{wcAbst("DDX41")}
-#' @return list of data frame and ggplot2 object
+#' @examples \donttest{wcAbst("DDX41")}
+#' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
 #' @import wordcloud

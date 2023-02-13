@@ -12,6 +12,7 @@
 #' @param tfidf use dfm_tfidf or not
 #' @param filterWords filtered words
 #' @param additionalRemove user-specified filter words
+#' @return osplot object after filtering using quanteda
 returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
                            filterWords,additionalRemove, tfidf) {
     
@@ -64,6 +65,9 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
 #' 
 #' @param ids tax ids from metacyc
 #' @param onlySpecies parse only species
+#' @return coverted species name
+#' @examples
+#' convertMetaCyc("TAX-9606")
 #' @export
 convertMetaCyc <- function (ids, onlySpecies=FALSE) {
   convIds <- sapply(ids, function(x) if (grepl("TAX-",x)) unlist(strsplit(x,"-")[[1]])[2] else x)
@@ -108,7 +112,10 @@ clearPath <- function (ex) {
 #' @param withTax parse taxonomy information
 #' @param noComma no comma separated when taxonomy parsing
 #' @param clear delete HTML tags and some symbols
-#' 
+#' @return data.frame of MetaCyc pathway information
+#' @examples
+#' file <- "pathways.dat"
+#' \donttest{parseMetaCycPathway(file, candSp="all")}
 #' @export
 #' 
 parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clear=FALSE) {
@@ -619,7 +626,7 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \dontrun{exportCyjs(g, "./", "net")}
+#' \donttest{exportCyjs(g, "./", "net")}
 #' @export
 #' 
 exportCyjs <- function(g, rootDir, netDir) {
@@ -748,7 +755,7 @@ exportCyjs <- function(g, rootDir, netDir) {
 #' V(g)$image <- c("path1","path2")
 #' V(g)$shape <- c("image","image")
 #' V(g)$size <- c(1,1)
-#' \dontrun{exportVisjs(g, "./", "net")}
+#' \donttest{exportVisjs(g, "./", "net")}
 #' @export
 #' 
 exportVisjs <- function(g, rootDir, netDir){
@@ -954,7 +961,10 @@ makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lowe
 #' @param file downloaded file
 #' @param candUP candidate UniProt organism identification codes
 #' @param candTax candidate taxonomy name
-#' 
+#' @return data.frame consisting of taxonomy name and UniProt IDs
+#' @examples
+#' file <- "speclist.txt"
+#' \donttest{getUPtax(file, candUP="all")}
 #' @export
 #' 
 getUPtax <- function(file, candUP, candTax=NULL) {
@@ -1019,7 +1029,7 @@ getUPtax <- function(file, candUP, candTax=NULL) {
 #' library(igraph)
 #' g <- graph_from_literal( ME1-+ME2 )
 #' V(g)$size <- c(1,1)
-#' \dontrun{exportCyjsWithoutImage(g, "./", "net")}
+#' \donttest{exportCyjsWithoutImage(g, "./", "net")}
 #' @export
 #' 
 exportCyjsWithoutImage <- function(g, rootDir, netDir,
@@ -1035,8 +1045,6 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
     nc <- get.vertex.attribute(g, nodeColor)
     nodeColors <- RColorBrewer::brewer.pal(length(unique(nc)), nodeColorDiscretePal)
     names(nodeColors) <- unique(nc)
-
-    print(nodeColors[nc])
 
     ## Make node size
     V(g)$size <- get.vertex.attribute(g, nodeSize)

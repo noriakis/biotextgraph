@@ -142,3 +142,7 @@ list of data frame and ggplot2 object
 \description{
 Produce networks using manual input
 }
+\examples{
+ret <- wcGeneSummary("DDX41")
+wcMan(ret@rawText$Gene_summary)
+}

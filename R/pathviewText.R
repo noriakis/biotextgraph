@@ -22,8 +22,12 @@
 #' @param areas used in patchwork
 #' @param trans transpose the barplot
 #' @param argList passed to wc functions
+#' @return osplot object, list of plots of pathway, and barplot and concatentaed image
 #' @import grid
 #' @importFrom RColorBrewer brewer.pal
+#' @examples
+#' query <- c("TP53","CDC45","CDC6")
+#' \donttest{pathviewText(query, keyType = "SYMBOL", pid = "04110", org = "hsa")}
 #' @export
 #'
 #' 
@@ -52,9 +56,9 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
     
     pathview::download.kegg(pathway.id=pid,
                   species=org)
-    xml.file=paste0(org, pid,".xml")
-    node.data=pathview::node.info(xml.file)
-    plot.data.gene=pathview::node.map(mol.data=vec,
+    xml.file <- paste0(org, pid,".xml")
+    node.data <- pathview::node.info(xml.file)
+    plot.data.gene <- pathview::node.map(mol.data=vec,
                             node.data,
                             node.types=node.types)
     
@@ -91,7 +95,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         }
     }
     
-    pv.pars= pathview::keggview.native(plot.data.gene=plot.data.gene,
+    pv.pars <- pathview::keggview.native(plot.data.gene=plot.data.gene,
                              cols.ts.gene=molCol,
                              pathway.name=paste0(org,pid),
                              same.layer=TRUE,
