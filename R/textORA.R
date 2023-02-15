@@ -37,7 +37,10 @@ textORA <- function(queries, notGene=FALSE, bg=NULL) {
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
     
     if (is.null(bg)) {
-        bg <- allFreqGeneSummary
+        data_env <- new.env(parent = emptyenv())
+        load(system.file("extdata", "sysdata.rda", package = "wcGeneSummary"),
+            envir=data_env)
+        bg <- data_env[["allFreqGeneSummary"]]
     }
 
     pvs <- vapply(names(matSorted),
