@@ -29,10 +29,21 @@ library(ggraph)
 
 We use ERCC genes as input. The basic usage of the package is producing a word cloud of gene summaries by querying gene IDs, default to symbol. The other type can be set by `keyType`. As many of the words are commonly observed, you should limit word frequency by `excludeFreq`, which is default to 2000. TF-IDF on the all the summary is precomputed, and `exclude="tfidf"` can be specified too.
 
-```{r basic, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+```{r basic_wc1, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 ## Configure input genes
 inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 gwc <- wcGeneSummary(inpSymbol)
+gwc
+gwc@wc
+```
+
+The options in `wordcloud` including color and rotation can be specified in `argList`.
+
+```{r basic_wc2, warning=FALSE, message=FALSE, cache=TRUE, fig.height=12, fig.width=12}
+gwc <- wcGeneSummary(inpSymbol, numWords=200,
+                     argList=list(max.words=200, random.order=FALSE,
+                     colors=RColorBrewer::brewer.pal(5, "Dark2"),
+                     rot.per=0.4))
 gwc
 gwc@wc
 ```
@@ -96,6 +107,7 @@ hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZI
                            plotType="network", corThresh=0.2)
 hCNetReacTrans <- hCNetReac@net +
                     theme(plot.background = element_rect(fill = "transparent",colour = NA))
+hCNetReacTrans
 ```
 
 # Annotating the gene cluster relationship
