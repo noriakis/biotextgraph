@@ -26,6 +26,7 @@
 #' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
 #' @importFrom grDevices colorRampPalette
+#' @importFrom ggforce geom_mark_hull
 compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size="freq", conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
@@ -184,7 +185,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   if (tag){
     ## Hull sometimes make groups inconsistent
     comNet <- comNet + 
-              ggforce::geom_mark_hull(
+              geom_mark_hull(
                 aes(.data$x,
                   .data$y,
                   group=.data$tag,
@@ -223,7 +224,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
         geom_node_point(aes(color=col, size=size))+
         scale_color_discrete(name="Group")
       comNet <- comNet + 
-        ggforce::geom_mark_hull(
+        geom_mark_hull(
         aes(comNet$data$x,
             comNet$data$y,
             group = col,

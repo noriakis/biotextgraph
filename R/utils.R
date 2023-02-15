@@ -230,59 +230,99 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
 #' @noRd
 
 retFiltWords <- function(useFil, filType, filNum) {
+
+    data_env <- new.env(parent = emptyenv())
+    load(system.file("extdata", "sysdata.rda", package = "wcGeneSummary"),
+        envir=data_env)
+
     if (filType=="above" | filType==">") {
         if (useFil=="GS_TfIdf") {
+
+          allTfIdfGeneSummary <- data_env[["allTfIdfGeneSummary"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummary[
             allTfIdfGeneSummary$tfidf > filNum,]$word
+            
         } else if (useFil=="BSDB_TfIdf"){
+
+          allTfIdfBSDB <- data_env[["allTfIdfBSDB"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDB[
             allTfIdfBSDB$tfidf > filNum,]$word
+
         } else if (useFil=="GS_TfIdf_Max"){
+
+          allTfIdfGeneSummaryMax <- data_env[["allTfIdfGeneSummaryMax"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummaryMax[
             allTfIdfGeneSummaryMax$tfidf > filNum,]$word
+
         } else if (useFil=="BSDB_TfIdf_Max"){
+
+          allTfIdfBSDBMax <- data_env[["allTfIdfBSDBMax"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDBMax[
             allTfIdfBSDBMax$tfidf > filNum,]$word
+
         } else if (useFil=="GS_Freq"){
+
+          allFreqGeneSummary <- data_env[["allFreqGeneSummary"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allFreqGeneSummary[
             allFreqGeneSummary$freq > filNum,]$word
+
         } else if (useFil=="BSDB_Freq"){
+
+          allFreqBSDB <- data_env[["allFreqBSDB"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allFreqBSDB[
             allFreqBSDB$freq > filNum,]$word
+
         } else {
           stop("Please specify useFil")
         }
     } else {
         if (useFil=="GS_TfIdf") {
+
+          allTfIdfGeneSummary <- data_env[["allTfIdfGeneSummary"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummary[
             allTfIdfGeneSummary$tfidf < filNum,]$word
+
         } else if (useFil=="BSDB_TfIdf"){
+
+          allTfIdfBSDB <- data_env[["allTfIdfBSDB"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDB[
             allTfIdfBSDB$tfidf < filNum,]$word
+
         } else if (useFil=="GS_TfIdf_Max"){
+
+          allTfIdfGeneSummaryMax <- data_env[["allTfIdfGeneSummaryMax"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allTfIdfGeneSummaryMax[
             allTfIdfGeneSummaryMax$tfidf < filNum,]$word
+
         } else if (useFil=="BSDB_TfIdf_Max"){
+
+          allTfIdfBSDBMax <- data_env[["allTfIdfBSDBMax"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allTfIdfBSDBMax[
             allTfIdfBSDBMax$tfidf < filNum,]$word
+
         } else if (useFil=="GS_Freq"){
+          allFreqGeneSummary <- data_env[["allFreqGeneSummary"]]
           qqcat("Filter based on GeneSummary\n")
           filterWords <- allFreqGeneSummary[
             allFreqGeneSummary$freq < filNum,]$word
+
         } else if (useFil=="BSDB_Freq"){
+
+          allFreqBSDB <- data_env[["allFreqBSDB"]]
           qqcat("Filter based on BugSigDB\n")
           filterWords <- allFreqBSDB[
             allFreqBSDB$freq < filNum,]$word
+
         } else {
           stop("Please specify useFil")
         }
