@@ -49,6 +49,7 @@ wcAbst(
   udpipeOnlyFreq = FALSE,
   udpipeOnlyFreqN = FALSE,
   naEdgeColor = "grey50",
+  cooccurrence = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   normalize = FALSE,
   takeMean = FALSE,
@@ -156,6 +157,8 @@ Otherwise take sum.}
 high-frequent words}
 
 \item{naEdgeColor}{edge color linking query with the other category than text}
+
+\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
 \item{udpipeModel}{udpipe model file name}
 

@@ -15,6 +15,7 @@
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
+#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
@@ -93,7 +94,7 @@ wcBSDB <- function (mbList,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
-                    useUdpipe=FALSE, colorize=FALSE,
+                    useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50",
@@ -432,10 +433,16 @@ wcBSDB <- function (mbList,
         }
 
         ## Check correlation
-        if (onWholeDTM){
-            corData <- cor(freqWordsDTM)
+        ## TODO: speed up calculation using Rcpp
+        if (onWholeDTM) {
+            corInput <- freqWordsDTM
         } else {
-            corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+            corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+        }
+        if (cooccurrence) {
+            corData <- t(corInput) %*% corInput
+        } else {
+            corData <- cor(corInput)
         }
         ret@corMat <- corData
         ret@corThresh <- corThresh

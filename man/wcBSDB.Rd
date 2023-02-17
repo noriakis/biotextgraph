@@ -41,6 +41,7 @@ wcBSDB(
   filterMax = FALSE,
   useUdpipe = FALSE,
   colorize = FALSE,
+  cooccurrence = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ngram = NA,
   plotType = "wc",
@@ -135,6 +136,8 @@ Otherwise take sum.}
 
 \item{colorize}{color the nodes and texts based on their category,
 not by their frequency}
+
+\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
 \item{udpipeModel}{udpipe model file name}
 

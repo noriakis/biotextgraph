@@ -26,6 +26,7 @@ wcGeneSummary(
   orgDb = org.Hs.eg.db,
   edgeLabel = FALSE,
   naEdgeColor = "grey50",
+  cooccurrence = FALSE,
   pvclAlpha = 0.95,
   bn = FALSE,
   R = 20,
@@ -105,6 +106,8 @@ Otherwise take sum.}
 
 \item{naEdgeColor}{edge colors for NA values (linking query with the category other than text)}
 
+\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
+
 \item{pvclAlpha}{alpha for pvpick()}
 
 \item{bn}{perform bootstrap-based Bayesian network inference instead of correlation using bnlearn}
@@ -123,7 +126,7 @@ Otherwise take sum.}
 
 \item{colorText}{color text label based on frequency in correlation network}
 
-\item{corThresh}{the correlation threshold}
+\item{corThresh}{the correlation (cooccurrence) threshold}
 
 \item{genePlot}{plot associated genes (default: FALSE)}
 

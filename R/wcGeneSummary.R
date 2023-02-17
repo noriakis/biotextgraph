@@ -16,7 +16,8 @@
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
-#' @param corThresh the correlation threshold
+#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
+#' @param corThresh the correlation (cooccurrence) threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
@@ -95,7 +96,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             pal=c("blue","red"), numWords=15,
                             scaleRange=c(5,10), showLegend=FALSE,
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
-                            naEdgeColor="grey50",
+                            naEdgeColor="grey50", cooccurrence=FALSE,
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
                             ngram=NA, plotType="wc", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
@@ -404,19 +405,25 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             coGraph <- graph_from_data_frame(mgd, directed=TRUE)
         } else {
             ## Check correlation
-            ## TODO: speed up calculation using Rcpp 
-            if (onWholeTDM){
-                corData <- cor(freqWordsTDM)
+            ## TODO: speed up calculation using Rcpp
+            if (onWholeTDM) {
+                corInput <- freqWordsTDM
             } else {
-                corData <- cor(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords])
+                corInput <- freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]
+            }
+            if (cooccurrence) {
+                corData <- t(corInput) %*% corInput
+            } else {
+                corData <- cor(corInput)
             }
             ret@corMat <- corData
-
+            ret@corThresh <- corThresh
             ## Set correlation below threshold to zero
             corData[corData<corThresh] <- 0
             coGraph <- graph.adjacency(corData, weighted=TRUE,
                         mode="undirected", diag = FALSE)
         }
+
 
         # if (verb) {
         #     eg <- as_data_frame(coGraph)

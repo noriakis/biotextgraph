@@ -9,6 +9,7 @@ wcMan(
   madeUpper = NULL,
   useFil = NA,
   filType = "above",
+  cooccurrence = FALSE,
   filNum = 0,
   useQuanteda = FALSE,
   quantedaArgs = list(),
@@ -57,6 +58,8 @@ wcMan(
 or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
 \item{filType}{"above" or "below"}
+
+\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
 \item{filNum}{specify filter tfidf}
 
