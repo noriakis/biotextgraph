@@ -112,7 +112,7 @@ setMethod("plot",
             
             plot(g,
                  vertex.color=gradn,
-                 vertex.label.color=gradn,
+                 # vertex.label.color=gradn,
                  vertex.size=vs,
                  vertex.label.cex=tsz,
                  vertex.label.dist=1,
