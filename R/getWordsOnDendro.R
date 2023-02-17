@@ -366,7 +366,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                     Label = c(names(sorted_L[1:numberOfWords]),
                             names(sorted_R[1:numberOfWords]))
                     )
-
+               topDf$Label <- factor(topDf$Label, levels = topDf$Label)
             }
 
             ## Convert to uppercase
