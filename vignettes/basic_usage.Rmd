@@ -69,12 +69,6 @@ cxclNet <- wcGeneSummary(cxcls, plotType="network",
     colorText=TRUE, edgeLink=FALSE)
 cxclNet@net
 ```
-Comparison of networks can be performed by `compareWordNet`.
-
-```{r basic4, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-compareWordNet(list(cxclNet, net), titles=c("CXCL","ERCC"))
-```
-
 The genes associated with the frequently occurred words within the cluster can be shown by `genePlot=TRUE`.
 
 ```{r basic5, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
@@ -87,7 +81,6 @@ net@net
 ## An example of a corelation network of words in the pathway
 
 ```{r basic6, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-library(org.Hs.eg.db)
 keggPathways <- org.Hs.egPATH2EG
 mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
@@ -108,6 +101,15 @@ hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZI
 hCNetReacTrans <- hCNetReac@net +
                     theme(plot.background = element_rect(fill = "transparent",colour = NA))
 hCNetReacTrans
+```
+
+Comparison of networks can be performed by `compareWordNet`.
+
+```{r basic4, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+compareWordNet(list(hCNet, hCNetReac),
+               titles=c("RefSeq","Reactome"),
+               colPal = "Dark2",
+               colNum=3)
 ```
 
 # Annotating the gene cluster relationship
