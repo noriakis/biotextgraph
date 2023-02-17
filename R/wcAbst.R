@@ -11,6 +11,7 @@
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
+#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param corThresh the correlation threshold
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
@@ -92,7 +93,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
-                   naEdgeColor="grey50",
+                   naEdgeColor="grey50", cooccurrence=FALSE,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
@@ -304,17 +305,23 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       coGraph <- graph_from_data_frame(mgd, directed=TRUE)
     } else {
       ## Check correlation
-      if (onWholeDTM){
-        corData <- cor(freqWordsDTM)
+      ## TODO: speed up calculation using Rcpp
+      if (onWholeDTM) {
+          corInput <- freqWordsDTM
       } else {
-        corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+          corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+      }
+      if (cooccurrence) {
+          corData <- t(corInput) %*% corInput
+      } else {
+          corData <- cor(corInput)
       }
       ret@corMat <- corData
-      
+      ret@corThresh <- corThresh
       ## Set correlation below threshold to zero
       corData[corData<corThresh] <- 0
       coGraph <- graph.adjacency(corData, weighted=TRUE,
-                                 mode="undirected", diag = FALSE)
+                  mode="undirected", diag = FALSE)
     }
     ## before or after?
     coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)

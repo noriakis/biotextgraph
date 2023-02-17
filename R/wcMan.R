@@ -10,6 +10,7 @@
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
+#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
@@ -67,7 +68,7 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 wcMan <- function(df, madeUpper=NULL,
-                   useFil=NA, filType="above",
+                   useFil=NA, filType="above", cooccurrence=FALSE,
                    filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
                    pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
@@ -223,16 +224,22 @@ wcMan <- function(df, madeUpper=NULL,
         coGraph <- graph_from_data_frame(mgd, directed=TRUE)
       } else {
         ## Check correlation
-        if (onWholeDTM){
-          corData <- cor(freqWordsDTM)
+        ## TODO: speed up calculation using Rcpp
+        if (onWholeDTM) {
+            corInput <- freqWordsDTM
         } else {
-          corData <- cor(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords])
+            corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+        }
+        if (cooccurrence) {
+            corData <- t(corInput) %*% corInput
+        } else {
+            corData <- cor(corInput)
         }
         ret@corMat <- corData
-      
+        ## Set correlation below threshold to zero
         corData[corData<corThresh] <- 0
         coGraph <- graph.adjacency(corData, weighted=TRUE,
-                                   mode="undirected", diag = FALSE)
+                    mode="undirected", diag = FALSE)
       }
 
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
