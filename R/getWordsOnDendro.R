@@ -17,6 +17,8 @@
 #' @param textSize text size in pyramid plots
 #' @param candidateNodes if NULL, all nodes are investigated
 #' @param takeIntersect take intersection or frequent words
+#' @param useWC plot wordcloud instead of pyramid plot
+#' @param wcScale max_size of wordcloud
 #' 
 #' @export
 #' @import grid gridExtra
@@ -29,8 +31,8 @@
 #' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
-                                            geneVecType="ENSEMBL",
-                                            border=TRUE, type="words",
+                                            geneVecType="ENSEMBL", useWC=FALSE,
+                                            border=TRUE, type="words", wcScale=3,
                                             candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5,
                                             highlight=NULL, argList=list()) {
@@ -65,7 +67,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  textSize=textSize,
                                  candidateNodes=candidateNodes,
                                  showType=showType, takeIntersect=takeIntersect,
-                                 argList=argList)
+                                 argList=argList, useWC=useWC, wcScale=wcScale)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
@@ -110,6 +112,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param textSize text size in pyramid plots
 #' @param candidateNodes if NULL, all nodes are investigated
 #' @param takeIntersect take intersection or frequent words
+#' @param useWC use wordcloud
+#' @param wcScale max_size of wordcloud
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -130,9 +134,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @export
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
-                            geneVecType="ENSEMBL",
+                            geneVecType="ENSEMBL", useWC=FALSE,
                             numberOfWords=25, showType="ID",
-                            highlight=NULL, textSize=3.5,
+                            highlight=NULL, textSize=3.5, wcScale=3,
                             candidateNodes=NULL, takeIntersect=TRUE,
                             type="words", argList=list()) {
     
@@ -202,8 +206,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         if (sum(L %in% candidateNodes)==length(L) | sum(R %in% candidateNodes)==length(R)) {
                             pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
-                                argList=argList, textSize=textSize, takeIntersect=takeIntersect)
-
+                                argList=argList, textSize=textSize, takeIntersect=takeIntersect,
+                                useWC=useWC, wcScale=wcScale)
                             if (!is.null(pyrm)){
                                 grobList[[as.character(grobNum)]]$plot <- pyrm
                                 grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -260,6 +264,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param wrap wrap the strings
 #' @param textSize text size in pyramid plots
 #' @param takeIntersect take intersection or frequent words
+#' @param useWC return wordcloud
+#' @param wcScale if useWC, number of size scaling (max_size)
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -274,9 +280,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 returnPyramid <- function(L, R, geneVec, geneVecType,
                         numberOfWords=25, widths=c(0.3,0.6,0.3),
                         lowCol="blue", showType="ID",
-                        highCol="red", highlight=NULL,
+                        highCol="red", highlight=NULL, wcScale=3,
                         type="words", wrap=15, textSize=3.5,
-                        takeIntersect=TRUE,
+                        takeIntersect=TRUE, useWC=FALSE,
                         orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -298,6 +304,24 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     # all_bet <- VectorSource(all_bet)
     # all_corpus <- VCorpus(all_bet)
     if (type=="words") {
+
+        
+        if (useWC) {
+            argList[["geneList"]] <- c(names(geneVec)[geneVec %in% L],
+            names(geneVec)[geneVec %in% R])
+            argList[["keyType"]] <- geneVecType
+            retWC <- do.call("wcGeneSummary", argList)
+
+            plt <- ggwordcloud::ggwordcloud(retWC@freqDf$word,
+                             retWC@freqDf$freq,
+                             min.freq = 1,
+                             max.words = Inf,
+                             rot.per = 0.5,
+                             random.order = FALSE,
+                             colors = brewer.pal(10, sample(row.names(RColorBrewer::brewer.pal.info), 1)))+
+                 scale_size_area(max_size = wcScale)+ theme(plot.background = element_rect(fill = "white",colour = NA))
+            return(plt)
+        }
         argList[["geneList"]] <- names(geneVec)[geneVec %in% L]
         argList[["collapse"]] <- TRUE
         argList[["onlyTDM"]] <- TRUE
