@@ -11,8 +11,10 @@ plotEigengeneNetworksWithWords(
   numberOfWords = 10,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
+  useWC = FALSE,
   border = TRUE,
   type = "words",
+  wcScale = 3,
   candidateNodes = NULL,
   takeIntersect = TRUE,
   showType = "ID",
@@ -34,9 +36,13 @@ plotEigengeneNetworksWithWords(
 
 \item{geneVecType}{type of IDs in `colors`}
 
+\item{useWC}{plot wordcloud instead of pyramid plot}
+
 \item{border}{whether to draw border on pyramid plots}
 
 \item{type}{"words" or "enrich"}
+
+\item{wcScale}{max_size of wordcloud}
 
 \item{candidateNodes}{if NULL, all nodes are investigated}
 

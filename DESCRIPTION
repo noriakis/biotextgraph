@@ -11,6 +11,7 @@ Depends:
 Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, methods, dendextend, RColorBrewer, utils, ggrepel, cyjShiny, graphlayouts, ggforce
 Suggests:
     concaveman,
+    ggwordcloud,
     ReactomePA,
     clusterProfiler,
     bnlearn,

@@ -15,10 +15,12 @@ returnPyramid(
   showType = "ID",
   highCol = "red",
   highlight = NULL,
+  wcScale = 3,
   type = "words",
   wrap = 15,
   textSize = 3.5,
   takeIntersect = TRUE,
+  useWC = FALSE,
   orgDb = org.Hs.eg.db,
   argList = list()
 )
@@ -44,6 +46,8 @@ returnPyramid(
 
 \item{highlight}{words to highlight}
 
+\item{wcScale}{if useWC, number of size scaling (max_size)}
+
 \item{type}{"words" or "enrich"}
 
 \item{wrap}{wrap the strings}
@@ -51,6 +55,8 @@ returnPyramid(
 \item{textSize}{text size in pyramid plots}
 
 \item{takeIntersect}{take intersection or frequent words}
+
+\item{useWC}{return wordcloud}
 
 \item{orgDb}{organism database to use in enrich}
 

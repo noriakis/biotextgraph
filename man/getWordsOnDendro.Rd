@@ -9,10 +9,12 @@ getWordsOnDendro(
   geneVec,
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
+  useWC = FALSE,
   numberOfWords = 25,
   showType = "ID",
   highlight = NULL,
   textSize = 3.5,
+  wcScale = 3,
   candidateNodes = NULL,
   takeIntersect = TRUE,
   type = "words",
@@ -29,6 +31,8 @@ pyramid plots are not produced}
 
 \item{geneVecType}{type of the name of geneVec (default: ENSEMBL)}
 
+\item{useWC}{use wordcloud}
+
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
 \item{showType}{when "enrich", which labels to show}
@@ -36,6 +40,8 @@ pyramid plots are not produced}
 \item{highlight}{words to highlight}
 
 \item{textSize}{text size in pyramid plots}
+
+\item{wcScale}{max_size of wordcloud}
 
 \item{candidateNodes}{if NULL, all nodes are investigated}
 
