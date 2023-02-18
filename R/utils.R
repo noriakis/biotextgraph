@@ -16,8 +16,8 @@
 returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
                            filterWords,additionalRemove, tfidf) {
     
-    if (length(quantedaArgList)==0) {
-        quantedaArgList <- list(
+    if (length(quantedaArgs)==0) {
+        quantedaArgs <- list(
             remove_punct=TRUE,
             remove_symbols=TRUE,
             remove_numbers=TRUE,
@@ -32,8 +32,8 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
     
     ## case_insensitive=TRUE
     
-    quantedaArgList[["x"]] <- docs
-    tokens <- do.call("tokens", quantedaArgList) |>
+    quantedaArgs[["x"]] <- docs
+    tokens <- do.call(quanteda::tokens, quantedaArgs) |>
         quanteda::tokens_remove(quanteda::stopwords("english"))
 
     if (length(additionalRemove[!is.na(additionalRemove)])!=0) {
