@@ -48,7 +48,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             highlight=NULL, argList=list(), useFunc=NULL) {
 
     if (is.null(candidateNodes)) {
-        candidateNodes <- colnames(MEs)
+        candidateNodes <- unique(names(colors))
     } else {
         # No limit when nodes are specified
         geneNumLimit <- Inf
@@ -91,7 +91,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
     if (dendPlot=="pvclust") {
         dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot(horiz=horiz) 
     } else {
-        dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)      
+        dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)
     }
     
     ## Plot the grob on dendrogram using annotation_custom.
