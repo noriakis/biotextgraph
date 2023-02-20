@@ -12,9 +12,10 @@
 #' @param tfidf use dfm_tfidf or not
 #' @param filterWords filtered words
 #' @param additionalRemove user-specified filter words
+#' @param collapse collapse sentences
 #' @return osplot object after filtering using quanteda
 returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
-                           filterWords,additionalRemove, tfidf) {
+                           filterWords,additionalRemove, tfidf, collapse) {
     
     if (length(quantedaArgs)==0) {
         quantedaArgs <- list(
@@ -26,8 +27,11 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
             split_hyphens=FALSE
         )
     }
-
-    docs <- quanteda::corpus(ret@rawText$text)
+    if (collapse) {
+      docs <- quanteda::corpus(paste(ret@rawText$text, collapse=" "))
+    } else {
+      docs <- quanteda::corpus(ret@rawText$text)      
+    }
     ret@corpusQuanteda <- docs
     
     ## case_insensitive=TRUE

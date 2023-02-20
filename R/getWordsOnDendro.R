@@ -23,6 +23,10 @@
 #' @param dhc user-specified dendrogram
 #' @param horiz horizontal plot or not
 #' @param wcArg argument list, pass to ggwordcloud
+#' @param useFunc if not specified, use RefSeq summary data
+#' @param useDf data.frame to subset when manual function is specified
+#' "query" column will be used to subset
+#' @param useWGCNA pad named color vector with prefix "ME"
 #' 
 #' @export
 #' @import grid gridExtra
@@ -40,7 +44,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5, horiz=FALSE,
                                             dendPlot="pvclust", dhc=NULL, wcArg=list(),
-                                            highlight=NULL, argList=list()) {
+                                            useDf=NULL, useWGCNA=TRUE,
+                                            highlight=NULL, argList=list(), useFunc=NULL) {
 
     if (is.null(candidateNodes)) {
         candidateNodes <- colnames(MEs)
@@ -62,8 +67,12 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
     }
 
     ## Make named vector
-    geneVec <- paste0("ME", colors)
-    names(geneVec) <- names(colors)
+    if (useWGCNA) {
+        geneVec <- paste0("ME", colors)
+        names(geneVec) <- names(colors)
+    } else {
+        geneVec <- colors
+    }
     
     ## Get pyramid plot list using the function.
     ## It takes time when geneNumLimit is large.
@@ -75,7 +84,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  textSize=textSize, wcArg=wcArg,
                                  candidateNodes=candidateNodes,
                                  showType=showType, takeIntersect=takeIntersect,
-                                 argList=argList, useWC=useWC, wcScale=wcScale)
+                                 argList=argList, useWC=useWC, wcScale=wcScale,
+                                 useFunc=useFunc, useDf=useDf)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     if (dendPlot=="pvclust") {
@@ -133,6 +143,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param useWC use wordcloud
 #' @param wcScale max_size of wordcloud
 #' @param wcArg argument list for ggwordcloud
+#' @param useFunc function to summarize text
+#' @param useDf data.frame to subset when manual function is specified
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -156,8 +168,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL", useWC=FALSE,
                             numberOfWords=25, showType="ID", wcArg=list(),
                             highlight=NULL, textSize=3.5, wcScale=3,
-                            candidateNodes=NULL, takeIntersect=TRUE,
-                            type="words", argList=list()) {
+                            candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL,
+                            type="words", argList=list(), useFunc=NULL) {
     
     ## Filter high frequency words if needed
     # filterWords <- allFreqGeneSummary[
@@ -193,6 +205,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 
             NODES <- i %>% get_nodes_attr("label")
             NODES <- NODES[!is.na(NODES)]
+
             XMIN <- as.numeric(labelPos %>%
                 filter(label==NODES[1]) %>% select(.data$x))
             XMAX <- as.numeric(labelPos %>%
@@ -226,7 +239,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
                                 argList=argList, textSize=textSize, takeIntersect=takeIntersect,
-                                useWC=useWC, wcScale=wcScale, wcArg=wcArg)
+                                useWC=useWC, wcScale=wcScale, wcArg=wcArg, useFunc=useFunc,
+                                useDf=useDf)
                             if (!is.null(pyrm)){
                                 grobList[[as.character(grobNum)]]$plot <- pyrm
                                 grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -286,6 +300,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param useWC return wordcloud
 #' @param wcScale if useWC, number of size scaling (max_size)
 #' @param wcArg argument list for ggwordcloud
+#' @param useFunc function to summarize text
+#' @param useDf data.frame to subset when manual function is specified
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -303,7 +319,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         highCol="red", highlight=NULL, wcScale=3,
                         type="words", wrap=15, textSize=3.5,
                         takeIntersect=TRUE, useWC=FALSE, wcArg=list(),
-                        orgDb=org.Hs.eg.db, argList=list()) {
+                        orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
     #     keys = names(geneVec)[geneVec %in% L],
@@ -323,16 +339,24 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     
     # all_bet <- VectorSource(all_bet)
     # all_corpus <- VCorpus(all_bet)
+
+
     if (type=="words") {
 
-        
         if (useWC) {
-            argList[["geneList"]] <- c(names(geneVec)[geneVec %in% L],
-            names(geneVec)[geneVec %in% R])
-            argList[["keyType"]] <- geneVecType
-            retWC <- do.call("wcGeneSummary", argList)
-            wcArg[["words"]] <- retWC@freqDf$word
-            wcArg[["freq"]] <- retWC@freqDf$freq
+
+            if (!is.null(useFunc)) {
+                if (!is.null(useDf)) {
+                    sch <- c(names(geneVec)[geneVec %in% L], names(geneVec)[geneVec %in% R])
+                    inputMan <- subset(useDf, useDf$query %in% sch)
+                    retWC <- do.call(useFunc, list(df=inputMan))
+                }
+            } else {
+                argList[["geneList"]] <- c(names(geneVec)[geneVec %in% L],
+                names(geneVec)[geneVec %in% R])
+                argList[["keyType"]] <- geneVecType
+                retWC <- do.call("wcGeneSummary", argList)
+            }
 
             if (length(wcArg)==0) {
                 wcArg[["min.freq"]] <- 1
@@ -342,19 +366,37 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 wcArg[["colors"]] <- brewer.pal(10, sample(row.names(RColorBrewer::brewer.pal.info), 1))
             }
 
+            wcArg[["words"]] <- retWC@freqDf$word
+            wcArg[["freq"]] <- retWC@freqDf$freq
+
+
+
             plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
                  scale_size_area(max_size = wcScale)+
                  theme(plot.background = element_rect(fill = "white",colour = NA))
             return(plt)
         }
-        argList[["geneList"]] <- names(geneVec)[geneVec %in% L]
-        argList[["collapse"]] <- TRUE
-        argList[["onlyTDM"]] <- TRUE
-        argList[["keyType"]] <- geneVecType
-        all_L <- as.matrix(do.call("wcGeneSummary",argList))
-        
-        argList[["geneList"]] <- names(geneVec)[geneVec %in% R]
-        all_R <- as.matrix(do.call("wcGeneSummary",argList))
+
+        if (is.null(useFunc)) {
+            argList[["geneList"]] <- names(geneVec)[geneVec %in% L]
+            argList[["collapse"]] <- TRUE
+            argList[["onlyTDM"]] <- TRUE
+            argList[["keyType"]] <- geneVecType
+            all_L <- as.matrix(do.call("wcGeneSummary",argList))
+            
+            argList[["geneList"]] <- names(geneVec)[geneVec %in% R]
+            all_R <- as.matrix(do.call("wcGeneSummary",argList))
+        } else {
+            if (!is.null(useDf)) {
+                argList[["df"]] <- subset(useDf, useDf$query %in% names(geneVec)[geneVec %in% L])
+                argList[["collapse"]] <- TRUE
+                argList[["onlyTDM"]] <- TRUE
+                all_L <- as.matrix(do.call(useFunc,argList))
+                
+                argList[["df"]] <- subset(useDf, useDf$query %in% names(geneVec)[geneVec %in% R])
+                all_R <- as.matrix(do.call(useFunc,argList))
+            }
+        }
 
         if (takeIntersect) {
 

@@ -50,6 +50,9 @@
 #' @param naEdgeColor edge color values for NA
 #' @param colorize color the nodes and texts based on their category,
 #' not by their frequency
+#' @param collapse default to FALSE, collapse all the sentences
+#' @param useUdpipe use udpipe to make a network
+#' @param udpipeModel udpipe model file name
 #' 
 #' @examples
 #' ret <- wcGeneSummary("DDX41")
@@ -78,9 +81,16 @@ wcMan <- function(df, madeUpper=NULL,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
-                   normalize=FALSE, takeMean=FALSE, queryPlot=FALSE,
-                   onWholeDTM=FALSE, stem=FALSE, argList=list())
+                   normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
+                   onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
+                   udpipeModel="english-ewt-ud-2.5-191206.udpipe")
 {
+
+    if (useUdpipe) {
+      qqcat("Using udpipe mode\n")
+      plotType="network"
+      udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
+    }
     if (!is.data.frame(df)) {
       if (is.vector(df)) {
         df <- data.frame(df) |> `colnames<-`(c("text"))
@@ -106,14 +116,17 @@ wcMan <- function(df, madeUpper=NULL,
     if (useQuanteda) {
       preserve <- FALSE
       ret <- returnQuanteda(ret, quantedaArgs,numWords,ngram,
-                           filterWords,additionalRemove, tfidf)
+                           filterWords,additionalRemove, tfidf, collapse)
       if (onlyCorpus) {return(ret@corpusQuanteda)}
       if (onlyTDM) {return(ret@dfm)}
       docs <- t(as.matrix(ret@dfm))
       mat <- t(as.matrix(ret@dfm))
     } else {
-
-      docs <- VCorpus(VectorSource(df$text))
+      if (collapse) {
+        docs <- VCorpus(VectorSource(paste(df$text, collapse=" ")))
+      } else {
+        docs <- VCorpus(VectorSource(df$text))
+      }
       if (preserve) {
         pdic <- preserveDict(docs, ngram, numOnly, stem)
         ret@dic <- pdic
@@ -149,6 +162,19 @@ wcMan <- function(df, madeUpper=NULL,
         return(docs)
       }
       mat <- as.matrix(docs)
+    }
+
+    if (useUdpipe) {
+        if (!"query" %in% colnames(df)) {
+          df$query <- seq_len(nrow(df))
+          queryPlot <- FALSE
+        }
+        df$ID <- df$query
+        ret <- retUdpipeNet(ret=ret, texts=df,udmodel_english=udmodel_english,
+            orgDb=NULL, filterWords=filterWords, additionalRemove=additionalRemove,
+            colorText=colorText,edgeLink=edgeLink,queryPlot=queryPlot, layout=layout,
+            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+        return(ret)
     }
 
   

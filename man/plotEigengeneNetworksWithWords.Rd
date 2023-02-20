@@ -23,8 +23,11 @@ plotEigengeneNetworksWithWords(
   dendPlot = "pvclust",
   dhc = NULL,
   wcArg = list(),
+  useDf = NULL,
+  useWGCNA = TRUE,
   highlight = NULL,
-  argList = list()
+  argList = list(),
+  useFunc = NULL
 )
 }
 \arguments{
@@ -64,9 +67,16 @@ plotEigengeneNetworksWithWords(
 
 \item{wcArg}{argument list, pass to ggwordcloud}
 
+\item{useDf}{data.frame to subset when manual function is specified
+"query" column will be used to subset}
+
+\item{useWGCNA}{pad named color vector with prefix "ME"}
+
 \item{highlight}{words to highlight}
 
 \item{argList}{passed to wcGeneSummary()}
+
+\item{useFunc}{if not specified, use RefSeq summary data}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations
