@@ -19,6 +19,10 @@ plotEigengeneNetworksWithWords(
   takeIntersect = TRUE,
   showType = "ID",
   textSize = 3.5,
+  horiz = FALSE,
+  dendPlot = "pvclust",
+  dhc = NULL,
+  wcArg = list(),
   highlight = NULL,
   argList = list()
 )
@@ -51,6 +55,14 @@ plotEigengeneNetworksWithWords(
 \item{showType}{when "enrich", which labels to show}
 
 \item{textSize}{text size in pyramid plots}
+
+\item{horiz}{horizontal plot or not}
+
+\item{dendPlot}{type of dendrogram plot}
+
+\item{dhc}{user-specified dendrogram}
+
+\item{wcArg}{argument list, pass to ggwordcloud}
 
 \item{highlight}{words to highlight}
 

@@ -12,6 +12,7 @@ getWordsOnDendro(
   useWC = FALSE,
   numberOfWords = 25,
   showType = "ID",
+  wcArg = list(),
   highlight = NULL,
   textSize = 3.5,
   wcScale = 3,
@@ -36,6 +37,8 @@ pyramid plots are not produced}
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
 \item{showType}{when "enrich", which labels to show}
+
+\item{wcArg}{argument list for ggwordcloud}
 
 \item{highlight}{words to highlight}
 

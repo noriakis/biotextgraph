@@ -19,6 +19,10 @@
 #' @param takeIntersect take intersection or frequent words
 #' @param useWC plot wordcloud instead of pyramid plot
 #' @param wcScale max_size of wordcloud
+#' @param dendPlot type of dendrogram plot
+#' @param dhc user-specified dendrogram
+#' @param horiz horizontal plot or not
+#' @param wcArg argument list, pass to ggwordcloud
 #' 
 #' @export
 #' @import grid gridExtra
@@ -28,13 +32,14 @@
 #' mod <- returnExample()
 #' plotEigengeneNetworksWithWords(mod$MEs, mod$colors)
 #' @importFrom pvclust pvclust
-#' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient
+#' @importFrom dendextend hang.dendrogram pvclust_show_signif_gradient as.ggdend
 plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             numberOfWords=10, geneNumLimit=1000,
                                             geneVecType="ENSEMBL", useWC=FALSE,
                                             border=TRUE, type="words", wcScale=3,
                                             candidateNodes=NULL, takeIntersect=TRUE,
-                                            showType="ID", textSize=3.5,
+                                            showType="ID", textSize=3.5, horiz=FALSE,
+                                            dendPlot="pvclust", dhc=NULL, wcArg=list(),
                                             highlight=NULL, argList=list()) {
 
     if (is.null(candidateNodes)) {
@@ -44,14 +49,17 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         geneNumLimit <- Inf
     }
 
-    ## Perform pvclust on ME data.frame
-    result <- pvclust(MEs, method.dist="cor",
-        method.hclust="average", nboot=nboot)
+
     
-    ## Make dendrogram    
-    dhc <- result |>
-        as.dendrogram() |>
-        hang.dendrogram()
+    ## Make dendrogram
+    if (dendPlot=="pvclust") {
+        ## Perform pvclust on ME data.frame
+        result <- pvclust(MEs, method.dist="cor",
+                        method.hclust="average", nboot=nboot)    
+        dhc <- result |>
+            as.dendrogram() |>
+            hang.dendrogram()
+    }
 
     ## Make named vector
     geneVec <- paste0("ME", colors)
@@ -64,13 +72,17 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
                                  type=type, highlight=highlight,
-                                 textSize=textSize,
+                                 textSize=textSize, wcArg=wcArg,
                                  candidateNodes=candidateNodes,
                                  showType=showType, takeIntersect=takeIntersect,
                                  argList=argList, useWC=useWC, wcScale=wcScale)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
-    dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot() 
+    if (dendPlot=="pvclust") {
+        dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot(horiz=horiz) 
+    } else {
+        dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)      
+    }
     
     ## Plot the grob on dendrogram using annotation_custom.
     ## If border is TRUE, border line is drawn using grid.rect.
@@ -84,9 +96,15 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         } else {
             addPlot <- gr$plot
         }
-        dendroPlot <- dendroPlot +
-            annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                              ymin=gr$height+0.005, ymax=gr$heightup-0.005)
+        if (horiz) {
+            dendroPlot <- dendroPlot +
+                annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                                  ymin=-1*gr$height-0.005, ymax=-1*gr$heightup+0.005)
+        } else {
+            dendroPlot <- dendroPlot +      
+                annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                                  ymin=gr$height+0.005, ymax=gr$heightup-0.005)
+        }
     }
     
     dendroPlot
@@ -114,6 +132,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param takeIntersect take intersection or frequent words
 #' @param useWC use wordcloud
 #' @param wcScale max_size of wordcloud
+#' @param wcArg argument list for ggwordcloud
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -135,7 +154,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL", useWC=FALSE,
-                            numberOfWords=25, showType="ID",
+                            numberOfWords=25, showType="ID", wcArg=list(),
                             highlight=NULL, textSize=3.5, wcScale=3,
                             candidateNodes=NULL, takeIntersect=TRUE,
                             type="words", argList=list()) {
@@ -166,7 +185,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     grobNum <- 1
     ddata <-dendro_data(dhc)
     labelPos <- ddata$labels
-    
+
     while (k < length(dhc %>% labels)){
         subdendro <- dhc %>% get_subdendrograms(k=k)
         
@@ -207,7 +226,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
                                 argList=argList, textSize=textSize, takeIntersect=takeIntersect,
-                                useWC=useWC, wcScale=wcScale)
+                                useWC=useWC, wcScale=wcScale, wcArg=wcArg)
                             if (!is.null(pyrm)){
                                 grobList[[as.character(grobNum)]]$plot <- pyrm
                                 grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -266,6 +285,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param takeIntersect take intersection or frequent words
 #' @param useWC return wordcloud
 #' @param wcScale if useWC, number of size scaling (max_size)
+#' @param wcArg argument list for ggwordcloud
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -282,7 +302,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         lowCol="blue", showType="ID",
                         highCol="red", highlight=NULL, wcScale=3,
                         type="words", wrap=15, textSize=3.5,
-                        takeIntersect=TRUE, useWC=FALSE,
+                        takeIntersect=TRUE, useWC=FALSE, wcArg=list(),
                         orgDb=org.Hs.eg.db, argList=list()) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -311,15 +331,20 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             names(geneVec)[geneVec %in% R])
             argList[["keyType"]] <- geneVecType
             retWC <- do.call("wcGeneSummary", argList)
+            wcArg[["words"]] <- retWC@freqDf$word
+            wcArg[["freq"]] <- retWC@freqDf$freq
 
-            plt <- ggwordcloud::ggwordcloud(retWC@freqDf$word,
-                             retWC@freqDf$freq,
-                             min.freq = 1,
-                             max.words = Inf,
-                             rot.per = 0.5,
-                             random.order = FALSE,
-                             colors = brewer.pal(10, sample(row.names(RColorBrewer::brewer.pal.info), 1)))+
-                 scale_size_area(max_size = wcScale)+ theme(plot.background = element_rect(fill = "white",colour = NA))
+            if (length(wcArg)==0) {
+                wcArg[["min.freq"]] <- 1
+                wcArg[["max.words"]] <- Inf
+                wcArg[["rot.per"]] <- 0.5
+                wcArg[["random.order"]] <- FALSE
+                wcArg[["colors"]] <- brewer.pal(10, sample(row.names(RColorBrewer::brewer.pal.info), 1))
+            }
+
+            plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
+                 scale_size_area(max_size = wcScale)+
+                 theme(plot.background = element_rect(fill = "white",colour = NA))
             return(plt)
         }
         argList[["geneList"]] <- names(geneVec)[geneVec %in% L]

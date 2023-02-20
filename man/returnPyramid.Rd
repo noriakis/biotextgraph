@@ -21,6 +21,7 @@ returnPyramid(
   textSize = 3.5,
   takeIntersect = TRUE,
   useWC = FALSE,
+  wcArg = list(),
   orgDb = org.Hs.eg.db,
   argList = list()
 )
@@ -57,6 +58,8 @@ returnPyramid(
 \item{takeIntersect}{take intersection or frequent words}
 
 \item{useWC}{return wordcloud}
+
+\item{wcArg}{argument list for ggwordcloud}
 
 \item{orgDb}{organism database to use in enrich}
 
