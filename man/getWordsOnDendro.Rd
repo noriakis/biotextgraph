@@ -18,8 +18,10 @@ getWordsOnDendro(
   wcScale = 3,
   candidateNodes = NULL,
   takeIntersect = TRUE,
+  useDf = NULL,
   type = "words",
-  argList = list()
+  argList = list(),
+  useFunc = NULL
 )
 }
 \arguments{
@@ -50,9 +52,13 @@ pyramid plots are not produced}
 
 \item{takeIntersect}{take intersection or frequent words}
 
+\item{useDf}{data.frame to subset when manual function is specified}
+
 \item{type}{"words" or "enrich"}
 
 \item{argList}{passed to wcGeneSummary}
+
+\item{useFunc}{function to summarize text}
 }
 \value{
 list of pyramid plot grobs and its positions

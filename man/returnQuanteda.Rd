@@ -11,7 +11,8 @@ returnQuanteda(
   ngram,
   filterWords,
   additionalRemove,
-  tfidf
+  tfidf,
+  collapse
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ returnQuanteda(
 \item{additionalRemove}{user-specified filter words}
 
 \item{tfidf}{use dfm_tfidf or not}
+
+\item{collapse}{collapse sentences}
 }
 \value{
 osplot object after filtering using quanteda

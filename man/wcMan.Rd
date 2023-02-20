@@ -44,9 +44,12 @@ wcMan(
   normalize = FALSE,
   takeMean = FALSE,
   queryPlot = FALSE,
+  collapse = FALSE,
   onWholeDTM = FALSE,
   stem = FALSE,
-  argList = list()
+  argList = list(),
+  useUdpipe = FALSE,
+  udpipeModel = "english-ewt-ud-2.5-191206.udpipe"
 )
 }
 \arguments{
@@ -132,12 +135,18 @@ Otherwise take sum.}
 
 \item{queryPlot}{plot query}
 
+\item{collapse}{default to FALSE, collapse all the sentences}
+
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
 
 \item{stem}{whether to use stemming}
 
 \item{argList}{parameters to pass to wordcloud()}
+
+\item{useUdpipe}{use udpipe to make a network}
+
+\item{udpipeModel}{udpipe model file name}
 }
 \value{
 list of data frame and ggplot2 object

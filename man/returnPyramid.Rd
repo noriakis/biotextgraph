@@ -23,7 +23,9 @@ returnPyramid(
   useWC = FALSE,
   wcArg = list(),
   orgDb = org.Hs.eg.db,
-  argList = list()
+  argList = list(),
+  useFunc = NULL,
+  useDf = NULL
 )
 }
 \arguments{
@@ -64,6 +66,10 @@ returnPyramid(
 \item{orgDb}{organism database to use in enrich}
 
 \item{argList}{parameters passed to wcGeneSummary()}
+
+\item{useFunc}{function to summarize text}
+
+\item{useDf}{data.frame to subset when manual function is specified}
 }
 \value{
 list of pyramid plot grobs and its positions
