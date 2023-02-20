@@ -349,7 +349,8 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 if (!is.null(useDf)) {
                     sch <- c(names(geneVec)[geneVec %in% L], names(geneVec)[geneVec %in% R])
                     inputMan <- subset(useDf, useDf$query %in% sch)
-                    retWC <- do.call(useFunc, list(df=inputMan))
+                    argList[["df"]] <- inputMan
+                    retWC <- do.call(useFunc, argList)
                 }
             } else {
                 argList[["geneList"]] <- c(names(geneVec)[geneVec %in% L],
