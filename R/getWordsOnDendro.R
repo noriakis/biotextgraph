@@ -49,7 +49,10 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             highlight=NULL, argList=list(), useFunc=NULL) {
 
     if (is.null(candidateNodes)) {
-        candidateNodes <- unique(names(colors))
+        candidateNodes <- unique(colors)
+        if (useWGCNA) {
+            candidateNodes <- paste0("ME",candidateNodes)
+        }
     } else {
         # No limit when nodes are specified
         geneNumLimit <- Inf
