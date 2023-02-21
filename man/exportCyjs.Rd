@@ -4,7 +4,7 @@
 \alias{exportCyjs}
 \title{exportCyjs}
 \usage{
-exportCyjs(g, rootDir, netDir)
+exportCyjs(g, rootDir, netDir, bubble = FALSE, withEdge = TRUE)
 }
 \arguments{
 \item{g}{igraph object}
@@ -12,6 +12,12 @@ exportCyjs(g, rootDir, netDir)
 \item{rootDir}{root directory path}
 
 \item{netDir}{directory to store scripts}
+
+\item{bubble}{default to FALSE, if node attribute "group" is available,
+use the grouping to draw bubblesets using
+`https://github.com/upsetjs/cytoscape.js-bubblesets`}
+
+\item{withEdge}{connect edges or not in bubblesets}
 }
 \value{
 return nothing, export to a specified directory
