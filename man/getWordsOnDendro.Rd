@@ -16,6 +16,7 @@ getWordsOnDendro(
   highlight = NULL,
   textSize = 3.5,
   wcScale = 3,
+  wrap = NULL,
   candidateNodes = NULL,
   takeIntersect = TRUE,
   useDf = NULL,
@@ -47,6 +48,8 @@ pyramid plots are not produced}
 \item{textSize}{text size in pyramid plots}
 
 \item{wcScale}{max_size of wordcloud}
+
+\item{wrap}{wrap the strings}
 
 \item{candidateNodes}{if NULL, all nodes are investigated}
 

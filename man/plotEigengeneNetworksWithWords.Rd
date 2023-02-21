@@ -26,6 +26,7 @@ plotEigengeneNetworksWithWords(
   useDf = NULL,
   useWGCNA = TRUE,
   spacer = 0.005,
+  wrap = NULL,
   highlight = NULL,
   argList = list(),
   useFunc = NULL
@@ -74,6 +75,8 @@ plotEigengeneNetworksWithWords(
 \item{useWGCNA}{pad named color vector with prefix "ME"}
 
 \item{spacer}{spacing for grob}
+
+\item{wrap}{wrap string}
 
 \item{highlight}{words to highlight}
 
