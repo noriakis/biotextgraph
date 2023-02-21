@@ -661,6 +661,10 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
 #' @param g igraph object
 #' @param rootDir root directory path
 #' @param netDir directory to store scripts
+#' @param bubble default to FALSE, if node attribute "group" is available,
+#' use the grouping to draw bubblesets using
+#' `https://github.com/upsetjs/cytoscape.js-bubblesets`
+#' @param withEdge connect edges or not in bubblesets
 #' @import jsonlite
 #' @importFrom cyjShiny dataFramesToJSON
 #' @return return nothing, export to a specified directory
@@ -673,7 +677,8 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
 #' \dontrun{exportCyjs(g, "./", "net")}
 #' @export
 #' 
-exportCyjs <- function(g, rootDir, netDir) {
+exportCyjs <- function(g, rootDir, netDir,
+  bubble=FALSE, withEdge=TRUE) {
     
     if (is.null(V(g)$shape)){stop("No node shape specified")}
     if (is.null(V(g)$size)){stop("No node size specified")}
@@ -688,6 +693,10 @@ exportCyjs <- function(g, rootDir, netDir) {
         shape=V(g)$shape
     )
     
+    if (!is.null(V(g)$group)) {
+      nodes$group <- V(g)$group
+    }
+
     edgeList <- as_edgelist(g)
     edges <- data.frame(source=edgeList[,1],
         target=edgeList[,2], interaction=NA)
@@ -697,90 +706,169 @@ exportCyjs <- function(g, rootDir, netDir) {
     pret <- substr(pret, 18, nchar(pret)-3)
     pret
     
-    js <- paste0("
-    var cy = window.cy = cytoscape({
-        container: document.getElementById('cy'),
-          style: cytoscape.stylesheet()
-            .selector('node')
-            .css({
-                      'content': 'data(label)',
-                      'shape' : 'data(shape)',
-                      'background-image': 'data(image)',
-                      'text-valign': 'bottom',
-                      'background-color': '#FFF',
-                      'background-fit': 'cover',
-                      'width': 'data(size)',
-                      'height': 'data(size)',
-                      'font-size' : 'mapData(size, 0, 100, 1, 20)',
-                      'text-outline-width': 1,
-                      'text-outline-color': '#FFF',
-                      'border-color' : '#555',
-                      'border-width': 1
-                  })
-            .selector('edge')
-            .css({
-                    'width' : '4',
-                    'target-arrow-shape': 'triangle',
-                    'curve-style': 'bezier',
-                    'width' : 'mapData(strength, 0.5, 1, 0, 5)'
-                  }),
-        'elements':
-    ", pret, ",
-        layout:{
-              name: 'cola',
-              padding: 0.5,
-              avoidOverlap: true, 
-              nodeSpacing: function( node ){ return 0.1; },
-              nodeDimensionsIncludeLabels: true
-          }
-        });
-    ")
-    
+
+    if (bubble) {
+      js <- 'import cytoscapeBubblesets from "https://cdn.skypack.dev/cytoscape-bubblesets@3.1.0";'
+    } else {
+      js <- ""
+    }
+
+    js <- paste0(js, "
+        var cy = window.cy = cytoscape({
+            container: document.getElementById('cy'),
+              style: cytoscape.stylesheet()
+                .selector('node')
+                .css({
+                          'content': 'data(label)',
+                          'shape' : 'data(shape)',
+                          'background-image': 'data(image)',
+                          'text-valign': 'bottom',
+                          'background-color': '#FFF',
+                          'background-fit': 'cover',
+                          'width': 'data(size)',
+                          'height': 'data(size)',
+                          'font-size' : 'mapData(size, 0, 100, 1, 20)',
+                          'text-outline-width': 1,
+                          'text-outline-color': '#FFF',
+                          'border-color' : '#555',
+                          'border-width': 1
+                      })
+                .selector('edge')
+                .css({
+                        'width' : '4',
+                        'target-arrow-shape': 'triangle',
+                        'curve-style': 'bezier',
+                        'width' : 'mapData(strength, 0.5, 1, 0, 5)'
+                      }),
+            'elements':
+        ", pret, ",
+            layout:{
+                  name: 'cola',
+                  padding: 0.5,
+                  avoidOverlap: true, 
+                  nodeSpacing: function( node ){ return 0.1; },
+                  nodeDimensionsIncludeLabels: true
+              }
+            });
+        ")
+
+    if (bubble) {
+      if (withEdge) {
+        js <- paste0(js, 
+               "cy.ready(() => {
+                 let groups = cy.nodes().map(nodes => nodes.data().group).flat().filter(Boolean);
+                 let uniqGroups = Array.from(new Set(groups));
+                 const bb = cy.bubbleSets();
+                 
+                 for (let i = 0; i < uniqGroups.length; i++) {
+                   var tmpgr = uniqGroups[i];
+                   const nodes = cy.nodes().filter(function(nodes){
+                     let gr = nodes.data().group;
+                     if (gr!=null) {
+                       let int = gr.includes(tmpgr);
+                       return(int);
+                     }
+                   });
+                   let gr = nodes.data().group;
+                   console.log(nodes.length)
+                   const edges = nodes.connectedEdges();
+                   bb.addPath(nodes, edges);
+                 }
+               });"
+        )
+      } else {
+        js <- paste0(js, 
+                     "cy.ready(() => {
+                 let groups = cy.nodes().map(nodes => nodes.data().group).flat().filter(Boolean);
+                 let uniqGroups = Array.from(new Set(groups));
+                 const bb = cy.bubbleSets();
+                 
+                 for (let i = 0; i < uniqGroups.length; i++) {
+                   var tmpgr = uniqGroups[i];
+                   const nodes = cy.nodes().filter(function(nodes){
+                     let gr = nodes.data().group;
+                     if (gr!=null) {
+                       let int = gr.includes(tmpgr);
+                       return(int);
+                     }
+                   });
+                   let gr = nodes.data().group;
+                   console.log(nodes.length)
+                   const edges = nodes.connectedEdges();
+                   bb.addPath(nodes);
+                 }
+               });"
+        )
+      }
+    }
+
     ## Using cola layout by default.
-    html <- '
-    <!DOCTYPE html>
-    <html lang="en">
-    
-    <head>
-        <meta charset="UTF-8">
-        <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.21.1/dist/cytoscape.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.4.0/cytoscape-cola.min.js"></script>
-        <link rel="stylesheet" type="text/css" href="style.css">
-    </head>
-    
-    <body>
-        <div id="cy"></div>
-        <script src="script.js"></script>
-    </body>
-    
-    </html>
-    '
-    
+    if (bubble) {
+      html <- '
+        <!DOCTYPE html>
+        <html lang="en">
+        
+        <head>
+            <meta charset="UTF-8">
+            <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.21.1/dist/cytoscape.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.4.0/cytoscape-cola.min.js"></script>
+            <link rel="stylesheet" type="text/css" href="style.css">
+        </head>
+        
+        <body>
+            <div id="cy"></div>
+            <script type="module" src="script.js"></script>
+        </body>
+        
+        </html>
+        '
+      
+    } else {
+      html <- '
+        <!DOCTYPE html>
+        <html lang="en">
+        
+        <head>
+            <meta charset="UTF-8">
+            <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.21.1/dist/cytoscape.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/webcola@3.4.0/WebCola/cola.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/cytoscape-cola@2.4.0/cytoscape-cola.min.js"></script>
+            <link rel="stylesheet" type="text/css" href="style.css">
+        </head>
+        
+        <body>
+            <div id="cy"></div>
+            <script src="script.js"></script>
+        </body>
+        
+        </html>
+        '
+    }
     style <- "
-    body {
-        font-family: helvetica, sans-serif;
-        font-size: 14px;
-    }
-    
-    #cy {
-        position: absolute;
-        left: 0;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999;
-    }
-    
-    h1 {
-        opacity: 0.5;
-        font-size: 1em;
-    }"
-    
-    
-    write(js, file = paste0(rootDir, netDir, "/script.js"))
-    write(style, file = paste0(rootDir, netDir, "/style.css"))
-    write(html, file = paste0(rootDir, netDir, "/index.html"))
+      body {
+          font-family: helvetica, sans-serif;
+          font-size: 14px;
+      }
+      
+      #cy {
+          position: absolute;
+          left: 0;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 999;
+      }
+      
+      h1 {
+          opacity: 0.5;
+          font-size: 1em;
+      }"
+
+
+    write(js, file = paste0(rootDir, "/", netDir, "/script.js"))
+    write(style, file = paste0(rootDir, "/", netDir, "/style.css"))
+    write(html, file = paste0(rootDir, "/", netDir, "/index.html"))
     # message(paste0("Exported to ",rootDir,netDir))
 }
 
@@ -896,9 +984,9 @@ exportVisjs <- function(g, rootDir, netDir){
     }
     '
     
-    write(js, file = paste0(rootDir, netDir, "/script.js"))
-    write(html, file = paste0(rootDir, netDir, "/index.html"))
-    write(style, file = paste0(rootDir, netDir, "/style.css"))
+    write(js, file = paste0(rootDir, "/",netDir, "/script.js"))
+    write(html, file = paste0(rootDir,"/",netDir, "/index.html"))
+    write(style, file = paste0(rootDir, "/",netDir, "/style.css"))
     # message(paste0("Exported to ",rootDir,netDir))
 }
 
