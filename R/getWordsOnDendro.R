@@ -27,6 +27,7 @@
 #' @param useDf data.frame to subset when manual function is specified
 #' "query" column will be used to subset
 #' @param useWGCNA pad named color vector with prefix "ME"
+#' @param spacer spacing for grob
 #' 
 #' @export
 #' @import grid gridExtra
@@ -44,7 +45,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5, horiz=FALSE,
                                             dendPlot="pvclust", dhc=NULL, wcArg=list(),
-                                            useDf=NULL, useWGCNA=TRUE,
+                                            useDf=NULL, useWGCNA=TRUE, spacer=0.005,
                                             highlight=NULL, argList=list(), useFunc=NULL) {
 
     if (is.null(candidateNodes)) {
@@ -109,11 +110,11 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         if (horiz) {
             dendroPlot <- dendroPlot +
                 annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                                  ymin=-1*gr$height-0.005, ymax=-1*gr$heightup+0.005)
+                                  ymin=-1*gr$height-spacer, ymax=-1*gr$heightup+spacer)
         } else {
             dendroPlot <- dendroPlot +      
                 annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                                  ymin=gr$height+0.005, ymax=gr$heightup-0.005)
+                                  ymin=gr$height+spacer, ymax=gr$heightup-spacer)
         }
     }
     

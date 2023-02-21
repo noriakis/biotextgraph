@@ -25,6 +25,7 @@ plotEigengeneNetworksWithWords(
   wcArg = list(),
   useDf = NULL,
   useWGCNA = TRUE,
+  spacer = 0.005,
   highlight = NULL,
   argList = list(),
   useFunc = NULL
@@ -71,6 +72,8 @@ plotEigengeneNetworksWithWords(
 "query" column will be used to subset}
 
 \item{useWGCNA}{pad named color vector with prefix "ME"}
+
+\item{spacer}{spacing for grob}
 
 \item{highlight}{words to highlight}
 
