@@ -28,6 +28,7 @@
 #' "query" column will be used to subset
 #' @param useWGCNA pad named color vector with prefix "ME"
 #' @param spacer spacing for grob
+#' @param wrap wrap string
 #' 
 #' @export
 #' @import grid gridExtra
@@ -45,7 +46,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5, horiz=FALSE,
                                             dendPlot="pvclust", dhc=NULL, wcArg=list(),
-                                            useDf=NULL, useWGCNA=TRUE, spacer=0.005,
+                                            useDf=NULL, useWGCNA=TRUE, spacer=0.005, wrap=NULL,
                                             highlight=NULL, argList=list(), useFunc=NULL) {
 
     if (is.null(candidateNodes)) {
@@ -89,7 +90,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  candidateNodes=candidateNodes,
                                  showType=showType, takeIntersect=takeIntersect,
                                  argList=argList, useWC=useWC, wcScale=wcScale,
-                                 useFunc=useFunc, useDf=useDf)
+                                 useFunc=useFunc, useDf=useDf, wrap=wrap)
     
     ## Plot dendrogram ggplot, using the pvclust p-values
     if (dendPlot=="pvclust") {
@@ -149,6 +150,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param wcArg argument list for ggwordcloud
 #' @param useFunc function to summarize text
 #' @param useDf data.frame to subset when manual function is specified
+#' @param wrap wrap the strings
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -171,7 +173,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             geneVecType="ENSEMBL", useWC=FALSE,
                             numberOfWords=25, showType="ID", wcArg=list(),
-                            highlight=NULL, textSize=3.5, wcScale=3,
+                            highlight=NULL, textSize=3.5, wcScale=3, wrap=NULL,
                             candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL,
                             type="words", argList=list(), useFunc=NULL) {
     
@@ -244,7 +246,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
                                 argList=argList, textSize=textSize, takeIntersect=takeIntersect,
                                 useWC=useWC, wcScale=wcScale, wcArg=wcArg, useFunc=useFunc,
-                                useDf=useDf)
+                                useDf=useDf, wrap=wrap)
                             if (!is.null(pyrm)){
                                 grobList[[as.character(grobNum)]]$plot <- pyrm
                                 grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -577,6 +579,9 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             if (!is.null(wrap)) {
               lSig$plotID <- stringr::str_wrap(lSig$Description, wrap)
               rSig$plotID <- stringr::str_wrap(rSig$Description, wrap)
+            } else {
+              lSig$plotID <- lSig$Description
+              rSig$plotID <- rSig$Description
             }            
         } else if (showType=="ID") {
             lSig$plotID <- lSig$ID
@@ -615,8 +620,13 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
 
         }
 
-        gg1 <- lSig %>%
-          ggplot(aes( .data$plotID, .data$value, fill = .data$value)) +
+        lSig$pos <- rep("left", nrow(lSig))
+        rSig$pos <- rep("right", nrow(rSig))
+        sigs <- rbind(lSig, rSig)
+
+        gg1 <- sigs %>%
+          mutate(Count = if_else(.data$pos == "left", .data$value, 0)) %>%          
+          ggplot(aes( .data$plotID, .data$Count, fill = .data$Count)) +
           geom_col(width = 0.6) +
           coord_flip() +
           scale_fill_gradient(low=lowCol,high=highCol)+
@@ -628,15 +638,16 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             axis.ticks.y=element_blank(),
             legend.position = "none")
 
-        gg2 <- lSig %>%
+        gg2 <- sigs %>%
           ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
           geom_text(size=textSize) +
           scale_color_manual(values=highlightCol, guide="none")+
           coord_flip() +
           theme_void()
 
-        gg3 <- rSig %>%
-          ggplot(aes( .data$plotID, .data$value, fill = .data$value)) +
+        gg3 <- sigs %>%
+          mutate(Count = if_else(.data$pos == "right", .data$value, 0)) %>%          
+          ggplot(aes( .data$plotID, .data$Count, fill = .data$Count)) +
           geom_col(width = 0.6) +
           coord_flip() +
           theme_void() +
@@ -647,20 +658,22 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             axis.ticks.y=element_blank(),
             legend.position = "none")
 
-        gg4 <- rSig %>%
-          ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
-          geom_text(size=textSize) +
-          scale_color_manual(values=highlightCol, guide="none")+
-          coord_flip() +
-          theme_void()
+        # gg4 <- rSig %>%
+        #   ggplot(aes(.data$plotID, 0, label = .data$plotID, color=.data$plotCol)) +
+        #   geom_text(size=textSize) +
+        #   scale_color_manual(values=highlightCol, guide="none")+
+        #   coord_flip() +
+        #   theme_void()
 
-        areas <- "
-        AA#
-        AA#
-        #BB
-        #BB
-        "
-        pyramid <- (gg1 + gg2) / (gg4 + gg3) + plot_layout(design=areas)
+        # areas <- "
+        # AA#
+        # AA#
+        # #BB
+        # #BB
+        # "
+
+        # pyramid <- (gg1 + gg2) / (gg4 + gg3) + plot_layout(design=areas)
+        pyramid <- gg1+gg2+gg3+plot_layout(widths=widths)
         pyramidGrob <- patchworkGrob(pyramid)
         return(pyramidGrob)
     }
