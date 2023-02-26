@@ -79,6 +79,18 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         geneVec <- colors
     }
     
+
+    ## Plot dendrogram ggplot, using the pvclust p-values
+    if (dendPlot=="pvclust") {
+        dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot(horiz=horiz) 
+    } else if (dendPlot=="ggplot") {
+        dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)
+    } else if (dendPlot=="ggtree") {
+        # dendroPlot <- ggtree::ggtree(dhc)+ggtree::geom_tiplab()
+        # dhc <- as.dendrogram(dhc)
+        stop("Currently not supported.")
+    }
+
     ## Get pyramid plot list using the function.
     ## It takes time when geneNumLimit is large.
     grobList <- getWordsOnDendro(dhc, geneVec,
@@ -92,13 +104,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  argList=argList, useWC=useWC, wcScale=wcScale,
                                  useFunc=useFunc, useDf=useDf, wrap=wrap)
     
-    ## Plot dendrogram ggplot, using the pvclust p-values
-    if (dendPlot=="pvclust") {
-        dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot(horiz=horiz) 
-    } else {
-        dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)
-    }
-    
+
     ## Plot the grob on dendrogram using annotation_custom.
     ## If border is TRUE, border line is drawn using grid.rect.
     for (gr in grobList){
