@@ -20,6 +20,7 @@
 #' @param useWC plot wordcloud instead of pyramid plot
 #' @param wcScale max_size of wordcloud
 #' @param dendPlot type of dendrogram plot
+#' if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.
 #' @param dhc user-specified dendrogram
 #' @param horiz horizontal plot or not
 #' @param wcArg argument list, pass to ggwordcloud
@@ -29,6 +30,14 @@
 #' @param useWGCNA pad named color vector with prefix "ME"
 #' @param spacer spacing for grob
 #' @param wrap wrap string
+#' @param returnGlobOnly default to FALSE
+#' @param tipWC using ggtree, show WC on tip
+#' @param tipWCNodes node names to plot
+#' @param imageDir image directory to output WC
+#' @param wh width and height of wordcloud
+#' @param al positional argument to passed to ggtree::geom_tiplab
+#' @param offset positional argument to passed to ggtree::geom_tiplab
+#' @param tipSize positional argument to passed to ggtree::geom_tiplab
 #' 
 #' @export
 #' @import grid gridExtra
@@ -47,7 +56,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             showType="ID", textSize=3.5, horiz=FALSE,
                                             dendPlot="pvclust", dhc=NULL, wcArg=list(),
                                             useDf=NULL, useWGCNA=TRUE, spacer=0.005, wrap=NULL,
-                                            highlight=NULL, argList=list(), useFunc=NULL) {
+                                            highlight=NULL, argList=list(), useFunc=NULL,
+                                            returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
+                                            imageDir=NULL, wh=5, al=1, offset=.2, tipSize=0.3) {
 
     if (is.null(candidateNodes)) {
         candidateNodes <- unique(colors)
@@ -82,13 +93,51 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
     ## Plot dendrogram ggplot, using the pvclust p-values
     if (dendPlot=="pvclust") {
-        dendroPlot <- dhc |> pvclust_show_signif_gradient(result) |> ggplot(horiz=horiz) 
+        dendroPlot <- dhc |>
+        pvclust_show_signif_gradient(result) |>
+        ggplot(horiz=horiz)
     } else if (dendPlot=="ggplot") {
         dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)
     } else if (dendPlot=="ggtree") {
-        # dendroPlot <- ggtree::ggtree(dhc)+ggtree::geom_tiplab()
-        # dhc <- as.dendrogram(dhc)
-        stop("Currently not supported.")
+        if (tipWC) {
+            for (ti in tipWCNodes) {
+                argList[["geneList"]] <- names(geneVec[geneVec==ti])
+                argList[["keyType"]] <- geneVecType
+                im <- do.call(wcGeneSummary, argList)
+
+                if (length(wcArg)==0) {
+                    wcArg[["min.freq"]] <- 1
+                    wcArg[["max.words"]] <- Inf
+                    wcArg[["rot.per"]] <- 0.5
+                    wcArg[["random.order"]] <- FALSE
+                    wcArg[["colors"]] <- brewer.pal(10,
+                        sample(row.names(RColorBrewer::brewer.pal.info), 1))
+                }
+
+                wcArg[["words"]] <- im@freqDf$word
+                wcArg[["freq"]] <- im@freqDf$freq
+
+                plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
+                     scale_size_area(max_size = wcScale)+
+                     theme(plot.background = element_rect(fill = "white",colour = NA))
+                ggsave(filename=paste0(imageDir, "/", ti , ".png"), plot=plt,
+                    width=wh, height=wh, dpi=300, units="in")
+
+            }
+            ## First show images on tip
+            dendroPlot <- ggtree::ggtree(dhc)+
+                ggtree::geom_tiplab(
+                aes(image=paste0(imageDir, '/', label, '.png')),
+                data=ggtree::td_filter(label %in% tipWCNodes), 
+                geom="image", align=al, offset=offset, size=tipSize)+
+                ggtree::geom_tiplab(geom='label')
+            plot(dendroPlot)
+
+        } else {
+            dendroPlot <- ggtree::ggtree(dhc)+ggtree::geom_tiplab()
+        }
+        dhc <- as.dendrogram(dhc)
+        # stop("Currently not supported.")
     }
 
     ## Get pyramid plot list using the function.
@@ -104,6 +153,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  argList=argList, useWC=useWC, wcScale=wcScale,
                                  useFunc=useFunc, useDf=useDf, wrap=wrap)
     
+    if (returnGlobOnly) {
+        return(grobList)
+    }
 
     ## Plot the grob on dendrogram using annotation_custom.
     ## If border is TRUE, border line is drawn using grid.rect.
@@ -117,14 +169,23 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         } else {
             addPlot <- gr$plot
         }
-        if (horiz) {
-            dendroPlot <- dendroPlot +
-                annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                                  ymin=-1*gr$height-spacer, ymax=-1*gr$heightup+spacer)
+
+        if (dendPlot!="ggtree") {
+
+            if (horiz) {
+                dendroPlot <- dendroPlot +
+                    annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                                      ymin=-1*gr$height-spacer, ymax=-1*gr$heightup+spacer)
+            } else {
+                dendroPlot <- dendroPlot +      
+                    annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                                      ymin=gr$height+spacer, ymax=gr$heightup-spacer)
+            }
         } else {
-            dendroPlot <- dendroPlot +      
-                annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                                  ymin=gr$height+spacer, ymax=gr$heightup-spacer)
+            ## Only the rectangular layout
+            dendroPlot <- dendroPlot + annotation_custom(addPlot,
+                ymin=gr$xmin, ymax=gr$xmax,
+                xmin=-1*gr$height-spacer, xmax=-1*gr$heightup+spacer)
         }
     }
     

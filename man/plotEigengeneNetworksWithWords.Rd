@@ -29,7 +29,15 @@ plotEigengeneNetworksWithWords(
   wrap = NULL,
   highlight = NULL,
   argList = list(),
-  useFunc = NULL
+  useFunc = NULL,
+  returnGlobOnly = FALSE,
+  tipWC = FALSE,
+  tipWCNodes = NULL,
+  imageDir = NULL,
+  wh = 5,
+  al = 1,
+  offset = 0.2,
+  tipSize = 0.3
 )
 }
 \arguments{
@@ -63,7 +71,8 @@ plotEigengeneNetworksWithWords(
 
 \item{horiz}{horizontal plot or not}
 
-\item{dendPlot}{type of dendrogram plot}
+\item{dendPlot}{type of dendrogram plot
+if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 
 \item{dhc}{user-specified dendrogram}
 
@@ -83,6 +92,22 @@ plotEigengeneNetworksWithWords(
 \item{argList}{passed to wcGeneSummary()}
 
 \item{useFunc}{if not specified, use RefSeq summary data}
+
+\item{returnGlobOnly}{default to FALSE}
+
+\item{tipWC}{using ggtree, show WC on tip}
+
+\item{tipWCNodes}{node names to plot}
+
+\item{imageDir}{image directory to output WC}
+
+\item{wh}{width and height of wordcloud}
+
+\item{al}{positional argument to passed to ggtree::geom_tiplab}
+
+\item{offset}{positional argument to passed to ggtree::geom_tiplab}
+
+\item{tipSize}{positional argument to passed to ggtree::geom_tiplab}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations
