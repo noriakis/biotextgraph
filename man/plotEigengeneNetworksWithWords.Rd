@@ -35,9 +35,10 @@ plotEigengeneNetworksWithWords(
   tipWCNodes = NULL,
   imageDir = NULL,
   wh = 5,
-  al = 1,
+  al = TRUE,
   offset = 0.2,
-  tipSize = 0.3
+  tipSize = 0.3,
+  asp = 1.5
 )
 }
 \arguments{
@@ -103,11 +104,13 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 
 \item{wh}{width and height of wordcloud}
 
-\item{al}{positional argument to passed to ggtree::geom_tiplab}
+\item{al}{positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)}
 
-\item{offset}{positional argument to passed to ggtree::geom_tiplab}
+\item{offset}{positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)}
 
-\item{tipSize}{positional argument to passed to ggtree::geom_tiplab}
+\item{tipSize}{positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)}
+
+\item{asp}{aspect ratio for ggimage::geom_image}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

@@ -35,9 +35,10 @@
 #' @param tipWCNodes node names to plot
 #' @param imageDir image directory to output WC
 #' @param wh width and height of wordcloud
-#' @param al positional argument to passed to ggtree::geom_tiplab
-#' @param offset positional argument to passed to ggtree::geom_tiplab
-#' @param tipSize positional argument to passed to ggtree::geom_tiplab
+#' @param al positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)
+#' @param offset positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)
+#' @param tipSize positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)
+#' @param asp aspect ratio for ggimage::geom_image
 #' 
 #' @export
 #' @import grid gridExtra
@@ -58,7 +59,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             useDf=NULL, useWGCNA=TRUE, spacer=0.005, wrap=NULL,
                                             highlight=NULL, argList=list(), useFunc=NULL,
                                             returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
-                                            imageDir=NULL, wh=5, al=1, offset=.2, tipSize=0.3) {
+                                            imageDir=NULL, wh=5, al=TRUE, offset=.2, tipSize=0.3,
+                                            asp=1.5) {
 
     if (is.null(candidateNodes)) {
         candidateNodes <- unique(colors)
@@ -100,7 +102,9 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         dendroPlot <- dhc |> as.ggdend() |> ggplot(horiz=horiz)
     } else if (dendPlot=="ggtree") {
         if (tipWC) {
+            qqcat("Annotating tip by word cloud\n")
             for (ti in tipWCNodes) {
+                qqcat("  Producing @{ti}\n")
                 argList[["geneList"]] <- names(geneVec[geneVec==ti])
                 argList[["keyType"]] <- geneVecType
                 im <- do.call(wcGeneSummary, argList)
@@ -119,19 +123,21 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
                 plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
                      scale_size_area(max_size = wcScale)+
-                     theme(plot.background = element_rect(fill = "white",colour = NA))
+                     theme(plot.background = element_rect(fill = "transparent",colour = NA))
                 ggsave(filename=paste0(imageDir, "/", ti , ".png"), plot=plt,
-                    width=wh, height=wh, dpi=300, units="in")
+                    width=wh, height=wh, dpi=300, units="in", bg = "transparent")
 
             }
+
             ## First show images on tip
             dendroPlot <- ggtree::ggtree(dhc)+
                 ggtree::geom_tiplab(
                 aes(image=paste0(imageDir, '/', label, '.png')),
                 data=ggtree::td_filter(label %in% tipWCNodes), 
-                geom="image", align=al, offset=offset, size=tipSize)+
+                size=tipSize, by="height", asp=asp,
+                geom="image", align=al, offset=offset)+
                 ggtree::geom_tiplab(geom='label')
-            plot(dendroPlot)
+            # plot(dendroPlot)
 
         } else {
             dendroPlot <- ggtree::ggtree(dhc)+ggtree::geom_tiplab()
