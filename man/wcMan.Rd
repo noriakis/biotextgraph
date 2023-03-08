@@ -49,6 +49,9 @@ wcMan(
   stem = FALSE,
   argList = list(),
   useUdpipe = FALSE,
+  useggwordcloud = TRUE,
+  wcScale = 10,
+  fontFamily = "sans",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe"
 )
 }
@@ -145,6 +148,12 @@ on whole dataset or top-words specified by numWords}
 \item{argList}{parameters to pass to wordcloud()}
 
 \item{useUdpipe}{use udpipe to make a network}
+
+\item{useggwordcloud}{default to TRUE}
+
+\item{wcScale}{scaling size for ggwordcloud}
+
+\item{fontFamily}{font family to use, default to "sans"}
 
 \item{udpipeModel}{udpipe model file name}
 }
