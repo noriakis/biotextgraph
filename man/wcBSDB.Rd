@@ -51,6 +51,7 @@ wcBSDB(
   naEdgeColor = "grey50",
   useggwordcloud = TRUE,
   wcScale = 10,
+  addFreqToMB = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -160,6 +161,8 @@ on whole dataset or top-words specified by numWords}
 \item{useggwordcloud}{default to TRUE}
 
 \item{wcScale}{scaling size for ggwordcloud}
+
+\item{addFreqToMB}{add pseudo frequency to microbes in genePlot}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

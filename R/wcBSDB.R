@@ -63,6 +63,7 @@
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param fontFamily font family to use, default to "sans"
+#' @param addFreqToMB add pseudo frequency to microbes in genePlot
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -100,7 +101,7 @@ wcBSDB <- function (mbList,
                     useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
-                    naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,
+                    naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -591,10 +592,13 @@ wcBSDB <- function (mbList,
         }
 
 
-        ## Add pseudo-freq
-        naRm <- V(coGraph)$Freq
-        naRm[is.na(naRm)] <- min(naRm, na.rm=TRUE)
-        V(coGraph)$Freq <- naRm
+        if (addFreqToMB) {
+            ## Set pseudo freq as min value of freq
+            fre <- V(coGraph)$Freq
+            fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+            V(coGraph)$Freq <- fre
+        }
+
 
         ret@igraph <- coGraph
 
