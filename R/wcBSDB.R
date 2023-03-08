@@ -60,6 +60,9 @@
 #' @param colorize color the nodes and texts based on their category,
 #' not by their frequency
 #' @param naEdgeColor edge color linking query with the other category than text
+#' @param useggwordcloud default to TRUE
+#' @param wcScale scaling size for ggwordcloud
+#' @param fontFamily font family to use, default to "sans"
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -87,7 +90,7 @@ wcBSDB <- function (mbList,
                     additionalRemove=NA, tfidf=FALSE,
                     target="title", apiKey=NULL, takeMax=FALSE,
                     pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
-                    madeUpper=c("dna","rna"), redo=NULL,
+                    madeUpper=c("dna","rna"), redo=NULL, fontFamily="sans",
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
                     metab=NULL, metThresh=0.2, curate=TRUE,
                     abstArg=list(), nodePal=palette(), metCol=NULL,
@@ -97,7 +100,7 @@ wcBSDB <- function (mbList,
                     useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
-                    naEdgeColor="grey50",
+                    naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -608,7 +611,7 @@ wcBSDB <- function (mbList,
                                 label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
-                                alpha=0.5,
+                                alpha=0.5,family=fontFamily,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
@@ -625,7 +628,7 @@ wcBSDB <- function (mbList,
                                 label=round(.data$weight,3)),
                                 angle_calc = 'along',
                                 label_dodge = unit(2.5, 'mm'),
-                                alpha=0.5,
+                                alpha=0.5,family=fontFamily,
                                 show.legend = showLegend)
             } else {
                 netPlot <- netPlot +
@@ -651,13 +654,13 @@ wcBSDB <- function (mbList,
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        bg.color = "white", segment.color="black",
+                        bg.color = "white", segment.color="black",family=fontFamily,
                         bg.r = .15, show.legend=showLegend)
             } else {
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        bg.color = "white", segment.color="black",
+                        bg.color = "white", segment.color="black",family=fontFamily,
                         bg.r = .15, show.legend=showLegend)
             }
         } else {
@@ -665,7 +668,7 @@ wcBSDB <- function (mbList,
                         geom_node_text(aes(label=.data$name, size=.data$Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
-                            bg.color = "white", segment.color="black",
+                            bg.color = "white", segment.color="black",family=fontFamily,
                             bg.r = .15, show.legend=showLegend) 
         }
         netPlot <- netPlot +
@@ -734,16 +737,41 @@ wcBSDB <- function (mbList,
                 }
             }
         }
+        if (tfidf) {
+            showFreq <- returnDf$freq*10
+        } else {
+            showFreq <- returnDf$freq
+        }
         if (tag){
-            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = returnDf$freq,
-                                               colors = wcCol,
-                                               random.order=FALSE,
-                                               ordered.colors=TRUE)))
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- showFreq
+            argList[["family"]] <- fontFamily
+            argList[["colors"]] <- wcCol
+            argList[["random.order"]] <- FALSE
+            argList[["ordered.colors"]] <- TRUE
+
+            if (useggwordcloud) {
+                wcScale <- 10
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill="transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
         } else {
             argList[["words"]] <- returnDf$word
-            argList[["freq"]] <- returnDf$freq
-            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            argList[["freq"]] <- showFreq
+            argList[["family"]] <- fontFamily
+            if (useggwordcloud) {
+                wcScale <- 10
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill = "transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
         }
         ret@freqDf <- returnDf
         ret@wc <- wc

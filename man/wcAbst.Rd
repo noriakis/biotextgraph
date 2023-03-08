@@ -13,6 +13,7 @@ wcAbst(
   filType = "above",
   filNum = 0,
   sortOrder = "relevance",
+  fontFamily = "sans",
   pvclAlpha = 0.95,
   numOnly = TRUE,
   delim = "OR",
@@ -50,6 +51,8 @@ wcAbst(
   udpipeOnlyFreqN = FALSE,
   naEdgeColor = "grey50",
   cooccurrence = FALSE,
+  useggwordcloud = TRUE,
+  wcScale = 10,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   normalize = FALSE,
   takeMean = FALSE,
@@ -81,6 +84,8 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 \item{filNum}{specify filter tfidf}
 
 \item{sortOrder}{sort order, passed to rentrez function}
+
+\item{fontFamily}{font family to use, default to "sans"}
 
 \item{pvclAlpha}{alpha for pvpick()}
 
@@ -159,6 +164,10 @@ high-frequent words}
 \item{naEdgeColor}{edge color linking query with the other category than text}
 
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
+
+\item{useggwordcloud}{default to TRUE}
+
+\item{wcScale}{scaling size for ggwordcloud}
 
 \item{udpipeModel}{udpipe model file name}
 

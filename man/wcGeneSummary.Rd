@@ -58,8 +58,11 @@ wcGeneSummary(
   collapse = FALSE,
   useUdpipe = FALSE,
   normalize = FALSE,
+  fontFamily = "sans",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
-  argList = list()
+  argList = list(),
+  useggwordcloud = TRUE,
+  wcScale = 10
 )
 }
 \arguments{
@@ -173,9 +176,15 @@ on whole dataset or top-words specified by numWords}
 
 \item{normalize}{sum normalize the term frequency document-wise}
 
+\item{fontFamily}{font family to use, default to "sans"}
+
 \item{udpipeModel}{udpipe model file name}
 
 \item{argList}{parameters to pass to wordcloud()}
+
+\item{useggwordcloud}{default to TRUE}
+
+\item{wcScale}{scaling size for ggwordcloud}
 }
 \value{
 list of data frame and ggplot2 object

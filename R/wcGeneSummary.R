@@ -63,6 +63,9 @@
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
 #' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
+#' @param fontFamily font family to use, default to "sans"
+#' @param useggwordcloud default to TRUE
+#' @param wcScale scaling size for ggwordcloud
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -106,9 +109,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeTDM=FALSE, pre=TRUE, takeMean=FALSE,
                             nodePal=palette(), collapse=FALSE,
-                            useUdpipe=FALSE, normalize=FALSE,
+                            useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
-                            argList=list()) {
+                            argList=list(), useggwordcloud=TRUE, wcScale=10) {
     ret <- new("osplot")
     ret@query <- geneList
     ret@type <- "refseq"
@@ -379,7 +382,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
             ret@enrichResults <- pathRes@result
-            sigPath <- subset(clusterProfiler::setReadable(pathRes, orgDb)@result, p.adjust<genePathPlotSig)
+            sigPath <- subset(clusterProfiler::setReadable(pathRes,
+                orgDb)@result, p.adjust<genePathPlotSig)
             pathGraph <- c()
             for (i in 1:nrow(sigPath)){
                 pa <- sigPath[i, "Description"]
@@ -393,7 +397,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             qqcat("bn specified, R=@{R}\n")
             # To avoid computaitonal time, subset to numWords
             bnboot <- bnlearn::boot.strength(
-                data.frame(freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]),
+                data.frame(
+                    freqWordsTDM[,colnames(freqWordsTDM) %in% freqWords]),
                 algorithm = "hc", R=R)
             ret@strength <- bnboot
             av <- bnlearn::averaged.network(bnboot)
@@ -514,7 +519,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]
             ret@geneMap <- genemap
-            genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
+            genemap <- simplify(igraph::graph_from_edgelist(genemap,
+                directed = FALSE))
             coGraph <- igraph::union(coGraph, genemap)
 
             E(coGraph)$edgeColor <- E(coGraph)$weight
@@ -531,12 +537,14 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         if (!is.na(genePathPlot)) {
 
             withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
-            withinCoGraphPathGraph <- pathGraph[ pathGraph[,2] %in% withinCoGraph,]
+            withinCoGraphPathGraph <- pathGraph[
+            pathGraph[,2] %in% withinCoGraph,]
 
             grp <- c()
             for (i in V(coGraph)$name) {
                 if (i %in% withinCoGraphPathGraph[,2]){
-                    tmpMap <- withinCoGraphPathGraph[withinCoGraphPathGraph[,2] %in% i,]
+                    tmpMap <- withinCoGraphPathGraph[
+                    withinCoGraphPathGraph[,2] %in% i,]
                     if (is.vector(tmpMap)) {
                         grp <- c(grp, tmpMap[1])
                     } else {
@@ -591,6 +599,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
+                                    family=fontFamily,
                                     label_dodge = unit(2.5, 'mm'),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
@@ -614,6 +623,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     color=.data$edgeColor,
                                     label=.data$weightLabel),
                                     angle_calc = 'along',
+                                    family=fontFamily,
                                     label_dodge = unit(2.5, 'mm'),
                                     arrow = arrow(length = unit(4, 'mm')), 
                                     start_cap = circle(3, 'mm'),
@@ -638,6 +648,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     aes(width=.data$weight,
                                     color=.data$edgeColor,
                                     label=.data$weightLabel),
+                                    family=fontFamily,
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     alpha=0.5,
@@ -658,6 +669,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                     angle_calc = 'along',
                                     label_dodge = unit(2.5, 'mm'),
                                     alpha=0.5,
+                                    family=fontFamily,
                                     show.legend = showLegend)                        
                 } else {
                     netPlot <- netPlot +
@@ -669,11 +681,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                color=.data$tag),
                                                 show.legend = showLegend) +
             scale_color_manual(values=nodePal)
         } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                color=.data$Freq),
                                                 show.legend = showLegend)+
                                  scale_color_gradient(low=pal[1],high=pal[2],
                                                       name = "Frequency")
@@ -684,13 +698,16 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name,
                         size=.data$Freq, color=.data$tag),
+                        family=fontFamily,
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             } else {
                 netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
+                    geom_node_text(aes(label=.data$name, size=.data$Freq,
+                        color=.data$Freq),
                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                        family=fontFamily,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend)
             }
@@ -699,6 +716,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                         geom_node_text(aes(label=.data$name, size=.data$Freq),
                             check_overlap=TRUE, repel=TRUE,# size = labelSize,
                             color = "black",
+                            family=fontFamily,
                             bg.color = "white", segment.color="black",
                             bg.r = .15, show.legend=showLegend) 
         }
@@ -768,15 +786,41 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         if (tag){
-            wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                               freq = showFreq,
-                                               colors = wcCol,
-                                               random.order=FALSE,
-                                               ordered.colors = TRUE)))
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- showFreq
+            argList[["family"]] <- fontFamily
+            argList[["colors"]] <- wcCol
+            argList[["random.order"]] <- FALSE
+            argList[["ordered.colors"]] <- TRUE
+
+            if (useggwordcloud) {
+                wcScale <- 10
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill="transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
+            # wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
+            #                                    freq = showFreq,
+            #                                    colors = wcCol,
+            #                                    family=fontFamily,
+            #                                    random.order=FALSE,
+            #                                    ordered.colors = TRUE)))
         } else {
             argList[["words"]] <- returnDf$word
             argList[["freq"]] <- showFreq
-            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            argList[["family"]] <- fontFamily
+            if (useggwordcloud) {
+                wcScale <- 10
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill = "transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
         }
         ret@freqDf <- returnDf
         ret@wc <- wc

@@ -67,6 +67,9 @@
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
 #' @param naEdgeColor edge color linking query with the other category than text
+#' @param useggwordcloud default to TRUE
+#' @param wcScale scaling size for ggwordcloud
+#' @param fontFamily font family to use, default to "sans"
 #' @export
 #' @examples \donttest{wcAbst("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -83,7 +86,7 @@
 #' @importFrom ggplotify as.ggplot
 wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    target="abstract", useFil=NA, filType="above",
-                   filNum=0, sortOrder="relevance",
+                   filNum=0, sortOrder="relevance", fontFamily="sans",
                    pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
                    geneUpper=TRUE, apiKey=NULL, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
@@ -94,6 +97,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
                    naEdgeColor="grey50", cooccurrence=FALSE,
+                   useggwordcloud=TRUE, wcScale=10,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
@@ -434,7 +438,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               arrow = arrow(length = unit(4, 'mm')), 
               start_cap = circle(3, 'mm'),
               end_cap = circle(3, 'mm'),
-              alpha=0.5,
+              alpha=0.5,family=fontFamily,
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
@@ -456,7 +460,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               arrow = arrow(length = unit(4, 'mm')), 
               start_cap = circle(3, 'mm'),
               end_cap = circle(3, 'mm'),
-              alpha=0.5,
+              alpha=0.5,family=fontFamily,
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
@@ -477,7 +481,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                   label=round(.data$weight,3)),
               angle_calc = 'along',
               label_dodge = unit(2.5, 'mm'),
-              alpha=0.5,
+              alpha=0.5,family=fontFamily,
               show.legend = showLegend)
         } else {
           netPlot <- netPlot +
@@ -491,7 +495,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
               aes(width=.data$weight,
                   color=.data$edgeColor,
                   label=round(.data$weight,3)),
-              angle_calc = 'along',
+              angle_calc = 'along',family=fontFamily,
               label_dodge = unit(2.5, 'mm'),
               alpha=0.5,
               show.legend = showLegend)
@@ -517,20 +521,20 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         netPlot <- netPlot + 
           geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                         bg.color = "white", segment.color="black",
+                         bg.color = "white", segment.color="black",family=fontFamily,
                          bg.r = .15, show.legend=showLegend)
       } else {
         netPlot <- netPlot + 
           geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                         bg.color = "white", segment.color="black",
+                         bg.color = "white", segment.color="black",family=fontFamily,
                          bg.r = .15, show.legend=showLegend)
       }
     } else {
       netPlot <- netPlot + 
         geom_node_text(aes(label=.data$name, size=.data$Freq),
                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                       color = "black",
+                       color = "black",family=fontFamily,
                        bg.color = "white", segment.color="black",
                        bg.r = .15, show.legend=showLegend) 
     }
@@ -585,17 +589,41 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
             }
         }
     }
-
-    if (tag){
-      wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                         freq = returnDf$freq,
-                                         colors = wcCol,
-                                         random.order=FALSE,
-                                         ordered.colors = TRUE)))
+    if (tfidf) {
+        showFreq <- returnDf$freq*10
     } else {
-      argList[["words"]] <- returnDf$word
-      argList[["freq"]] <- returnDf$freq
-      wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        showFreq <- returnDf$freq
+    }
+    if (tag){
+        argList[["words"]] <- returnDf$word
+        argList[["freq"]] <- showFreq
+        argList[["family"]] <- fontFamily
+        argList[["colors"]] <- wcCol
+        argList[["random.order"]] <- FALSE
+        argList[["ordered.colors"]] <- TRUE
+
+        if (useggwordcloud) {
+            wcScale <- 10
+            wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+            scale_size_area(max_size = wcScale)+
+            theme(plot.background = element_rect(fill="transparent",
+                colour = NA))
+        } else {
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        }
+    } else {
+        argList[["words"]] <- returnDf$word
+        argList[["freq"]] <- showFreq
+        argList[["family"]] <- fontFamily
+        if (useggwordcloud) {
+            wcScale <- 10
+            wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+            scale_size_area(max_size = wcScale)+
+            theme(plot.background = element_rect(fill = "transparent",
+                colour = NA))
+        } else {
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        }
     }
     ret@freqDf <- returnDf
     ret@wc <- wc

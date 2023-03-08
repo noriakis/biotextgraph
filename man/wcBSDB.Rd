@@ -21,6 +21,7 @@ wcBSDB(
   numOnly = TRUE,
   madeUpper = c("dna", "rna"),
   redo = NULL,
+  fontFamily = "sans",
   pal = c("blue", "red"),
   numWords = 15,
   preserve = TRUE,
@@ -48,6 +49,8 @@ wcBSDB(
   disPlot = FALSE,
   onWholeDTM = FALSE,
   naEdgeColor = "grey50",
+  useggwordcloud = TRUE,
+  wcScale = 10,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -92,6 +95,8 @@ wcBSDB(
 \item{madeUpper}{make the words uppercase in resulting plot}
 
 \item{redo}{if "abstract" is chosen in target, one can provide resulting object again}
+
+\item{fontFamily}{font family to use, default to "sans"}
 
 \item{pal}{palette for color gradient in correlation network and tag coloring}
 
@@ -151,6 +156,10 @@ not by their frequency}
 on whole dataset or top-words specified by numWords}
 
 \item{naEdgeColor}{edge color linking query with the other category than text}
+
+\item{useggwordcloud}{default to TRUE}
+
+\item{wcScale}{scaling size for ggwordcloud}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

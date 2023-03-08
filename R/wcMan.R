@@ -53,7 +53,9 @@
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
-#' 
+#' @param useggwordcloud default to TRUE
+#' @param wcScale scaling size for ggwordcloud
+#' @param fontFamily font family to use, default to "sans"
 #' @examples
 #' ret <- wcGeneSummary("DDX41")
 #' wcMan(ret@rawText$Gene_summary)
@@ -83,6 +85,7 @@ wcMan <- function(df, madeUpper=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
+                   useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe")
 {
 
@@ -411,6 +414,7 @@ wcMan <- function(df, madeUpper=NULL,
                     color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
+                family=fontFamily,
                 label_dodge = unit(2.5, 'mm'),
                 arrow = arrow(length = unit(4, 'mm')), 
                 start_cap = circle(3, 'mm'),
@@ -433,6 +437,7 @@ wcMan <- function(df, madeUpper=NULL,
                     color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
+                family=fontFamily,
                 label_dodge = unit(2.5, 'mm'),
                 arrow = arrow(length = unit(4, 'mm')), 
                 start_cap = circle(3, 'mm'),
@@ -457,6 +462,7 @@ wcMan <- function(df, madeUpper=NULL,
                     color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
+                family=fontFamily,
                 label_dodge = unit(2.5, 'mm'),
                 alpha=0.5,
                 show.legend = showLegend)
@@ -473,6 +479,7 @@ wcMan <- function(df, madeUpper=NULL,
                     color=.data$edgeColor,
                     label=round(.data$weight,3)),
                 angle_calc = 'along',
+                family=fontFamily,
                 label_dodge = unit(2.5, 'mm'),
                 alpha=0.5,
                 show.legend = showLegend)
@@ -498,20 +505,20 @@ wcMan <- function(df, madeUpper=NULL,
           netPlot <- netPlot + 
             geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           bg.color = "white", segment.color="black",
+                           bg.color = "white", segment.color="black",family=fontFamily,
                            bg.r = .15, show.legend=showLegend)
         } else {
           netPlot <- netPlot + 
             geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           bg.color = "white", segment.color="black",
+                           bg.color = "white", segment.color="black",family=fontFamily,
                            bg.r = .15, show.legend=showLegend)
         }
       } else {
         netPlot <- netPlot + 
           geom_node_text(aes(label=.data$name, size=.data$Freq),
                          check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                         color = "black",
+                         color = "black",family=fontFamily,
                          bg.color = "white", segment.color="black",
                          bg.r = .15, show.legend=showLegend) 
       }
@@ -565,17 +572,41 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
     }
-    
-    if (tag){
-      wc <- as.ggplot(as_grob(~wordcloud(words = returnDf$word, 
-                                         freq = returnDf$freq,
-                                         colors = wcCol,
-                                         random.order=FALSE,
-                                         ordered.colors = TRUE)))
+    if (tfidf) {
+        showFreq <- returnDf$freq*10
     } else {
-      argList[["words"]] <- returnDf$word
-      argList[["freq"]] <- returnDf$freq
-      wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        showFreq <- returnDf$freq
+    }    
+    if (tag){
+        argList[["words"]] <- returnDf$word
+        argList[["freq"]] <- showFreq
+        argList[["family"]] <- fontFamily
+        argList[["colors"]] <- wcCol
+        argList[["random.order"]] <- FALSE
+        argList[["ordered.colors"]] <- TRUE
+
+        if (useggwordcloud) {
+            wcScale <- 10
+            wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+            scale_size_area(max_size = wcScale)+
+            theme(plot.background = element_rect(fill="transparent",
+                colour = NA))
+        } else {
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        }
+    } else {
+        argList[["words"]] <- returnDf$word
+        argList[["freq"]] <- showFreq
+        argList[["family"]] <- fontFamily
+        if (useggwordcloud) {
+            wcScale <- 10
+            wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+            scale_size_area(max_size = wcScale)+
+            theme(plot.background = element_rect(fill = "transparent",
+                colour = NA))
+        } else {
+            wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+        }
     }
     ret@freqDf <- returnDf
     ret@wc <- wc
