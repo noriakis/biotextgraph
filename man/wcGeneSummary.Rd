@@ -56,6 +56,7 @@ wcGeneSummary(
   takeMean = FALSE,
   nodePal = palette(),
   collapse = FALSE,
+  addFreqToGene = FALSE,
   useUdpipe = FALSE,
   normalize = FALSE,
   fontFamily = "sans",
@@ -171,6 +172,8 @@ on whole dataset or top-words specified by numWords}
 \item{nodePal}{node palette when tag is TRUE}
 
 \item{collapse}{default to FALSE, collapse all the sentences}
+
+\item{addFreqToGene}{add pseudo frequency to gene in genePlot}
 
 \item{useUdpipe}{use udpipe to make a network}
 

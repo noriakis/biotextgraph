@@ -66,6 +66,7 @@
 #' @param fontFamily font family to use, default to "sans"
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
+#' @param addFreqToGene add pseudo frequency to gene in genePlot
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -108,7 +109,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeTDM=FALSE, pre=TRUE, takeMean=FALSE,
-                            nodePal=palette(), collapse=FALSE,
+                            nodePal=palette(), collapse=FALSE, addFreqToGene=FALSE,
                             useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             argList=list(), useggwordcloud=TRUE, wcScale=10) {
@@ -557,11 +558,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             V(coGraph)$grp <- grp
         }
-           
-        ## Set pseudo freq as min value of freq
-        # fre <- V(coGraph)$Freq
-        # fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-        # V(coGraph)$Freq <- fre
+        
+        if (addFreqToGene) {
+            ## Set pseudo freq as min value of freq
+            fre <- V(coGraph)$Freq
+            fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+            V(coGraph)$Freq <- fre
+        }
 
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
