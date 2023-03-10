@@ -1,3 +1,33 @@
+#'
+#' connectGenes
+#'
+#' When an interesting word is found in two or more networks,
+#' connect the words and gene names and return the graph.
+#' Note that genePlot must be set to TRUE.
+#'
+#' @param nets named list of nets
+#' @param query_word word to connect
+connectGenes <- function(nets, query_word) {
+  words <- NULL
+  if (is.null(names(nets))) {
+    names(nets) <- paste0("Net",seq_len(length(nets)))
+  }
+  k <- 1
+  for (net in nets) {
+    if (dim(net@geneMap)[1]==0) {
+      stop("No gene mapping present in object")
+    }
+    
+    mp <- net@geneMap
+    mp <- data.frame(mp[mp[,1]==query_word,])
+    mp$type <- names(nets)[k]
+    
+    words <- rbind(words, mp[,c(1,2)])
+    words <- rbind(words, mp[,c(2,3)]|>`colnames<-`(colnames(mp[,c(1,2)])))
+    k <- k+1
+  }
+  return(graph_from_edgelist(as.matrix(words), directed = FALSE))
+}
 
 #'
 #' returnQuanteda
