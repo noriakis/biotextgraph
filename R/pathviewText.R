@@ -22,6 +22,7 @@
 #' @param areas used in patchwork
 #' @param trans transpose the barplot
 #' @param argList passed to wc functions
+#' @param textSize text size in barplot
 #' @return osplot object, list of plots of pathway, and barplot and concatentaed image
 #' @import grid
 #' @importFrom RColorBrewer brewer.pal
@@ -34,7 +35,7 @@
 pathviewText <- function(geneList, keyType, pid, org="hsa",
                          pal="RdBu",target="refseq",
                          searchTerms=NULL, node.types="gene",
-                         termMap=NULL, orgDb=org.Hs.eg.db,
+                         termMap=NULL, orgDb=org.Hs.eg.db, textSize=12,
                          numWords=20, trans=FALSE, areas=NULL, argList=list()) {
     returnList <- list()
     if (!keyType %in% c("KO","ENTREZID")) {
@@ -227,7 +228,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
             xlab("Words")+ylab("Frequency")+theme_minimal()+
-            theme(axis.text =element_text(angle=90))
+            theme(axis.text =element_text(angle=90, size=textSize))
         
         if (is.null(areas)) {
             areas <- "
@@ -245,7 +246,8 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
             x=.data$stack,fill=.data$query))+
             geom_bar(position="stack", stat="identity")+
             scale_fill_manual(values=colVec, name="Gene")+
-            ylab("Words")+xlab("Frequency")+theme_minimal()
+            ylab("Words")+xlab("Frequency")+theme_minimal()+
+            theme(axis.text =element_text(size=textSize))
         if (is.null(areas)) {
             areas <- "
             AAAAAABB
