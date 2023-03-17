@@ -15,6 +15,7 @@ pathviewText(
   node.types = "gene",
   termMap = NULL,
   orgDb = org.Hs.eg.db,
+  textSize = 12,
   numWords = 20,
   trans = FALSE,
   areas = NULL,
@@ -46,6 +47,8 @@ and description as "searchTerms".
 e.g. "K08097" and "phosphosulfolactate synthase"}
 
 \item{orgDb}{organism database to convert symbol}
+
+\item{textSize}{text size in barplot}
 
 \item{numWords}{number of words in barplot}
 
