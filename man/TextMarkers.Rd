@@ -11,9 +11,12 @@ TextMarkers(
   genePlot = TRUE,
   genePlotNum = 5,
   colorText = TRUE,
-  wcArg = NULL,
+  args = list(),
+  wcArgs = NULL,
   raw = FALSE,
-  col = NULL
+  col = NULL,
+  pvalThresh = 0.05,
+  withTitle = TRUE
 )
 }
 \arguments{
@@ -29,11 +32,21 @@ TextMarkers(
 
 \item{colorText}{colorlize text or not, default to TRUE}
 
-\item{wcArg}{parameters to pass to ggwordcloud}
+\item{args}{parameters to pass to wcGeneSummary}
+
+\item{wcArgs}{parameters to pass to ggwordcloud}
 
 \item{raw}{obtain raw results of wcGeneSummary instead of plot}
 
-\item{col}{color to be used in wordcloud}
+\item{col}{color to be used in wordcloud,
+named list of clusters}
+
+\item{pvalThresh}{adjusted p-value threshold for markers}
+
+\item{withTitle}{plot title on the plot}
+}
+\value{
+list of plots on textual information in the gene cluster
 }
 \description{
 Take results of Seurat::FindAllMarkers as input,
