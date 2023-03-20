@@ -11,9 +11,11 @@ TextMarkersScran(
   genePlot = TRUE,
   genePlotNum = 5,
   colorText = TRUE,
-  wcArg = NULL,
+  args = list(),
+  wcArgs = NULL,
   raw = FALSE,
   col = NULL,
+  withTitle = TRUE,
   top = 10
 )
 }
@@ -30,13 +32,17 @@ TextMarkersScran(
 
 \item{colorText}{colorlize text or not, default to TRUE}
 
-\item{wcArg}{parameters to pass to ggwordcloud}
+\item{args}{parameters to pass to wcGeneSummary}
+
+\item{wcArgs}{parameters to pass to ggwordcloud}
 
 \item{raw}{obtain raw results of wcGeneSummary instead of plot}
 
 \item{col}{color to be used in wordcloud}
 
-\item{top}{Top-{top} genes will be included}
+\item{withTitle}{ggtitle({cluster name}) will be added}
+
+\item{top}{Top-{top} genes for each cluster will be included}
 }
 \description{
 Take results of scran::findMarkers as input,

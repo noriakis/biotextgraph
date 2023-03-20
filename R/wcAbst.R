@@ -603,7 +603,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         argList[["ordered.colors"]] <- TRUE
 
         if (useggwordcloud) {
-            wcScale <- 10
             wc <- do.call(ggwordcloud::ggwordcloud, argList)+
             scale_size_area(max_size = wcScale)+
             theme(plot.background = element_rect(fill="transparent",
@@ -616,7 +615,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         argList[["freq"]] <- showFreq
         argList[["family"]] <- fontFamily
         if (useggwordcloud) {
-            wcScale <- 10
             wc <- do.call(ggwordcloud::ggwordcloud, argList)+
             scale_size_area(max_size = wcScale)+
             theme(plot.background = element_rect(fill = "transparent",
