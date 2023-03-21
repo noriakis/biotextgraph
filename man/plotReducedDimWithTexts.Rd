@@ -16,6 +16,7 @@ plotReducedDimWithTexts(
   wcScale = 5,
   rot.per = 0.4,
   r = NULL,
+  top = 10,
   random.order = FALSE,
   dimred = "PCA",
   withTitle = FALSE,
@@ -44,6 +45,8 @@ plotReducedDimWithTexts(
 \item{rot.per}{ggwordcloud parameter}
 
 \item{r}{named vector of size of each cluster}
+
+\item{top}{Top-{top} genes are included}
 
 \item{random.order}{ggwordcloud parameter}
 
