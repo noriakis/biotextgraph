@@ -13,10 +13,11 @@ plotReducedDimWithTexts(
   bg.colour = "white",
   which.label = NULL,
   wc_alpha = 1,
-  wcScale = 7,
+  wcScale = 5,
   rot.per = 0.4,
   r = NULL,
   random.order = FALSE,
+  dimred = "PCA",
   withTitle = FALSE,
   args = list()
 )
@@ -45,6 +46,8 @@ plotReducedDimWithTexts(
 \item{r}{named vector of size of each cluster}
 
 \item{random.order}{ggwordcloud parameter}
+
+\item{dimred}{dimension reduction method}
 
 \item{withTitle}{whether to append title on wordcloud}
 

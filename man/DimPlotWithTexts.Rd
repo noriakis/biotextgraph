@@ -15,7 +15,7 @@ DimPlotWithTexts(
   bg.colour = "white",
   which.label = NULL,
   wc_alpha = 1,
-  wcScale = 7,
+  wcScale = 5,
   rot.per = 0.4,
   r = NULL,
   random.order = FALSE,
