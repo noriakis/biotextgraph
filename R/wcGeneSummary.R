@@ -169,7 +169,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ## If specified pathway option
         if (!is.null(enrich)) {
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
-            qqcat("Performing enrichment analysis")
+            qqcat("Performing enrichment analysis\n")
             if (enrich=="reactome"){
                 pathRes <- ReactomePA::enrichPathway(geneList)
                 pathRes@result$Description <- gsub("Homo sapiens\r: ",
