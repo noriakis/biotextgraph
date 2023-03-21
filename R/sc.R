@@ -42,7 +42,7 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
             tmpcol <- RColorBrewer::brewer.pal(8, sample(
                 row.names(RColorBrewer::brewer.pal.info),1))
         } else {
-            tmpcol <- col[[i]]
+            tmpcol <- col[[as.character(i)]]
         }
         wcArgs[["colors"]] <- tmpcol
         args[["argList"]] <- wcArgs
@@ -67,7 +67,6 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
             }
         }
                 wresList[[i]] <- wres
-        col <- NULL
     }
     if (raw) {
         return(wresList)
@@ -128,7 +127,7 @@ TextMarkersScran <- function(res,
             tmpcol <- RColorBrewer::brewer.pal(8, sample(
                 row.names(RColorBrewer::brewer.pal.info),1))
         } else {
-            tmpcol <- col[i]
+            tmpcol <- col[[as.character(i)]]
         }
 
         wcArgs[["colors"]] <- tmpcol
@@ -162,4 +161,217 @@ TextMarkersScran <- function(res,
     } else {
         return(plotList)
     }
+}
+
+
+
+#' plotReducedDimWithTexts
+#' 
+#' @param sce sce object
+#' @param marker.info results of findMarkers()
+#' @param colour_by colorize by this label
+#' @param point_alpha point alpha
+#' @param use_shadowtext use shadowtext for wordcloud
+#' @param bg.colour shadowtext background color
+#' @param which.label which label to plot text
+#' @param wc_alpha alpha value for wordcloud
+#' @param wcScale scaling value for wordcloud
+#' @param withTitle whether to append title on wordcloud
+#' @param args parameters to passed to wcGeneSummary
+#' @param rot.per ggwordcloud parameter
+#' @param random.order ggwordcloud parameter
+#' @param r named vector of size of each cluster
+#' @export
+#' @importFrom dplyr summarise
+#' @importFrom dplyr group_by
+#' @return single-cell plot with text annotation
+plotReducedDimWithTexts <- function(sce, marker.info,
+         colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
+         bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
+         rot.per=0.4, r=NULL,
+         random.order=FALSE,
+         withTitle=FALSE, args=list()) {
+    args[["wcScale"]] <- wcScale
+    if (requireNamespace("scater", quietly = TRUE)) {## pass the plot itself
+        rawPlot <- scater::plotReducedDim(sce, dimred="PCA",
+                                  colour_by=colour_by,
+                                  point_alpha=point_alpha)
+    } else {
+        stop("Please install scater")
+    }
+
+    ## Obtain color and generate colors for wc
+    ## Name as character
+    g <- ggplot_build(rawPlot)
+    colmap <- g$data[[1]][,c("colour","group")]
+    colmap <- colmap[!duplicated(colmap),]
+    row.names(colmap) <- colmap$group
+    cols <- list()
+    vec <- NULL
+    for (i in seq_len(nrow(colmap))) {
+      cols[[as.character(colmap[i,"group"])]] <- 
+          colorRampPalette(c("grey",colmap[i,"colour"]))(10)
+      vec[as.character(colmap[i,"group"])] <- colmap[i,"colour"]
+    }
+
+    if (is.null(which.label)) {
+        which.label <- names(marker.info)
+    }
+    texts <- marker.info[which.label] |> TextMarkersScran(wcArgs=list(alpha=wc_alpha,
+                                                                      rot.per=rot.per,
+                                                                      random.order=random.order,
+                                                                      use_shadowtext=use_shadowtext,
+                                                                      bg.colour=bg.colour),
+                                                          col=cols,
+                                                          args=args,
+                                                          withTitle=withTitle)
+
+
+    new_points <- rawPlot$data |>
+      group_by(.data$colour_by) |>
+      summarise(XMi=min(.data$X),
+                YMi=min(.data$Y),
+                XMa=max(.data$X),
+                YMa=max(.data$Y),
+                XMe=mean(.data$X),
+                YMe=mean(.data$Y))
+
+    if (!is.null(r)) {
+        new_points <- data.frame(t(apply(new_points,1,function(x){
+            xme <- as.numeric(x["XMe"])
+            yme <- as.numeric(x["YMe"])
+            c(x["ident"],
+              xme - r[x["ident"]],
+              yme - r[x["ident"]],
+              xme + r[x["ident"]],
+              yme + r[x["ident"]])
+        }))) |> `colnames<-`(colnames(new_points)[1:5])
+    }
+
+    for (i in names(texts)) {
+      tmp <- subset(new_points,
+                    new_points$colour_by==i)
+      tmpXMi <- as.numeric(tmp$XMi);
+      tmpYMi <- as.numeric(tmp$YMi);
+      tmpXMa <- as.numeric(tmp$XMa);
+      tmpYMa <- as.numeric(tmp$YMa);
+      rawPlot <- rawPlot + annotation_custom(ggplotify::as.grob(texts[[i]]),
+                                       xmin=tmpXMi, xmax=tmpXMa,
+                                       ymin=tmpYMi, ymax=tmpYMa)
+    }
+    rawPlot
+}
+
+
+
+
+
+#' DimPlotWithTexts
+#' 
+#' @param seu Seurat object
+#' @param markers results of FindAllMarkers()
+#' @param label plot label or not
+#' @param pt.size point size in plot
+#' @param reduction reduction method
+#' @param point_alpha point alpha
+#' @param use_shadowtext use shadowtext for wordcloud
+#' @param bg.colour shadowtext background color
+#' @param which.label which label to plot text
+#' @param wc_alpha alpha value for wordcloud
+#' @param wcScale scaling value for wordcloud
+#' @param withTitle whether to append title on wordcloud
+#' @param args parameters to passed to wcGeneSummary
+#' @param rot.per ggwordcloud parameter
+#' @param random.order ggwordcloud parameter
+#' @param r named vector of size of each cluster
+#' @export
+#' @importFrom dplyr summarise
+#' @importFrom dplyr group_by
+#' @return single-cell plot with text annotation
+DimPlotWithTexts <- function(seu, markers,
+         label=TRUE, pt.size=0.5, reduction="umap",
+         point_alpha=0.2, use_shadowtext=TRUE,
+         bg.colour="white", which.label=NULL,
+         wc_alpha=1, wcScale=5,
+         rot.per=0.4, r=NULL,
+         random.order=FALSE,
+         withTitle=FALSE, args=list()) {
+    args[["wcScale"]] <- wcScale
+    
+    if (requireNamespace("Seurat", quietly = TRUE)) {## pass the plot itself
+        plt <- Seurat::DimPlot(seu, reduction = reduction,
+                label = label, pt.size = pt.size) 
+        # https://github.com/satijalab/seurat/issues/2835
+        plt[[1]]$layers[[1]]$aes_params$alpha <- point_alpha
+    } else {
+        stop("Please install Seurat")
+    }
+
+    ## Obtain color and generate colors for wc
+    ## Name as character
+    g <- ggplot_build(plt)
+    colmap <- g$data[[1]][,c("colour","group")]
+    colmap <- colmap[!duplicated(colmap),]
+    row.names(colmap) <- colmap$group
+
+    print(colmap)
+
+    cols <- list()
+    vec <- NULL
+    for (i in seq_len(nrow(colmap))) {
+      cols[[as.character(colmap[i,"group"])]] <- 
+          colorRampPalette(c("grey",colmap[i,"colour"]))(10)
+      vec[as.character(colmap[i,"group"])] <- colmap[i,"colour"]
+    }
+
+    if (is.null(which.label)) {
+        which.label <- unique(markers$cluster)
+    }
+
+    texts <- subset(markers, markers$cluster %in% which.label) |> TextMarkers(
+                                        wcArgs=list(alpha=wc_alpha,
+                                        rot.per=rot.per,
+                                        random.order=random.order,
+                                        use_shadowtext=use_shadowtext,
+                                        bg.colour=bg.colour),
+                                          col=cols,
+                                          args=args,
+                                          withTitle=withTitle)
+
+    plt$data$X <- plt$data[,1]
+    plt$data$Y <- plt$data[,2]
+    new_points <- plt$data |>
+      group_by(.data$ident) |>
+      summarise(XMi=min(.data$X),
+                YMi=min(.data$Y),
+                XMa=max(.data$X),
+                YMa=max(.data$Y),
+                XMe=mean(.data$X),
+                YMe=mean(.data$Y))
+    
+    if (!is.null(r)) {
+        new_points <- data.frame(t(apply(new_points,1,function(x){
+            xme <- as.numeric(x["XMe"])
+            yme <- as.numeric(x["YMe"])
+            c(x["ident"],
+              xme - r[x["ident"]],
+              yme - r[x["ident"]],
+              xme + r[x["ident"]],
+              yme + r[x["ident"]])
+        }))) |> `colnames<-`(colnames(new_points)[1:5])
+    }
+
+
+    for (i in names(texts)) {
+      tmp <- subset(new_points,
+                    new_points$ident==i)
+      tmpXMi <- as.numeric(tmp$XMi);
+      tmpYMi <- as.numeric(tmp$YMi);
+      tmpXMa <- as.numeric(tmp$XMa);
+      tmpYMa <- as.numeric(tmp$YMa);
+      plt <- plt + annotation_custom(ggplotify::as.grob(texts[[i]]),
+                                       xmin=tmpXMi, xmax=tmpXMa,
+                                       ymin=tmpYMi, ymax=tmpYMa)
+    }
+    plt
 }
