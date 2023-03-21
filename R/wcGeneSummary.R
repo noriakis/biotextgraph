@@ -795,7 +795,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             argList[["colors"]] <- wcCol
             argList[["random.order"]] <- FALSE
             argList[["ordered.colors"]] <- TRUE
-
+            if ("bg.color" %in% names(argList)) {
+                argList[["bg.colour"]] <- argList[["bg.color"]]
+            }
             if (useggwordcloud) {
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
@@ -814,6 +816,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             argList[["words"]] <- returnDf$word
             argList[["freq"]] <- showFreq
             argList[["family"]] <- fontFamily
+            if ("bg.color" %in% names(argList)) {
+                argList[["bg.colour"]] <- argList[["bg.color"]]
+            }
             if (useggwordcloud) {
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
