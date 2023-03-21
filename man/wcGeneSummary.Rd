@@ -61,6 +61,7 @@ wcGeneSummary(
   normalize = FALSE,
   fontFamily = "sans",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
+  scaleLowFreq = NULL,
   argList = list(),
   useggwordcloud = TRUE,
   wcScale = 10
@@ -182,6 +183,8 @@ on whole dataset or top-words specified by numWords}
 \item{fontFamily}{font family to use, default to "sans"}
 
 \item{udpipeModel}{udpipe model file name}
+
+\item{scaleLowFreq}{default to NULL}
 
 \item{argList}{parameters to pass to wordcloud()}
 
