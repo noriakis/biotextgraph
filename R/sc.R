@@ -179,6 +179,7 @@ TextMarkersScran <- function(res,
 #' @param withTitle whether to append title on wordcloud
 #' @param args parameters to passed to wcGeneSummary
 #' @param rot.per ggwordcloud parameter
+#' @param dimred dimension reduction method
 #' @param random.order ggwordcloud parameter
 #' @param r named vector of size of each cluster
 #' @export
@@ -189,11 +190,11 @@ plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
          rot.per=0.4, r=NULL,
-         random.order=FALSE,
+         random.order=FALSE, dimred="PCA",
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
     if (requireNamespace("scater", quietly = TRUE)) {## pass the plot itself
-        rawPlot <- scater::plotReducedDim(sce, dimred="PCA",
+        rawPlot <- scater::plotReducedDim(sce, dimred=dimred,
                                   colour_by=colour_by,
                                   point_alpha=point_alpha)
     } else {
@@ -240,11 +241,11 @@ plotReducedDimWithTexts <- function(sce, marker.info,
         new_points <- data.frame(t(apply(new_points,1,function(x){
             xme <- as.numeric(x["XMe"])
             yme <- as.numeric(x["YMe"])
-            c(x["ident"],
-              xme - r[x["ident"]],
-              yme - r[x["ident"]],
-              xme + r[x["ident"]],
-              yme + r[x["ident"]])
+            c(x["colour_by"],
+              xme - r[x["colour_by"]],
+              yme - r[x["colour_by"]],
+              xme + r[x["colour_by"]],
+              yme + r[x["colour_by"]])
         }))) |> `colnames<-`(colnames(new_points)[1:5])
     }
 
