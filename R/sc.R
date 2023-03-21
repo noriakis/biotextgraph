@@ -184,6 +184,7 @@ TextMarkersScran <- function(res,
 #' @param dimred dimension reduction method
 #' @param random.order ggwordcloud parameter
 #' @param r named vector of size of each cluster
+#' @param top Top-{top} genes are included
 #' @export
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
@@ -191,7 +192,7 @@ TextMarkersScran <- function(res,
 plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
-         rot.per=0.4, r=NULL,
+         rot.per=0.4, r=NULL, top=10,
          random.order=FALSE, dimred="PCA",
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
@@ -225,7 +226,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
                                                                       random.order=random.order,
                                                                       use_shadowtext=use_shadowtext,
                                                                       bg.colour=bg.colour),
-                                                          col=cols,
+                                                          col=cols,top=top,
                                                           genePlot=FALSE,
                                                           args=args,
                                                           withTitle=withTitle)
