@@ -67,6 +67,7 @@
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
+#' @param scaleLowFreq default to NULL
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -112,6 +113,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             nodePal=palette(), collapse=FALSE, addFreqToGene=FALSE,
                             useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
+                            scaleLowFreq=NULL,
                             argList=list(), useggwordcloud=TRUE, wcScale=10) {
     ret <- new("osplot")
     ret@query <- geneList
@@ -786,6 +788,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             showFreq <- returnDf$freq*10
         } else {
             showFreq <- returnDf$freq
+        }
+
+        if (!is.null(scaleLowFreq)) {
+            showFreq <- returnDf$freq*scaleLowFreq
         }
 
         if (tag){

@@ -37,17 +37,18 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
         )
     }
     for (i in unique(df$cluster)) {
+        i <- as.character(i)
         qqcat("@{i}\n")
         if (is.null(col)){
             tmpcol <- RColorBrewer::brewer.pal(8, sample(
                 row.names(RColorBrewer::brewer.pal.info),1))
         } else {
-            tmpcol <- col[[as.character(i)]]
+            tmpcol <- col[[i]]
         }
         wcArgs[["colors"]] <- tmpcol
         args[["argList"]] <- wcArgs
         candidate <- subset(df, df$p_val_adj<pvalThresh & df$cluster==i)
-        cand_genes <- candidate |> row.names()
+        cand_genes <- candidate$gene
         args[["geneList"]] <- cand_genes
 
         wres <- do.call(wcGeneSummary, args)
@@ -122,12 +123,13 @@ TextMarkersScran <- function(res,
         )
     }
     for (i in names(res)) {
+        i <- as.character(i)
         qqcat("@{i}\n")
         if (is.null(col)){
             tmpcol <- RColorBrewer::brewer.pal(8, sample(
                 row.names(RColorBrewer::brewer.pal.info),1))
         } else {
-            tmpcol <- col[[as.character(i)]]
+            tmpcol <- col[[i]]
         }
 
         wcArgs[["colors"]] <- tmpcol
