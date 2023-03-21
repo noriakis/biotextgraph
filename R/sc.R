@@ -224,6 +224,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
                                                                       use_shadowtext=use_shadowtext,
                                                                       bg.colour=bg.colour),
                                                           col=cols,
+                                                          genePlot=FALSE,
                                                           args=args,
                                                           withTitle=withTitle)
 
@@ -311,11 +312,10 @@ DimPlotWithTexts <- function(seu, markers,
     ## Obtain color and generate colors for wc
     ## Name as character
     g <- ggplot_build(plt)
+    g$data[[1]]$group <- plt$data$ident
     colmap <- g$data[[1]][,c("colour","group")]
     colmap <- colmap[!duplicated(colmap),]
     row.names(colmap) <- colmap$group
-
-    print(colmap)
 
     cols <- list()
     vec <- NULL
@@ -337,6 +337,7 @@ DimPlotWithTexts <- function(seu, markers,
                                         bg.colour=bg.colour),
                                           col=cols,
                                           args=args,
+                                          genePlot=FALSE,
                                           withTitle=withTitle)
 
     plt$data$X <- plt$data[,1]
