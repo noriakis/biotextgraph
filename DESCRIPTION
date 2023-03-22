@@ -7,8 +7,8 @@ Description: This package aims to visualize the word and text information contai
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
-    R (>= 4.2.0)
-Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggplot2, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, methods, dendextend, RColorBrewer, utils, ggrepel, cyjShiny, graphlayouts, ggforce, ggwordcloud
+    R (>= 4.2.0), ggplot2
+Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, methods, dendextend, RColorBrewer, utils, ggrepel, cyjShiny, graphlayouts, ggforce, ggwordcloud, MASS
 Suggests:
     concaveman,
     ReactomePA,

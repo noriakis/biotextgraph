@@ -185,6 +185,14 @@ TextMarkersScran <- function(res,
 #' @param random.order ggwordcloud parameter
 #' @param r named vector of size of each cluster
 #' @param top Top-{top} genes are included
+#' @param sort_by default to avg_log2FC, "log10p" can be specified.
+#' @param scale_number scale the frequency of words by this number
+#' in `gene_name`
+#' @param decreasing sort by decreasing order or not
+#' @param geneNum number of genes to be included in wordclouds
+#' @param gene_name show gene names instead of textual information
+#' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
+#' @param base_dens if TRUE, wordclouds are placed based on density
 #' @export
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
@@ -192,10 +200,12 @@ TextMarkersScran <- function(res,
 plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
-         rot.per=0.4, r=NULL, top=10,
-         random.order=FALSE, dimred="PCA",
+         rot.per=0.4, r=NULL, top=10, gene_name=FALSE,
+         sort_by="summary.logFC", scale_number=2, decreasing=TRUE, geneNum=50,
+         random.order=FALSE, dimred="PCA", base_ellipse=FALSE, base_dens=FALSE,
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
+    if (base_dens) {base_ellipse <- TRUE}
     if (requireNamespace("scater", quietly = TRUE)) {## pass the plot itself
         rawPlot <- scater::plotReducedDim(sce, dimred=dimred,
                                   colour_by=colour_by,
@@ -203,10 +213,15 @@ plotReducedDimWithTexts <- function(sce, marker.info,
     } else {
         stop("Please install scater")
     }
+    g <- ggplot_build(rawPlot)
+
+    ## Map the group
+    map_group <- as.character(rawPlot$data$colour_by)
+    names(map_group) <- as.character(g$data[[1]]$group)
+    map_group <- map_group[!duplicated(map_group)]
 
     ## Obtain color and generate colors for wc
     ## Name as character
-    g <- ggplot_build(rawPlot)
     colmap <- g$data[[1]][,c("colour","group")]
     colmap <- colmap[!duplicated(colmap),]
     row.names(colmap) <- colmap$group
@@ -221,36 +236,96 @@ plotReducedDimWithTexts <- function(sce, marker.info,
     if (is.null(which.label)) {
         which.label <- names(marker.info)
     }
-    texts <- marker.info[which.label] |> TextMarkersScran(wcArgs=list(alpha=wc_alpha,
-                                                                      rot.per=rot.per,
-                                                                      random.order=random.order,
-                                                                      use_shadowtext=use_shadowtext,
-                                                                      bg.colour=bg.colour),
-                                                          col=cols,top=top,
-                                                          genePlot=FALSE,
-                                                          args=args,
-                                                          withTitle=withTitle)
 
+    wcArgs <- list(alpha=wc_alpha,rot.per=rot.per,random.order=random.order,
+        use_shadowtext=use_shadowtext,bg.colour=bg.colour)
+    if (gene_name) {
+        subset.marker.info <- marker.info[which.label]
+        texts <-  obtainMarkersWCScran(subset.marker.info,
+                                    cols=cols,
+                                    wcArgs=wcArgs,
+                                    wcScale=wcScale,
+                                    scale_number=scale_number,
+                                    sort_by=sort_by,
+                                    decreasing=decreasing,
+                                    geneNum=geneNum)
+    } else {
 
-    new_points <- rawPlot$data |>
-      group_by(.data$colour_by) |>
-      summarise(XMi=min(.data$X),
-                YMi=min(.data$Y),
-                XMa=max(.data$X),
-                YMa=max(.data$Y),
-                XMe=mean(.data$X),
-                YMe=mean(.data$Y))
+        texts <- marker.info[which.label] |> TextMarkersScran(wcArgs=wcArgs,
+                                                              col=cols,top=top,
+                                                              genePlot=FALSE,
+                                                              args=args,
+                                                              withTitle=withTitle)
+    }
 
-    if (!is.null(r)) {
-        new_points <- data.frame(t(apply(new_points,1,function(x){
-            xme <- as.numeric(x["XMe"])
-            yme <- as.numeric(x["YMe"])
-            c(x["colour_by"],
-              xme - r[x["colour_by"]],
-              yme - r[x["colour_by"]],
-              xme + r[x["colour_by"]],
-              yme + r[x["colour_by"]])
-        }))) |> `colnames<-`(colnames(new_points)[1:5])
+    if (base_ellipse) {
+        el <- ggplot_build(rawPlot + 
+                stat_ellipse(aes(x=.data$X,
+                    y=.data$Y, group=.data$colour_by)))
+        pl <- el$data[[1]]
+        el <- el$data[[2]]
+
+        new_points <- NULL
+        for (i in unique(el$group)) {## el
+          i <- as.character(i)
+          tmp_el <- subset(el, el$group==i)[,c("x","y")]
+          
+          ctr = MASS::cov.trob(tmp_el)$center
+          dist2center <- sqrt(rowSums((t(t(tmp_el)-ctr))^2))
+          if (is.null(r)) {
+            ar <- pi*min(dist2center)*max(dist2center)
+            r <- sqrt(ar / pi)
+          } else {}
+          
+          if (base_dens) {## pl
+            tmp_pl <- subset(pl, pl$group==i)[,c("x","y")]
+            kde <- MASS::kde2d(tmp_pl$x, tmp_pl$y, n=100)
+            ix <- findInterval(tmp_pl$x, kde$x)
+            iy <- findInterval(tmp_pl$y, kde$y)
+            ii <- cbind(ix, iy)
+            tmp_pl$dens <- kde$z[ii]
+            dens_max <- tmp_pl[order(tmp_pl$dens, decreasing=TRUE),][1,]
+            XMe <- dens_max$x
+            YMe <- dens_max$y
+            
+            new_points <- rbind(new_points,
+                                c(map_group[i],
+                                  XMe - r,
+                                  YMe - r,
+                                  XMe + r,
+                                  YMe + r))
+          } else {
+            new_points <- rbind(new_points,
+                                c(map_group[i],
+                                  ctr["x"] - min(dist2center),
+                                  ctr["y"] - min(dist2center),
+                                  ctr["x"] + max(dist2center),
+                                  ctr["y"] + max(dist2center)))
+          }
+          new_points <- data.frame(new_points) |>
+              `colnames<-`(c("colour_by","XMi","YMi","XMa","YMa"))
+        }
+      } else {
+        new_points <- rawPlot$data |>
+          group_by(.data$colour_by) |>
+          summarise(XMi=min(.data$X),
+                    YMi=min(.data$Y),
+                    XMa=max(.data$X),
+                    YMa=max(.data$Y),
+                    XMe=mean(.data$X),
+                    YMe=mean(.data$Y))
+
+        if (!is.null(r)) {
+            new_points <- data.frame(t(apply(new_points,1,function(x){
+                xme <- as.numeric(x["XMe"])
+                yme <- as.numeric(x["YMe"])
+                c(x["colour_by"],
+                  xme - r[x["colour_by"]],
+                  yme - r[x["colour_by"]],
+                  xme + r[x["colour_by"]],
+                  yme + r[x["colour_by"]])
+            }))) |> `colnames<-`(colnames(new_points)[1:5])
+        }
     }
 
     for (i in names(texts)) {
@@ -289,6 +364,14 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 #' @param rot.per ggwordcloud parameter
 #' @param random.order ggwordcloud parameter
 #' @param r named vector of size of each cluster
+#' @param sort_by default to avg_log2FC, "log10p" can be specified.
+#' @param scale_number scale the frequency of words by this number
+#' in `gene_name`
+#' @param decreasing sort by decreasing order or not
+#' @param geneNum number of genes to be included in wordclouds
+#' @param gene_name show gene names instead of textual information
+#' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
+#' @param base_dens if TRUE, wordclouds are placed based on density
 #' @export
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
@@ -298,11 +381,12 @@ DimPlotWithTexts <- function(seu, markers,
          point_alpha=0.2, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL,
          wc_alpha=1, wcScale=5,
-         rot.per=0.4, r=NULL,
-         random.order=FALSE,
+         rot.per=0.4, r=NULL, sort_by="avg_log2FC", scale_number=2,
+         decreasing=TRUE, geneNum=50, base_ellipse=FALSE, base_dens=FALSE,
+         random.order=FALSE, gene_name=FALSE,
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
-    
+    if (base_dens) {base_ellipse <- TRUE}
     if (requireNamespace("Seurat", quietly = TRUE)) {## pass the plot itself
         plt <- Seurat::DimPlot(seu, reduction = reduction,
                 label = label, pt.size = pt.size) 
@@ -315,6 +399,11 @@ DimPlotWithTexts <- function(seu, markers,
     ## Obtain color and generate colors for wc
     ## Name as character
     g <- ggplot_build(plt)
+
+    map_group <- as.character(plt$data$ident)
+    names(map_group) <- as.character(g$data[[1]]$group)
+    map_group <- map_group[!duplicated(map_group)]
+
     g$data[[1]]$group <- plt$data$ident
     colmap <- g$data[[1]][,c("colour","group")]
     colmap <- colmap[!duplicated(colmap),]
@@ -331,39 +420,100 @@ DimPlotWithTexts <- function(seu, markers,
     if (is.null(which.label)) {
         which.label <- unique(markers$cluster)
     }
+    wcArgs <- list(alpha=wc_alpha,rot.per=rot.per,random.order=random.order,
+        use_shadowtext=use_shadowtext,bg.colour=bg.colour)
+    if (gene_name) {
+        subset.markers <- subset(markers, markers$cluster %in% which.label)
+        texts <- suppressMessages(obtainMarkersWC(subset.markers,
+                                                    cols=cols,
+                                                    wcArgs=wcArgs,
+                                                    wcScale=wcScale,
+                                                    scale_number=scale_number,
+                                                    sort_by=sort_by,
+                                                    decreasing=decreasing,
+                                                    geneNum=geneNum))
+    } else {
+        texts <- subset(markers, markers$cluster %in% which.label) |> TextMarkers(
+                                            wcArgs=wcArgs,
+                                              col=cols,
+                                              args=args,
+                                              genePlot=FALSE,
+                                              withTitle=withTitle)        
+    }
 
-    texts <- subset(markers, markers$cluster %in% which.label) |> TextMarkers(
-                                        wcArgs=list(alpha=wc_alpha,
-                                        rot.per=rot.per,
-                                        random.order=random.order,
-                                        use_shadowtext=use_shadowtext,
-                                        bg.colour=bg.colour),
-                                          col=cols,
-                                          args=args,
-                                          genePlot=FALSE,
-                                          withTitle=withTitle)
+  if (base_ellipse) {
+    plt$data$x <- plt$data[,1]
+    plt$data$y <- plt$data[,2]
 
-    plt$data$X <- plt$data[,1]
-    plt$data$Y <- plt$data[,2]
-    new_points <- plt$data |>
-      group_by(.data$ident) |>
-      summarise(XMi=min(.data$X),
-                YMi=min(.data$Y),
-                XMa=max(.data$X),
-                YMa=max(.data$Y),
-                XMe=mean(.data$X),
-                YMe=mean(.data$Y))
-    
-    if (!is.null(r)) {
-        new_points <- data.frame(t(apply(new_points,1,function(x){
-            xme <- as.numeric(x["XMe"])
-            yme <- as.numeric(x["YMe"])
-            c(x["ident"],
-              xme - r[x["ident"]],
-              yme - r[x["ident"]],
-              xme + r[x["ident"]],
-              yme + r[x["ident"]])
-        }))) |> `colnames<-`(colnames(new_points)[1:5])
+    el <- ggplot_build(plt + 
+            stat_ellipse(aes(x=.data$x, y=.data$y, group=.data$ident)))
+    pl <- el$data[[1]]
+    el <- el$data[[2]]
+
+    new_points <- NULL
+    for (i in unique(el$group)) {## el
+      i <- as.character(i)
+      tmp_el <- subset(el, el$group==i)[,c("x","y")]
+      
+      ctr = MASS::cov.trob(tmp_el)$center
+      dist2center <- sqrt(rowSums((t(t(tmp_el)-ctr))^2))
+      if (is.null(r)) {
+        ar <- pi*min(dist2center)*max(dist2center)
+        r <- sqrt(ar / pi)
+      } else {}
+      
+      if (base_dens) {## pl
+        tmp_pl <- subset(pl, pl$group==i)[,c("x","y")]
+        kde <- MASS::kde2d(tmp_pl$x, tmp_pl$y, n=100)
+        ix <- findInterval(tmp_pl$x, kde$x)
+        iy <- findInterval(tmp_pl$y, kde$y)
+        ii <- cbind(ix, iy)
+        tmp_pl$dens <- kde$z[ii]
+        dens_max <- tmp_pl[order(tmp_pl$dens, decreasing=TRUE),][1,]
+        XMe <- dens_max$x
+        YMe <- dens_max$y
+        
+        new_points <- rbind(new_points,
+                            c(map_group[i],
+                              XMe - r,
+                              YMe - r,
+                              XMe + r,
+                              YMe + r))
+      } else {
+        new_points <- rbind(new_points,
+                            c(map_group[i],
+                              ctr["x"] - min(dist2center),
+                              ctr["y"] - min(dist2center),
+                              ctr["x"] + max(dist2center),
+                              ctr["y"] + max(dist2center)))
+      }
+      new_points <- data.frame(new_points) |>
+          `colnames<-`(c("ident","XMi","YMi","XMa","YMa"))
+    }
+  } else {
+        
+        plt$data$X <- plt$data[,1]
+        plt$data$Y <- plt$data[,2]
+        new_points <- plt$data |>
+          group_by(.data$ident) |>
+          summarise(XMi=min(.data$X),
+                    YMi=min(.data$Y),
+                    XMa=max(.data$X),
+                    YMa=max(.data$Y),
+                    XMe=mean(.data$X),
+                    YMe=mean(.data$Y))
+        
+        if (!is.null(r)) {
+            new_points <- data.frame(t(apply(new_points,1,function(x){
+                xme <- as.numeric(x["XMe"])
+                yme <- as.numeric(x["YMe"])
+                c(x["ident"],
+                  xme - r[x["ident"]],
+                  yme - r[x["ident"]],
+                  xme + r[x["ident"]],
+                  yme + r[x["ident"]])
+            }))) |> `colnames<-`(colnames(new_points)[1:5])
+        }
     }
 
 

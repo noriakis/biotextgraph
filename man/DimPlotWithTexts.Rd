@@ -18,7 +18,14 @@ DimPlotWithTexts(
   wcScale = 5,
   rot.per = 0.4,
   r = NULL,
+  sort_by = "avg_log2FC",
+  scale_number = 2,
+  decreasing = TRUE,
+  geneNum = 50,
+  base_ellipse = FALSE,
+  base_dens = FALSE,
   random.order = FALSE,
+  gene_name = FALSE,
   withTitle = FALSE,
   args = list()
 )
@@ -50,7 +57,22 @@ DimPlotWithTexts(
 
 \item{r}{named vector of size of each cluster}
 
+\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+
+\item{scale_number}{scale the frequency of words by this number
+in `gene_name`}
+
+\item{decreasing}{sort by decreasing order or not}
+
+\item{geneNum}{number of genes to be included in wordclouds}
+
+\item{base_ellipse}{if TRUE, wordclouds are placed based on \code{stat_ellipse}.}
+
+\item{base_dens}{if TRUE, wordclouds are placed based on density}
+
 \item{random.order}{ggwordcloud parameter}
+
+\item{gene_name}{show gene names instead of textual information}
 
 \item{withTitle}{whether to append title on wordcloud}
 
