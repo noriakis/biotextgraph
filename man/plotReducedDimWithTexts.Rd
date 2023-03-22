@@ -15,7 +15,7 @@ plotReducedDimWithTexts(
   wc_alpha = 1,
   wcScale = 5,
   rot.per = 0.4,
-  r = NULL,
+  rad = NULL,
   top = 10,
   gene_name = FALSE,
   sort_by = "summary.logFC",
@@ -51,7 +51,7 @@ plotReducedDimWithTexts(
 
 \item{rot.per}{ggwordcloud parameter}
 
-\item{r}{named vector of size of each cluster}
+\item{rad}{named vector of size of each cluster}
 
 \item{top}{Top-{top} genes are included}
 
