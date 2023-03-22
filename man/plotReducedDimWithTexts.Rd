@@ -17,8 +17,15 @@ plotReducedDimWithTexts(
   rot.per = 0.4,
   r = NULL,
   top = 10,
+  gene_name = FALSE,
+  sort_by = "summary.logFC",
+  scale_number = 2,
+  decreasing = TRUE,
+  geneNum = 50,
   random.order = FALSE,
   dimred = "PCA",
+  base_ellipse = FALSE,
+  base_dens = FALSE,
   withTitle = FALSE,
   args = list()
 )
@@ -48,9 +55,24 @@ plotReducedDimWithTexts(
 
 \item{top}{Top-{top} genes are included}
 
+\item{gene_name}{show gene names instead of textual information}
+
+\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+
+\item{scale_number}{scale the frequency of words by this number
+in `gene_name`}
+
+\item{decreasing}{sort by decreasing order or not}
+
+\item{geneNum}{number of genes to be included in wordclouds}
+
 \item{random.order}{ggwordcloud parameter}
 
 \item{dimred}{dimension reduction method}
+
+\item{base_ellipse}{if TRUE, wordclouds are placed based on \code{stat_ellipse}.}
+
+\item{base_dens}{if TRUE, wordclouds are placed based on density}
 
 \item{withTitle}{whether to append title on wordcloud}
 
