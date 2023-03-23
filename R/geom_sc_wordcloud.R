@@ -189,7 +189,7 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
     }
   }
 
-  markers <- markers |> 
+  markers <- object$markers |> 
     dplyr::filter(.data$cluster %in% show_markers) |>
     dplyr::filter(.data$p_val_adj < object$p_val_adj_threshold)
   
