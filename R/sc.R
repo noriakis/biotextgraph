@@ -183,7 +183,7 @@ TextMarkersScran <- function(res,
 #' @param rot.per ggwordcloud parameter
 #' @param dimred dimension reduction method
 #' @param random.order ggwordcloud parameter
-#' @param r named vector of size of each cluster
+#' @param rad named vector of size of each cluster
 #' @param top Top-{top} genes are included
 #' @param sort_by default to avg_log2FC, "log10p" can be specified.
 #' @param scale_number scale the frequency of words by this number
@@ -200,7 +200,7 @@ TextMarkersScran <- function(res,
 plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
-         rot.per=0.4, r=NULL, top=10, gene_name=FALSE,
+         rot.per=0.4, rad=NULL, top=10, gene_name=FALSE,
          sort_by="summary.logFC", scale_number=2, decreasing=TRUE, geneNum=50,
          random.order=FALSE, dimred="PCA", base_ellipse=FALSE, base_dens=FALSE,
          withTitle=FALSE, args=list()) {
@@ -275,7 +275,9 @@ plotReducedDimWithTexts <- function(sce, marker.info,
           if (is.null(r)) {
             ar <- pi*min(dist2center)*max(dist2center)
             r <- sqrt(ar / pi)
-          } else {}
+          } else {
+            r <- rad[i]
+          }
           
           if (base_dens) {## pl
             tmp_pl <- subset(pl, pl$group==i)[,c("x","y")]
@@ -315,15 +317,15 @@ plotReducedDimWithTexts <- function(sce, marker.info,
                     XMe=mean(.data$X),
                     YMe=mean(.data$Y))
 
-        if (!is.null(r)) {
+        if (!is.null(rad)) {
             new_points <- data.frame(t(apply(new_points,1,function(x){
                 xme <- as.numeric(x["XMe"])
                 yme <- as.numeric(x["YMe"])
                 c(x["colour_by"],
-                  xme - r[x["colour_by"]],
-                  yme - r[x["colour_by"]],
-                  xme + r[x["colour_by"]],
-                  yme + r[x["colour_by"]])
+                  xme - rad[x["colour_by"]],
+                  yme - rad[x["colour_by"]],
+                  xme + rad[x["colour_by"]],
+                  yme + rad[x["colour_by"]])
             }))) |> `colnames<-`(colnames(new_points)[1:5])
         }
     }
@@ -363,7 +365,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 #' @param args parameters to passed to wcGeneSummary
 #' @param rot.per ggwordcloud parameter
 #' @param random.order ggwordcloud parameter
-#' @param r named vector of size of each cluster
+#' @param rad named vector of size of each cluster
 #' @param sort_by default to avg_log2FC, "log10p" can be specified.
 #' @param scale_number scale the frequency of words by this number
 #' in `gene_name`
@@ -381,7 +383,7 @@ DimPlotWithTexts <- function(seu, markers,
          point_alpha=0.2, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL,
          wc_alpha=1, wcScale=5,
-         rot.per=0.4, r=NULL, sort_by="avg_log2FC", scale_number=2,
+         rot.per=0.4, rad=NULL, sort_by="avg_log2FC", scale_number=2,
          decreasing=TRUE, geneNum=50, base_ellipse=FALSE, base_dens=FALSE,
          random.order=FALSE, gene_name=FALSE,
          withTitle=FALSE, args=list()) {
@@ -457,10 +459,12 @@ DimPlotWithTexts <- function(seu, markers,
       
       ctr = MASS::cov.trob(tmp_el)$center
       dist2center <- sqrt(rowSums((t(t(tmp_el)-ctr))^2))
-      if (is.null(r)) {
+      if (is.null(rad)) {
         ar <- pi*min(dist2center)*max(dist2center)
         r <- sqrt(ar / pi)
-      } else {}
+      } else {
+        r <- rad[i]
+      }
       
       if (base_dens) {## pl
         tmp_pl <- subset(pl, pl$group==i)[,c("x","y")]
@@ -503,15 +507,15 @@ DimPlotWithTexts <- function(seu, markers,
                     XMe=mean(.data$X),
                     YMe=mean(.data$Y))
         
-        if (!is.null(r)) {
+        if (!is.null(rad)) {
             new_points <- data.frame(t(apply(new_points,1,function(x){
                 xme <- as.numeric(x["XMe"])
                 yme <- as.numeric(x["YMe"])
                 c(x["ident"],
-                  xme - r[x["ident"]],
-                  yme - r[x["ident"]],
-                  xme + r[x["ident"]],
-                  yme + r[x["ident"]])
+                  xme - rad[x["ident"]],
+                  yme - rad[x["ident"]],
+                  xme + rad[x["ident"]],
+                  yme + rad[x["ident"]])
             }))) |> `colnames<-`(colnames(new_points)[1:5])
         }
     }
