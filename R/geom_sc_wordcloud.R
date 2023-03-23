@@ -130,7 +130,7 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
         ar <- pi*min(dist2center)*max(dist2center)
         r <- sqrt(ar / pi)
       } else {
-        r <- object$rad
+        r <- object$rad[i]
       }
       
       if (object$base_dens) {## pl

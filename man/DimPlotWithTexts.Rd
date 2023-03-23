@@ -17,7 +17,7 @@ DimPlotWithTexts(
   wc_alpha = 1,
   wcScale = 5,
   rot.per = 0.4,
-  r = NULL,
+  rad = NULL,
   sort_by = "avg_log2FC",
   scale_number = 2,
   decreasing = TRUE,
@@ -55,7 +55,7 @@ DimPlotWithTexts(
 
 \item{rot.per}{ggwordcloud parameter}
 
-\item{r}{named vector of size of each cluster}
+\item{rad}{named vector of size of each cluster}
 
 \item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
 
