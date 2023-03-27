@@ -67,7 +67,9 @@
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
-#' @param scaleLowFreq default to NULL
+#' @param colorize color the nodes and texts based on their category
+#' @param geneColor color for associated genes with words
+#' @param scaleLowFreq default to NULL, scale the value if specified
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -113,7 +115,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             nodePal=palette(), collapse=FALSE, addFreqToGene=FALSE,
                             useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
-                            scaleLowFreq=NULL,
+                            scaleLowFreq=NULL, colorize=FALSE, geneColor="grey",
                             argList=list(), useggwordcloud=TRUE, wcScale=10) {
     ret <- new("osplot")
     ret@query <- geneList
@@ -560,12 +562,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             V(coGraph)$grp <- grp
         }
-        
+        if (colorize) {addFreqToGene<-TRUE}
         if (addFreqToGene) {
             ## Set pseudo freq as min value of freq
             fre <- V(coGraph)$Freq
             fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-            V(coGraph)$Freq <- fre
+            V(coGraph)$Freq <- fre * 0.8
         }
 
         if (tag) {
@@ -685,36 +687,61 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
         }
 
-        if (tag) {
+        if (colorize) {
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$tag),
-                                                show.legend = showLegend) +
-            scale_color_manual(values=nodePal)
-        } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$Freq),
-                                                show.legend = showLegend)+
-                                 scale_color_gradient(low=pal[1],high=pal[2],
-                                                      name = "Frequency")
+                    color=.data$Freq, filter=!.data$name %in% incGene),
+                show.legend = showLegend)+
+                scale_color_gradient(low=pal[1],high=pal[2],
+                                    name = "Frequency")+
+                geom_node_point(aes(size=.data$Freq,
+                    filter=.data$name %in% incGene),
+                show.legend = showLegend, color=geneColor)
+        } else {
+            if (tag) {
+                netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                    color=.data$tag), show.legend = showLegend) +
+                scale_color_manual(values=nodePal)
+            } else { 
+                netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                    color=.data$Freq), show.legend = showLegend)+
+                scale_color_gradient(low=pal[1],high=pal[2],
+                                    name = "Frequency")
+            }
         }
 
         if (colorText){
-            if (tag) {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name,
-                        size=.data$Freq, color=.data$tag),
-                        family=fontFamily,
-                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
+            if (colorize) {
+                    netPlot <- netPlot + 
+                        geom_node_text(aes(label=.data$name, size=.data$Freq,
+                            color=.data$Freq, filter=!.data$name %in% incGene),
+                            check_overlap=TRUE, repel=TRUE,
+                            family=fontFamily,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)+ 
+                        geom_node_text(aes(label=.data$name, size=.data$Freq,
+                            filter=.data$name %in% incGene),
+                            check_overlap=TRUE, repel=TRUE,
+                            family=fontFamily, color=geneColor,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
             } else {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        color=.data$Freq),
-                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        family=fontFamily,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
+                if (tag) {
+                    netPlot <- netPlot + 
+                        geom_node_text(aes(label=.data$name,
+                            size=.data$Freq, color=.data$tag),
+                            family=fontFamily,
+                            check_overlap=TRUE, repel=TRUE,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
+                } else {
+                    netPlot <- netPlot + 
+                        geom_node_text(aes(label=.data$name, size=.data$Freq,
+                            color=.data$Freq),
+                            check_overlap=TRUE, repel=TRUE,
+                            family=fontFamily,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
+                }
             }
         } else {
             netPlot <- netPlot +

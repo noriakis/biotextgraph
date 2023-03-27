@@ -272,7 +272,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
           
           ctr = MASS::cov.trob(tmp_el)$center
           dist2center <- sqrt(rowSums((t(t(tmp_el)-ctr))^2))
-          if (is.null(r)) {
+          if (is.null(rad)) {
             ar <- pi*min(dist2center)*max(dist2center)
             r <- sqrt(ar / pi)
           } else {

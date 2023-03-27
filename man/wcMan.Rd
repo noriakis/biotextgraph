@@ -38,6 +38,7 @@ wcMan(
   nodePal = palette(),
   preserve = TRUE,
   takeMax = FALSE,
+  catColors = NULL,
   deleteZeroDeg = TRUE,
   additionalRemove = NA,
   naEdgeColor = "grey50",
@@ -116,8 +117,7 @@ instead of correlation using bnlearn}
 
 \item{ngram}{default to NA (1)}
 
-\item{colorize}{color the nodes and texts based on their category,
-not by their frequency}
+\item{colorize}{color the nodes and texts based on their category}
 
 \item{nodePal}{node palette when tag is TRUE}
 
@@ -125,6 +125,8 @@ not by their frequency}
 
 \item{takeMax}{when summarizing term-document matrix, take max.
 Otherwise take sum.}
+
+\item{catColors}{named vector showing colors for each category}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 

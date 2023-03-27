@@ -52,6 +52,7 @@ wcBSDB(
   useggwordcloud = TRUE,
   wcScale = 10,
   addFreqToMB = FALSE,
+  catColors = NULL,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -140,8 +141,7 @@ Otherwise take sum.}
 
 \item{useUdpipe}{use udpipe to make a network}
 
-\item{colorize}{color the nodes and texts based on their category,
-not by their frequency}
+\item{colorize}{color the nodes and texts based on their category}
 
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
@@ -162,7 +162,9 @@ on whole dataset or top-words specified by numWords}
 
 \item{wcScale}{scaling size for ggwordcloud}
 
-\item{addFreqToMB}{add pseudo frequency to microbes in genePlot}
+\item{addFreqToMB}{add pseudo frequency to microbes in mbPlot}
+
+\item{catColors}{named vector showing colors for each category}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

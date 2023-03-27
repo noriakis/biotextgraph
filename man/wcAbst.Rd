@@ -51,8 +51,11 @@ wcAbst(
   udpipeOnlyFreqN = FALSE,
   naEdgeColor = "grey50",
   cooccurrence = FALSE,
+  colorize = FALSE,
+  queryColor = "grey",
   useggwordcloud = TRUE,
   wcScale = 10,
+  distinguish_query = TRUE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   normalize = FALSE,
   takeMean = FALSE,
@@ -165,9 +168,16 @@ high-frequent words}
 
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
+\item{colorize}{color the nodes and texts based on their category}
+
+\item{queryColor}{color for associated queries with words}
+
 \item{useggwordcloud}{default to TRUE}
 
 \item{wcScale}{scaling size for ggwordcloud}
+
+\item{distinguish_query}{if TRUE, distinguish query and returned texts
+by appending (Q) on query}
 
 \item{udpipeModel}{udpipe model file name}
 

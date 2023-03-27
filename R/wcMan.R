@@ -48,8 +48,8 @@
 #' @param useQuanteda use quanteda functions to generate
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
-#' @param colorize color the nodes and texts based on their category,
-#' not by their frequency
+#' @param colorize color the nodes and texts based on their category
+#' @param catColors named vector showing colors for each category
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
@@ -81,7 +81,7 @@ wcMan <- function(df, madeUpper=NULL,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
-                   nodePal=palette(), preserve=TRUE, takeMax=FALSE,
+                   nodePal=palette(), preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
@@ -336,15 +336,6 @@ wcMan <- function(df, madeUpper=NULL,
         corThreshGenePlot <- corThresh - 0.1}
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
-      
-
-      ## Set pseudo freq as min value of freq
-      ## Available only in wcMan and wcBSDB, as 
-      ## category other than query is often available
-      fre <- V(coGraph)$Freq
-      fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-      V(coGraph)$Freq <- fre
-
 
       if (tag) {
         netCol <- tolower(names(V(coGraph)))
@@ -372,18 +363,24 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
       if (colorize) {
-          if (!is.null(nodeN)) {
-              addC <- NULL
-              for (nn in seq_along(names(V(coGraph)))) {
-                  if (names(V(coGraph))[nn] %in% names(nodeN)) {
-                      addC[nn] <- nodeN[names(V(coGraph))[nn]]
-                  } else {
-                      addC[nn] <- "Words"
-                  }
-              }
-              V(coGraph)$tag <- addC
-          }
-          tag <- TRUE
+
+        ## Set pseudo freq based on min value of freq
+        fre <- V(coGraph)$Freq
+        fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+        V(coGraph)$Freq <- fre * 0.8
+
+        if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
+        if (!is.null(nodeN)) {
+            addC <- NULL
+            for (nn in seq_along(names(V(coGraph)))) {
+                if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                    addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                } else {
+                    addC[nn] <- "Words"
+                }
+            }
+            V(coGraph)$tag <- addC
+        }
       }
 
       if (preserve) {
@@ -490,38 +487,9 @@ wcMan <- function(df, madeUpper=NULL,
           }
         }
       }
-      if (tag) {
-        netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
-                                             show.legend = showLegend)+
-          scale_color_manual(values=nodePal, name="Category")
-      } else { 
-        netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
-                                             show.legend = showLegend)+
-          scale_color_gradient(low=pal[1],high=pal[2],
-                               name = "Frequency")
-      }
-      if (colorText){
-        if (tag) {
-          netPlot <- netPlot + 
-            geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
-                           check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           bg.color = "white", segment.color="black",family=fontFamily,
-                           bg.r = .15, show.legend=showLegend)
-        } else {
-          netPlot <- netPlot + 
-            geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
-                           check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                           bg.color = "white", segment.color="black",family=fontFamily,
-                           bg.r = .15, show.legend=showLegend)
-        }
-      } else {
-        netPlot <- netPlot + 
-          geom_node_text(aes(label=.data$name, size=.data$Freq),
-                         check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                         color = "black",family=fontFamily,
-                         bg.color = "white", segment.color="black",
-                         bg.r = .15, show.legend=showLegend) 
-      }
+
+      netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
+                          showLegend,catColors,nodeN,pal,fontFamily,colorText)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+

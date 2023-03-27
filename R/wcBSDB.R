@@ -57,13 +57,14 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
-#' @param colorize color the nodes and texts based on their category,
-#' not by their frequency
+
 #' @param naEdgeColor edge color linking query with the other category than text
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param fontFamily font family to use, default to "sans"
-#' @param addFreqToMB add pseudo frequency to microbes in genePlot
+#' @param addFreqToMB add pseudo frequency to microbes in mbPlot
+#' @param catColors named vector showing colors for each category
+#' @param colorize color the nodes and texts based on their category
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -102,6 +103,7 @@ wcBSDB <- function (mbList,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
+                    catColors=NULL,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -226,7 +228,6 @@ wcBSDB <- function (mbList,
         docs <- VCorpus(VectorSource(abstDf$text))
     }
     ## Make corpus
-    ## Filter high frequency words
     ## Filter high frequency words if needed
     if (exclude=="frequency") {
         pref = "BSDB_Freq"
@@ -378,8 +379,6 @@ wcBSDB <- function (mbList,
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
-        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-        ## TODO: before or after?
         freqWordsDTM <- t(as.matrix(docs))
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         ret@freqDf <- returnDf
@@ -418,12 +417,11 @@ wcBSDB <- function (mbList,
             }
         }
 
-        ## genePlot: plot associated genes
+        ## mbPlot: plot associated mbs
         if (disPlot) {mbPlot <- TRUE}
         if (!is.null(metab)) {mbPlot <- TRUE}
         if (ecPlot) {mbPlot <- TRUE}
 
-        # if (target=="abstract" & mbPlot) {stop("mbPlot is not supported in abstract as target.")}
         if (mbPlot) {
             if (target=="abstract") {
                 row.names(freqWordsDTM) <- abstDf$query
@@ -455,7 +453,6 @@ wcBSDB <- function (mbList,
         corData[corData<corThresh] <- 0
         coGraph <- graph.adjacency(corData, weighted=TRUE,
                     mode="undirected", diag = FALSE)
-        ## before or after?
         coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
@@ -522,7 +519,6 @@ wcBSDB <- function (mbList,
                     coGraph <- igraph::union(coGraph, tmpAdd)
                 }
             }
-
             ## Set edge weight
             ## Probably set to NA would be better.
 
@@ -564,6 +560,8 @@ wcBSDB <- function (mbList,
         }
 
         if (colorize) {
+            if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
+            addFreqToMB <- TRUE
             if (!is.null(nodeN)) {
                 addC <- NULL
                 for (nn in seq_along(names(V(coGraph)))) {
@@ -575,7 +573,6 @@ wcBSDB <- function (mbList,
                 }
                 V(coGraph)$tag <- addC
             }
-            tag <- TRUE
         }
 
 
@@ -593,10 +590,10 @@ wcBSDB <- function (mbList,
 
 
         if (addFreqToMB) {
-            ## Set pseudo freq as min value of freq
+            ## Set pseudo freq based on min value of freq
             fre <- V(coGraph)$Freq
             fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-            V(coGraph)$Freq <- fre
+            V(coGraph)$Freq <- fre * 0.8
         }
 
 
@@ -642,39 +639,8 @@ wcBSDB <- function (mbList,
             }
         }
 
-        if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
-                                                show.legend = showLegend) +
-                                 scale_color_manual(values=nodePal)
-        } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
-                                                show.legend = showLegend)+
-                                 scale_color_gradient(low=pal[1],high=pal[2],na.value="grey50",
-                                                      name = "Frequency")
-        }
-
-        if (colorText){
-            if (tag) {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
-                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        bg.color = "white", segment.color="black",family=fontFamily,
-                        bg.r = .15, show.legend=showLegend)
-            } else {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
-                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        bg.color = "white", segment.color="black",family=fontFamily,
-                        bg.r = .15, show.legend=showLegend)
-            }
-        } else {
-            netPlot <- netPlot +
-                        geom_node_text(aes(label=.data$name, size=.data$Freq),
-                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                            color = "black",
-                            bg.color = "white", segment.color="black",family=fontFamily,
-                            bg.r = .15, show.legend=showLegend) 
-        }
+        netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
+                          showLegend,catColors,nodeN,pal,fontFamily,colorText)     
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+

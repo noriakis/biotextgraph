@@ -62,6 +62,8 @@ wcGeneSummary(
   fontFamily = "sans",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   scaleLowFreq = NULL,
+  colorize = FALSE,
+  geneColor = "grey",
   argList = list(),
   useggwordcloud = TRUE,
   wcScale = 10
@@ -184,7 +186,11 @@ on whole dataset or top-words specified by numWords}
 
 \item{udpipeModel}{udpipe model file name}
 
-\item{scaleLowFreq}{default to NULL}
+\item{scaleLowFreq}{default to NULL, scale the value if specified}
+
+\item{colorize}{color the nodes and texts based on their category}
+
+\item{geneColor}{color for associated genes with words}
 
 \item{argList}{parameters to pass to wordcloud()}
 
