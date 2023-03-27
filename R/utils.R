@@ -1,3 +1,83 @@
+#' appendNodesAndTexts
+#' 
+#' function to append nodes and texts based on parameters
+#' to ggraph
+#' 
+#' @noRd
+appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
+  showLegend,catColors,nodeN,pal,fontFamily,colorText){
+  if (tag) {
+      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
+                                          show.legend = showLegend) +
+                           scale_color_manual(values=nodePal)
+  } else {
+      if (colorize) {## If node is present, colorize accordingly
+          if (is.null(catColors)) {
+              catColors <- RColorBrewer::brewer.pal(length(unique(nodeN)), "Dark2")
+              names(catColors) <- unique(nodeN)
+          }
+          ## colorize points of texts
+          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq,
+                                              filter=.data$tag == "Words"),
+                                              show.legend = showLegend) +
+                              scale_color_gradient(low=pal[1],high=pal[2],na.value="grey50",
+                                                  name = "Frequency")
+          ## colorize the other points
+          useCatColors <- catColors[ netPlot$data[ netPlot$data$tag != "Words", ]$tag ]
+          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                                              filter=.data$tag != "Words"),
+                                              show.legend=showLegend, color=useCatColors)
+
+      } else {
+          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
+                                              show.legend = showLegend)+
+                               scale_color_gradient(low=pal[1],high=pal[2],na.value="grey50",
+                                                    name = "Frequency")
+      }
+  }
+
+  if (colorText){
+      if (colorize) {
+          netPlot <- netPlot + 
+              geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq,
+                  filter=.data$tag == "Words"),
+                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  bg.color = "white", segment.color="black",family=fontFamily,
+                  bg.r = .15, show.legend=showLegend)+
+              geom_node_text(aes(label=.data$name, size=.data$Freq,
+                  filter=.data$tag != "Words"),color=useCatColors,
+                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  bg.color = "white", segment.color="black",family=fontFamily,
+                  bg.r = .15, show.legend=showLegend)
+
+      } else {
+          if (tag) {
+              netPlot <- netPlot + 
+                  geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
+                      check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                      bg.color = "white", segment.color="black",family=fontFamily,
+                      bg.r = .15, show.legend=showLegend)
+          } else {
+              netPlot <- netPlot + 
+                  geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
+                      check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                      bg.color = "white", segment.color="black",family=fontFamily,
+                      bg.r = .15, show.legend=showLegend)
+          }
+      }
+  } else {
+      netPlot <- netPlot +
+                  geom_node_text(aes(label=.data$name, size=.data$Freq),
+                      check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                      color = "black",
+                      bg.color = "white", segment.color="black",family=fontFamily,
+                      bg.r = .15, show.legend=showLegend) 
+  }
+  netPlot
+}
+
+
+
 #'
 #' connectGenes
 #'
