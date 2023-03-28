@@ -5,7 +5,7 @@
 #' 
 #' @noRd
 appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
-  showLegend,catColors,nodeN,pal,fontFamily,colorText){
+  showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange){
   if (tag) {
       netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                           show.legend = showLegend) +
@@ -19,15 +19,15 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
           ## colorize points of texts
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq,
                                               filter=.data$tag == "Words"),
-                                              show.legend = showLegend) +
-                              scale_color_gradient(low=pal[1],high=pal[2],na.value="grey50",
-                                                  name = "Frequency")
+                                              show.legend = FALSE)+
+                              scale_color_gradient(low=pal[1],high=pal[2],
+                                                na.value="grey50")
           ## colorize the other points
           useCatColors <- catColors[ netPlot$data[ netPlot$data$tag != "Words", ]$tag ]
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                                               filter=.data$tag != "Words"),
-                                              show.legend=showLegend, color=useCatColors)
-
+                                              show.legend=FALSE,
+                                              color=useCatColors)
       } else {
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                               show.legend = showLegend)+
@@ -38,17 +38,19 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 
   if (colorText){
       if (colorize) {
+        ## [TODO] discrete and continuous scale in same ggplot is discouraged
+        ##        use ggnewscale?
           netPlot <- netPlot + 
               geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq,
                   filter=.data$tag == "Words"),
-                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  check_overlap=TRUE, repel=TRUE,
                   bg.color = "white", segment.color="black",family=fontFamily,
-                  bg.r = .15, show.legend=showLegend)+
+                  bg.r = .15, show.legend=FALSE)+
               geom_node_text(aes(label=.data$name, size=.data$Freq,
-                  filter=.data$tag != "Words"),color=useCatColors,
-                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  filter=.data$tag != "Words"), color=useCatColors,
+                  check_overlap=TRUE, repel=TRUE,
                   bg.color = "white", segment.color="black",family=fontFamily,
-                  bg.r = .15, show.legend=showLegend)
+                  bg.r = .15, show.legend=FALSE)
 
       } else {
           if (tag) {
@@ -73,6 +75,13 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                       bg.color = "white", segment.color="black",family=fontFamily,
                       bg.r = .15, show.legend=showLegend) 
   }
+  ## [TODO] When colorize, node size not representing text frequency in all nodes.
+  # if (!colorize) {
+  if (colorize) {
+    netPlot <- netPlot + guides(size = FALSE)
+  }
+  netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
+  # }
   netPlot
 }
 

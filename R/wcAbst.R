@@ -428,7 +428,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     if (colorize) {
       fre <- V(coGraph)$Freq
       fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-      V(coGraph)$Freq <- fre * 0.8
+      V(coGraph)$Freq <- fre
     }
     ## Main plot
 
@@ -525,12 +525,12 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     if (colorize) {
         netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq, filter=!.data$name %in% incQuery),
-            show.legend = showLegend)+
+            show.legend = FALSE)+
             scale_color_gradient(low=pal[1],high=pal[2],
                                 name = "Frequency")+
             geom_node_point(aes(size=.data$Freq,
                 filter=.data$name %in% incQuery),
-            show.legend = showLegend, color=queryColor)
+            show.legend = FALSE, color=queryColor)
     } else {
         if (tag) {
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
@@ -552,13 +552,13 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                         check_overlap=TRUE, repel=TRUE,
                         family=fontFamily,
                         bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)+ 
+                        bg.r = .15, show.legend=FALSE)+ 
                     geom_node_text(aes(label=.data$name, size=.data$Freq,
                         filter=.data$name %in% incQuery),
                         check_overlap=TRUE, repel=TRUE,
                         family=fontFamily, color=queryColor,
                         bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
+                        bg.r = .15, show.legend=FALSE)
         } else {
             if (tag) {
                 netPlot <- netPlot + 
@@ -586,6 +586,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                         family=fontFamily,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend) 
+    }
+    if (colorize) {
+      netPlot <- netPlot +  guides(size = FALSE)
     }
     netPlot <- netPlot+
       scale_size(range=scaleRange, name="Frequency")+
