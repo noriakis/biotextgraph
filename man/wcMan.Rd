@@ -31,7 +31,7 @@ wcMan(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
-  colorize_no_freq = FALSE,
+  colorizeNoFreq = FALSE,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -112,7 +112,7 @@ instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
 
-\item{colorize_no_freq}{color the nodes and texts based on their category,
+\item{colorizeNoFreq}{color the nodes and texts based on their category,
 erase the frequency information (only the discrete mapping)}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}

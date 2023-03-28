@@ -375,20 +375,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         }
       }
       incQuery <- unique(genemap[,2])
-      # if (preserve) {
-      #   retGenemap <- genemap
-      #   gmnew <- NULL
-      #   for (q in retGenemap[,1]) {
-      #     if (q %in% names(pdic)){
-      #       gmnew <- c(gmnew, pdic[q])
-      #     } else {
-      #       gmnew <- c(gmnew, q)
-      #     }
-      #   }
-      #   retGenemap[,1] <- gmnew
-      # } else {
-      #   retGenemap <- genemap
-      # }
       retGenemap <- genemap
       ret@geneMap <- retGenemap
       genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
@@ -440,88 +426,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
 
     ret@igraph <- coGraph
     netPlot <- ggraph(coGraph, layout=layout)
+    netPlot <- appendEdges(netPlot, bn, edgeLink,
+            edgeLabel, showLegend, fontFamily)
     
-    if (bn){
-      if (edgeLink){
-        if (edgeLabel){
-          netPlot <- netPlot +
-            geom_edge_link(
-              aes(width=.data$weight,
-                  color=.data$edgeColor,
-                  label=round(.data$weight,3)),
-              angle_calc = 'along',
-              label_dodge = unit(2.5, 'mm'),
-              arrow = arrow(length = unit(4, 'mm')), 
-              start_cap = circle(3, 'mm'),
-              end_cap = circle(3, 'mm'),
-              alpha=0.5,family=fontFamily,
-              show.legend = showLegend)
-        } else {
-          netPlot <- netPlot +
-            geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
-                           arrow = arrow(length = unit(4, 'mm')), 
-                           start_cap = circle(3, 'mm'),
-                           end_cap = circle(3, 'mm'),
-                           alpha=0.5, show.legend = showLegend)
-        }
-      } else {
-        if (edgeLabel){
-          netPlot <- netPlot +
-            geom_edge_diagonal(
-              aes(width=.data$weight,
-                  color=.data$edgeColor,
-                  label=round(.data$weight,3)),
-              angle_calc = 'along',
-              label_dodge = unit(2.5, 'mm'),
-              arrow = arrow(length = unit(4, 'mm')), 
-              start_cap = circle(3, 'mm'),
-              end_cap = circle(3, 'mm'),
-              alpha=0.5,family=fontFamily,
-              show.legend = showLegend)
-        } else {
-          netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
-                               arrow = arrow(length = unit(4, 'mm')), 
-                               start_cap = circle(3, 'mm'),
-                               end_cap = circle(3, 'mm'),                                    
-                               alpha=0.5, show.legend = showLegend)                
-        }
-      }
-    } else {
-      if (edgeLink){
-        if (edgeLabel){
-          netPlot <- netPlot +
-            geom_edge_link(
-              aes(width=.data$weight,
-                  color=.data$edgeColor,
-                  label=round(.data$weight,3)),
-              angle_calc = 'along',
-              label_dodge = unit(2.5, 'mm'),
-              alpha=0.5,family=fontFamily,
-              show.legend = showLegend)
-        } else {
-          netPlot <- netPlot +
-            geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
-                           alpha=0.5, show.legend = showLegend)
-        }
-      } else {
-        if (edgeLabel){
-          netPlot <- netPlot +
-            geom_edge_diagonal(
-              aes(width=.data$weight,
-                  color=.data$edgeColor,
-                  label=round(.data$weight,3)),
-              angle_calc = 'along',family=fontFamily,
-              label_dodge = unit(2.5, 'mm'),
-              alpha=0.5,
-              show.legend = showLegend)
-        } else {
-          netPlot <- netPlot +
-            geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
-                               alpha=0.5, show.legend = showLegend)                
-        }
-      }
-    }
     if (colorize) {
         netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq, filter=!.data$name %in% incQuery),

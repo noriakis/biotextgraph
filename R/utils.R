@@ -1,3 +1,106 @@
+#' appendEdges
+#' 
+#' function to append edges of ggraph
+#' 
+#' @noRd
+appendEdges <- function(netPlot,
+  bn, edgeLink, edgeLabel, showLegend,
+  fontFamily) {
+
+    if (bn){
+      if (edgeLink){
+          if (edgeLabel){
+              netPlot <- netPlot +
+                          geom_edge_link(
+                              aes(width=.data$weight,
+                              color=.data$edgeColor,
+                              label=.data$weightLabel),
+                              angle_calc = 'along',
+                              family=fontFamily,
+                              label_dodge = unit(2.5, 'mm'),
+                              arrow = arrow(length = unit(4, 'mm')), 
+                              start_cap = circle(3, 'mm'),
+                              end_cap = circle(3, 'mm'),
+                              alpha=0.5,
+                              show.legend = showLegend)
+          } else {
+              netPlot <- netPlot +
+                          geom_edge_link(aes(width=.data$weight,
+                              color=.data$edgeColor),
+                              arrow = arrow(length = unit(4, 'mm')), 
+                              start_cap = circle(3, 'mm'),
+                              end_cap = circle(3, 'mm'),
+                              alpha=0.5, show.legend = showLegend)
+          }
+      } else {
+          if (edgeLabel){
+              netPlot <- netPlot +
+                          geom_edge_diagonal(
+                              aes(width=.data$weight,
+                              color=.data$edgeColor,
+                              label=.data$weightLabel),
+                              angle_calc = 'along',
+                              family=fontFamily,
+                              label_dodge = unit(2.5, 'mm'),
+                              arrow = arrow(length = unit(4, 'mm')), 
+                              start_cap = circle(3, 'mm'),
+                              end_cap = circle(3, 'mm'),
+                              alpha=0.5,
+                              show.legend = showLegend)
+          } else {
+              netPlot <- netPlot +
+                          geom_edge_diagonal(aes(width=.data$weight,
+                              color=.data$edgeColor),
+                              arrow = arrow(length = unit(4, 'mm')), 
+                              start_cap = circle(3, 'mm'),
+                              end_cap = circle(3, 'mm'),                                    
+                              alpha=0.5, show.legend = showLegend)                
+          }
+      }
+  } else {
+      if (edgeLink){
+          if (edgeLabel){
+              netPlot <- netPlot +
+                          geom_edge_link(
+                              aes(width=.data$weight,
+                              color=.data$edgeColor,
+                              label=.data$weightLabel),
+                              family=fontFamily,
+                              angle_calc = 'along',
+                              label_dodge = unit(2.5, 'mm'),
+                              alpha=0.5,
+                              show.legend = showLegend)                        
+          } else {
+              netPlot <- netPlot +
+                          geom_edge_link(aes(width=.data$weight,
+                              color=.data$edgeColor),
+                              alpha=0.5, show.legend = showLegend)
+          }
+      } else {
+          if (edgeLabel){
+              netPlot <- netPlot +
+                          geom_edge_diagonal(
+                              aes(width=.data$weight,
+                              color=.data$edgeColor,
+                              label=.data$weightLabel),
+                              angle_calc = 'along',
+                              label_dodge = unit(2.5, 'mm'),
+                              alpha=0.5,
+                              family=fontFamily,
+                              show.legend = showLegend)                        
+          } else {
+              netPlot <- netPlot +
+                          geom_edge_diagonal(aes(width=.data$weight,
+                              color=.data$edgeColor),
+                              alpha=0.5, show.legend = showLegend)                
+          }
+      }
+  }
+}
+
+
+
+
 #' appendNodesAndTexts
 #' 
 #' function to append nodes and texts based on parameters
@@ -78,7 +181,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
   ## [TODO] When colorize, node size not representing text frequency in all nodes.
   # if (!colorize) {
   if (colorize) {
-    netPlot <- netPlot + guides(size = FALSE)
+    netPlot <- netPlot + guides(size = "none")
   }
   netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
   # }
