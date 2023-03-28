@@ -31,6 +31,7 @@ wcMan(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
+  colorize_no_freq = FALSE,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -110,6 +111,9 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
+
+\item{colorize_no_freq}{color the nodes and texts based on their category,
+erase the frequency information (only the discrete mapping)}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 

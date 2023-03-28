@@ -53,6 +53,7 @@ wcBSDB(
   wcScale = 10,
   addFreqToMB = FALSE,
   catColors = NULL,
+  colorize_no_freq = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -165,6 +166,9 @@ on whole dataset or top-words specified by numWords}
 \item{addFreqToMB}{add pseudo frequency to microbes in mbPlot}
 
 \item{catColors}{named vector showing colors for each category}
+
+\item{colorize_no_freq}{color the nodes and texts based on their category,
+erase the frequency information (only the discrete mapping)}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

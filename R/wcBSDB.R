@@ -65,6 +65,8 @@
 #' @param addFreqToMB add pseudo frequency to microbes in mbPlot
 #' @param catColors named vector showing colors for each category
 #' @param colorize color the nodes and texts based on their category
+#' @param colorize_no_freq color the nodes and texts based on their category,
+#' erase the frequency information (only the discrete mapping)
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -103,7 +105,7 @@ wcBSDB <- function (mbList,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
-                    catColors=NULL,
+                    catColors=NULL, colorize_no_freq=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -575,6 +577,10 @@ wcBSDB <- function (mbList,
             }
         }
 
+        if (colorize & colorize_no_freq) {
+            colorize <- FALSE
+            tag <- TRUE
+        }
 
         if (preserve) {
             newGname <- NULL
@@ -593,7 +599,7 @@ wcBSDB <- function (mbList,
             ## Set pseudo freq based on min value of freq
             fre <- V(coGraph)$Freq
             fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-            V(coGraph)$Freq <- fre * 0.8
+            V(coGraph)$Freq <- fre
         }
 
 
@@ -640,9 +646,8 @@ wcBSDB <- function (mbList,
         }
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
-                          showLegend,catColors,nodeN,pal,fontFamily,colorText)     
+                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange)
         netPlot <- netPlot +
-            scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
                 name = "Correlation", na.value=naEdgeColor)+

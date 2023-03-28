@@ -567,7 +567,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ## Set pseudo freq as min value of freq
             fre <- V(coGraph)$Freq
             fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-            V(coGraph)$Freq <- fre * 0.8
+            V(coGraph)$Freq <- fre
         }
 
         if (tag) {
@@ -688,14 +688,17 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         if (colorize) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                    color=.data$Freq, filter=!.data$name %in% incGene),
-                show.legend = showLegend)+
+            netPlot <- netPlot + 
+                geom_node_point(aes(
+                    size=.data$Freq,
+                    color=.data$Freq,
+                    filter=!.data$name %in% incGene),
+                    show.legend = FALSE)+
                 scale_color_gradient(low=pal[1],high=pal[2],
-                                    name = "Frequency")+
+                                    name = "Frequency", guide="none")+
                 geom_node_point(aes(size=.data$Freq,
                     filter=.data$name %in% incGene),
-                show.legend = showLegend, color=geneColor)
+                show.legend = FALSE, color=geneColor)
         } else {
             if (tag) {
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
@@ -717,13 +720,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             check_overlap=TRUE, repel=TRUE,
                             family=fontFamily,
                             bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)+ 
+                            bg.r = .15, show.legend=FALSE)+ 
                         geom_node_text(aes(label=.data$name, size=.data$Freq,
                             filter=.data$name %in% incGene),
                             check_overlap=TRUE, repel=TRUE,
                             family=fontFamily, color=geneColor,
                             bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
+                            bg.r = .15, show.legend=FALSE)
             } else {
                 if (tag) {
                     netPlot <- netPlot + 
@@ -751,6 +754,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             family=fontFamily,
                             bg.color = "white", segment.color="black",
                             bg.r = .15, show.legend=showLegend) 
+        }
+        if (colorize) {
+            netPlot <- netPlot +  guides(size = "none")
         }
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+

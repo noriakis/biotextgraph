@@ -49,6 +49,8 @@
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
 #' @param colorize color the nodes and texts based on their category
+#' @param colorize_no_freq color the nodes and texts based on their category,
+#' erase the frequency information (only the discrete mapping)
 #' @param catColors named vector showing colors for each category
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
@@ -79,7 +81,7 @@ wcMan <- function(df, madeUpper=NULL,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorize_no_freq=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
@@ -367,7 +369,7 @@ wcMan <- function(df, madeUpper=NULL,
         ## Set pseudo freq based on min value of freq
         fre <- V(coGraph)$Freq
         fre[is.na(fre)] <- min(fre, na.rm=TRUE)
-        V(coGraph)$Freq <- fre * 0.8
+        V(coGraph)$Freq <- fre
 
         if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
         if (!is.null(nodeN)) {
@@ -381,6 +383,11 @@ wcMan <- function(df, madeUpper=NULL,
             }
             V(coGraph)$tag <- addC
         }
+      }
+
+      if (colorize & colorize_no_freq) {
+        colorize <- FALSE
+        tag <- TRUE
       }
 
       if (preserve) {
@@ -489,7 +496,7 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
       netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
-                          showLegend,catColors,nodeN,pal,fontFamily,colorText)
+                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+
