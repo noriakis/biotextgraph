@@ -64,8 +64,9 @@
 #' @param fontFamily font family to use, default to "sans"
 #' @param addFreqToMB add pseudo frequency to microbes in mbPlot
 #' @param catColors named vector showing colors for each category
-#' @param colorize color the nodes and texts based on their category
-#' @param colorize_no_freq color the nodes and texts based on their category,
+#' @param colorize color the nodes and texts based on their category,
+#' except for words which have frequency mapping
+#' @param colorizeNoFreq color the nodes and texts based on their category,
 #' erase the frequency information (only the discrete mapping)
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
@@ -105,7 +106,7 @@ wcBSDB <- function (mbList,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                     ngram=NA, plotType="wc", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
-                    catColors=NULL, colorize_no_freq=FALSE,
+                    catColors=NULL, colorizeNoFreq=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -577,7 +578,8 @@ wcBSDB <- function (mbList,
             }
         }
 
-        if (colorize & colorize_no_freq) {
+        if (colorize & colorizeNoFreq) {
+            ## Only discrete mapping (e.g. Words, Microbes, Diseases)
             colorize <- FALSE
             tag <- TRUE
         }
@@ -608,42 +610,8 @@ wcBSDB <- function (mbList,
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)
 
-
-        if (edgeLink){
-            if (edgeLabel){
-                netPlot <- netPlot +
-                            geom_edge_link(
-                                aes(width=.data$weight,
-                                color=.data$edgeColor,
-                                label=round(.data$weight,3)),
-                                angle_calc = 'along',
-                                label_dodge = unit(2.5, 'mm'),
-                                alpha=0.5,family=fontFamily,
-                                show.legend = showLegend)
-            } else {
-                netPlot <- netPlot +
-                            geom_edge_link(aes(width=.data$weight,
-                                color=.data$edgeColor),
-                                alpha=0.5, show.legend = showLegend)
-            }
-        } else {
-            if (edgeLabel){
-                netPlot <- netPlot +
-                            geom_edge_diagonal(
-                                aes(width=.data$weight,
-                                color=.data$edgeColor,
-                                label=round(.data$weight,3)),
-                                angle_calc = 'along',
-                                label_dodge = unit(2.5, 'mm'),
-                                alpha=0.5,family=fontFamily,
-                                show.legend = showLegend)
-            } else {
-                netPlot <- netPlot +
-                            geom_edge_diagonal(aes(width=.data$weight,
-                                color=.data$edgeColor),
-                                alpha=0.5, show.legend = showLegend)                
-            }
-        }
+        netPlot <- appendEdges(netPlot, FALSE, edgeLink,
+            edgeLabel, showLegend, fontFamily)
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
                           showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange)

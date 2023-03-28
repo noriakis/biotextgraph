@@ -53,7 +53,7 @@ wcBSDB(
   wcScale = 10,
   addFreqToMB = FALSE,
   catColors = NULL,
-  colorize_no_freq = FALSE,
+  colorizeNoFreq = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -142,7 +142,8 @@ Otherwise take sum.}
 
 \item{useUdpipe}{use udpipe to make a network}
 
-\item{colorize}{color the nodes and texts based on their category}
+\item{colorize}{color the nodes and texts based on their category,
+except for words which have frequency mapping}
 
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
@@ -167,7 +168,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{catColors}{named vector showing colors for each category}
 
-\item{colorize_no_freq}{color the nodes and texts based on their category,
+\item{colorizeNoFreq}{color the nodes and texts based on their category,
 erase the frequency information (only the discrete mapping)}
 
 \item{colorText}{color text label based on frequency in correlation network}

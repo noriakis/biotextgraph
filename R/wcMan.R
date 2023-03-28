@@ -49,7 +49,7 @@
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
 #' @param colorize color the nodes and texts based on their category
-#' @param colorize_no_freq color the nodes and texts based on their category,
+#' @param colorizeNoFreq color the nodes and texts based on their category,
 #' erase the frequency information (only the discrete mapping)
 #' @param catColors named vector showing colors for each category
 #' @param collapse default to FALSE, collapse all the sentences
@@ -81,7 +81,7 @@ wcMan <- function(df, madeUpper=NULL,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="wc", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorize_no_freq=FALSE,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorizeNoFreq=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    nodePal=palette(), preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
@@ -385,7 +385,7 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
 
-      if (colorize & colorize_no_freq) {
+      if (colorize & colorizeNoFreq) {
         colorize <- FALSE
         tag <- TRUE
       }

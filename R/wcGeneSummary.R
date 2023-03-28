@@ -435,70 +435,18 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
 
-        # if (verb) {
-        #     eg <- as_data_frame(coGraph)
-        #     newegconc <- c()
-        #     newatt <- c()
-        #     nmls <- list()
-        #     for (j in seq_len(dim(eg)[1])){
-        #         tmp <- as.character(eg[j,1:2])
-        #         if (length(intersect(verbs, tmp))==0){
-        #             newegconc <- rbind(newegconc,c(tmp,eg[j,3]))
-        #             newatt <- c(newatt,NA)
-        #         } else if (length(intersect(verbs, tmp))==1){
-        #             ve <- tmp[tmp%in%verbs]
-        #             nve <- tmp[!tmp%in%verbs]
-        #             nmls[[ve]] <- c(nmls[[ve]],nve)
-        #         } else {
-        #             next
-        #         }
-        #     }
-        #     for (i in names(nmls)){
-        #         if (length(nmls[[i]])!=1) {
-        #             cmbn <- t(combn(nmls[[i]],2))
-        #             cmbn <- cbind(cmbn,rep(NA,dim(cmbn)[1]))
-        #             newegconc <- rbind(newegconc,cmbn)
-        #             newatt <- c(newatt,rep(i,dim(cmbn)[1]))
-        #         }
-        #     }
-        #     ## Restore cor values
-        #     for (i in seq_len(nrow(newegconc))){
-        #       tmp <- newegconc[i,]
-        #       if (is.na(tmp[3])){
-        #         y <- try(corData[tmp[1],tmp[2]])
-        #         if (class(y)=="try-error"){
-        #           y <- NA
-        #         }
-        #         tmp[3] <- NA
-        #       }
-        #       newegconc[i,] <- tmp
-        #     }
-        #     ## Merge
-        #     verbDf <- data.frame(cbind(newegconc, newatt))
-        #     colnames(verbDf) <- c("from","to","Weight","Verb")
-        #     coGraph <- graph_from_data_frame(verbDf,
-        #         directed = FALSE)
-        #     coGraph <- simplify(coGraph,
-        #         remove.multiple = TRUE,
-        #         edge.attr.comb = "concat")
-        #     E(coGraph)$verb <- vapply(E(coGraph)$Verb,
-        #         function(x) paste0(x[!is.na(x)],collapse=","),
-        #         FUN.VALUE = "character")
-        #     E(coGraph)$weight <- unlist(sapply(E(coGraph)$Weight,
-        #         function(x) as.numeric(x[!is.na(x)])[1]))
-        # }
-
         ## before or after?
-        coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
+        coGraph <- induced.subgraph(coGraph,
+            names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
 
-
-
         if (deleteZeroDeg){
-            coGraph <- induced.subgraph(coGraph, degree(coGraph) > 0)
+            coGraph <- induced.subgraph(coGraph,
+                degree(coGraph) > 0)
         }
 
+        ## Make uppercase
         nodeName <- V(coGraph)$name
         tdmCol <- colnames(freqWordsTDM)
         for (i in madeUpper) {
@@ -597,95 +545,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
         netPlot <- ggraph(coGraph, layout=layout)
 
-        if (bn){
-            if (edgeLink){
-                if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_link(
-                                    aes(width=.data$weight,
-                                    color=.data$edgeColor,
-                                    label=.data$weightLabel),
-                                    angle_calc = 'along',
-                                    family=fontFamily,
-                                    label_dodge = unit(2.5, 'mm'),
-                                    arrow = arrow(length = unit(4, 'mm')), 
-                                    start_cap = circle(3, 'mm'),
-                                    end_cap = circle(3, 'mm'),
-                                    alpha=0.5,
-                                    show.legend = showLegend)
-                } else {
-                    netPlot <- netPlot +
-                                geom_edge_link(aes(width=.data$weight,
-                                    color=.data$edgeColor),
-                                    arrow = arrow(length = unit(4, 'mm')), 
-                                    start_cap = circle(3, 'mm'),
-                                    end_cap = circle(3, 'mm'),
-                                    alpha=0.5, show.legend = showLegend)
-                }
-            } else {
-                if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_diagonal(
-                                    aes(width=.data$weight,
-                                    color=.data$edgeColor,
-                                    label=.data$weightLabel),
-                                    angle_calc = 'along',
-                                    family=fontFamily,
-                                    label_dodge = unit(2.5, 'mm'),
-                                    arrow = arrow(length = unit(4, 'mm')), 
-                                    start_cap = circle(3, 'mm'),
-                                    end_cap = circle(3, 'mm'),
-                                    alpha=0.5,
-                                    show.legend = showLegend)
-                } else {
-                    netPlot <- netPlot +
-                                geom_edge_diagonal(aes(width=.data$weight,
-                                    color=.data$edgeColor),
-                                    arrow = arrow(length = unit(4, 'mm')), 
-                                    start_cap = circle(3, 'mm'),
-                                    end_cap = circle(3, 'mm'),                                    
-                                    alpha=0.5, show.legend = showLegend)                
-                }
-            }
-        } else {
-            if (edgeLink){
-                if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_link(
-                                    aes(width=.data$weight,
-                                    color=.data$edgeColor,
-                                    label=.data$weightLabel),
-                                    family=fontFamily,
-                                    angle_calc = 'along',
-                                    label_dodge = unit(2.5, 'mm'),
-                                    alpha=0.5,
-                                    show.legend = showLegend)                        
-                } else {
-                    netPlot <- netPlot +
-                                geom_edge_link(aes(width=.data$weight,
-                                    color=.data$edgeColor),
-                                    alpha=0.5, show.legend = showLegend)
-                }
-            } else {
-                if (edgeLabel){
-                    netPlot <- netPlot +
-                                geom_edge_diagonal(
-                                    aes(width=.data$weight,
-                                    color=.data$edgeColor,
-                                    label=.data$weightLabel),
-                                    angle_calc = 'along',
-                                    label_dodge = unit(2.5, 'mm'),
-                                    alpha=0.5,
-                                    family=fontFamily,
-                                    show.legend = showLegend)                        
-                } else {
-                    netPlot <- netPlot +
-                                geom_edge_diagonal(aes(width=.data$weight,
-                                    color=.data$edgeColor),
-                                    alpha=0.5, show.legend = showLegend)                
-                }
-            }
-        }
+        netPlot <- appendEdges(netPlot, bn, edgeLink,
+            edgeLabel, showLegend, fontFamily)
 
         if (colorize) {
             netPlot <- netPlot + 
