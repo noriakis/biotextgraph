@@ -1,3 +1,59 @@
+#' obtainMatrix
+#' 
+#' obtain matrix of words-to-words relationship
+#' 
+#' @noRd
+#' @return list of graph and osplot object
+#' 
+obtainMatrix <- function(ret,
+                          bn,
+                          R,
+                          DTM,
+                          freqWords,
+                          corThresh,
+                          cooccurrence,
+                          onWholeDTM) {
+    retList <- list()
+    if (bn) {
+      qqcat("bn specified, R=@{R}\n")
+      # To avoid computaitonal time, subset to numWords
+      bnboot <- bnlearn::boot.strength(
+          data.frame(
+              DTM[, colnames(DTM) %in% freqWords]),
+          algorithm = "hc", R=R)
+      ret@strength <- bnboot
+      av <- bnlearn::averaged.network(bnboot)
+      avig <- bnlearn::as.igraph(av)
+      el <- data.frame(as_edgelist(avig))
+      colnames(el) <- c("from","to")
+      mgd <- merge(el, bnboot, by=c("from","to"))
+      colnames(mgd) <- c("from","to","weight","direction")
+      coGraph <- graph_from_data_frame(mgd, directed=TRUE)
+    } else {
+      ## Check correlation
+      ## TODO: speed up calculation using Rcpp
+      if (onWholeDTM) {## To obtain correlation for all the words
+          corInput <- DTM
+      } else {
+          corInput <- DTM[, colnames(DTM) %in% freqWords]
+      }
+      if (cooccurrence) {
+          corData <- t(corInput) %*% corInput
+      } else {
+          corData <- cor(corInput)
+      }
+      ret@corMat <- corData
+      ret@corThresh <- corThresh
+      ## Set correlation below threshold to zero
+      corData[corData<corThresh] <- 0
+      coGraph <- graph.adjacency(corData, weighted=TRUE,
+                  mode="undirected", diag = FALSE)
+  }
+  retList[["ret"]] <- ret
+  retList[["coGraph"]] <- coGraph
+  return(retList)
+}
+
 #' appendEdges
 #' 
 #' function to append edges of ggraph

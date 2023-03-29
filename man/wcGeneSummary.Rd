@@ -51,7 +51,7 @@ wcGeneSummary(
   mergeCorpus = NULL,
   numOnly = TRUE,
   madeUpperGenes = TRUE,
-  onWholeTDM = FALSE,
+  onWholeDTM = FALSE,
   pre = TRUE,
   takeMean = FALSE,
   nodePal = palette(),
@@ -165,7 +165,7 @@ like PubMed information and RefSeq summary}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
 
-\item{onWholeTDM}{calculate correlation network
+\item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
 
 \item{pre}{remove words "pmids", "geneids"}
@@ -203,7 +203,6 @@ list of data frame and ggplot2 object
 }
 \description{
 Plot wordcloud of RefSeq description obtained by GeneSummary
-Testing function for new class
 }
 \examples{
 geneList <- c("DDX41")

@@ -270,10 +270,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
 
 
-    # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-    ## TODO: before or after?
-    freqWordsDTM <- t(as.matrix(docs))
-    row.names(freqWordsDTM) <- allDataDf$query
+    DTM <- t(as.matrix(docs))
+    row.names(DTM) <- allDataDf$query
+
     if (tag) {
       if (!is.null(ret) & length(ret@pvpick)!=0){
         qqcat("Using previous pvclust results")
@@ -285,7 +284,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           # pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))))
           pvc <- pvclust(as.matrix(dist(
             t(
-              freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+              DTM[, colnames(DTM) %in% freqWords]
             )
           )), parallel=cl)
         }
@@ -295,41 +294,10 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       }
     }
     
-    ## Check correlation
-    if (bn) {
-      qqcat("bn specified, R=@{R}\n")
-      # To avoid computaitonal time, subset to numWords
-      bnboot <- bnlearn::boot.strength(
-        data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
-        algorithm = "hc", R=R)
-      ret@strength <- bnboot
-      av <- bnlearn::averaged.network(bnboot)
-      avig <- bnlearn::as.igraph(av)
-      el <- data.frame(as_edgelist(avig))
-      colnames(el) <- c("from","to")
-      mgd <- merge(el, bnboot, by=c("from","to"))
-      colnames(mgd) <- c("from","to","weight","direction")
-      coGraph <- graph_from_data_frame(mgd, directed=TRUE)
-    } else {
-      ## Check correlation
-      ## TODO: speed up calculation using Rcpp
-      if (onWholeDTM) {
-          corInput <- freqWordsDTM
-      } else {
-          corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-      }
-      if (cooccurrence) {
-          corData <- t(corInput) %*% corInput
-      } else {
-          corData <- cor(corInput)
-      }
-      ret@corMat <- corData
-      ret@corThresh <- corThresh
-      ## Set correlation below threshold to zero
-      corData[corData<corThresh] <- 0
-      coGraph <- graph.adjacency(corData, weighted=TRUE,
-                  mode="undirected", diag = FALSE)
-    }
+    matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
+          corThresh, cooccurrence, onWholeDTM)
+    coGraph <- matrixs$coGraph
+    ret <- matrixs$ret
     ## before or after?
     coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
     V(coGraph)$Freq <- matSorted[V(coGraph)$name]
@@ -341,19 +309,19 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     
     nodeName <- V(coGraph)$name
-    dtmCol <- colnames(freqWordsDTM)
+    dtmCol <- colnames(DTM)
     for (i in madeUpper) {
       dtmCol[dtmCol == i] <- toupper(i)
       nodeName[nodeName == i] <- toupper(i)
     }
     V(coGraph)$name <- nodeName
-    colnames(freqWordsDTM) <- dtmCol
+    colnames(DTM) <- dtmCol
     
     if (colorize) {genePlot <- TRUE}
     if (genePlot) {
       genemap <- c()
       for (rn in nodeName){
-        tmp <- freqWordsDTM[ ,rn]
+        tmp <- DTM[ ,rn]
         for (nm in names(tmp[tmp!=0])){
           if (nm!=""){
             if (grepl(",",nm,fixed=TRUE)){
