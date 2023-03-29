@@ -382,7 +382,7 @@ wcBSDB <- function (mbList,
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
-        freqWordsDTM <- t(as.matrix(docs))
+        DTM <- t(as.matrix(docs))
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         ret@freqDf <- returnDf
 
@@ -392,11 +392,11 @@ wcBSDB <- function (mbList,
                     pvcl <- ret@pvpick
                 } else {
                     if (tagWhole){
-                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
+                        pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl)
                     } else {
                         pvc <- pvclust(as.matrix(dist(
                             t(
-                                freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                                DTM[,colnames(DTM) %in% freqWords]
                                 )
                             )), parallel=cl)
                     }
@@ -406,11 +406,11 @@ wcBSDB <- function (mbList,
                 }
             } else {
                 if (tagWhole){
-                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
+                    pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl)
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
-                            freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                            freqWordsDTM[,colnames(DTM) %in% freqWords]
                             )
                         )),parallel=cl)
                 }
@@ -427,35 +427,22 @@ wcBSDB <- function (mbList,
 
         if (mbPlot) {
             if (target=="abstract") {
-                row.names(freqWordsDTM) <- abstDf$query
+                row.names(DTM) <- abstDf$query
             } else {
                 if (curate) {
-                    row.names(freqWordsDTM) <- fil$query
+                    row.names(DTM) <- fil$query
                 } else {
-                    row.names(freqWordsDTM) <- abstDf$query
+                    row.names(DTM) <- abstDf$query
                 }
             }
         }
 
-        ## Check correlation
-        ## TODO: speed up calculation using Rcpp
-        if (onWholeDTM) {
-            corInput <- freqWordsDTM
-        } else {
-            corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-        }
-        if (cooccurrence) {
-            corData <- t(corInput) %*% corInput
-        } else {
-            corData <- cor(corInput)
-        }
-        ret@corMat <- corData
-        ret@corThresh <- corThresh
+        matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
+            corThresh, cooccurrence, onWholeDTM)
+        coGraph <- matrixs$coGraph
+        ret <- matrixs$ret
 
-        ## Set correlation below threshold to zero
-        corData[corData<corThresh] <- 0
-        coGraph <- graph.adjacency(corData, weighted=TRUE,
-                    mode="undirected", diag = FALSE)
+
         coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 
@@ -464,19 +451,19 @@ wcBSDB <- function (mbList,
         }
 
         nodeName <- V(coGraph)$name
-        dtmCol <- colnames(freqWordsDTM)
+        dtmCol <- colnames(DTM)
         for (i in madeUpper) {
             dtmCol[dtmCol == i] <- toupper(i)
             nodeName[nodeName == i] <- toupper(i)
         }
         V(coGraph)$name <- nodeName
-        colnames(freqWordsDTM) <- dtmCol
+        colnames(DTM) <- dtmCol
 
         nodeN <- NULL
         if (mbPlot) {
             mbmap <- c()
             for (rn in nodeName){
-                tmp <- freqWordsDTM[ ,rn]
+                tmp <- DTM[ ,rn]
                 for (nm in names(tmp[tmp!=0])){
                     if (grepl(",", nm, fixed = TRUE)) {
                         for (microbe in unlist(strsplit(nm, ","))){

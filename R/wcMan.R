@@ -2,7 +2,6 @@
 #' 
 #' Produce networks using manual input
 #' 
-#' 
 #' @param df df
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param pal palette for color gradient in correlation network
@@ -215,8 +214,8 @@ wcMan <- function(df, madeUpper=NULL,
       ret@freqDf <- returnDf
     
       freqWords <- names(matSorted)
-      freqWordsDTM <- t(as.matrix(docs))
-      row.names(freqWordsDTM) <- df$query
+      DTM <- t(as.matrix(docs))
+      row.names(DTM) <- df$query
       
       if (tag) {
         if (!is.null(ret) & length(ret@pvpick)!=0){
@@ -228,7 +227,7 @@ wcMan <- function(df, madeUpper=NULL,
           } else {
             pvc <- pvclust(as.matrix(dist(
               t(
-                freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
+                DTM[, colnames(DTM) %in% freqWords]
               )
             )), parallel=cl)
           }
@@ -238,40 +237,10 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
     
-      ## Check correlation
-      if (bn) {
-        qqcat("bn specified, R=@{R}\n")
-        # To avoid computaitonal time, subset to numWords
-        bnboot <- bnlearn::boot.strength(
-          data.frame(freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]),
-          algorithm = "hc", R=R)
-        ret@strength <- bnboot
-        av <- bnlearn::averaged.network(bnboot)
-        avig <- bnlearn::as.igraph(av)
-        el <- data.frame(as_edgelist(avig))
-        colnames(el) <- c("from","to")
-        mgd <- merge(el, bnboot, by=c("from","to"))
-        colnames(mgd) <- c("from","to","weight","direction")
-        coGraph <- graph_from_data_frame(mgd, directed=TRUE)
-      } else {
-        ## Check correlation
-        ## TODO: speed up calculation using Rcpp
-        if (onWholeDTM) {
-            corInput <- freqWordsDTM
-        } else {
-            corInput <- freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
-        }
-        if (cooccurrence) {
-            corData <- t(corInput) %*% corInput
-        } else {
-            corData <- cor(corInput)
-        }
-        ret@corMat <- corData
-        ## Set correlation below threshold to zero
-        corData[corData<corThresh] <- 0
-        coGraph <- graph.adjacency(corData, weighted=TRUE,
-                    mode="undirected", diag = FALSE)
-      }
+      matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
+          corThresh, cooccurrence, onWholeDTM)
+      coGraph <- matrixs$coGraph
+      ret <- matrixs$ret
 
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
       V(coGraph)$Freq <- matSorted[V(coGraph)$name]
@@ -282,13 +251,13 @@ wcMan <- function(df, madeUpper=NULL,
       }
     
       nodeName <- V(coGraph)$name
-      dtmCol <- colnames(freqWordsDTM)
+      dtmCol <- colnames(DTM)
       for (i in madeUpper) {
         dtmCol[dtmCol == i] <- toupper(i)
         nodeName[nodeName == i] <- toupper(i)
       }
       V(coGraph)$name <- nodeName
-      colnames(freqWordsDTM) <- dtmCol
+      colnames(DTM) <- dtmCol
       
       incCols <- colnames(df)
       incCols <- incCols[!incCols %in% c("query","text")]
@@ -315,7 +284,7 @@ wcMan <- function(df, madeUpper=NULL,
       if (queryPlot) {
         genemap <- c()
         for (rn in nodeName){
-          tmp <- freqWordsDTM[ ,rn]
+          tmp <- DTM[ ,rn]
           for (nm in names(tmp[tmp!=0])){
             if (nm!=""){
               if (grepl(",",nm,fixed=TRUE)){
