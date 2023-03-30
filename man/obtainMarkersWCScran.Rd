@@ -37,6 +37,10 @@ obtainMarkersWCScran(
 \item{wcScale}{scale for scale_size_area()}
 
 \item{geneNum}{number of genes to be included in wordclouds}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 }
 \description{
 obtainMarkersWCScran
