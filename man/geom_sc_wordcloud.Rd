@@ -20,12 +20,14 @@ geom_sc_wordcloud(
   wcScale = 4,
   args = list(),
   wcArgs = list(),
-  sort_by = "avg_log2FC",
-  scale_number = 2,
+  sortBy = "avg_log2FC",
+  scaleNumber = 2,
   decreasing = TRUE,
   geneNum = 50,
   base_ellipse = FALSE,
-  base_dens = FALSE
+  base_dens = FALSE,
+  withggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -62,9 +64,9 @@ used to define positions of annotation_custom.}
 
 \item{wcArgs}{passed to ggwordcloud()}
 
-\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+\item{sortBy}{default to avg_log2FC, "log10p" can be specified.}
 
-\item{scale_number}{scale the frequency of words by this number
+\item{scaleNumber}{scale the frequency of words by this number
 in `gene_name`}
 
 \item{decreasing}{sort by decreasing order or not}
@@ -74,6 +76,10 @@ in `gene_name`}
 \item{base_ellipse}{if TRUE, wordclouds are placed based on \code{stat_ellipse}.}
 
 \item{base_dens}{if TRUE, wordclouds are placed based on density}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 }
 \description{
 geom_sc_wordcloud

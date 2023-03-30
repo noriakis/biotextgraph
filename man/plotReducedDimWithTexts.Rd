@@ -18,8 +18,10 @@ plotReducedDimWithTexts(
   rad = NULL,
   top = 10,
   gene_name = FALSE,
-  sort_by = "summary.logFC",
-  scale_number = 2,
+  withggfx = NULL,
+  ggfxParams = list(),
+  sortBy = "summary.logFC",
+  scaleNumber = 2,
   decreasing = TRUE,
   geneNum = 50,
   random.order = FALSE,
@@ -57,9 +59,13 @@ plotReducedDimWithTexts(
 
 \item{gene_name}{show gene names instead of textual information}
 
-\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+\item{withggfx}{applying ggfx filters}
 
-\item{scale_number}{scale the frequency of words by this number
+\item{ggfxParams}{parameter list for ggfx}
+
+\item{sortBy}{default to avg_log2FC, "log10p" can be specified.}
+
+\item{scaleNumber}{scale the frequency of words by this number
 in `gene_name`}
 
 \item{decreasing}{sort by decreasing order or not}

@@ -16,7 +16,9 @@ TextMarkers(
   raw = FALSE,
   col = NULL,
   pvalThresh = 0.05,
-  withTitle = TRUE
+  withTitle = TRUE,
+  withggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -44,6 +46,10 @@ named list of clusters}
 \item{pvalThresh}{adjusted p-value threshold for markers}
 
 \item{withTitle}{plot title on the plot}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 }
 \value{
 list of plots on textual information in the gene cluster

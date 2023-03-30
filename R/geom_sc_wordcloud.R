@@ -3,33 +3,48 @@
 #' @param markers marker data frame
 #' @param cols list of colors
 #' @param wcArgs arguments for ggwordcloud
-#' @param sort_by default to avg_log2FC, "log10p" can be specified.
-#' @param scale_number scale the frequency by this number
+#' @param sortBy default to avg_log2FC, "log10p" can be specified.
+#' @param scaleNumber scale the frequency by this number
 #' @param wcScale scale for scale_size_area()
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
 #' @param eps when taking log of p-values, this value will be added
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 obtainMarkersWC <- function(markers,
                             cols,
                             wcArgs,
                             eps=1e-10,
-                            sort_by="avg_log2FC",
+                            sortBy="avg_log2FC",
                             decreasing=TRUE,
-                            scale_number=10,
+                            scaleNumber=10,
                             wcScale=5,
-                            geneNum=50) {
+                            geneNum=50,
+                            withggfx=NULL,
+                            ggfxParams=list()
+                            ) {
     markers$log10p <- -1*log10(markers$p_val+eps)
     wcList <- list()
     for (i in unique(markers$cluster)) {
         tmp_markers <- subset(markers, markers$cluster==i)
-        tmp_markers <- tmp_markers[order(tmp_markers[[sort_by]],
+        tmp_markers <- tmp_markers[order(tmp_markers[[sortBy]],
                                          decreasing=decreasing),]
         tmp_markers <- tmp_markers[1:geneNum,]
         wcArgs[["colors"]] <- cols[[as.character(i)]]
         wcArgs[["word"]] <- tmp_markers$gene
-        wcArgs[["freq"]] <- tmp_markers[[sort_by]]*scale_number
-        wc <- do.call(ggwordcloud::ggwordcloud, wcArgs)
+        wcArgs[["freq"]] <- tmp_markers[[sortBy]]*scaleNumber
+
+        if (!is.null(withggfx)) {
+          wc <- do.call(eval(parse(text=withggfx)),
+            c(list(
+              x = do.call(ggwordcloud::ggwordcloud, wcArgs)
+              ),
+              ggfxParams)
+          )
+        } else {
+          wc <- do.call(ggwordcloud::ggwordcloud, wcArgs)
+        }
         wc <- wc + scale_size_area(max_size = wcScale)
         wcList[[as.character(i)]] <- wc
     }
@@ -42,8 +57,8 @@ obtainMarkersWC <- function(markers,
 #' @param markers marker list
 #' @param cols list of colors
 #' @param wcArgs arguments for ggwordcloud
-#' @param sort_by default to summary.logFC, "log10p" can be specified.
-#' @param scale_number scale the frequency by this number
+#' @param sortBy default to summary.logFC, "log10p" can be specified.
+#' @param scaleNumber scale the frequency by this number
 #' @param wcScale scale for scale_size_area()
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
@@ -53,23 +68,35 @@ obtainMarkersWCScran <- function(markers,
                             cols,
                             wcArgs,
                             eps=1e-10,
-                            sort_by="summary.logFC",
+                            sortBy="summary.logFC",
                             decreasing=TRUE,
-                            scale_number=10,
+                            scaleNumber=10,
                             wcScale=5,
-                            geneNum=50) {
+                            geneNum=50,
+                            withggfx=NULL,
+                            ggfxParams=list()
+                            ) {
     wcList <- list()
     for (i in names(markers)) {
         tmp_markers <- markers[[i]]
         tmp_markers$log10p <- -1*log10(tmp_markers$p.value+eps)
-        tmp_markers <- tmp_markers[order(tmp_markers[[sort_by]],
+        tmp_markers <- tmp_markers[order(tmp_markers[[sortBy]],
                                          decreasing=decreasing),]
 
         tmp_markers <- tmp_markers[1:geneNum,]
         wcArgs[["colors"]] <- cols[[as.character(i)]]
         wcArgs[["word"]] <- tmp_markers |> row.names()
-        wcArgs[["freq"]] <- tmp_markers[[sort_by]]*scale_number
-        wc <- do.call(ggwordcloud::ggwordcloud, wcArgs)
+        wcArgs[["freq"]] <- tmp_markers[[sortBy]]*scaleNumber
+        if (!is.null(withggfx)) {
+          wc <- do.call(eval(parse(text=withggfx)),
+            c(list(
+              x = do.call(ggwordcloud::ggwordcloud, wcArgs)
+              ),
+              ggfxParams)
+          )
+        } else {
+          wc <- do.call(ggwordcloud::ggwordcloud, wcArgs)
+        }
         wc <- wc + scale_size_area(max_size = wcScale)
         wcList[[as.character(i)]] <- wc
     }
@@ -206,10 +233,13 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
                                                 cols=cols,
                                                 wcArgs=wcArgs,
                                                 wcScale=object$wcScale,
-                                                scale_number=object$scale_number,
-                                                sort_by=object$sort_by,
+                                                scaleNumber=object$scaleNumber,
+                                                sortBy=object$sortBy,
                                                 decreasing=object$decreasing,
-                                                geneNum=object$geneNum))
+                                                geneNum=object$geneNum,
+                                                withggfx=object$withggfx,
+                                                ggfxParams=object$ggfxParams)
+      )
   } else {
       wcMarkers <- suppressMessages(TextMarkers(markers,
                                                 keyType=object$keyType,
@@ -218,7 +248,10 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
                                                 col=cols,
                                                 withTitle=object$withTitle,
                                                 args=args,
-                                                wcArgs=wcArgs))      
+                                                wcArgs=wcArgs,
+                                                withggfx=object$withggfx,
+                                                ggfxParams=object$ggfxParams)
+      )      
   }
   
   for (i in names(wcMarkers)) {
@@ -256,11 +289,13 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
 #' @param wcArgs passed to ggwordcloud()
 #' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
 #' @param base_dens if TRUE, wordclouds are placed based on density
-#' @param sort_by default to avg_log2FC, "log10p" can be specified.
-#' @param scale_number scale the frequency of words by this number
+#' @param sortBy default to avg_log2FC, "log10p" can be specified.
+#' @param scaleNumber scale the frequency of words by this number
 #' in `gene_name`
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @importFrom MASS cov.trob
 #' @importFrom ggplot2 ggplot_add
 #' @export
@@ -273,9 +308,10 @@ geom_sc_wordcloud <- function(markers,
                               rot.per=0.4, random.order=FALSE,
                               use_shadowtext=TRUE, bg.colour="white",
                               wcScale=4, args=list(), wcArgs=list(),
-                              sort_by="avg_log2FC", scale_number=2,
+                              sortBy="avg_log2FC", scaleNumber=2,
                               decreasing=TRUE, geneNum=50,
-                              base_ellipse=FALSE, base_dens=FALSE) {
+                              base_ellipse=FALSE, base_dens=FALSE,
+                              withggfx=NULL, ggfxParams=list()) {
   if (base_dens) {
     base_ellipse <- TRUE
   }
@@ -293,13 +329,15 @@ geom_sc_wordcloud <- function(markers,
                  withTitle=withTitle,
                  args=args,
                  wcArgs=wcArgs,
-                 sort_by=sort_by,
+                 sortBy=sortBy,
                  decreasing=decreasing,
                  geneNum=geneNum,
-                 scale_number=scale_number,
+                 scaleNumber=scaleNumber,
                  random.order=random.order,
                  base_ellipse=base_ellipse,
-                 base_dens=base_dens),
+                 base_dens=base_dens,
+                 withggfx=withggfx,
+                 ggfxParams=ggfxParams),
             class = "geom_sc_wordcloud")
 }
 

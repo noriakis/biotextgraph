@@ -18,14 +18,16 @@ DimPlotWithTexts(
   wcScale = 5,
   rot.per = 0.4,
   rad = NULL,
-  sort_by = "avg_log2FC",
-  scale_number = 2,
+  sortBy = "avg_log2FC",
+  scaleNumber = 2,
   decreasing = TRUE,
   geneNum = 50,
   base_ellipse = FALSE,
   base_dens = FALSE,
   random.order = FALSE,
   gene_name = FALSE,
+  withggfx = NULL,
+  ggfxParams = list(),
   withTitle = FALSE,
   args = list()
 )
@@ -57,9 +59,9 @@ DimPlotWithTexts(
 
 \item{rad}{named vector of size of each cluster}
 
-\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+\item{sortBy}{default to avg_log2FC, "log10p" can be specified.}
 
-\item{scale_number}{scale the frequency of words by this number
+\item{scaleNumber}{scale the frequency of words by this number
 in `gene_name`}
 
 \item{decreasing}{sort by decreasing order or not}
@@ -73,6 +75,10 @@ in `gene_name`}
 \item{random.order}{ggwordcloud parameter}
 
 \item{gene_name}{show gene names instead of textual information}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 
 \item{withTitle}{whether to append title on wordcloud}
 

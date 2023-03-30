@@ -16,11 +16,14 @@
 #' named list of clusters
 #' @param pvalThresh adjusted p-value threshold for markers
 #' @param withTitle plot title on the plot
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 #' @return list of plots on textual information in the gene cluster
 TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
          genePlotNum=5, colorText=TRUE, args=list(), wcArgs=NULL,
-         raw=FALSE, col=NULL, pvalThresh=0.05, withTitle=TRUE) {
+         raw=FALSE, col=NULL, pvalThresh=0.05, withTitle=TRUE,withggfx=NULL,
+         ggfxParams=list()) {
 
     plotList <- list()
     wresList <- list()
@@ -54,10 +57,20 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
         wres <- do.call(wcGeneSummary, args)
 
         if (type=="wc"){
-            if (withTitle) {
-                plotList[[i]] <- wres@wc + ggtitle(i)
+            if (!is.null(withggfx)) {
+              wc <- do.call(eval(parse(text=withggfx)),
+                c(list(
+                  x = wres@wc
+                  ),
+                  ggfxParams)
+              )
             } else {
-                plotList[[i]] <- wres@wc
+              wc <- wres@wc
+            }
+            if (withTitle) {
+                plotList[[i]] <- wc + ggtitle(i)
+            } else {
+                plotList[[i]] <- wc
             }
 
         } else {
@@ -94,6 +107,8 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 #' @param col color to be used in wordcloud
 #' @param top Top-{top} genes for each cluster will be included
 #' @param withTitle ggtitle({cluster name}) will be added
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 TextMarkersScran <- function(res,
     keyType="SYMBOL",
@@ -106,7 +121,10 @@ TextMarkersScran <- function(res,
     raw=FALSE,
     col=NULL,
     withTitle=TRUE,
-    top=10) {
+    top=10,
+    withggfx=NULL,
+    ggfxParams=list()
+    ) {
 
     plotList <- list()
     wresList <- list()
@@ -143,10 +161,20 @@ TextMarkersScran <- function(res,
         wres <- do.call(wcGeneSummary, args)
 
         if (type=="wc"){
-            if (withTitle) {
-                plotList[[i]] <- wres@wc + ggtitle(i)
+            if (!is.null(withggfx)) {
+              wc <- do.call(eval(parse(text=withggfx)),
+                c(list(
+                  x = wres@wc
+                  ),
+                  ggfxParams)
+              )
             } else {
-                plotList[[i]] <- wres@wc
+              wc <- wres@wc
+            }
+            if (withTitle) {
+                plotList[[i]] <- wc + ggtitle(i)
+            } else {
+                plotList[[i]] <- wc
             }
 
         } else {
@@ -185,14 +213,16 @@ TextMarkersScran <- function(res,
 #' @param random.order ggwordcloud parameter
 #' @param rad named vector of size of each cluster
 #' @param top Top-{top} genes are included
-#' @param sort_by default to avg_log2FC, "log10p" can be specified.
-#' @param scale_number scale the frequency of words by this number
+#' @param sortBy default to avg_log2FC, "log10p" can be specified.
+#' @param scaleNumber scale the frequency of words by this number
 #' in `gene_name`
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
 #' @param gene_name show gene names instead of textual information
 #' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
 #' @param base_dens if TRUE, wordclouds are placed based on density
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
@@ -200,8 +230,8 @@ TextMarkersScran <- function(res,
 plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
-         rot.per=0.4, rad=NULL, top=10, gene_name=FALSE,
-         sort_by="summary.logFC", scale_number=2, decreasing=TRUE, geneNum=50,
+         rot.per=0.4, rad=NULL, top=10, gene_name=FALSE, withggfx=NULL, ggfxParams=list(),
+         sortBy="summary.logFC", scaleNumber=2, decreasing=TRUE, geneNum=50,
          random.order=FALSE, dimred="PCA", base_ellipse=FALSE, base_dens=FALSE,
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
@@ -245,17 +275,21 @@ plotReducedDimWithTexts <- function(sce, marker.info,
                                     cols=cols,
                                     wcArgs=wcArgs,
                                     wcScale=wcScale,
-                                    scale_number=scale_number,
-                                    sort_by=sort_by,
+                                    scaleNumber=scaleNumber,
+                                    sortBy=sortBy,
                                     decreasing=decreasing,
-                                    geneNum=geneNum)
+                                    geneNum=geneNum,
+                                    withggfx=withggfx,
+                                    ggfxParams=ggfxParams)
     } else {
 
         texts <- marker.info[which.label] |> TextMarkersScran(wcArgs=wcArgs,
                                                               col=cols,top=top,
                                                               genePlot=FALSE,
                                                               args=args,
-                                                              withTitle=withTitle)
+                                                              withTitle=withTitle,
+                                                              withggfx=withggfx,
+                                                              ggfxParams=ggfxParams)
     }
 
     if (base_ellipse) {
@@ -366,14 +400,16 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 #' @param rot.per ggwordcloud parameter
 #' @param random.order ggwordcloud parameter
 #' @param rad named vector of size of each cluster
-#' @param sort_by default to avg_log2FC, "log10p" can be specified.
-#' @param scale_number scale the frequency of words by this number
+#' @param sortBy default to avg_log2FC, "log10p" can be specified.
+#' @param scaleNumber scale the frequency of words by this number
 #' in `gene_name`
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
 #' @param gene_name show gene names instead of textual information
 #' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
 #' @param base_dens if TRUE, wordclouds are placed based on density
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 #' @importFrom dplyr summarise
 #' @importFrom dplyr group_by
@@ -383,9 +419,9 @@ DimPlotWithTexts <- function(seu, markers,
          point_alpha=0.2, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL,
          wc_alpha=1, wcScale=5,
-         rot.per=0.4, rad=NULL, sort_by="avg_log2FC", scale_number=2,
+         rot.per=0.4, rad=NULL, sortBy="avg_log2FC", scaleNumber=2,
          decreasing=TRUE, geneNum=50, base_ellipse=FALSE, base_dens=FALSE,
-         random.order=FALSE, gene_name=FALSE,
+         random.order=FALSE, gene_name=FALSE, withggfx=NULL, ggfxParams=list(),
          withTitle=FALSE, args=list()) {
     args[["wcScale"]] <- wcScale
     if (base_dens) {base_ellipse <- TRUE}
@@ -430,17 +466,23 @@ DimPlotWithTexts <- function(seu, markers,
                                                     cols=cols,
                                                     wcArgs=wcArgs,
                                                     wcScale=wcScale,
-                                                    scale_number=scale_number,
-                                                    sort_by=sort_by,
+                                                    scaleNumber=scaleNumber,
+                                                    sortBy=sortBy,
                                                     decreasing=decreasing,
-                                                    geneNum=geneNum))
+                                                    geneNum=geneNum,
+                                                    withggfx=withggfx,
+                                                    ggfxParams=ggfxParams
+                                                    ))
     } else {
         texts <- subset(markers, markers$cluster %in% which.label) |> TextMarkers(
                                             wcArgs=wcArgs,
                                               col=cols,
                                               args=args,
                                               genePlot=FALSE,
-                                              withTitle=withTitle)        
+                                              withTitle=withTitle,
+                                              withggfx=withggfx,
+                                              ggfxParams=ggfxParams
+                                              )        
     }
 
   if (base_ellipse) {

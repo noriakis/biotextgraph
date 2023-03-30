@@ -10,11 +10,13 @@ obtainMarkersWCScran(
   cols,
   wcArgs,
   eps = 1e-10,
-  sort_by = "summary.logFC",
+  sortBy = "summary.logFC",
   decreasing = TRUE,
-  scale_number = 10,
+  scaleNumber = 10,
   wcScale = 5,
-  geneNum = 50
+  geneNum = 50,
+  withggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -26,11 +28,11 @@ obtainMarkersWCScran(
 
 \item{eps}{when taking log of p-values, this value will be added}
 
-\item{sort_by}{default to summary.logFC, "log10p" can be specified.}
+\item{sortBy}{default to summary.logFC, "log10p" can be specified.}
 
 \item{decreasing}{sort by decreasing order or not}
 
-\item{scale_number}{scale the frequency by this number}
+\item{scaleNumber}{scale the frequency by this number}
 
 \item{wcScale}{scale for scale_size_area()}
 
