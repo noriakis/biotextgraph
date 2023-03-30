@@ -410,7 +410,7 @@ wcBSDB <- function (mbList,
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
-                            freqWordsDTM[,colnames(DTM) %in% freqWords]
+                            DTM[,colnames(DTM) %in% freqWords]
                             )
                         )),parallel=cl)
                 }
