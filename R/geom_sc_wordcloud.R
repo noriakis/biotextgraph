@@ -63,6 +63,8 @@ obtainMarkersWC <- function(markers,
 #' @param decreasing sort by decreasing order or not
 #' @param geneNum number of genes to be included in wordclouds
 #' @param eps when taking log of p-values, this value will be added
+#' @param withggfx applying ggfx filters
+#' @param ggfxParams parameter list for ggfx
 #' @export
 obtainMarkersWCScran <- function(markers,
                             cols,
