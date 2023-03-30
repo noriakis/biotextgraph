@@ -9,11 +9,13 @@ obtainMarkersWC(
   cols,
   wcArgs,
   eps = 1e-10,
-  sort_by = "avg_log2FC",
+  sortBy = "avg_log2FC",
   decreasing = TRUE,
-  scale_number = 10,
+  scaleNumber = 10,
   wcScale = 5,
-  geneNum = 50
+  geneNum = 50,
+  withggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -25,15 +27,19 @@ obtainMarkersWC(
 
 \item{eps}{when taking log of p-values, this value will be added}
 
-\item{sort_by}{default to avg_log2FC, "log10p" can be specified.}
+\item{sortBy}{default to avg_log2FC, "log10p" can be specified.}
 
 \item{decreasing}{sort by decreasing order or not}
 
-\item{scale_number}{scale the frequency by this number}
+\item{scaleNumber}{scale the frequency by this number}
 
 \item{wcScale}{scale for scale_size_area()}
 
 \item{geneNum}{number of genes to be included in wordclouds}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 }
 \description{
 obtainMarkersWC

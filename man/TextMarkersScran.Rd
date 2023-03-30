@@ -16,7 +16,9 @@ TextMarkersScran(
   raw = FALSE,
   col = NULL,
   withTitle = TRUE,
-  top = 10
+  top = 10,
+  withggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ TextMarkersScran(
 \item{withTitle}{ggtitle({cluster name}) will be added}
 
 \item{top}{Top-{top} genes for each cluster will be included}
+
+\item{withggfx}{applying ggfx filters}
+
+\item{ggfxParams}{parameter list for ggfx}
 }
 \description{
 Take results of scran::findMarkers as input,
