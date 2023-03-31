@@ -317,6 +317,9 @@ geom_sc_wordcloud <- function(markers,
   if (base_dens) {
     base_ellipse <- TRUE
   }
+  if (!use_shadowtext) {
+    bg.colour <- NULL
+  }
   structure(list(markers = markers,
                  show_markers = show_markers,
                  gene_name = gene_name,

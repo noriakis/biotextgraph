@@ -234,6 +234,10 @@ plotReducedDimWithTexts <- function(sce, marker.info,
          sortBy="summary.logFC", scaleNumber=2, decreasing=TRUE, geneNum=50,
          random.order=FALSE, dimred="PCA", base_ellipse=FALSE, base_dens=FALSE,
          withTitle=FALSE, args=list()) {
+    if (!use_shadowtext) {
+      bg.colour <- NULL
+    }
+
     args[["wcScale"]] <- wcScale
     if (base_dens) {base_ellipse <- TRUE}
     if (requireNamespace("scater", quietly = TRUE)) {## pass the plot itself
@@ -423,6 +427,9 @@ DimPlotWithTexts <- function(seu, markers,
          decreasing=TRUE, geneNum=50, base_ellipse=FALSE, base_dens=FALSE,
          random.order=FALSE, gene_name=FALSE, withggfx=NULL, ggfxParams=list(),
          withTitle=FALSE, args=list()) {
+    if (!use_shadowtext) {
+      bg.colour <- NULL
+    }
     args[["wcScale"]] <- wcScale
     if (base_dens) {base_ellipse <- TRUE}
     if (requireNamespace("Seurat", quietly = TRUE)) {## pass the plot itself
