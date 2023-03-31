@@ -22,7 +22,8 @@ getWordsOnDendro(
   useDf = NULL,
   type = "words",
   argList = list(),
-  useFunc = NULL
+  useFunc = NULL,
+  useggfx = NULL
 )
 }
 \arguments{
@@ -62,6 +63,8 @@ pyramid plots are not produced}
 \item{argList}{passed to wcGeneSummary}
 
 \item{useFunc}{function to summarize text}
+
+\item{useggfx}{use ggfx on resulting plot}
 }
 \value{
 list of pyramid plot grobs and its positions

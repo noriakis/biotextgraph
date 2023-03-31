@@ -38,7 +38,11 @@ plotEigengeneNetworksWithWords(
   al = TRUE,
   offset = 0.2,
   tipSize = 0.3,
-  asp = 1.5
+  asp = 1.5,
+  horizontalSpacer = 0,
+  bg.colour = NULL,
+  useggfx = NULL,
+  ggfxParams = list()
 )
 }
 \arguments{
@@ -111,6 +115,14 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 \item{tipSize}{positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)}
 
 \item{asp}{aspect ratio for ggimage::geom_image}
+
+\item{horizontalSpacer}{horizontal spacer for annotation}
+
+\item{bg.colour}{use shadowtext for wordcloud, override border to FALSE}
+
+\item{useggfx}{filter in ggfx to apply to wordcloud, default to NULL}
+
+\item{ggfxParams}{parameters to pass to ggfx geom}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

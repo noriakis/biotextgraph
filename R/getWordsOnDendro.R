@@ -39,6 +39,10 @@
 #' @param offset positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)
 #' @param tipSize positional argument to passed to ggtree::geom_tiplab (ggimage::geom_image)
 #' @param asp aspect ratio for ggimage::geom_image
+#' @param horizontalSpacer horizontal spacer for annotation
+#' @param bg.colour use shadowtext for wordcloud, override border to FALSE
+#' @param useggfx filter in ggfx to apply to wordcloud, default to NULL
+#' @param ggfxParams parameters to pass to ggfx geom
 #' 
 #' @export
 #' @import grid gridExtra
@@ -60,7 +64,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             highlight=NULL, argList=list(), useFunc=NULL,
                                             returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
                                             imageDir=NULL, wh=5, al=TRUE, offset=.2, tipSize=0.3,
-                                            asp=1.5) {
+                                            asp=1.5, horizontalSpacer=0,
+                                            bg.colour=NULL, useggfx=NULL, ggfxParams=list()) {
 
     if (is.null(candidateNodes)) {
         candidateNodes <- unique(colors)
@@ -120,6 +125,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
                 wcArg[["words"]] <- im@freqDf$word
                 wcArg[["freq"]] <- im@freqDf$freq
+                wcArg[["bg.colour"]] <- bg.colour
 
                 plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
                      scale_size_area(max_size = wcScale)+
@@ -148,6 +154,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
     ## Get pyramid plot list using the function.
     ## It takes time when geneNumLimit is large.
+    wcArg[["bg.colour"]] <- bg.colour
     grobList <- getWordsOnDendro(dhc, geneVec,
                                  numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
@@ -157,11 +164,18 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  candidateNodes=candidateNodes,
                                  showType=showType, takeIntersect=takeIntersect,
                                  argList=argList, useWC=useWC, wcScale=wcScale,
-                                 useFunc=useFunc, useDf=useDf, wrap=wrap)
+                                 useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx)
     
     if (returnGlobOnly) {
         return(grobList)
     }
+    if (!is.null(bg.colour)) {
+        border <- FALSE
+    }
+    if (!is.null(useggfx)) {
+        border <- FALSE
+    }
+
 
     ## Plot the grob on dendrogram using annotation_custom.
     ## If border is TRUE, border line is drawn using grid.rect.
@@ -173,28 +187,32 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                           gp = gpar(lwd = 1, col = "black", fill = NA))
             })
         } else {
-            addPlot <- gr$plot
+            addPlot <- ggplotify::as.grob(gr$plot)
         }
 
+        if (!is.null(useggfx)) {
+            addPlot <- do.call(useggfx, c(list(x=addPlot),ggfxParams))
+        }
         if (dendPlot!="ggtree") {
-
             if (horiz) {
                 dendroPlot <- dendroPlot +
-                    annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
+                    annotation_custom(addPlot, xmin=gr$xmin+horizontalSpacer, xmax=gr$xmax-horizontalSpacer,
                                       ymin=-1*gr$height-spacer, ymax=-1*gr$heightup+spacer)
             } else {
                 dendroPlot <- dendroPlot +      
-                    annotation_custom(addPlot, xmin=gr$xmin, xmax=gr$xmax,
-                                      ymin=gr$height+spacer, ymax=gr$heightup-spacer)
+                    annotation_custom(addPlot,
+                        xmin=gr$xmin+horizontalSpacer,
+                        xmax=gr$xmax-horizontalSpacer,
+                        ymin=gr$height+spacer,
+                        ymax=gr$heightup-spacer)
             }
         } else {
             ## Only the rectangular layout
             dendroPlot <- dendroPlot + annotation_custom(addPlot,
-                ymin=gr$xmin, ymax=gr$xmax,
+                ymin=gr$xmin+horizontalSpacer, ymax=gr$xmax-horizontalSpacer,
                 xmin=-1*gr$height-spacer, xmax=-1*gr$heightup+spacer)
         }
     }
-    
     dendroPlot
 }
 
@@ -224,6 +242,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param useFunc function to summarize text
 #' @param useDf data.frame to subset when manual function is specified
 #' @param wrap wrap the strings
+#' @param useggfx use ggfx on resulting plot
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -248,7 +267,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             numberOfWords=25, showType="ID", wcArg=list(),
                             highlight=NULL, textSize=3.5, wcScale=3, wrap=NULL,
                             candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL,
-                            type="words", argList=list(), useFunc=NULL) {
+                            type="words", argList=list(), useFunc=NULL, useggfx=NULL) {
     
     ## Filter high frequency words if needed
     # filterWords <- allFreqGeneSummary[
@@ -319,7 +338,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                 numberOfWords=numberOfWords, type=type, showType=showType,
                                 argList=argList, textSize=textSize, takeIntersect=takeIntersect,
                                 useWC=useWC, wcScale=wcScale, wcArg=wcArg, useFunc=useFunc,
-                                useDf=useDf, wrap=wrap)
+                                useDf=useDf, wrap=wrap, useggfx=useggfx)
                             if (!is.null(pyrm)){
                                 grobList[[as.character(grobNum)]]$plot <- pyrm
                                 grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -381,6 +400,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param wcArg argument list for ggwordcloud
 #' @param useFunc function to summarize text
 #' @param useDf data.frame to subset when manual function is specified
+#' @param useggfx use ggfx on plot
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -396,7 +416,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         numberOfWords=25, widths=c(0.3,0.6,0.3),
                         lowCol="blue", showType="ID",
                         highCol="red", highlight=NULL, wcScale=3,
-                        type="words", wrap=15, textSize=3.5,
+                        type="words", wrap=15, textSize=3.5, useggfx=NULL,
                         takeIntersect=TRUE, useWC=FALSE, wcArg=list(),
                         orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL) {
     ## Convert to ENTREZ ID
@@ -423,7 +443,6 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     if (type=="words") {
 
         if (useWC) {
-
             if (!is.null(useFunc)) {
                 if (!is.null(useDf)) {
                     sch <- c(names(geneVec)[geneVec %in% L], names(geneVec)[geneVec %in% R])
@@ -443,17 +462,18 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 wcArg[["max.words"]] <- Inf
                 wcArg[["rot.per"]] <- 0.5
                 wcArg[["random.order"]] <- FALSE
-                wcArg[["colors"]] <- brewer.pal(10, sample(row.names(RColorBrewer::brewer.pal.info), 1))
+                wcArg[["colors"]] <- brewer.pal(10,
+                    sample(row.names(RColorBrewer::brewer.pal.info), 1))
             }
-
             wcArg[["words"]] <- retWC@freqDf$word
             wcArg[["freq"]] <- retWC@freqDf$freq
 
-
-
             plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
                  scale_size_area(max_size = wcScale)+
-                 theme(plot.background = element_rect(fill = "white",colour = NA))
+                 theme(plot.background = element_rect(
+                    fill = ifelse(is.null(wcArg[["bg.colour"]]) & is.null(useggfx),
+                        "white","transparent"),
+                    colour = NA))
             return(plt)
         }
 

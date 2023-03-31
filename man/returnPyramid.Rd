@@ -19,6 +19,7 @@ returnPyramid(
   type = "words",
   wrap = 15,
   textSize = 3.5,
+  useggfx = NULL,
   takeIntersect = TRUE,
   useWC = FALSE,
   wcArg = list(),
@@ -56,6 +57,8 @@ returnPyramid(
 \item{wrap}{wrap the strings}
 
 \item{textSize}{text size in pyramid plots}
+
+\item{useggfx}{use ggfx on plot}
 
 \item{takeIntersect}{take intersection or frequent words}
 
