@@ -10,9 +10,10 @@ getWordsOnDendro(
   geneNumLimit = 1000,
   geneVecType = "ENSEMBL",
   useWC = FALSE,
+  useRandomColor = FALSE,
   numberOfWords = 25,
   showType = "ID",
-  wcArg = list(),
+  wcArgs = list(),
   highlight = NULL,
   textSize = 3.5,
   wcScale = 3,
@@ -20,6 +21,7 @@ getWordsOnDendro(
   candidateNodes = NULL,
   takeIntersect = TRUE,
   useDf = NULL,
+  bg.colour = NULL,
   type = "words",
   argList = list(),
   useFunc = NULL,
@@ -38,11 +40,13 @@ pyramid plots are not produced}
 
 \item{useWC}{use wordcloud}
 
+\item{useRandomColor}{use random colors on wordclouds}
+
 \item{numberOfWords}{the number of words to plot (default: 25)}
 
 \item{showType}{when "enrich", which labels to show}
 
-\item{wcArg}{argument list for ggwordcloud}
+\item{wcArgs}{argument list for ggwordcloud}
 
 \item{highlight}{words to highlight}
 
@@ -57,6 +61,8 @@ pyramid plots are not produced}
 \item{takeIntersect}{take intersection or frequent words}
 
 \item{useDf}{data.frame to subset when manual function is specified}
+
+\item{bg.colour}{background color for wordcloud}
 
 \item{type}{"words" or "enrich"}
 

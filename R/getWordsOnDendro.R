@@ -23,7 +23,7 @@
 #' if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.
 #' @param dhc user-specified dendrogram
 #' @param horiz horizontal plot or not
-#' @param wcArg argument list, pass to ggwordcloud
+#' @param wcArgs argument list, pass to ggwordcloud
 #' @param useFunc if not specified, use RefSeq summary data
 #' @param useDf data.frame to subset when manual function is specified
 #' "query" column will be used to subset
@@ -43,6 +43,7 @@
 #' @param bg.colour use shadowtext for wordcloud, override border to FALSE
 #' @param useggfx filter in ggfx to apply to wordcloud, default to NULL
 #' @param ggfxParams parameters to pass to ggfx geom
+#' @param useRandomColor use random color on wordclouds
 #' 
 #' @export
 #' @import grid gridExtra
@@ -59,12 +60,12 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             border=TRUE, type="words", wcScale=3,
                                             candidateNodes=NULL, takeIntersect=TRUE,
                                             showType="ID", textSize=3.5, horiz=FALSE,
-                                            dendPlot="pvclust", dhc=NULL, wcArg=list(),
+                                            dendPlot="pvclust", dhc=NULL, wcArgs=list(),
                                             useDf=NULL, useWGCNA=TRUE, spacer=0.005, wrap=NULL,
                                             highlight=NULL, argList=list(), useFunc=NULL,
                                             returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
                                             imageDir=NULL, wh=5, al=TRUE, offset=.2, tipSize=0.3,
-                                            asp=1.5, horizontalSpacer=0,
+                                            asp=1.5, horizontalSpacer=0, useRandomColor=FALSE,
                                             bg.colour=NULL, useggfx=NULL, ggfxParams=list()) {
 
     if (is.null(candidateNodes)) {
@@ -114,20 +115,25 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                 argList[["keyType"]] <- geneVecType
                 im <- do.call(wcGeneSummary, argList)
 
-                if (length(wcArg)==0) {
-                    wcArg[["min.freq"]] <- 1
-                    wcArg[["max.words"]] <- Inf
-                    wcArg[["rot.per"]] <- 0.5
-                    wcArg[["random.order"]] <- FALSE
-                    wcArg[["colors"]] <- brewer.pal(10,
+                if (length(wcArgs)==0) {
+                    wcArgs[["min.freq"]] <- 1
+                    wcArgs[["max.words"]] <- Inf
+                    wcArgs[["rot.per"]] <- 0.5
+                    wcArgs[["random.order"]] <- FALSE
+                    wcArgs[["colors"]] <- brewer.pal(10,
                         sample(row.names(RColorBrewer::brewer.pal.info), 1))
                 }
+                if (useRandomColor) {
+                    wcArgs[["colors"]] <- brewer.pal(10,
+                        sample(row.names(RColorBrewer::brewer.pal.info), 1))
 
-                wcArg[["words"]] <- im@freqDf$word
-                wcArg[["freq"]] <- im@freqDf$freq
-                wcArg[["bg.colour"]] <- bg.colour
+                }
 
-                plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
+                wcArgs[["words"]] <- im@freqDf$word
+                wcArgs[["freq"]] <- im@freqDf$freq
+                wcArgs[["bg.colour"]] <- bg.colour
+
+                plt <- do.call(ggwordcloud::ggwordcloud, wcArgs)+
                      scale_size_area(max_size = wcScale)+
                      theme(plot.background = element_rect(fill = "transparent",colour = NA))
                 qqcat("Saving the image for plotting on the dendrogram\n")
@@ -155,14 +161,14 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
     ## Get pyramid plot list using the function.
     ## It takes time when geneNumLimit is large.
-    wcArg[["bg.colour"]] <- bg.colour
+    # wcArgs[["bg.colour"]] <- bg.colour
     grobList <- getWordsOnDendro(dhc, geneVec,
                                  numberOfWords = numberOfWords,
                                  geneNumLimit = geneNumLimit,
                                  geneVecType = geneVecType,
                                  type=type, highlight=highlight,
-                                 textSize=textSize, wcArg=wcArg,
-                                 candidateNodes=candidateNodes,
+                                 textSize=textSize, wcArgs=wcArgs, bg.colour=bg.colour,
+                                 candidateNodes=candidateNodes, useRandomColor=useRandomColor,
                                  showType=showType, takeIntersect=takeIntersect,
                                  argList=argList, useWC=useWC, wcScale=wcScale,
                                  useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx)
@@ -241,11 +247,13 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param takeIntersect take intersection or frequent words
 #' @param useWC use wordcloud
 #' @param wcScale max_size of wordcloud
-#' @param wcArg argument list for ggwordcloud
+#' @param wcArgs argument list for ggwordcloud
 #' @param useFunc function to summarize text
 #' @param useDf data.frame to subset when manual function is specified
 #' @param wrap wrap the strings
 #' @param useggfx use ggfx on resulting plot
+#' @param useRandomColor use random colors on wordclouds
+#' @param bg.colour background color for wordcloud
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -266,10 +274,10 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @export
 #' 
 getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
-                            geneVecType="ENSEMBL", useWC=FALSE,
-                            numberOfWords=25, showType="ID", wcArg=list(),
+                            geneVecType="ENSEMBL", useWC=FALSE, useRandomColor=FALSE,
+                            numberOfWords=25, showType="ID", wcArgs=list(),
                             highlight=NULL, textSize=3.5, wcScale=3, wrap=NULL,
-                            candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL,
+                            candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL, bg.colour=NULL,
                             type="words", argList=list(), useFunc=NULL, useggfx=NULL) {
     
     ## Filter high frequency words if needed
@@ -294,6 +302,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     curHeights <- c(((dhc %>%
         get_subdendrograms(k=1))[[1]] %>%
         get_nodes_attr("height"))[1])
+    alreadyPerformed <- NULL
     k <- 2
     grobNum <- 1
     ddata <-dendro_data(dhc)
@@ -358,9 +367,13 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                 XMAX <- as.numeric(labelPos %>%
                     filter(label==NODES[length(NODES)]) %>% select(.data$x))                
             }
-            HEIGHT <- get_nodes_attr(i, "height")[1]
-            
-            if (!HEIGHT %in% curHeights){
+            centerPos <- (XMIN+XMAX)/2
+            centerPos <- (segments %>% filter(x==centerPos & xend==centerPos))
+            HEIGHT <- centerPos$yend
+            HEIGHTUP <- centerPos$y
+
+            # HEIGHT <- get_nodes_attr(i, "height")[1]
+            # if (!HEIGHT %in% curHeights){
                 if (nnodes(i)!=1){
                     lb <- i %>% dendextend::cutree(k=2) ## not stats::cutree
                     # L <- as.numeric(sapply(strsplit(names(lb[lb==1]),
@@ -379,41 +392,47 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                                         L <- names(lb[lb==1])
                                                         R <- names(lb[lb==2])
                     }
+                    if (!2 %in% apply(cbind(paste(L,collapse=",") %in% alreadyPerformed[,1],
+                        paste(R, collapse=",") %in% alreadyPerformed[,2]),1,sum)) {
+                        ## [TODO] better way to distinguish
+                        alreadyPerformed <- rbind(alreadyPerformed,
+                            c(paste(L,collapse=","),
+                                paste(R, collapse=",")))
 
-                    if (length(names(geneVec)[geneVec %in% L])<geneNumLimit &
-                        length(names(geneVec)[geneVec %in% R])<geneNumLimit)
-                    {
-                        if (sum(L %in% candidateNodes)==length(L) | sum(R %in% candidateNodes)==length(R)) {
-                            pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
-                                numberOfWords=numberOfWords, type=type, showType=showType,
-                                argList=argList, textSize=textSize, takeIntersect=takeIntersect,
-                                useWC=useWC, wcScale=wcScale, wcArg=wcArg, useFunc=useFunc,
-                                useDf=useDf, wrap=wrap, useggfx=useggfx)
-                            if (!is.null(pyrm)){
-                                grobList[[as.character(grobNum)]]$plot <- pyrm
-                                grobList[[as.character(grobNum)]]$height <- HEIGHT
-                                grobList[[as.character(grobNum)]]$xmin <- XMIN
-                                grobList[[as.character(grobNum)]]$xmax <- XMAX
+                        if (length(names(geneVec)[geneVec %in% L])<geneNumLimit &
+                            length(names(geneVec)[geneVec %in% R])<geneNumLimit)
+                        {
+                            if (sum(L %in% candidateNodes)==length(L) | sum(R %in% candidateNodes)==length(R)) {
+                                pyrm <- returnPyramid(L, R, geneVec, geneVecType, highlight=highlight,
+                                    numberOfWords=numberOfWords, type=type, showType=showType,
+                                    argList=argList, textSize=textSize, takeIntersect=takeIntersect,
+                                    useWC=useWC, wcScale=wcScale, wcArgs=wcArgs, useFunc=useFunc, bg.colour=bg.colour,
+                                    useDf=useDf, wrap=wrap, useggfx=useggfx, useRandomColor=useRandomColor)
+                                if (!is.null(pyrm)){
+                                    grobList[[as.character(grobNum)]]$plot <- pyrm
+                                    grobList[[as.character(grobNum)]]$height <- HEIGHT
+                                    grobList[[as.character(grobNum)]]$xmin <- XMIN
+                                    grobList[[as.character(grobNum)]]$xmax <- XMAX
 
-                                hind <- which(alHeights==HEIGHT)
-                                revNodes <- rev(alNodes[1:(hind-1)])
-                                revHeights <- rev(alHeights[1:(hind-1)])
-                                for (tmp in seq_len(length(revHeights))){
-                                    if (revHeights[tmp]>HEIGHT){
-                                        if (is.na(revNodes[tmp])) {
-                                            HEIGHTUP <- revHeights[tmp]
-                                            break
-                                        }
-                                    }
+                                    # hind <- which(alHeights==HEIGHT)
+                                    # revNodes <- rev(alNodes[1:(hind-1)])
+                                    # revHeights <- rev(alHeights[1:(hind-1)])
+                                    # for (tmp in seq_len(length(revHeights))){
+                                    #     if (revHeights[tmp]>HEIGHT){
+                                    #         if (is.na(revNodes[tmp])) {
+                                    #             HEIGHTUP <- revHeights[tmp]
+                                    #             break
+                                    #         }
+                                    #     }
+                                    # }
+
+                                    grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
+                                    
+                                    curHeights <- c(curHeights, HEIGHT)
+                                    grobNum <- grobNum + 1
                                 }
-                                
-                                grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
-                                
-                                curHeights <- c(curHeights, HEIGHT)
-                                grobNum <- grobNum + 1
                             }
                         }
-                    }
                     
                 }
             }
@@ -447,10 +466,12 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param takeIntersect take intersection or frequent words
 #' @param useWC return wordcloud
 #' @param wcScale if useWC, number of size scaling (max_size)
-#' @param wcArg argument list for ggwordcloud
+#' @param wcArgs argument list for ggwordcloud
 #' @param useFunc function to summarize text
 #' @param useDf data.frame to subset when manual function is specified
 #' @param useggfx use ggfx on plot
+#' @param useRandomColor use random colors on wordclouds
+#' @param bg.colour background color for wordclouds
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -464,10 +485,10 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' 
 returnPyramid <- function(L, R, geneVec, geneVecType,
                         numberOfWords=25, widths=c(0.3,0.6,0.3),
-                        lowCol="blue", showType="ID",
+                        lowCol="blue", showType="ID", useRandomColor=FALSE,
                         highCol="red", highlight=NULL, wcScale=3,
                         type="words", wrap=15, textSize=3.5, useggfx=NULL,
-                        takeIntersect=TRUE, useWC=FALSE, wcArg=list(),
+                        takeIntersect=TRUE, useWC=FALSE, wcArgs=list(), bg.colour=NULL,
                         orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
@@ -507,21 +528,26 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 retWC <- do.call("wcGeneSummary", argList)
             }
 
-            if (length(wcArg)==0) {
-                wcArg[["min.freq"]] <- 1
-                wcArg[["max.words"]] <- Inf
-                wcArg[["rot.per"]] <- 0.5
-                wcArg[["random.order"]] <- FALSE
-                wcArg[["colors"]] <- brewer.pal(10,
+            if (length(wcArgs)==0) {
+                wcArgs[["min.freq"]] <- 1
+                wcArgs[["max.words"]] <- Inf
+                wcArgs[["rot.per"]] <- 0.5
+                wcArgs[["random.order"]] <- FALSE
+                wcArgs[["colors"]] <- brewer.pal(10,
                     sample(row.names(RColorBrewer::brewer.pal.info), 1))
             }
-            wcArg[["words"]] <- retWC@freqDf$word
-            wcArg[["freq"]] <- retWC@freqDf$freq
 
-            plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
+            if (useRandomColor) {
+                wcArgs[["colors"]] <- brewer.pal(10,
+                    sample(row.names(RColorBrewer::brewer.pal.info), 1))
+            }
+            wcArgs[["words"]] <- retWC@freqDf$word
+            wcArgs[["freq"]] <- retWC@freqDf$freq
+            wcArgs[["bg.colour"]] <- bg.colour
+            plt <- do.call(ggwordcloud::ggwordcloud, wcArgs)+
                  scale_size_area(max_size = wcScale)+
                  theme(plot.background = element_rect(
-                    fill = ifelse(is.null(wcArg[["bg.colour"]]) & is.null(useggfx),
+                    fill = ifelse(is.null(wcArgs[["bg.colour"]]) & is.null(useggfx),
                         "white","transparent"),
                     colour = NA))
             return(plt)
