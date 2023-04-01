@@ -22,7 +22,7 @@ plotEigengeneNetworksWithWords(
   horiz = FALSE,
   dendPlot = "pvclust",
   dhc = NULL,
-  wcArg = list(),
+  wcArgs = list(),
   useDf = NULL,
   useWGCNA = TRUE,
   spacer = 0.005,
@@ -40,6 +40,7 @@ plotEigengeneNetworksWithWords(
   tipSize = 0.3,
   asp = 1.5,
   horizontalSpacer = 0,
+  useRandomColor = FALSE,
   bg.colour = NULL,
   useggfx = NULL,
   ggfxParams = list()
@@ -81,7 +82,7 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 
 \item{dhc}{user-specified dendrogram}
 
-\item{wcArg}{argument list, pass to ggwordcloud}
+\item{wcArgs}{argument list, pass to ggwordcloud}
 
 \item{useDf}{data.frame to subset when manual function is specified
 "query" column will be used to subset}
@@ -117,6 +118,8 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 \item{asp}{aspect ratio for ggimage::geom_image}
 
 \item{horizontalSpacer}{horizontal spacer for annotation}
+
+\item{useRandomColor}{use random color on wordclouds}
 
 \item{bg.colour}{use shadowtext for wordcloud, override border to FALSE}
 

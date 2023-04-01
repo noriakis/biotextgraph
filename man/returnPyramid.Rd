@@ -13,6 +13,7 @@ returnPyramid(
   widths = c(0.3, 0.6, 0.3),
   lowCol = "blue",
   showType = "ID",
+  useRandomColor = FALSE,
   highCol = "red",
   highlight = NULL,
   wcScale = 3,
@@ -22,7 +23,8 @@ returnPyramid(
   useggfx = NULL,
   takeIntersect = TRUE,
   useWC = FALSE,
-  wcArg = list(),
+  wcArgs = list(),
+  bg.colour = NULL,
   orgDb = org.Hs.eg.db,
   argList = list(),
   useFunc = NULL,
@@ -46,6 +48,8 @@ returnPyramid(
 
 \item{showType}{which labels to show in enrich}
 
+\item{useRandomColor}{use random colors on wordclouds}
+
 \item{highCol}{gradient high color}
 
 \item{highlight}{words to highlight}
@@ -64,7 +68,9 @@ returnPyramid(
 
 \item{useWC}{return wordcloud}
 
-\item{wcArg}{argument list for ggwordcloud}
+\item{wcArgs}{argument list for ggwordcloud}
+
+\item{bg.colour}{background color for wordclouds}
 
 \item{orgDb}{organism database to use in enrich}
 
