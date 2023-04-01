@@ -130,6 +130,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                 plt <- do.call(ggwordcloud::ggwordcloud, wcArg)+
                      scale_size_area(max_size = wcScale)+
                      theme(plot.background = element_rect(fill = "transparent",colour = NA))
+                qqcat("Saving the image for plotting on the dendrogram\n")
                 ggsave(filename=paste0(imageDir, "/", ti , ".png"), plot=plt,
                     width=wh, height=wh, dpi=300, units="in", bg = "transparent")
 
@@ -170,9 +171,11 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         return(grobList)
     }
     if (!is.null(bg.colour)) {
+        qqcat("border is set to FALSE as bg.colour is not NULL\n")
         border <- FALSE
     }
     if (!is.null(useggfx)) {
+        qqcat("border is set to FALSE as useggfx is not NULL\n")
         border <- FALSE
     }
 
@@ -295,19 +298,66 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     grobNum <- 1
     ddata <-dendro_data(dhc)
     labelPos <- ddata$labels
+    segments <- ddata$segments
+    xpositions <- unique(segments$x)
+    xpositions <- xpositions[order(xpositions)]
 
     while (k < length(dhc %>% labels)){
         subdendro <- dhc %>% get_subdendrograms(k=k)
-        
-        for (i in subdendro){
-
+        for (num in seq_along(subdendro)) {
+            i <- subdendro[[num]]
             NODES <- i %>% get_nodes_attr("label")
             NODES <- NODES[!is.na(NODES)]
+            ## Perhaps spanning over all the nodes is good
+            if (length(NODES)!=1) {
+                subs <- dendextend::get_subdendrograms(i, k=2)
 
-            XMIN <- as.numeric(labelPos %>%
-                filter(label==NODES[1]) %>% select(.data$x))
-            XMAX <- as.numeric(labelPos %>%
-                filter(label==NODES[length(NODES)]) %>% select(.data$x))
+                if (length(subs[[1]])>1) { ## Xmin
+                  sub_sub <- get_subdendrograms(subs[[1]],2)
+                  labs1 <- get_nodes_attr(sub_sub[[1]], "label")
+                  labs1 <- labs1[!is.na(labs1)]
+                  labs2 <- get_nodes_attr(sub_sub[[2]], "label")
+                  labs2 <- labs2[!is.na(labs2)]
+
+                  min1 <- as.numeric(labelPos %>%
+                                       filter(label==labs1[length(labs1)]) %>% select(.data$x))
+                  min1 <- xpositions[which(xpositions==min1)+1]
+                  min2 <- as.numeric(labelPos %>%
+                                       filter(label==labs2[1]) %>% select(.data$x))
+                  min2 <- xpositions[which(xpositions==min2)-1]
+
+                  XMIN <- min2
+                } else {
+                  XMIN <- as.numeric(labelPos %>%
+                                       filter(label==NODES[1]) %>% select(.data$x))
+                }
+
+                if (length(subs[[2]])>1) { ## Xmax
+                  sub_sub <- get_subdendrograms(subs[[2]],2)
+                  labs1 <- get_nodes_attr(sub_sub[[1]], "label")
+                  labs1 <- labs1[!is.na(labs1)]
+                  labs2 <- get_nodes_attr(sub_sub[[2]], "label")
+                  labs2 <- labs2[!is.na(labs2)]
+
+                  max1 <- as.numeric(labelPos %>%
+                                       filter(label==labs1[length(labs1)]) %>% select(.data$x))
+                  max1 <- xpositions[which(xpositions==max1)+1]
+
+                  max2 <- as.numeric(labelPos %>%
+                                       filter(label==labs2[1]) %>% select(.data$x))
+                  max2 <- xpositions[which(xpositions==max2)+1]
+                  XMAX <- max1
+                } else {
+                  XMAX <- as.numeric(labelPos %>%
+                                       filter(label==NODES[length(NODES)]) %>% select(.data$x))  
+                }
+
+            } else {
+                XMIN <- as.numeric(labelPos %>%
+                    filter(label==NODES[1]) %>% select(.data$x))
+                XMAX <- as.numeric(labelPos %>%
+                    filter(label==NODES[length(NODES)]) %>% select(.data$x))                
+            }
             HEIGHT <- get_nodes_attr(i, "height")[1]
             
             if (!HEIGHT %in% curHeights){
