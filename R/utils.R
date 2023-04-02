@@ -164,7 +164,7 @@ appendEdges <- function(netPlot,
 #' 
 #' @noRd
 appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
-  showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange){
+  showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange,useSeed){
   if (tag) {
       netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                           show.legend = showLegend) +
@@ -176,9 +176,8 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
               names(catColors) <- unique(nodeN)
           }
           ## colorize points of texts
-          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq,
-                                              filter=.data$tag == "Words"),
-                                              show.legend = FALSE)+
+          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
+                                              show.legend = showLegend)+
                               scale_color_gradient(low=pal[1],high=pal[2],
                                                 na.value="grey50")
           ## colorize the other points
@@ -199,17 +198,47 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
       if (colorize) {
         ## [TODO] discrete and continuous scale in same ggplot is discouraged
         ##        use ggnewscale?
+        ## [TODO] repel not work for multiple layers
           netPlot <- netPlot + 
-              geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq,
-                  filter=.data$tag == "Words"),
+              geom_node_text(aes(
+                  label=.data$name,
+                  size=.data$Freq,
+                  color=.data$Freq),
                   check_overlap=TRUE, repel=TRUE,
                   bg.color = "white", segment.color="black",family=fontFamily,
-                  bg.r = .15, show.legend=FALSE)+
-              geom_node_text(aes(label=.data$name, size=.data$Freq,
-                  filter=.data$tag != "Words"), color=useCatColors,
-                  check_overlap=TRUE, repel=TRUE,
-                  bg.color = "white", segment.color="black",family=fontFamily,
-                  bg.r = .15, show.legend=FALSE)
+                  bg.r = .15, show.legend=showLegend)
+
+          layerNum <- length(netPlot$layers)
+          geom_param_list <- netPlot$layers[[layerNum]]$geom_params
+          build <- ggplot_build(netPlot)$data[[layerNum]]
+          build[ netPlot$data$tag !="Words", ]$colour <- useCatColors
+
+          aes_list <- netPlot$layers[[layerNum]]$mapping
+          aes_list["filter"] <- NULL
+          geom_param_list[["repel"]] <- TRUE
+
+          geom_param_list[["seed"]] <- useSeed
+          netPlot$layers[[layerNum]]$geom_params[["seed"]] <- useSeed
+          geom_param_list[["show.legend"]] <- FALSE
+          geom_param_list["color"] <- NULL;
+          aes_list["label"] <- NULL
+          aes_list["color"] <- NULL
+          aes_list["colour"] <- NULL
+          geom_param_list["na.rm"] <- NULL
+          aes_params <- netPlot$layers[[layerNum]]$aes_params
+
+          netPlot <- netPlot + do.call(geom_node_text,
+                         c(aes_params,
+                          list(mapping=aes_list),
+                          geom_param_list, list(
+                           label=build$label,
+                            color=build$colour)))
+
+          # netPlot <- netPlot + geom_node_text(aes(label=.data$name, size=.data$Freq,
+          #         filter=.data$tag != "Words"), color=useCatColors,
+          #         check_overlap=TRUE, repel=TRUE, seed=useSeed,
+          #         bg.color = "white", segment.color="black",family=fontFamily,
+          #         bg.r = .15, show.legend=FALSE)
 
       } else {
           if (tag) {

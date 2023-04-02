@@ -57,6 +57,7 @@
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param fontFamily font family to use, default to "sans"
+#' @param useSeed seed
 #' @examples
 #' ret <- wcGeneSummary("DDX41")
 #' wcMan(ret@rawText$Gene_summary)
@@ -87,7 +88,7 @@ wcMan <- function(df, madeUpper=NULL,
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
                    useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
-                   udpipeModel="english-ewt-ud-2.5-191206.udpipe")
+                   udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
     if (useUdpipe) {
@@ -465,7 +466,8 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
       netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
-                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange)
+                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange,
+                          useSeed)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+
