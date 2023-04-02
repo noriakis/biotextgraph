@@ -562,6 +562,8 @@ wcBSDB <- function (mbList,
                     }
                 }
                 V(coGraph)$tag <- addC
+            } else {
+                V(coGraph)$tag <- rep("Words", length(names(V(coGraph))))
             }
         }
 
