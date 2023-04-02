@@ -66,7 +66,8 @@ wcGeneSummary(
   geneColor = "grey",
   argList = list(),
   useggwordcloud = TRUE,
-  wcScale = 10
+  wcScale = 10,
+  useSeed = 42
 )
 }
 \arguments{
@@ -197,6 +198,8 @@ on whole dataset or top-words specified by numWords}
 \item{useggwordcloud}{default to TRUE}
 
 \item{wcScale}{scaling size for ggwordcloud}
+
+\item{useSeed}{seed}
 }
 \value{
 list of data frame and ggplot2 object

@@ -56,6 +56,7 @@ wcAbst(
   useggwordcloud = TRUE,
   wcScale = 10,
   distinguish_query = TRUE,
+  useSeed = 42,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   normalize = FALSE,
   takeMean = FALSE,
@@ -178,6 +179,8 @@ high-frequent words}
 
 \item{distinguish_query}{if TRUE, distinguish query and returned texts
 by appending (Q) on query}
+
+\item{useSeed}{use seed}
 
 \item{udpipeModel}{udpipe model file name}
 

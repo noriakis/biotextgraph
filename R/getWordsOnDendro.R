@@ -368,7 +368,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     filter(label==NODES[length(NODES)]) %>% select(.data$x))                
             }
             centerPos <- (XMIN+XMAX)/2
-            centerPos <- (segments %>% filter(x==centerPos & xend==centerPos))
+            centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
 

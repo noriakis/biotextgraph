@@ -54,6 +54,7 @@ wcBSDB(
   addFreqToMB = FALSE,
   catColors = NULL,
   colorizeNoFreq = FALSE,
+  useSeed = 42,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -170,6 +171,8 @@ on whole dataset or top-words specified by numWords}
 
 \item{colorizeNoFreq}{color the nodes and texts based on their category,
 erase the frequency information (only the discrete mapping)}
+
+\item{useSeed}{use seed}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

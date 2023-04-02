@@ -74,6 +74,7 @@
 #' by appending (Q) on query
 #' @param colorize color the nodes and texts based on their category
 #' @param queryColor color for associated queries with words
+#' @param useSeed use seed
 #' @export
 #' @examples \donttest{wcAbst("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -101,7 +102,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
                    naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE, queryColor="grey",
-                   useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE,
+                   useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
@@ -399,8 +400,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     
     if (colorize) {
         netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$Freq, filter=!.data$name %in% incQuery),
-            show.legend = FALSE)+
+                color=.data$Freq),
+            show.legend = showLegend)+
             scale_color_gradient(low=pal[1],high=pal[2],
                                 name = "Frequency")+
             geom_node_point(aes(size=.data$Freq,
@@ -423,17 +424,43 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         if (colorize) {
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        color=.data$Freq, filter=!.data$name %in% incQuery),
+                        color=.data$Freq),
                         check_overlap=TRUE, repel=TRUE,
                         family=fontFamily,
                         bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=FALSE)+ 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        filter=.data$name %in% incQuery),
-                        check_overlap=TRUE, repel=TRUE,
-                        family=fontFamily, color=queryColor,
-                        bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=FALSE)
+                layerNum <- length(netPlot$layers)
+
+                geom_param_list <- netPlot$layers[[layerNum]]$geom_params
+                build <- ggplot_build(netPlot)$data[[layerNum]]
+                build[ netPlot$data$name %in% incQuery, ]$colour <- queryColor
+
+                aes_list <- netPlot$layers[[layerNum]]$mapping
+                aes_list["filter"] <- NULL
+                geom_param_list[["repel"]] <- TRUE
+                geom_param_list[["show.legend"]] <- FALSE
+                geom_param_list[["seed"]] <- useSeed
+                netPlot$layers[[layerNum]]$geom_params[["seed"]] <- useSeed
+                  
+                geom_param_list["color"] <- NULL;
+                aes_list["label"] <- NULL
+                aes_list["color"] <- NULL
+                aes_list["colour"] <- NULL
+                geom_param_list["na.rm"] <- NULL
+                aes_params <- netPlot$layers[[layerNum]]$aes_params
+
+                netPlot <- netPlot + do.call(geom_node_text,
+                                c(aes_params,
+                                  list(mapping=aes_list),
+                                  geom_param_list, list(
+                                   label=build$label,
+                                    color=build$colour)))
+                    # geom_node_text(aes(label=.data$name, size=.data$Freq,
+                    #     filter=.data$name %in% incQuery),
+                    #     check_overlap=TRUE, repel=TRUE,
+                    #     family=fontFamily, color=queryColor,
+                    #     bg.color = "white", segment.color="black",
+                    #     bg.r = .15, show.legend=FALSE)
         } else {
             if (tag) {
                 netPlot <- netPlot + 
@@ -463,7 +490,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                         bg.r = .15, show.legend=showLegend) 
     }
     if (colorize) {
-      netPlot <- netPlot +  guides(size = FALSE)
+      # netPlot <- netPlot +  guides(size = FALSE)
     }
     netPlot <- netPlot+
       scale_size(range=scaleRange, name="Frequency")+

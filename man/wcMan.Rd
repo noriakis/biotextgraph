@@ -54,7 +54,8 @@ wcMan(
   useggwordcloud = TRUE,
   wcScale = 10,
   fontFamily = "sans",
-  udpipeModel = "english-ewt-ud-2.5-191206.udpipe"
+  udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
+  useSeed = 42
 )
 }
 \arguments{
@@ -162,6 +163,8 @@ on whole dataset or top-words specified by numWords}
 \item{fontFamily}{font family to use, default to "sans"}
 
 \item{udpipeModel}{udpipe model file name}
+
+\item{useSeed}{seed}
 }
 \value{
 list of data frame and ggplot2 object
