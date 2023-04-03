@@ -25,6 +25,7 @@
 #' @param textSize text size in barplot
 #' @return osplot object, list of plots of pathway, and barplot and concatentaed image
 #' @import grid
+#' @importFrom utils head
 #' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' query <- c("TP53","CDC45","CDC6")

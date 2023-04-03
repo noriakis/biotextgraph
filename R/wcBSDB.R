@@ -476,12 +476,13 @@ wcBSDB <- function (mbList,
                 }
             }
             mbmap <- mbmap[mbmap[,2]!="",]
-
             gcnt <- table(mbmap[,2])
             if (length(mbList)!=1) {
                 gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
             }
-            ret@geneCount <- gcnt
+            if (is.table(gcnt)) {
+                ret@geneCount <- gcnt
+            }
             
             incGene <- names(gcnt)[1:length(mbList)]
             mbmap <- mbmap[mbmap[,2] %in% incGene,]
