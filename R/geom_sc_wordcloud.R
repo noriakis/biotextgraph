@@ -226,7 +226,6 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
   wcArgs <- c(object$wcArgs, alpha=object$wc_alpha,
               rot.per=object$rot.per,
               random.order=object$random.order,
-              use_shadowtext=object$use_shadowtext,
               bg.colour=object$bg.colour)
   
 
