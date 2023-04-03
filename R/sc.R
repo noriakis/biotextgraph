@@ -272,7 +272,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
     }
 
     wcArgs <- list(alpha=wc_alpha,rot.per=rot.per,random.order=random.order,
-        use_shadowtext=use_shadowtext,bg.colour=bg.colour)
+        bg.colour=bg.colour)
     if (gene_name) {
         subset.marker.info <- marker.info[which.label]
         texts <-  obtainMarkersWCScran(subset.marker.info,
@@ -466,7 +466,7 @@ DimPlotWithTexts <- function(seu, markers,
         which.label <- unique(markers$cluster)
     }
     wcArgs <- list(alpha=wc_alpha,rot.per=rot.per,random.order=random.order,
-        use_shadowtext=use_shadowtext,bg.colour=bg.colour)
+        bg.colour=bg.colour)
     if (gene_name) {
         subset.markers <- subset(markers, markers$cluster %in% which.label)
         texts <- suppressMessages(obtainMarkersWC(subset.markers,
