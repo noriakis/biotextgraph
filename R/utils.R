@@ -1,3 +1,16 @@
+#' changeLayout
+#' @param g osplot object
+#' @param layout_func layout function in igraph
+#' @export
+changeLayout <- function(g, layout_func) {
+  lyt <- do.call(layout_func, list(graph=g@igraph))
+  # lyt <- eval(parse(text=layout_func))(g@igraph)
+  g@net$data$x <- lyt[,1]
+  g@net$data$x <- lyt[,2]
+  g
+}
+
+
 #' obtainMatrix
 #' 
 #' obtain matrix of words-to-words relationship
