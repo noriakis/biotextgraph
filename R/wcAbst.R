@@ -123,7 +123,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                           "oxford","wiley")
   }
   if (is.null(redo)) {
-    ret <- new("osplot")
+    ret <- new("biotext")
     ret@type <- paste0("pubmed_",target)
     if (length(queries)>limit){
       stop("Number of queries exceeded specified limit number")}

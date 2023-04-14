@@ -118,7 +118,7 @@ wcBSDB <- function (mbList,
 
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
     }
-    ret <- new("osplot")
+    ret <- new("biotext")
     ret@query <- mbList
     ret@type <- paste0("BSDB_",target)
     addNet <- list()

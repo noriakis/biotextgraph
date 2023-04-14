@@ -59,7 +59,7 @@ e.g. "K08097" and "phosphosulfolactate synthase"}
 \item{argList}{passed to wc functions}
 }
 \value{
-osplot object, list of plots of pathway, and barplot and concatentaed image
+biotext object, list of plots of pathway, and barplot and concatentaed image
 }
 \description{
 colorize pathview map, and link to word frequency
