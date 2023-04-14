@@ -1,4 +1,4 @@
-#' osplot
+#' biotextgraph
 #' 
 #' wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
 #' 
@@ -8,10 +8,10 @@
 #' 
 #' @examples
 #' geneList <- c("DDX41")
-#' osplot("refseq", argList=list(geneList=geneList))
+#' biotextgraph("refseq", argList=list(geneList=geneList))
 #' @export
 #' 
-osplot <- function(target, argList) {
+biotextgraph <- function(target, argList) {
 	if (target=="pubmed"){
 		return(do.call("wcAbst", argList))
 	} else if (target=="bugsigdb"){
@@ -33,7 +33,7 @@ setOldClass("TermDocumentMatrix")
 setOldClass("gg")
 setOldClass("ggraph")
 setOldClass("dfm")
-setClass("osplot", slots=list(
+setClass("biotext", slots=list(
         query="character",
         delim="character",
         type="character",
@@ -71,7 +71,7 @@ setClass("osplot", slots=list(
 
 #' @importFrom utils object.size
 setMethod("show",
-  signature(object="osplot"),
+  signature(object="biotext"),
   function(object) {
     qqcat("Type: @{object@type}\n")
     qqcat("Number of words: @{object@numWords}\n")
@@ -87,7 +87,7 @@ setMethod("show",
 
 #' @importFrom grDevices adjustcolor
 setMethod("plot",
-          signature = "osplot",
+          signature = "biotext",
           definition = function(x) {
             retSc <- function(va, min=4,max=9){
               (max-min) * ((va-min(va)) / 
@@ -125,7 +125,7 @@ setMethod("plot",
 #' 
 #' plot volcano-plot like plot for ORA results
 #' 
-#' @param x osplot object
+#' @param x biotext object
 #' @param thresh hline to draw in plot
 #' @examples
 #' net1 <- wcGeneSummary(c("DDX41","IRF3"), ora=TRUE)

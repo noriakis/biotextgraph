@@ -101,7 +101,7 @@ wcMan <- function(df, madeUpper=NULL,
         df <- data.frame(df) |> `colnames<-`(c("text"))
       }
     }
-    ret <- new("osplot")
+    ret <- new("biotext")
     ret@type <- paste0("manual")
     ret@rawText <- df
 

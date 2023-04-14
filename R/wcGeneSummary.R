@@ -118,7 +118,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             scaleLowFreq=NULL, colorize=FALSE, geneColor="grey",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
                             useSeed=42) {
-    ret <- new("osplot")
+    ret <- new("biotext")
     ret@query <- geneList
     ret@type <- "refseq"
 

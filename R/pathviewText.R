@@ -23,7 +23,7 @@
 #' @param trans transpose the barplot
 #' @param argList passed to wc functions
 #' @param textSize text size in barplot
-#' @return osplot object, list of plots of pathway, and barplot and concatentaed image
+#' @return biotext object, list of plots of pathway, and barplot and concatentaed image
 #' @import grid
 #' @importFrom utils head
 #' @importFrom RColorBrewer brewer.pal

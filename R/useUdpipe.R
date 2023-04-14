@@ -3,7 +3,7 @@
 #'
 #' return network using udpipe dependencies
 #'
-#' @param ret osplot object
+#' @param ret biotext object
 #' @param texts data.frame
 #' @param showNeighbors only show nodes with the neighbors of these words
 #' @noRd
