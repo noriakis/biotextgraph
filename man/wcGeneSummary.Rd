@@ -32,7 +32,7 @@ wcGeneSummary(
   R = 20,
   cl = FALSE,
   ngram = NA,
-  plotType = "wc",
+  plotType = "network",
   onlyTDM = FALSE,
   stem = FALSE,
   colorText = FALSE,

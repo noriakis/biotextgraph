@@ -26,7 +26,7 @@ wcAbst(
   numWords = 30,
   scaleRange = c(5, 10),
   showLegend = FALSE,
-  plotType = "wc",
+  plotType = "network",
   colorText = FALSE,
   quote = FALSE,
   corThresh = 0.2,

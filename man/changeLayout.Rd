@@ -7,7 +7,7 @@
 changeLayout(g, layout_func)
 }
 \arguments{
-\item{g}{osplot object}
+\item{g}{biotext object}
 
 \item{layout_func}{layout function in igraph}
 }

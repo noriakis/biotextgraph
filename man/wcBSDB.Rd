@@ -45,7 +45,7 @@ wcBSDB(
   cooccurrence = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   ngram = NA,
-  plotType = "wc",
+  plotType = "network",
   disPlot = FALSE,
   onWholeDTM = FALSE,
   naEdgeColor = "grey50",
