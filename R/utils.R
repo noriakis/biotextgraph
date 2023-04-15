@@ -1,5 +1,5 @@
 #' changeLayout
-#' @param g osplot object
+#' @param g biotext object
 #' @param layout_func layout function in igraph
 #' @export
 changeLayout <- function(g, layout_func) {
