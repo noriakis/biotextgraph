@@ -208,7 +208,7 @@ list of data frame and ggplot2 object
 Plot wordcloud of RefSeq description obtained by GeneSummary
 }
 \examples{
-geneList <- c("DDX41")
+geneList <- c("DDX41","PNKP")
 wcGeneSummary(geneList)
 
 }

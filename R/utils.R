@@ -931,6 +931,7 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
   argList[["geneList"]] <- queries
   argList[["keyType"]] <- keyType
   argList[["orgDb"]] <- orgDb
+  argList[["plotType"]] <- "wc"
   argList[["madeUpper"]] <- c("dna","rna",
                                   tolower(AnnotationDbi::keys(orgDb,
                                                               keytype="SYMBOL")))

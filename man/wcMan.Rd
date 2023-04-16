@@ -21,7 +21,7 @@ wcMan(
   numWords = 30,
   scaleRange = c(5, 10),
   showLegend = FALSE,
-  plotType = "wc",
+  plotType = "network",
   colorText = FALSE,
   corThresh = 0.2,
   layout = "nicely",
@@ -173,6 +173,6 @@ list of data frame and ggplot2 object
 Produce networks using manual input
 }
 \examples{
-ret <- wcGeneSummary("DDX41")
-wcMan(ret@rawText$Gene_summary)
+ret <- wcGeneSummary("DDX41", plotType="wc")
+wcMan(ret@rawText$Gene_summary, plotType="wc")
 }

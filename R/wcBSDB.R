@@ -87,7 +87,7 @@
 #' 
 #' @examples
 #' mbList <- c("Veillonella dispar")
-#' wcBSDB(mbList)
+#' wcBSDB(mbList, plotType="wc")
 #' @export
 #' 
 wcBSDB <- function (mbList,

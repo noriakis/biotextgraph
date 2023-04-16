@@ -202,5 +202,5 @@ Visualize BugSigDB
 }
 \examples{
 mbList <- c("Veillonella dispar")
-wcBSDB(mbList)
+wcBSDB(mbList, plotType="wc")
 }
