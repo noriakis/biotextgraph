@@ -90,7 +90,7 @@
 #' 
 #' @export
 #' @examples
-#' geneList <- c("DDX41")
+#' geneList <- c("DDX41","PNKP")
 #' wcGeneSummary(geneList)
 #' 
 wcGeneSummary <- function (geneList, keyType="SYMBOL",

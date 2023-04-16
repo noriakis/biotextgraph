@@ -18,6 +18,6 @@ list of data frames and ggplot2 object
 wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
 }
 \examples{
-geneList <- c("DDX41")
+geneList <- c("DDX41","PNKP")
 biotextgraph("refseq", argList=list(geneList=geneList))
 }

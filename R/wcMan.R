@@ -59,8 +59,8 @@
 #' @param fontFamily font family to use, default to "sans"
 #' @param useSeed seed
 #' @examples
-#' ret <- wcGeneSummary("DDX41")
-#' wcMan(ret@rawText$Gene_summary)
+#' ret <- wcGeneSummary("DDX41", plotType="wc")
+#' wcMan(ret@rawText$Gene_summary, plotType="wc")
 #' @export
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -79,7 +79,7 @@ wcMan <- function(df, madeUpper=NULL,
                    filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
                    pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
-                   showLegend=FALSE, plotType="wc", colorText=FALSE,
+                   showLegend=FALSE, plotType="network", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorizeNoFreq=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
