@@ -1,9 +1,9 @@
-Package: wcGeneSummary
+Package: biotextgraph
 Type: Package
-Title: easy visualization and interpretation of omics summary data
+Title: visualization and interpretation of textual information from omics summary data
 Version: 0.99.0
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
-Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome. The package identifies important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in easy interpretation and visualization.
+Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome. The package identifies important words among the clusters, and compare the clusters based on those information. It contributes to understanding the gene clusters and aid in convenient interpretation and visualization.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Depends:
