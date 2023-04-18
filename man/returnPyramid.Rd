@@ -21,6 +21,7 @@ returnPyramid(
   wrap = 15,
   textSize = 3.5,
   useggfx = NULL,
+  normalizeByClusterNum = TRUE,
   takeIntersect = TRUE,
   useWC = FALSE,
   wcArgs = list(),
@@ -63,6 +64,8 @@ returnPyramid(
 \item{textSize}{text size in pyramid plots}
 
 \item{useggfx}{use ggfx on plot}
+
+\item{normalizeByClusterNum}{normalize frequency by ID numbers or not}
 
 \item{takeIntersect}{take intersection or frequent words}
 
