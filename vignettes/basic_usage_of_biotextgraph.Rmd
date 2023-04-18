@@ -34,6 +34,7 @@ The main function accepts some omics identifiers and generates a network. Variou
 inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 net <- wcGeneSummary(inpSymbol, plotType="network")
 net
+net@net
 ```
 
 The network visualization can be customized using the options like `colorText`, which colorizes the text based on the node colors, or `edgeLink` to customize the geom to represent edges.
@@ -55,6 +56,14 @@ net <- wcGeneSummary(cxcls, plotType="network",
     colorText=TRUE, edgeLink=FALSE, genePlot=TRUE, genePlotNum=5)
 net
 net@net
+```
+
+Tagging the set of words is possible by enabling the option `tag=TRUE`. This allows us to see what word sets appear significantly and to reflect this information in the plots.
+
+```{r tag}
+tag <- wcGeneSummary(c(inpSymbol, cxcls), plotType="network", tag=TRUE,
+    colorText=TRUE, edgeLink=FALSE, genePlot=TRUE, genePlotNum=5)
+tag@pvpick
 ```
 
 It is possible to perform searches against databases such as PubMed using the obtained important genes as queries, and visualize the results. It is recommended to use a PubMed API key for this purpose. Specify one in `apiKey`.
@@ -79,25 +88,22 @@ hCNet <- wcGeneSummary(keggList$`05160`, plotType="network",
                         layout="nicely", corThresh = 0.2, keyType="ENTREZID",
                         numWords = 30, excludeFreq = 5000, colorText=TRUE,
                         edgeLink=FALSE, showLegend=FALSE)
-hCNetTrans <- hCNet@net + theme(plot.background = element_rect(fill = "transparent",colour = NA))
-hCNetTrans
+hCNet@net
 ```
 
 The summarization of text in enrichment analysis results can be performed by `enrich` option. The below example shows enrichment analysis of Reactome database.
 
 ```{r basic5, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZID",
+hCNetReac <- wcGeneSummary(keggList$`05160`, enrich="reactome", keyType="ENTREZID",cooccurrence = TRUE,
                            topPath=50, numWords=50,
-                           plotType="network", corThresh=0.2)
-hCNetReacTrans <- hCNetReac@net +
-                    theme(plot.background = element_rect(fill = "transparent",colour = NA))
-hCNetReacTrans
+                           plotType="network", corThresh=0.1)
+hCNetReac@net
 ```
 
-We create another biotext object to compare with.
+We create another `biotext` object to compare with.
 
 ```{r basic6, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-ecoli <- wcGeneSummary::wcGeneSummary(keggList$`05130`, keyType="ENTREZID",
+ecoli <- wcGeneSummary(keggList$`05130`, keyType="ENTREZID",
                            numWords=30, corThresh=0.2)
 ```
 
@@ -132,7 +138,7 @@ The options in `wordcloud` or `ggwordcloud` including color and rotation can be 
 gwc <- wcGeneSummary(inpSymbol, numWords=200,
                      argList=list(max.words=200, random.order=FALSE,
                      colors=RColorBrewer::brewer.pal(5, "Dark2"),
-                     rot.per=0.4), plotType="wc", scaleLowFreq=5)
+                     rot.per=0.4), plotType="wc", scaleLowFreq=2)
 gwc
 gwc@wc
 ```

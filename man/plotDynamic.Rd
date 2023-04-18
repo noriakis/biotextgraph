@@ -9,7 +9,8 @@ plotDynamic(
   concat = "union",
   alpha = 0.5,
   titles = NULL,
-  tag = FALSE
+  tag = FALSE,
+  useDynamic = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ plotDynamic(
 \item{titles}{title to be shown on plot}
 
 \item{tag}{show tag on plot}
+
+\item{useDynamic}{use layout_as_dynamic}
 }
 \value{
 plot comparing gene clusters

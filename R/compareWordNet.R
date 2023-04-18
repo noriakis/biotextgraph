@@ -275,6 +275,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' @param alpha pass to layout_as_dynamic
 #' @param titles title to be shown on plot
 #' @param tag show tag on plot
+#' @param useDynamic use layout_as_dynamic
 #' 
 #' @export
 #' @examples
@@ -283,8 +284,11 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' wc2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
+#' @importFrom dplyr arrange
+#' @importFrom tidygraph as_tbl_graph activate
 #' @importFrom graphlayouts layout_as_dynamic
-plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALSE){
+plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALSE,
+  useDynamic=TRUE){
 
   if (is.null(titles)){
     titles <- c()
@@ -299,11 +303,17 @@ plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALS
         allNodes <- c(allNodes, V(n@igraph)$name)
     }
     igList <- list()
+    allNodes <- allNodes |> unique()
     for (e in seq_along(listOfNets)){
         tmpadd <- setdiff(allNodes, names(V(listOfNets[[e]]@igraph)))
-        igList[[e]] <- add_vertices(listOfNets[[e]]@igraph,
+        tmpg <- add_vertices(listOfNets[[e]]@igraph,
                                       length(tmpadd),
                                       attr=list(name=tmpadd))
+        tmpg <- tmpg |> 
+        as_tbl_graph() |> 
+        activate("nodes") |> 
+        arrange(.data$name)
+         igList[[e]] <- tmpg
     }
   } else {
     uniqNodeNames <- list()
@@ -318,7 +328,16 @@ plotDynamic <- function(listOfNets,concat="union",alpha=0.5,titles=NULL,tag=FALS
     }
   }
 
-  xy <- layout_as_dynamic(igList, alpha = alpha)
+  if (useDynamic) {
+    xy <- layout_as_dynamic(igList, alpha = alpha)
+  } else {
+    xy1 <- layout_nicely(igList[[1]])
+    xy <- list()
+    for (i in seq_along(igList)) {
+      xy[[i]] <- xy1
+    }
+  }
+
   pList <- vector("list",length(igList))
 
   for(i in seq_along(igList)){
