@@ -44,6 +44,7 @@
 #' @param useggfx filter in ggfx to apply to wordcloud, default to NULL
 #' @param ggfxParams parameters to pass to ggfx geom
 #' @param useRandomColor use random color on wordclouds
+#' @param normalizeByClusterNum normalize frequency by ID numbers or not
 #' 
 #' @export
 #' @import grid gridExtra
@@ -170,7 +171,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  textSize=textSize, wcArgs=wcArgs, bg.colour=bg.colour,
                                  candidateNodes=candidateNodes, useRandomColor=useRandomColor,
                                  showType=showType, takeIntersect=takeIntersect,
-                                 argList=argList, useWC=useWC, wcScale=wcScale,
+                                 argList=argList, useWC=useWC, wcScale=wcScale, normalizeByClusterNum=normalizeByClusterNum,
                                  useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx)
     
     if (returnGlobOnly) {
@@ -254,6 +255,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param useggfx use ggfx on resulting plot
 #' @param useRandomColor use random colors on wordclouds
 #' @param bg.colour background color for wordcloud
+#' @param normalizeByClusterNum normalize frequency by ID numbers or not
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -278,7 +280,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             numberOfWords=25, showType="ID", wcArgs=list(),
                             highlight=NULL, textSize=3.5, wcScale=3, wrap=NULL,
                             candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL, bg.colour=NULL,
-                            type="words", argList=list(), useFunc=NULL, useggfx=NULL) {
+                            type="words", argList=list(), useFunc=NULL, useggfx=NULL,
+                            normalizeByClusterNum=TRUE) {
     
     ## Filter high frequency words if needed
     # filterWords <- allFreqGeneSummary[
@@ -407,7 +410,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                     numberOfWords=numberOfWords, type=type, showType=showType,
                                     argList=argList, textSize=textSize, takeIntersect=takeIntersect,
                                     useWC=useWC, wcScale=wcScale, wcArgs=wcArgs, useFunc=useFunc, bg.colour=bg.colour,
-                                    useDf=useDf, wrap=wrap, useggfx=useggfx, useRandomColor=useRandomColor)
+                                    useDf=useDf, wrap=wrap, useggfx=useggfx, useRandomColor=useRandomColor,
+                                    normalizeByClusterNum=normalizeByClusterNum)
                                 if (!is.null(pyrm)){
                                     grobList[[as.character(grobNum)]]$plot <- pyrm
                                     grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -472,6 +476,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param useggfx use ggfx on plot
 #' @param useRandomColor use random colors on wordclouds
 #' @param bg.colour background color for wordclouds
+#' @param normalizeByClusterNum normalize frequency by ID numbers or not
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -488,6 +493,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         lowCol="blue", showType="ID", useRandomColor=FALSE,
                         highCol="red", highlight=NULL, wcScale=3,
                         type="words", wrap=15, textSize=3.5, useggfx=NULL,
+                        normalizeByClusterNum=TRUE,
                         takeIntersect=TRUE, useWC=FALSE, wcArgs=list(), bg.colour=NULL,
                         orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL) {
     ## Convert to ENTREZ ID
@@ -552,7 +558,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                     colour = NA))
             return(plt)
         }
-
+        ## [TODO] normalize or not
         if (is.null(useFunc)) {
             argList[["geneList"]] <- names(geneVec)[geneVec %in% L]
             argList[["collapse"]] <- TRUE
@@ -572,6 +578,11 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 argList[["df"]] <- subset(useDf, useDf$query %in% names(geneVec)[geneVec %in% R])
                 all_R <- as.matrix(do.call(useFunc,argList))
             }
+        }
+
+        if (normalizeByClusterNum) {
+            all_L <- all_L / length(names(geneVec)[geneVec %in% L])
+            all_R <- all_R / length(names(geneVec)[geneVec %in% R])
         }
 
         if (takeIntersect) {
