@@ -19,7 +19,7 @@ Install and load the package and the database for converting identifiers. In thi
 
 ```{r load, warning=FALSE, message=FALSE}
 # devtools::install_github("noriakis/wcGeneSummary")
-library(wcGeneSummary)
+library(biotextgraph)
 library(org.Hs.eg.db)
 library(ggplot2)
 library(ggraph)
@@ -110,21 +110,11 @@ compareWordNet(list(hCNet, hCNetReac, ecoli),
                colNum=3)
 ```
 
-## Example of summarizing microbiome-related data
+## Summarizing other identifiers' data
 
-Microbial information can also be summarized. An example of visualizing PubMed data stored in BugSigDB is shown here. For obtaining and summarizing information on enzymes, metabolites, and biological pathways, please refer to the documentation.
+Other than genes, microbial information can also be summarized in the similar manner. For obtaining and summarizing information on disease relationship, enzymes, metabolites, and biological pathways, please refer to the documentation. Furthermore, a manual function (`wcMan`) is available that performs similar operations based on customized user input.
 
 # The other visualization options
-
-## Annotating the gene cluster relationship
-
-The customized functions are available, which annotate the gene cluster relationship. If you perform some clustering analysis for gene expression data and investigate the relationship between eigengenes, the `plotEigengeneNetworksWithWords` function can be used to populate the resulting dendrogram.
-
-```{r custom1, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-mod <- returnExample()
-plotEigengeneNetworksWithWords(mod$MEs, mod$colors) +
-  scale_y_continuous(expand=c(0,1)) ## Scaled for labels to be not truncated
-```
 
 ## Producing word clouds
 
@@ -149,7 +139,17 @@ gwc@wc
 
 Text summaries such as word clouds can be combined with other plots. For example, they can be displayed on reduced dimension plots in single-cell analysis. For other ways of combining them, please refer to the documentation.
 
-## Populating reduced dimension plots in single-cell transcriptomics
+## Annotating the cluster relationship
+
+The customized functions are available, which annotate the gene cluster relationship. If you perform some clustering analysis for gene expression data or other identifiers and investigate the relationship between clusters by dendrogram, the `plotEigengeneNetworksWithWords` function can be used to populate the resulting dendrogram.
+
+```{r custom1, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+mod <- returnExample()
+plotEigengeneNetworksWithWords(mod$MEs, mod$colors) +
+  scale_y_continuous(expand=c(0,1)) ## Scaled for labels to be not truncated
+```
+
+Other examples, such as interactive visualization of cluster networks using actual data and populating reduced dimension plots in single-cell transcriptomics, are described in the documentation.
 
 ```{r}
 sessionInfo()
