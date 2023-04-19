@@ -36,7 +36,7 @@ wcMan(
   edgeLink = TRUE,
   ngram = NA,
   colorize = FALSE,
-  nodePal = palette(),
+  nodePal = NULL,
   preserve = TRUE,
   takeMax = FALSE,
   catColors = NULL,
@@ -124,7 +124,7 @@ erase the frequency information (only the discrete mapping)}
 
 \item{colorize}{color the nodes and texts based on their category}
 
-\item{nodePal}{node palette when tag is TRUE}
+\item{nodePal}{node palette when tag is TRUE, default to NULL}
 
 \item{preserve}{try to preserve the original characters}
 

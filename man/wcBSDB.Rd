@@ -29,7 +29,7 @@ wcBSDB(
   metThresh = 0.2,
   curate = TRUE,
   abstArg = list(),
-  nodePal = palette(),
+  nodePal = NULL,
   metCol = NULL,
   scaleRange = c(5, 10),
   showLegend = FALSE,

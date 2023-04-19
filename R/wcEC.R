@@ -16,6 +16,7 @@
 #' @param candTax when taxec=TRUE, search only for these species.
 #' @param argList passed to osplot(target="pubmed")
 #' @param target abstract or title
+#' @param apiKey api key for PubMed
 #' @return object consisting of data frame and ggplot2 object
 #' @examples
 #' file <- "enzyme.dat"
@@ -24,7 +25,8 @@
 #' 
 
 wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
-                 taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list()) {
+                 taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list(),
+                 apiKey=NULL) {
   flg <- FALSE
   candecs <- NULL
   allFlag <- FALSE
@@ -123,6 +125,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
   if (onlyDf) {return(candecs)}
   argList[["target"]] <- "abstract"
   argList[["queries"]] <- quoted
+  argList[["apiKey"]] <- apiKey
   abst <- do.call("wcAbst", argList)
   abst@ec <- candecs
   abst@type <- "EC"

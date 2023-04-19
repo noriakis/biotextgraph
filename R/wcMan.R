@@ -37,7 +37,7 @@
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param stem whether to use stemming
-#' @param nodePal node palette when tag is TRUE
+#' @param nodePal node palette when tag is TRUE, default to NULL
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
 #' @param argList parameters to pass to wordcloud()
@@ -83,7 +83,7 @@ wcMan <- function(df, madeUpper=NULL,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorizeNoFreq=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
-                   nodePal=palette(), preserve=TRUE, takeMax=FALSE, catColors=NULL,
+                   nodePal=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
@@ -101,6 +101,10 @@ wcMan <- function(df, madeUpper=NULL,
         df <- data.frame(df) |> `colnames<-`(c("text"))
       }
     }
+    if (queryPlot) {
+      if (!"query" %in% colnames(df)) {stop("There is no query specified")}
+    }
+
     ret <- new("biotext")
     ret@type <- paste0("manual")
     ret@rawText <- df
@@ -318,7 +322,6 @@ wcMan <- function(df, madeUpper=NULL,
         netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
         V(coGraph)$tag <- netCol
 
-        ## Add disease and other labs
         addC <- V(coGraph)$tag
         for (nn in seq_along(names(V(coGraph)))) {
             if (names(V(coGraph))[nn] %in% names(nodeN)) {
@@ -479,9 +482,10 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
 
+      tagColors <- nodePal
       netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed, ret)
+                          useSeed, ret, tagColors)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+

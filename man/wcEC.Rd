@@ -13,7 +13,8 @@ wcEC(
   taxec = FALSE,
   taxFile = NULL,
   candTax = NULL,
-  argList = list()
+  argList = list(),
+  apiKey = NULL
 )
 }
 \arguments{
@@ -36,6 +37,8 @@ If this is TRUE, data.frame is returned}
 \item{candTax}{when taxec=TRUE, search only for these species.}
 
 \item{argList}{passed to osplot(target="pubmed")}
+
+\item{apiKey}{api key for PubMed}
 }
 \value{
 object consisting of data frame and ggplot2 object

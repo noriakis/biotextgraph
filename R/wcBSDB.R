@@ -99,7 +99,7 @@ wcBSDB <- function (mbList,
                     madeUpper=c("dna","rna"), redo=NULL, fontFamily="sans",
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
                     metab=NULL, metThresh=0.2, curate=TRUE,
-                    abstArg=list(), nodePal=palette(), metCol=NULL,
+                    abstArg=list(), nodePal=NULL, metCol=NULL,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
@@ -621,7 +621,7 @@ wcBSDB <- function (mbList,
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed, ret)
+                          useSeed, ret, tagColors=nodePal)
         netPlot <- netPlot +
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
