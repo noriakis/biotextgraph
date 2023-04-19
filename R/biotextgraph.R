@@ -74,8 +74,7 @@ setClass("biotext", slots=list(
         stem="logical",
         ngram="numeric",
         curate="logical",
-        communities="communities",
-        nodeCat="vector"
+        communities="communities"
         ))
 
 #' @importFrom utils object.size

@@ -1,3 +1,21 @@
+#' obtain_manual
+#' 
+#' obtain biotext class object from manually specified data
+#' 
+#' @param df data frame
+#' 
+obtain_manual <- function(df) {
+    if (!is.data.frame(df)) {
+      if (is.vector(df)) {
+        df <- data.frame(df) |> `colnames<-`(c("text"))
+      }
+    }
+    ret <- new("biotext")
+    ret@type <- paste0("manual")
+    ret@rawText <- df
+    ret
+}
+
 
 #' obtain_bugsigdb
 #' 
@@ -102,8 +120,132 @@ obtain_bugsigdb <- function(mb_list,
     ret
 }
 
-
-
+#' obtain_enzyme
+#' 
+#' obtain EC-related text data from PubMed
+#' 
+#' @param file file downloaded from expasy
+#' @param ec_num candidate ecnum, like those obtained from eggNOG-mapper
+#' @param only_term only return quoted queries to wcAbst
+#' @param only_df only return ec description data.frame
+#' if onlyTerm and onlyDf are both specified, onlyTerm have priority
+#' @param tax_ec link taxonomy to EC using UniProt Taxonomy ID file
+#' If this is TRUE, data.frame is returned
+#' @param tax_file UniProt organism ID file path
+#' @param cand_tax when taxec=TRUE, search only for these species.
+#' @param arg_list passed to obtain_pubmed()
+#' @param target abstract or title
+#' @param api_key api key for PubMed
+#' @export
+#' @return biotext class object
+obtain_enzyme <- function(file, ec_num,
+    only_term=FALSE, only_df=FALSE, target="abstract",
+    tax_ec=FALSE, tax_file=NULL, cand_tax=NULL, arg_list=list(),
+    api_key=NULL) {
+  flg <- FALSE
+  candecs <- NULL
+  allFlag <- FALSE
+  if (length(ec_num)==1) {
+    if (ec_num=="all") {
+      allFlag <- TRUE
+    }
+  }
+  qqcat("Processing EC file\n")
+  con = file(file, "r")
+  while ( TRUE ) {
+    line = readLines(con, n = 1)
+    if ( length(line) == 0 ) {
+      break
+    }
+    if (startsWith(line,"ID")) {
+      ccs <- NULL
+      ecs <- NULL
+      drs <- NULL
+      ec <- gsub("ID   ","",line)
+      if (allFlag) {
+        flg <- TRUE
+      } else {
+        if (ec %in% ec_num) {
+          flg <- TRUE
+        } else {
+          flg <- FALSE
+        }
+      }
+    }
+    if (flg) {
+      if (startsWith(line, "DE")) {
+        de <- gsub("\\.","",gsub("DE   ","",line))
+      }
+      if (startsWith(line, "CC")) {
+        cc <- gsub("\\.","",gsub("CC   ","",line))
+        cc <- gsub("-!- ", "", cc)
+        ccs <- c(ccs, cc)
+      }
+      if (startsWith(line, "DR")) {
+        stLine <- gsub(" ","",gsub("DR", "", line))
+        drs <- c(drs, unlist(strsplit(stLine,";")))
+      }
+      if (startsWith(line, "//")) {
+        flg <- FALSE
+        ecs <- c(ec, de, paste0(ccs, collapse=" "),
+                 paste0(drs, collapse=";"))
+        candecs <- rbind(candecs, ecs)
+        }
+    }
+  }
+  close(con)
+  if (is.null(candecs)) {return(NULL)}
+  candecs <- data.frame(candecs) |>
+    `colnames<-`(c("number","desc","comment","DRs"))
+  if (tax_ec) {
+    qqcat("  Linking taxonomy to EC\n")
+    retTaxEC <- NULL
+    if (is.null(tax_file)) {stop("Please provide UniProt Taxonomy file")}
+    if (!is.null(cand_tax)) {
+      taxo <- getUPtax(tax_file, candUP="all", candTax=cand_tax)
+      for (num in candecs$number) {
+        desc <- subset(candecs, candecs$number==num)$desc
+        allCharIDs <- as.character(unlist(sapply(unlist(strsplit(subset(candecs, candecs$number==num)$DRs,";")),
+                                                 function(x) unlist(strsplit(x, "_"))[2])))
+        if (length(intersect(allCharIDs, taxo$UPID))>=1) {
+          for (ta in intersect(allCharIDs, taxo$UPID)) {
+            for (cta in subset(taxo, taxo$UPID==ta)$Taxonomy) {
+              retTaxEC <- rbind(retTaxEC, c(num, desc, ta, cta))
+            }
+          }
+        }
+      }
+    } else {
+      stop("Please specify cand_tax when tax_ec=TRUE")
+    }
+    if (is.null(retTaxEC)) {stop("No EC could be found for query")}
+    retTaxEC <- data.frame(retTaxEC) |> 
+      `colnames<-`(c("number","desc","taxonomy","scientificName"))
+    queryCheck <- NULL
+    for (ct in cand_tax) {
+      queryCheck <- cbind(queryCheck,
+                          grepl(ct, retTaxEC$scientificName))
+    }
+    retTaxEC$query <- apply(queryCheck, 1, function(x) {
+      if (length(cand_tax[x])==1) {
+        cand_tax[x]
+      } else {
+        paste0(cand_tax[x],",")
+      }})
+    return(retTaxEC)
+  }
+  
+  quoted <- dQuote(candecs$desc,options(useFancyQuotes = FALSE))
+  if (only_term) {return(quoted)}
+  if (only_df) {return(candecs)}
+  arg_list[["target"]] <- "abstract"
+  arg_list[["queries"]] <- quoted
+  arg_list[["api_key"]] <- api_key
+  abst <- do.call("obtain_pubmed", arg_list)
+  abst@ec <- candecs
+  abst@type <- "EC"
+  return(abst)
+}
 
 
 #' obtain_refseq
@@ -424,7 +566,11 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden) {
 #' @param make_upper make these words to uppercase
 #' @param disease_plot disease plotting
 #' @param ec_plot enzyme plotting
-#' @param metab_plot metabolite plotting
+#' @param metab metabolite data.frame
+#' @param metab_thresh threshold of association in metabolites - taxa relationship
+#' (e.g., correlation coefficient)
+#' @param metab_col metabolite data frame column name in the order of
+#' "candidate taxon", "metabolite", "quantitative values for thresholding"
 #' @param mb_plot microbe plotting
 #' @param ec_file enzyme database file
 #' @param up_tax_file UniProt taxonomy file
@@ -470,10 +616,10 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         qqcat("Checking metabolites\n")
         metabGraph <- NULL
         for (sp in mb_list) {
-            tmp <- metab[grepl(sp,metab[[metCol[1]]]),]
-            tmp <- tmp[abs(tmp[[metCol[3]]])>metab_thresh,]
+            tmp <- metab[grepl(sp,metab[[metab_col[1]]]),]
+            tmp <- tmp[abs(tmp[[metab_col[3]]])>metab_thresh,]
             if (dim(tmp)[1]!=0) {
-                for (met in tmp[[metCol[2]]]) {
+                for (met in tmp[[metab_col[2]]]) {
                     metabGraph <- rbind(metabGraph, c(sp, met))
                 }
             } else {
@@ -832,6 +978,149 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
     pathGraph
 }
 
+
+#' process_network_manual
+#' 
+#' process graph made from user-specified df
+#' 
+#' @param ret biotext class object
+#' @param delete_zero_degree delete zero degree nodes
+#' @param make_upper make these words uppercase
+#' @param query_plot plot the column other than text
+#' @export
+#' @return biotext class object
+process_network_manual <- function(ret, delete_zero_degree=TRUE,
+                       make_upper=NULL, query_plot=FALSE) {
+  DTM <- t(as.matrix(ret@TDM))
+  
+  if (query_plot) {
+    if (!"query" %in% colnames(ret@rawText)) {stop("No query words specified")}
+    row.names(DTM) <- ret@rawText$query
+    
+  }
+  
+  matSorted <- ret@wholeFreq
+  coGraph <- ret@igraphRaw
+  freqWords <- names(matSorted[1:ret@numWords])
+  
+  coGraph <- induced.subgraph(coGraph,
+                              names(V(coGraph)) %in% freqWords)
+  V(coGraph)$Freq <- matSorted[V(coGraph)$name]
+  
+  if (delete_zero_degree){
+    coGraph <- induced.subgraph(coGraph,
+                                degree(coGraph) > 0)
+  }
+  
+  nodeName <- V(coGraph)$name
+  dtmCol <- colnames(DTM)
+  for (i in make_upper) {
+    dtmCol[dtmCol == i] <- toupper(i)
+    nodeName[nodeName == i] <- toupper(i)
+  }
+  V(coGraph)$name <- nodeName
+  colnames(DTM) <- dtmCol
+  
+  df <- ret@rawText
+  incCols <- colnames(df)
+  incCols <- incCols[!incCols %in% c("query","text")]
+  
+  if (length(incCols)!=0) {
+    qqcat("Including columns @{paste(incCols, collapse=' and ')} to link with query\n")
+    for (ic in incCols) {
+      qmap <- simplify(igraph::graph_from_data_frame(df[,c(ic, "query")],
+                                                     directed = FALSE))
+      coGraph <- igraph::union(coGraph, qmap)
+    }
+  }
+  
+  nodeN <- NULL
+  for (coln in c(incCols, "query")) {
+    tmpn <- df[[coln]]
+    tmpnn <- rep(coln, length(tmpn))
+    names(tmpnn) <- tmpn
+    nodeN <- c(nodeN, tmpnn)
+  }
+
+  if (query_plot) {
+    genemap <- c()
+    for (rn in nodeName){
+      tmp <- DTM[ ,rn]
+      for (nm in names(tmp[tmp!=0])){
+        if (nm!=""){
+          if (grepl(",",nm,fixed=TRUE)){
+            for (nm2 in unlist(strsplit(nm, ","))){
+              genemap <- rbind(genemap, c(rn, paste(nm2)))
+            }
+          } else {
+            genemap <- rbind(genemap, c(rn, paste(nm)))
+          }
+        }
+      }
+    }
+    genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
+    coGraph <- igraph::union(coGraph, genemap)
+  }
+  
+  if (length(E(coGraph))==0) {stop("No edge present, stopping.")}
+  E(coGraph)$edgeColor <- E(coGraph)$weight
+  tmpW <- E(coGraph)$weight
+  tmpW[is.na(tmpW)] <- ret@corThresh
+  E(coGraph)$weight <- tmpW
+  
+  ## Node attributes
+  if (length(ret@pvpick)!=0) { ## If tag
+    netCol <- tolower(names(V(coGraph)))
+    for (i in seq_along(ret@pvpick$clusters)){
+      for (j in ret@pvpick$clusters[[i]])
+        netCol[netCol==j] <- paste0("cluster",i)
+    }
+    netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+    V(coGraph)$tag <- netCol
+    
+    if (!is.null(nodeN)) {
+      addC <- V(coGraph)$tag
+      for (nn in seq_along(names(V(coGraph)))) {
+        if (names(V(coGraph))[nn] %in% names(nodeN)) {
+          addC[nn] <- nodeN[names(V(coGraph))[nn]]
+        } else {
+          next
+        }
+      }
+      V(coGraph)$tag <- addC
+    }
+  }
+  
+  if (!is.null(nodeN)) {
+    nodeCat <- NULL
+    for (nn in seq_along(names(V(coGraph)))) {
+      if (names(V(coGraph))[nn] %in% names(nodeN)) {
+        nodeCat[nn] <- nodeN[names(V(coGraph))[nn]]
+      } else {
+        nodeCat[nn] <- "Words"
+      }
+    }
+  } else {
+    nodeCat <- rep("Words",length(V(coGraph)))
+  }    
+  V(coGraph)$nodeCat <- nodeCat
+  
+  if (!identical(ret@dic, logical(0))) {
+    pdic <- ret@dic
+    newGname <- NULL
+    for (nm in names(V(coGraph))) {
+      if (nm %in% names(pdic)) {
+        newGname <- c(newGname, pdic[nm])
+      } else {
+        newGname <- c(newGname, nm)
+      }
+    }
+    coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+  }
+  ret@igraph <- coGraph
+  ret
+}
+
 #' plot_biotextgraph
 #' 
 #' plot biotextgraph after processing graph
@@ -840,12 +1129,13 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 #' @param edge_link whether to use edge link or edge diagonal
 #' @param edge_label whether to show edge label
 #' @param show_legend whether to show legend
-#' @param cat_color named vector specifying color for each category of node
+#' @param cat_colors named vector specifying color for each category of node
 #' @param query_color color for queried nodes
 #' @param font_family font family
 #' @param colorize colorize the word frequency and query separately
 #' if FALSE, no node is plotted for query nodes. it overrides color_by_tag.
 #' @param color_by_tag color by tagging information (color scale will be discrete)
+#' @param color_by_community color by community information in graph
 #' @param pal palette for node color specified as (low, high)
 #' @param tag_colors palette for node color in discrete mode
 #' @param color_text whether to color the text
@@ -864,6 +1154,7 @@ plot_biotextgraph <- function(ret,
 	font_family="sans",
 	colorize=FALSE,
 	color_by_tag=FALSE,
+    color_by_community=FALSE,
 	tag_colors=NULL,
 	color_text=TRUE,
 	scale_range=c(5,10),
@@ -872,6 +1163,9 @@ plot_biotextgraph <- function(ret,
 	na_edge_color="grey",
 	use_seed=42) {
 
+    if (color_by_community & color_by_tag) {
+        stop("Cannot specify both of community or tag for coloring")
+    }
 	coGraph <- ret@igraph
 
     if (colorize) {
@@ -897,6 +1191,24 @@ plot_biotextgraph <- function(ret,
         V(coGraph)$tag <- netCol
     }
 
+    if (color_by_community) {
+        memb <- ret@communities$membership
+        uniq_memb <- memb |> unique()
+        netCol <- tolower(names(V(coGraph)))
+        for (i in seq_along(uniq_memb)){
+            for (j in ret@communities$names[memb==uniq_memb[i]]) {
+                netCol[netCol==j] <- paste0(uniq_memb[i])
+            }
+        }
+        # netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+        for (nn in seq_along(V(ret@igraph)$nodeCat)) {
+            if (V(ret@igraph)$nodeCat[nn]!="Words") {
+                netCol[nn] <- V(ret@igraph)$nodeCat[nn]
+            }
+        }
+        V(coGraph)$tag <- netCol
+    }
+
     ## Make ggraph from here ##
 
     netPlot <- ggraph(coGraph, layout=layout)
@@ -914,20 +1226,23 @@ plot_biotextgraph <- function(ret,
         names(cat_colors) <- cols
         cat_colors["Genes"] <- query_color
         cat_colors["Microbes"] <- query_color
+        cat_colors["query"] <- query_color
     }
 
-    if (!is.null(V(coGraph)$tag)) {
+    if (!is.null(V(coGraph)$tag) | color_by_community) {
         cols <- V(coGraph)$tag |> unique()
         if (is.null(tag_colors)) {
             tag_colors <- RColorBrewer::brewer.pal(length(cols), "Dark2")
             names(tag_colors) <- cols
             tag_colors["Genes"] <- query_color
+            tag_colors["query"] <- query_color
             tag_colors["Microbes"] <- query_color
         }
     }
 
+
     netPlot <- appendNodesAndTexts(netPlot,
-        tag=color_by_tag,
+        tag=color_by_tag | color_by_community,
         colorize=colorize,
         nodePal=NULL,
         showLegend=show_legend,

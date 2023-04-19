@@ -14,6 +14,7 @@ plot_biotextgraph(
   font_family = "sans",
   colorize = FALSE,
   color_by_tag = FALSE,
+  color_by_community = FALSE,
   tag_colors = NULL,
   color_text = TRUE,
   scale_range = c(5, 10),
@@ -40,6 +41,8 @@ plot_biotextgraph(
 if FALSE, no node is plotted for query nodes. it overrides color_by_tag.}
 
 \item{color_by_tag}{color by tagging information (color scale will be discrete)}
+
+\item{color_by_community}{color by community information in graph}
 
 \item{tag_colors}{palette for node color in discrete mode}
 
