@@ -418,9 +418,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
             gcnt <- table(genemap[,2])
             gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
-            if (!is.integer(gcnt)) {
-                ret@geneCount <- gcnt
-            }
+
+            if (length(gcnt)!=1) {ret@geneCount <- gcnt}
+
             
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]

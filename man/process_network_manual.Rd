@@ -8,7 +8,8 @@ process_network_manual(
   ret,
   delete_zero_degree = TRUE,
   make_upper = NULL,
-  query_plot = FALSE
+  query_plot = FALSE,
+  drop_ID = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ process_network_manual(
 \item{make_upper}{make these words uppercase}
 
 \item{query_plot}{plot the column other than text}
+
+\item{drop_ID}{drop `ID` column}
 }
 \value{
 biotext class object

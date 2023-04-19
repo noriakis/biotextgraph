@@ -731,6 +731,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         }
         netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
         V(coGraph)$tag <- netCol
+        V(coGraph)$tag_raw <- netCol
 
         ## Add disease and other labs
         if (!is.null(nodeN)) {
@@ -772,6 +773,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         }
         coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
     }
+    coGraph <- assign_community(ret, coGraph)  
     ret@igraph <- coGraph
     ret
 }
@@ -869,7 +871,7 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         gcnt <- table(genemap[,2])
         gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
 
-        if (!is.integer(gcnt)) {
+        if (is.table(gcnt)) {
 	        ret@geneCount <- gcnt
 	    }
         
@@ -891,6 +893,7 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
     if (!is.null(gene_path_plot)) {
     	pathGraph <- return_gene_path_graph(ret, gene_path_plot, org_db,
     		threshold=gene_path_plot_threshold)
+        pathGraph <- pathGraph |> data.frame()
         withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
         withinCoGraphPathGraph <- pathGraph[
         pathGraph[,2] %in% withinCoGraph,]
@@ -911,6 +914,10 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         }
         V(coGraph)$grp <- grp
     }
+
+    ## Node attributes
+
+
     if (!identical(ret@dic, logical(0))) {
     	pdic <- ret@dic
         newGname <- NULL
@@ -924,16 +931,46 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
     }
 
-    nodeN <- NULL
-    genes <- ret@geneMap[,2] |> unique()
-    for (nn in V(coGraph)$name) {
-        if (nn %in% genes) {
-            nodeN <- c(nodeN, "Genes")
-        } else {
-            nodeN <- c(nodeN, "Words")
+    if (gene_plot) {
+        nodeN <- NULL
+        genes <- ret@geneMap[,2] |> unique()
+        for (nn in V(coGraph)$name) {
+            if (nn %in% genes) {
+                nodeN <- c(nodeN, "Genes")
+            } else {
+                nodeN <- c(nodeN, "Words")
+            }
+        }
+        V(coGraph)$nodeCat <- nodeN
+    } else {
+        nodeN <- rep("Words", length(V(coGraph)))
+        V(coGraph)$nodeCat <- nodeN
+    }
+
+    if (length(ret@pvpick)!=0) { ## If tag
+        netCol <- tolower(names(V(coGraph)))
+        for (i in seq_along(ret@pvpick$clusters)){
+          for (j in ret@pvpick$clusters[[i]])
+            netCol[netCol==j] <- paste0("cluster",i)
+        }
+        netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+        V(coGraph)$tag <- netCol
+        V(coGraph)$tag_raw <- netCol
+
+        
+        if (!is.null(nodeN)) {
+          addC <- V(coGraph)$tag
+          for (nn in seq_along(names(V(coGraph)))) {
+            if (names(V(coGraph))[nn] %in% names(nodeN)) {
+              addC[nn] <- nodeN[names(V(coGraph))[nn]]
+            } else {
+              next
+            }
+          }
+          V(coGraph)$tag <- addC
         }
     }
-    V(coGraph)$nodeCat <- nodeN
+    coGraph <- assign_community(ret, coGraph)  
     ret@igraph <- coGraph
     ret
 }
@@ -987,10 +1024,11 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 #' @param delete_zero_degree delete zero degree nodes
 #' @param make_upper make these words uppercase
 #' @param query_plot plot the column other than text
+#' @param drop_ID drop `ID` column
 #' @export
 #' @return biotext class object
 process_network_manual <- function(ret, delete_zero_degree=TRUE,
-                       make_upper=NULL, query_plot=FALSE) {
+                       make_upper=NULL, query_plot=FALSE, drop_ID=TRUE) {
   DTM <- t(as.matrix(ret@TDM))
   
   if (query_plot) {
@@ -998,7 +1036,10 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
     row.names(DTM) <- ret@rawText$query
     
   }
-  
+  if (drop_ID) {
+    ret@rawText$ID <- NULL
+  }
+
   matSorted <- ret@wholeFreq
   coGraph <- ret@igraphRaw
   freqWords <- names(matSorted[1:ret@numWords])
@@ -1077,6 +1118,8 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
     }
     netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
     V(coGraph)$tag <- netCol
+    V(coGraph)$tag_raw <- netCol
+
     
     if (!is.null(nodeN)) {
       addC <- V(coGraph)$tag
@@ -1105,6 +1148,8 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   }    
   V(coGraph)$nodeCat <- nodeCat
   
+  coGraph <- assign_community(ret, coGraph)  
+
   if (!identical(ret@dic, logical(0))) {
     pdic <- ret@dic
     newGname <- NULL
@@ -1119,6 +1164,28 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   }
   ret@igraph <- coGraph
   ret
+}
+
+#' @noRd
+assign_community <- function(ret, coGraph) {
+    if (!is.null(attributes(ret@communities)$names)) {
+        memb <- ret@communities$membership
+        uniq_memb <- memb |> unique()
+        netCol <- tolower(names(V(coGraph)))
+        for (i in seq_along(uniq_memb)){
+            for (j in ret@communities$names[memb==uniq_memb[i]]) {
+                netCol[netCol==j] <- paste0(uniq_memb[i])
+            }
+        }
+        # netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
+        for (nn in seq_along(V(coGraph)$nodeCat)) {
+            if (V(coGraph)$nodeCat[nn]!="Words") {
+                netCol[nn] <- V(coGraph)$nodeCat[nn]
+            }
+        }
+        V(coGraph)$community <- netCol
+    }
+    coGraph
 }
 
 #' plot_biotextgraph
@@ -1176,38 +1243,7 @@ plot_biotextgraph <- function(ret,
 
     E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
 
-    if (color_by_tag) {
-        netCol <- tolower(names(V(coGraph)))
-        for (i in seq_along(ret@pvpick$clusters)){
-            for (j in ret@pvpick$clusters[[i]])
-                netCol[netCol==j] <- paste0("cluster",i)
-        }
-        netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
-        for (nn in seq_along(V(ret@igraph)$nodeCat)) {
-            if (V(ret@igraph)$nodeCat[nn]!="Words") {
-                netCol[nn] <- V(ret@igraph)$nodeCat[nn]
-            }
-        }
-        V(coGraph)$tag <- netCol
-    }
-
-    if (color_by_community) {
-        memb <- ret@communities$membership
-        uniq_memb <- memb |> unique()
-        netCol <- tolower(names(V(coGraph)))
-        for (i in seq_along(uniq_memb)){
-            for (j in ret@communities$names[memb==uniq_memb[i]]) {
-                netCol[netCol==j] <- paste0(uniq_memb[i])
-            }
-        }
-        # netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
-        for (nn in seq_along(V(ret@igraph)$nodeCat)) {
-            if (V(ret@igraph)$nodeCat[nn]!="Words") {
-                netCol[nn] <- V(ret@igraph)$nodeCat[nn]
-            }
-        }
-        V(coGraph)$tag <- netCol
-    }
+    if (color_by_community) {V(coGraph)$tag <- V(coGraph)$community}
 
     ## Make ggraph from here ##
 
