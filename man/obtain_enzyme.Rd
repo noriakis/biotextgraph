@@ -37,6 +37,8 @@ If this is TRUE, data.frame is returned}
 \item{cand_tax}{when taxec=TRUE, search only for these species.}
 
 \item{arg_list}{passed to obtain_pubmed()}
+
+\item{api_key}{api key for PubMed}
 }
 \value{
 biotext class object

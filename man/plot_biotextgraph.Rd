@@ -33,6 +33,8 @@ plot_biotextgraph(
 
 \item{show_legend}{whether to show legend}
 
+\item{cat_colors}{named vector specifying color for each category of node}
+
 \item{query_color}{color for queried nodes}
 
 \item{font_family}{font family}
@@ -57,8 +59,6 @@ if FALSE, no node is plotted for query nodes. it overrides color_by_tag.}
 \item{na_edge_color}{edge color for NA value}
 
 \item{use_seed}{seed value for ggrepel}
-
-\item{cat_color}{named vector specifying color for each category of node}
 }
 \value{
 biotext class object

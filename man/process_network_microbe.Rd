@@ -29,13 +29,19 @@ process_network_microbe(
 
 \item{ec_plot}{enzyme plotting}
 
+\item{metab}{metabolite data.frame}
+
+\item{metab_col}{metabolite data frame column name in the order of
+"candidate taxon", "metabolite", "quantitative values for thresholding"}
+
+\item{metab_thresh}{threshold of association in metabolites - taxa relationship
+(e.g., correlation coefficient)}
+
 \item{mb_plot}{microbe plotting}
 
 \item{ec_file}{enzyme database file}
 
 \item{up_tax_file}{UniProt taxonomy file}
-
-\item{metab_plot}{metabolite plotting}
 }
 \description{
 perform tasks before plotting
