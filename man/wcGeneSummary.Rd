@@ -205,7 +205,7 @@ on whole dataset or top-words specified by numWords}
 list of data frame and ggplot2 object
 }
 \description{
-Plot wordcloud of RefSeq description obtained by GeneSummary
+Text mining RefSeq description obtained by GeneSummary
 }
 \examples{
 geneList <- c("DDX41","PNKP")

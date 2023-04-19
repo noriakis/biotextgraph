@@ -64,6 +64,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             dendPlot="pvclust", dhc=NULL, wcArgs=list(),
                                             useDf=NULL, useWGCNA=TRUE, spacer=0.005, wrap=NULL,
                                             highlight=NULL, argList=list(), useFunc=NULL,
+                                            normalizeByClusterNum=TRUE,
                                             returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
                                             imageDir=NULL, wh=5, al=TRUE, offset=.2, tipSize=0.3,
                                             asp=1.5, horizontalSpacer=0, useRandomColor=FALSE,
@@ -171,7 +172,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  textSize=textSize, wcArgs=wcArgs, bg.colour=bg.colour,
                                  candidateNodes=candidateNodes, useRandomColor=useRandomColor,
                                  showType=showType, takeIntersect=takeIntersect,
-                                 argList=argList, useWC=useWC, wcScale=wcScale, normalizeByClusterNum=normalizeByClusterNum,
+                                 argList=argList, useWC=useWC, wcScale=wcScale, 
+                                 normalizeByClusterNum=normalizeByClusterNum,
                                  useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx)
     
     if (returnGlobOnly) {

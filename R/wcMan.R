@@ -335,7 +335,6 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
       if (colorize) {
-
         ## Set pseudo freq based on min value of freq
         fre <- V(coGraph)$Freq
         fre[is.na(fre)] <- min(fre, na.rm=TRUE)
@@ -354,6 +353,21 @@ wcMan <- function(df, madeUpper=NULL,
             V(coGraph)$tag <- addC
         }
       }
+
+      if (!is.null(nodeN)) {
+          nodeCat <- NULL
+          for (nn in seq_along(names(V(coGraph)))) {
+              if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                  nodeCat[nn] <- nodeN[names(V(coGraph))[nn]]
+              } else {
+                  nodeCat[nn] <- "Words"
+              }
+          }
+      } else {
+          nodeCat <- rep("Words",length(V(coGraph)))
+      }
+      V(coGraph)$nodeCat <- nodeCat
+
 
       if (colorize & colorizeNoFreq) {
         colorize <- FALSE
@@ -466,8 +480,8 @@ wcMan <- function(df, madeUpper=NULL,
       }
 
       netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
-                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange,
-                          useSeed)
+                          showLegend,catColors,pal,fontFamily,colorText,scaleRange,
+                          useSeed, ret)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+
