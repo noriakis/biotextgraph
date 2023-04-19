@@ -33,6 +33,7 @@ setOldClass("TermDocumentMatrix")
 setOldClass("gg")
 setOldClass("ggraph")
 setOldClass("dfm")
+setOldClass("communities")
 setClass("biotext", slots=list(
         query="character",
         delim="character",
@@ -59,6 +60,7 @@ setClass("biotext", slots=list(
         pvpick="list",
         strength="data.frame",
         corMat="matrix",
+        igraphRaw="igraph",
         igraph="igraph",
         geneCount="table",
         geneMap="matrix",
@@ -66,7 +68,14 @@ setClass("biotext", slots=list(
         wc="gg",
         ec="data.frame",
         wholeFreq="numeric",
-        dic="vector"
+        dic="vector",
+        sortOrder="character",
+        numOnly="logical",
+        stem="logical",
+        ngram="numeric",
+        curate="logical",
+        communities="communities",
+        nodeCat="vector"
         ))
 
 #' @importFrom utils object.size
@@ -135,13 +144,13 @@ setMethod("plot",
 #' @export
 #' 
 plotORA <- function(x, thresh=0.001) {
-    subr <- intersect(row.names(x@freqDf),names(x@ora))
-  vp <- x@freqDf[subr, ]
+  subr <- intersect(tolower(x@freqDf$word), names(x@ora))
+  vp <- x@freqDf[tolower(x@freqDf$word) %in% subr, ]
   vp$p <- -log10(x@ora[subr])
   
-  ggplot(vp, aes(x=vp$freq,y=vp$p, fill=vp$p))+
+  ggplot(vp, aes(x=.data$freq,y=.data$p, fill=.data$p))+
     geom_point(shape=21,size=3,show.legend=FALSE) +
-    geom_text_repel(aes(color=vp$p, label=vp$word),bg.color = "white",
+    geom_text_repel(aes(color=.data$p, label=.data$word),bg.color = "white",
                     segment.color="black",size=3,max.overlaps = Inf,
                     bg.r = .15, show.legend=FALSE)+
     scale_color_gradient(low="blue",high="red")+

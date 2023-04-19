@@ -15,6 +15,7 @@
 #' @param taxFile UniProt organism ID file path
 #' @param candTax when taxec=TRUE, search only for these species.
 #' @param argList passed to osplot(target="pubmed")
+#' @param target abstract or title
 #' @return object consisting of data frame and ggplot2 object
 #' @examples
 #' file <- "enzyme.dat"
@@ -22,7 +23,7 @@
 #' @export
 #' 
 
-wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE,
+wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
                  taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list()) {
   flg <- FALSE
   candecs <- NULL

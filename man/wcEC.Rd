@@ -9,6 +9,7 @@ wcEC(
   ecnum,
   onlyTerm = FALSE,
   onlyDf = FALSE,
+  target = "abstract",
   taxec = FALSE,
   taxFile = NULL,
   candTax = NULL,
@@ -24,6 +25,8 @@ wcEC(
 
 \item{onlyDf}{only return ec description data.frame
 if onlyTerm and onlyDf are both specified, onlyTerm have priority}
+
+\item{target}{abstract or title}
 
 \item{taxec}{link taxonomy to EC using UniProt Taxonomy ID file
 If this is TRUE, data.frame is returned}

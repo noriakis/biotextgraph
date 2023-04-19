@@ -177,26 +177,39 @@ appendEdges <- function(netPlot,
 #' 
 #' @noRd
 appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
-  showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange,useSeed){
-  if (tag) {
-      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
-                                          show.legend = showLegend) +
-                           scale_color_manual(values=nodePal)
+  showLegend,catColors,pal,fontFamily,colorText,scaleRange,useSeed,ret,tagColors){
+
+  if (dim(ret@geneMap)[1]!=0) {
+    included <- unique(ret@geneMap[,2])
   } else {
-      if (colorize) {## If node is present, colorize accordingly
-          if (is.null(catColors)) {
-              catColors <- RColorBrewer::brewer.pal(length(unique(nodeN)), "Dark2")
-              names(catColors) <- unique(nodeN)
-          }
+    included <- NULL
+  }
+
+  if (is.null(catColors)) {
+      catColors <- RColorBrewer::brewer.pal(length(unique(V(ret@igraph)$nodeCat)), "Dark2")
+      names(catColors) <- unique(V(ret@igraph)$nodeCat)
+  }
+  if (is.null(tagColors)) {
+      tagColors <- RColorBrewer::brewer.pal(length(unique(V(ret@igraph)$tag)), "Dark2")
+      names(tagColors) <- unique(V(ret@igraph)$tag)
+  }
+
+  if (tag) { ## use pvpick
+      useTagColors <- tagColors[ netPlot$data$tag ]
+      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq),color=useTagColors,
+                                          show.legend = showLegend)
+                           # scale_color_manual(values=nodePal)
+  } else {
+      if (colorize) {## Colorize by node category (except for words)
           ## colorize points of texts
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                               show.legend = showLegend)+
                               scale_color_gradient(low=pal[1],high=pal[2],
                                                 na.value="grey50")
           ## colorize the other points
-          useCatColors <- catColors[ netPlot$data[ netPlot$data$tag != "Words", ]$tag ]
+          useCatColors <- catColors[ netPlot$data[ netPlot$data$nodeCat != "Words", ]$nodeCat ]
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                                              filter=.data$tag != "Words"),
+                                              filter=.data$nodeCat != "Words"),
                                               show.legend=FALSE,
                                               color=useCatColors)
       } else {
@@ -224,7 +237,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
           layerNum <- length(netPlot$layers)
           geom_param_list <- netPlot$layers[[layerNum]]$geom_params
           build <- ggplot_build(netPlot)$data[[layerNum]]
-          build[ netPlot$data$tag !="Words", ]$colour <- useCatColors
+          build[ netPlot$data$nodeCat !="Words", ]$colour <- useCatColors
 
           aes_list <- netPlot$layers[[layerNum]]$mapping
           aes_list["filter"] <- NULL
@@ -255,8 +268,10 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 
       } else {
           if (tag) {
+              useTagColors <- tagColors[ netPlot$data$tag ]
               netPlot <- netPlot + 
-                  geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
+                  geom_node_text(aes(label=.data$name, size=.data$Freq),
+                    color=useTagColors,
                       check_overlap=TRUE, repel=TRUE,# size = labelSize,
                       bg.color = "white", segment.color="black",family=fontFamily,
                       bg.r = .15, show.legend=showLegend)

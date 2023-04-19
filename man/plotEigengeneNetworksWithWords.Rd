@@ -30,6 +30,7 @@ plotEigengeneNetworksWithWords(
   highlight = NULL,
   argList = list(),
   useFunc = NULL,
+  normalizeByClusterNum = TRUE,
   returnGlobOnly = FALSE,
   tipWC = FALSE,
   tipWCNodes = NULL,
@@ -99,6 +100,8 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 
 \item{useFunc}{if not specified, use RefSeq summary data}
 
+\item{normalizeByClusterNum}{normalize frequency by ID numbers or not}
+
 \item{returnGlobOnly}{default to FALSE}
 
 \item{tipWC}{using ggtree, show WC on tip}
@@ -126,8 +129,6 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 \item{useggfx}{filter in ggfx to apply to wordcloud, default to NULL}
 
 \item{ggfxParams}{parameters to pass to ggfx geom}
-
-\item{normalizeByClusterNum}{normalize frequency by ID numbers or not}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

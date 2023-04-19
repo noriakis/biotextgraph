@@ -1,6 +1,6 @@
 #' wcGeneSummary
 #' 
-#' Plot wordcloud of RefSeq description obtained by GeneSummary
+#' Text mining RefSeq description obtained by GeneSummary
 #' 
 #' @param geneList gene ID list
 #' @param exclude "frequency" or "tfidf",
@@ -131,12 +131,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     }
-    # if (ora & !numOnly) {
-    #     stop("ora should be used with numOnly=TRUE, as the background is calculated based on numOnly=TRUE")
-    # }
-    # if (ora & stem) {
-    #     stop("ora should be used with stem=FALSE, as the background is calculated based on stem=FALSE")
-    # }
 
     if (is.null(mergeCorpus)) {
         qqcat("Input genes: @{length(geneList)}\n")
@@ -144,7 +138,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             geneList <- AnnotationDbi::select(orgDb,
                 keys = geneList, columns = c("ENTREZID"),
                 keytype = keyType)$ENTREZID
-            geneList <- geneList[!is.na(geneList)]
+            geneList <- geneList[!is.na(geneList)] |> unique()
             qqcat("  Converted input genes: @{length(geneList)}\n")
         }
 
@@ -334,19 +328,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         DTM <- t(as.matrix(docs))
         
         if (tag) {
-            ## TODO: tagging based on cluster_walktrap
-            if (tagWhole){
-                pvc <- pvclust(as.matrix(dist(t(DTM))), parallel=cl)
-            } else {
-            pvc <- pvclust(as.matrix(dist(
-                t(
-                    DTM[, colnames(DTM) %in% freqWords]
-                    )
-                )), parallel=cl)
-            }
-            pvcl <- pvpick(pvc, alpha=pvclAlpha)
-            ret@pvclust <- pvc
-            ret@pvpick <- pvcl
+            ## TODO: tagging based on cluster_walktrap or graph-based
+            ret <- tag_words(ret, cl, pvclAlpha, whole=tagWhole, num_words=ret@numWords)
+            pvc <- ret@pvclust
+            pvcl <- ret@pvpick
         }
 
         ## genePlot: plot associated genes
@@ -399,6 +384,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
         coGraph <- matrixs$coGraph
+        ret@igraphRaw <- coGraph
         ret <- matrixs$ret
 
         ## before or after?
@@ -432,7 +418,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
             gcnt <- table(genemap[,2])
             gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
-            ret@geneCount <- gcnt
+            if (!is.integer(gcnt)) {
+                ret@geneCount <- gcnt
+            }
             
             incGene <- names(gcnt)[1:genePlotNum]
             genemap <- genemap[genemap[,2] %in% incGene,]
@@ -653,9 +641,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
-                    wcCol[wcCol==j] <- pal[i]
+                    wcCol[wcCol==j] <- nodePal[i]
             }
-            wcCol[!wcCol %in% pal] <- "grey"
+            wcCol[!wcCol %in% nodePal] <- "grey"
 
         }
         for (i in madeUpper) {

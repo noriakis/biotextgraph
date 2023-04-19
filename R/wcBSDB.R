@@ -163,7 +163,7 @@ wcBSDB <- function (mbList,
         fil <- fil[!is.na(fil$ID),] # Some PMIDs have NA
         # returnList[["filterWords"]] <- filterWords
         ret@pmids <- fil$ID
-        ret@rawText <- subTb
+        ret@rawTextBSDB <- subTb
 
     } else {
         qqcat("Redoing abstract query for microbes\n")
@@ -209,11 +209,11 @@ wcBSDB <- function (mbList,
                 #                                 "Abstract",
                 #                                 recursive = TRUE)
                 # absttext <- as.character(xmlValue(abstset))
-                ret@rawTextBSDB <- abstDf
+                ret@rawText <- abstDf
             } else {
-                abstDf <- ret@rawTextBSDB
+                abstDf <- ret@rawText
                 filterWords <- ret@filtered
-                subTb <- ret@rawText
+                subTb <- ret@rawTextBSDB
             }
             ## TODO: ask taking unique text or not?
             docs <- VCorpus(VectorSource(abstDf$text))
@@ -227,7 +227,7 @@ wcBSDB <- function (mbList,
         abstArg[["onlyDf"]] <- TRUE
 
         abstDf <- do.call(wcAbst, abstArg)
-        ret@rawTextBSDB <- abstDf
+        ret@rawText <- abstDf
         ret@type <- paste0("BSDB_PubMed_",target)
         docs <- VCorpus(VectorSource(abstDf$text))
     }
@@ -551,6 +551,21 @@ wcBSDB <- function (mbList,
             }
         }
 
+        ## Append node category e.g., Words, Microbes ...
+        if (!is.null(nodeN)) {
+            nodeCat <- NULL
+            for (nn in seq_along(names(V(coGraph)))) {
+                if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                    nodeCat[nn] <- nodeN[names(V(coGraph))[nn]]
+                } else {
+                    nodeCat[nn] <- "Words"
+                }
+            }
+        } else {
+            nodeCat <- rep("Words",length(V(coGraph)))
+        }
+        V(coGraph)$nodeCat <- nodeCat
+
         if (colorize) {
             if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
             addFreqToMB <- TRUE
@@ -605,8 +620,8 @@ wcBSDB <- function (mbList,
             edgeLabel, showLegend, fontFamily)
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
-                          showLegend,catColors,nodeN,pal,fontFamily,colorText,scaleRange,
-                          useSeed)
+                          showLegend,catColors,pal,fontFamily,colorText,scaleRange,
+                          useSeed, ret)
         netPlot <- netPlot +
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
