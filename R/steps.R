@@ -789,6 +789,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         if (!is.null(nodeN)) {
             addC <- V(coGraph)$tag
             for (nn in seq_along(names(V(coGraph)))) {
+                if (V(coGraph)$tag[nn]!="not_assigned"){next}
                 if (names(V(coGraph))[nn] %in% names(nodeN)) {
                     addC[nn] <- nodeN[names(V(coGraph))[nn]]
                 } else {
@@ -998,6 +999,7 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         nodeN <- rep("Words", length(V(coGraph)))
         V(coGraph)$nodeCat <- nodeN
     }
+    names(nodeN) <- V(coGraph)$name
 
     if (length(ret@pvpick)!=0) { ## If tag
         netCol <- tolower(names(V(coGraph)))
@@ -1013,6 +1015,7 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         if (!is.null(nodeN)) {
           addC <- V(coGraph)$tag
           for (nn in seq_along(names(V(coGraph)))) {
+            if (V(coGraph)$tag[nn]!="not_assigned"){next}
             if (names(V(coGraph))[nn] %in% names(nodeN)) {
               addC[nn] <- nodeN[names(V(coGraph))[nn]]
             } else {
@@ -1176,6 +1179,7 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
     if (!is.null(nodeN)) {
       addC <- V(coGraph)$tag
       for (nn in seq_along(names(V(coGraph)))) {
+        if (V(coGraph)$tag[nn]!="not_assigned"){next}
         if (names(V(coGraph))[nn] %in% names(nodeN)) {
           addC[nn] <- nodeN[names(V(coGraph))[nn]]
         } else {
@@ -1186,6 +1190,7 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
     }
   }
   
+  ## Assign node category, not tag
   if (!is.null(nodeN)) {
     nodeCat <- NULL
     for (nn in seq_along(names(V(coGraph)))) {
@@ -1325,6 +1330,9 @@ plot_biotextgraph <- function(ret,
         cols <- V(coGraph)$tag |> unique()
         if (is.null(tag_colors)) {
             tag_colors <- RColorBrewer::brewer.pal(length(cols), "Dark2")
+            if (length(tag_colors) < length(cols)) {
+                tag_colors <- colorRampPalette(RColorBrewer::brewer.pal(length(cols), "Dark2"))(length(cols))
+            }
             names(tag_colors) <- cols
             tag_colors["Genes"] <- query_color
             tag_colors["query"] <- query_color

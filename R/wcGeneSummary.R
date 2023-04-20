@@ -328,7 +328,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         DTM <- t(as.matrix(docs))
         
         if (tag) {
-            ## TODO: tagging based on cluster_walktrap or graph-based
             ret <- tag_words(ret, cl, pvclAlpha, whole=tagWhole, num_words=ret@numWords)
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
@@ -471,6 +470,24 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             V(coGraph)$Freq <- fre
         }
 
+        ## Assign node category
+        if (genePlot) {
+            nodeN <- NULL
+            genes <- ret@geneMap[,2] |> unique()
+            for (nn in V(coGraph)$name) {
+                if (nn %in% genes) {
+                    nodeN <- c(nodeN, "Genes")
+                } else {
+                    nodeN <- c(nodeN, "Words")
+                }
+            }
+            V(coGraph)$nodeCat <- nodeN
+        } else {
+            nodeN <- rep("Words", length(V(coGraph)))
+            V(coGraph)$nodeCat <- nodeN
+        }
+        names(nodeN) <- V(coGraph)$name
+
         if (tag) {
             netCol <- tolower(names(V(coGraph)))
             for (i in seq_along(pvcl$clusters)){
@@ -479,6 +496,19 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
             V(coGraph)$tag <- netCol
+
+            if (!is.null(nodeN)) {
+              addC <- V(coGraph)$tag
+              for (nn in seq_along(names(V(coGraph)))) {
+                if (V(coGraph)$tag[nn]!="not_assigned"){next}
+                if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                  addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                } else {
+                  next
+                }
+              }
+              V(coGraph)$tag <- addC
+            }
         }
 
         if (preserve) {
@@ -501,6 +531,13 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
+        if (tag) {
+            cols <- V(coGraph)$tag |> unique()
+            tagPalette <- tagPalette[1:length(cols)]
+            names(tagPalette) <- cols
+            tagPalette["Genes"] <- geneColor
+        }
+
         if (colorize) {
             netPlot <- netPlot + 
                 geom_node_point(aes(
@@ -516,7 +553,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         } else {
             if (tag) {
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                    color=.data$tag), show.legend = showLegend) +
+                    color=.data$tag), show.legend = showLegend)+
                 scale_color_manual(values=tagPalette)
             } else { 
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
