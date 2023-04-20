@@ -248,6 +248,52 @@ obtain_enzyme <- function(file, ec_num,
 }
 
 
+#' obtain_enrich
+#' 
+#' obtain enrichment analysis description
+#' 
+#' @param geneList gene list
+#' @param keyType key type of gene list
+#' @param enrich `kegg` or `reactome`
+#' @param org_db used to convert ID
+#' @param top_path the number of pathways to be obtained
+#' sorted by p-values
+#' @export
+#' @return biotext class object
+obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
+    org_db=org.Hs.eg.db, top_path=30) {
+    ret <- new("biotext")
+    ret@query <- geneList
+    ret@type <- "enrich"
+
+    qqcat("Input genes: @{length(geneList)}\n")
+    if (keyType!="ENTREZID"){
+        geneList <- AnnotationDbi::select(org_db,
+            keys = geneList, columns = c("ENTREZID"),
+            keytype = keyType)$ENTREZID
+        geneList <- geneList[!is.na(geneList)] |> unique()
+        qqcat("  Converted input genes: @{length(geneList)}\n")
+    }
+
+    qqcat("Performing enrichment analysis\n")
+    if (enrich=="reactome"){
+        pathRes <- ReactomePA::enrichPathway(geneList)
+        pathRes@result$Description <- gsub("Homo sapiens\r: ",
+                        "",
+                        pathRes@result$Description)                
+    } else if (enrich=="kegg"){
+        pathRes <- clusterProfiler::enrichKEGG(geneList)
+    } else {
+        ## Currently only supports some pathways
+        stop("Please specify 'reactome' or 'kegg'")
+    }
+    ret@enrichResults <- pathRes@result
+    ret@rawText <- pathRes@result[1:top_path,"Description"] |> 
+    data.frame() |> `colnames<-`(c("text"))
+    ret
+}
+
+
 #' obtain_refseq
 #' 
 #' obtain RefSeq text data
