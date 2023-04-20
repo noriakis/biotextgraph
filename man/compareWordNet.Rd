@@ -20,7 +20,9 @@ compareWordNet(
   returnNet = FALSE,
   colPal = "Pastel1",
   colNum = 20,
-  colorText = FALSE
+  colorText = FALSE,
+  community = FALSE,
+  returnClass = TRUE
 )
 }
 \arguments{
@@ -55,6 +57,8 @@ compareWordNet(
 \item{colNum}{color number to be used in plot}
 
 \item{colorText}{whether to color text based on category}
+
+\item{community}{compare based on community (igraph), override tag}
 }
 \value{
 plot comparing gene clusters

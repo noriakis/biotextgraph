@@ -246,7 +246,7 @@ wcMan <- function(df, madeUpper=NULL,
           corThresh, cooccurrence, onWholeDTM)
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret
-
+      ret@igraphRaw <- coGraph
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
       V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 

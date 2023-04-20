@@ -4,12 +4,14 @@
 \alias{graph_cluster}
 \title{graph_cluster}
 \usage{
-graph_cluster(ret, func = igraph::cluster_leiden)
+graph_cluster(ret, func = igraph::cluster_leiden, factorize = TRUE)
 }
 \arguments{
 \item{ret}{biotext class object}
 
 \item{func}{community detection algorithm in igraph}
+
+\item{factorize}{convert to factor upon assigning}
 }
 \value{
 biotext class object
