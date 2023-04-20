@@ -54,14 +54,14 @@ wcGeneSummary(
   onWholeDTM = FALSE,
   pre = TRUE,
   takeMean = FALSE,
-  nodePal = palette(),
+  tagPalette = palette(),
   collapse = FALSE,
   addFreqToGene = FALSE,
   useUdpipe = FALSE,
   normalize = FALSE,
   fontFamily = "sans",
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
-  scaleLowFreq = NULL,
+  scaleFreq = NULL,
   colorize = FALSE,
   geneColor = "grey",
   argList = list(),
@@ -173,7 +173,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{takeMean}{take mean values for each term in term-document matrix}
 
-\item{nodePal}{node palette when tag is TRUE}
+\item{tagPalette}{tag palette when tag is TRUE}
 
 \item{collapse}{default to FALSE, collapse all the sentences}
 
@@ -187,7 +187,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{udpipeModel}{udpipe model file name}
 
-\item{scaleLowFreq}{default to NULL, scale the value if specified}
+\item{scaleFreq}{default to NULL, scale the value if specified}
 
 \item{colorize}{color the nodes and texts based on their category}
 

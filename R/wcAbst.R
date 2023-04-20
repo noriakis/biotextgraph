@@ -53,7 +53,7 @@
 #' @param sortOrder sort order, passed to rentrez function
 #' @param stem whether to use stemming
 #' @param onlyDf return only the raw data.frame of searching PubMed
-#' @param nodePal node palette when tag is TRUE
+#' @param tagPalette tag palette when tag is TRUE
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
 #' @param onlyGene plot only the gene symbol
@@ -75,6 +75,7 @@
 #' @param colorize color the nodes and texts based on their category
 #' @param queryColor color for associated queries with words
 #' @param useSeed use seed
+#' @param scaleFreq scale the frequency
 #' @export
 #' @examples \donttest{wcAbst("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -98,8 +99,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE,
-                   onlyDf=FALSE, nodePal=palette(), preserve=TRUE, takeMax=FALSE,
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE, scaleFreq=NULL,
+                   onlyDf=FALSE, tagPalette=palette(), preserve=TRUE, takeMax=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
                    naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE, queryColor="grey",
                    useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
@@ -266,7 +267,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       ret <- retUdpipeNet(ret=ret,texts=allDataDf,udmodel_english=udmodel_english,
           orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
           colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
-          pal=pal,showNeighbors=showNeighbors, showFreq=showFreq, nodePal=nodePal)
+          pal=pal,showNeighbors=showNeighbors, showFreq=showFreq, nodePal=tagPalette)
       return(ret)
     }
 
@@ -412,7 +413,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         if (tag) {
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$tag), show.legend = showLegend) +
-            scale_color_manual(values=nodePal)
+            scale_color_manual(values=tagPalette)
         } else { 
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq), show.legend = showLegend)+
@@ -528,9 +529,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       wcCol <- returnDf$word
       for (i in seq_along(pvcl$clusters)){
         for (j in pvcl$clusters[[i]])
-          wcCol[wcCol==j] <- pal[i]
+          wcCol[wcCol==j] <- tagPalette[i]
       }
-      wcCol[!wcCol %in% pal] <- "grey"
+      wcCol[!wcCol %in% tagPalette] <- "grey"
       
     }
     for (i in madeUpper) {
@@ -544,11 +545,12 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
             }
         }
     }
-    if (tfidf) {
-        showFreq <- returnDf$freq*10
+    if (!is.null(scaleFreq)) {
+        showFreq <- returnDf$freq*scaleFreq
     } else {
         showFreq <- returnDf$freq
     }
+
     if (tag){
         argList[["words"]] <- returnDf$word
         argList[["freq"]] <- showFreq

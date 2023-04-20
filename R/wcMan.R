@@ -37,7 +37,7 @@
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param stem whether to use stemming
-#' @param nodePal node palette when tag is TRUE, default to NULL
+#' @param tagPalette palette for each tag when tag is TRUE, default to NULL
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
 #' @param argList parameters to pass to wordcloud()
@@ -58,6 +58,7 @@
 #' @param wcScale scaling size for ggwordcloud
 #' @param fontFamily font family to use, default to "sans"
 #' @param useSeed seed
+#' @param scaleFreq scale the frequency
 #' @examples
 #' ret <- wcGeneSummary("DDX41", plotType="wc")
 #' wcMan(ret@rawText$Gene_summary, plotType="wc")
@@ -78,12 +79,12 @@ wcMan <- function(df, madeUpper=NULL,
                    useFil=NA, filType="above", cooccurrence=FALSE,
                    filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
                    pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
-                   pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
+                   pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
                    showLegend=FALSE, plotType="network", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorizeNoFreq=FALSE,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
-                   nodePal=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
+                   tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
@@ -182,7 +183,7 @@ wcMan <- function(df, madeUpper=NULL,
         ret <- retUdpipeNet(ret=ret, texts=df,udmodel_english=udmodel_english,
             orgDb=NULL, filterWords=filterWords, additionalRemove=additionalRemove,
             colorText=colorText,edgeLink=edgeLink,queryPlot=queryPlot, layout=layout,
-            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
         return(ret)
     }
 
@@ -482,8 +483,8 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
 
-      tagColors <- nodePal
-      netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
+      tagColors <- tagPalette
+      netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
                           useSeed, ret, tagColors)
       netPlot <- netPlot+
@@ -521,9 +522,9 @@ wcMan <- function(df, madeUpper=NULL,
       wcCol <- returnDf$word
       for (i in seq_along(pvcl$clusters)){
         for (j in pvcl$clusters[[i]])
-          wcCol[wcCol==j] <- pal[i]
+          wcCol[wcCol==j] <- tagPalette[i]
       }
-      wcCol[!wcCol %in% pal] <- "grey"
+      wcCol[!wcCol %in% tagPalette] <- "grey"
     }
     for (i in madeUpper) {
       # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
@@ -536,11 +537,11 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
     }
-    if (tfidf) {
-        showFreq <- returnDf$freq*10
+    if (!is.null(scaleFreq)) {
+        showFreq <- returnDf$freq*scaleFreq
     } else {
         showFreq <- returnDf$freq
-    }    
+    }
     if (tag){
         argList[["words"]] <- returnDf$word
         argList[["freq"]] <- showFreq

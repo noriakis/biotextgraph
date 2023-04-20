@@ -52,7 +52,7 @@
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
 #' @param stem whether to use stemming
-#' @param nodePal node palette when tag is TRUE
+#' @param tagPalette tag palette when tag is TRUE
 #' @param preserve preserve original characters
 #' @param takeMax take max values for each term in term-document matrix
 #' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
@@ -68,7 +68,7 @@
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
 #' @param colorize color the nodes and texts based on their category
 #' @param geneColor color for associated genes with words
-#' @param scaleLowFreq default to NULL, scale the value if specified
+#' @param scaleFreq default to NULL, scale the value if specified
 #' @param useSeed seed
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -112,10 +112,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeDTM=FALSE, pre=TRUE, takeMean=FALSE,
-                            nodePal=palette(), collapse=FALSE, addFreqToGene=FALSE,
+                            tagPalette=palette(), collapse=FALSE, addFreqToGene=FALSE,
                             useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
-                            scaleLowFreq=NULL, colorize=FALSE, geneColor="grey",
+                            scaleFreq=NULL, colorize=FALSE, geneColor="grey",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
                             useSeed=42) {
     ret <- new("biotext")
@@ -250,7 +250,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
             orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
             colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
-            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=nodePal)
+            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
         return(ret)
     }
     ret@corpus <- docs
@@ -517,7 +517,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             if (tag) {
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                     color=.data$tag), show.legend = showLegend) +
-                scale_color_manual(values=nodePal)
+                scale_color_manual(values=tagPalette)
             } else { 
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                     color=.data$Freq), show.legend = showLegend)+
@@ -641,9 +641,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
-                    wcCol[wcCol==j] <- nodePal[i]
+                    wcCol[wcCol==j] <- tagPalette[i]
             }
-            wcCol[!wcCol %in% nodePal] <- "grey"
+            wcCol[!wcCol %in% tagPalette] <- "grey"
 
         }
         for (i in madeUpper) {
@@ -657,14 +657,11 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 }
             }
         }
-        if (tfidf) {
-            showFreq <- returnDf$freq*10
+        
+        if (!is.null(scaleFreq)) {
+            showFreq <- returnDf$freq*scaleFreq
         } else {
             showFreq <- returnDf$freq
-        }
-
-        if (!is.null(scaleLowFreq)) {
-            showFreq <- returnDf$freq*scaleLowFreq
         }
 
         if (tag){

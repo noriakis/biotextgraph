@@ -29,7 +29,7 @@ wcBSDB(
   metThresh = 0.2,
   curate = TRUE,
   abstArg = list(),
-  nodePal = NULL,
+  tagPalette = NULL,
   metCol = NULL,
   scaleRange = c(5, 10),
   showLegend = FALSE,
@@ -44,6 +44,7 @@ wcBSDB(
   colorize = FALSE,
   cooccurrence = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
+  scaleFreq = NULL,
   ngram = NA,
   plotType = "network",
   disPlot = FALSE,
@@ -116,7 +117,7 @@ wcBSDB(
 
 \item{abstArg}{passed to PubMed function when using curate=FALSE}
 
-\item{nodePal}{node palette when tag is TRUE}
+\item{tagPalette}{tag palette when tag is TRUE}
 
 \item{metCol}{metabolite data frame column name in the order of
 "candidate taxon", "metabolite", "quantitative values for thresholding"}
@@ -149,6 +150,8 @@ except for words which have frequency mapping}
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
 \item{udpipeModel}{udpipe model file name}
+
+\item{scaleFreq}{scale the frequency}
 
 \item{ngram}{default to NA (1)}
 

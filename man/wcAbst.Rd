@@ -42,8 +42,9 @@ wcAbst(
   edgeLink = TRUE,
   ngram = NA,
   genePlot = FALSE,
+  scaleFreq = NULL,
   onlyDf = FALSE,
-  nodePal = palette(),
+  tagPalette = palette(),
   preserve = TRUE,
   takeMax = FALSE,
   useUdpipe = FALSE,
@@ -149,9 +150,11 @@ instead of correlation using bnlearn}
 \item{genePlot}{plot associated genes (default: FALSE)
 Query gene name is shown with (Q)}
 
+\item{scaleFreq}{scale the frequency}
+
 \item{onlyDf}{return only the raw data.frame of searching PubMed}
 
-\item{nodePal}{node palette when tag is TRUE}
+\item{tagPalette}{tag palette when tag is TRUE}
 
 \item{preserve}{try to preserve the original characters}
 
