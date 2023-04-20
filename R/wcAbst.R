@@ -298,8 +298,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM)
     coGraph <- matrixs$coGraph
+
     ret <- matrixs$ret
-    ## before or after?
+    ret@igraphRaw <- coGraph
     coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
     V(coGraph)$Freq <- matSorted[V(coGraph)$name]
 

@@ -548,10 +548,16 @@ make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 #' graph_cluster
 #' @param ret biotext class object
 #' @param func community detection algorithm in igraph
+#' @param factorize convert to factor upon assigning
 #' @return biotext class object
 #' @export
-graph_cluster <- function(ret, func=igraph::cluster_leiden) {
+graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 	ret@communities <- do.call(func, list(graph=ret@igraphRaw))
+    if (factorize) {
+        V(ret@igraphRaw)$community <- factor(ret@communities$membership)
+    } else {
+        V(ret@igraphRaw)$community <- ret@communities$membership
+    }
 	ret
 }
 
@@ -1166,6 +1172,9 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   ret
 }
 
+#' assign_community
+#' assign community and assign remaining queries the other category
+#' If all words, just use like V(g)$community <- community$membership
 #' @noRd
 assign_community <- function(ret, coGraph) {
     if (!is.null(attributes(ret@communities)$names)) {
@@ -1233,6 +1242,7 @@ plot_biotextgraph <- function(ret,
     if (color_by_community & color_by_tag) {
         stop("Cannot specify both of community or tag for coloring")
     }
+
 	coGraph <- ret@igraph
 
     if (colorize) {
@@ -1256,7 +1266,7 @@ plot_biotextgraph <- function(ret,
         showLegend=show_legend,
         fontFamily=font_family)
 
-    cols <- V(ret@igraph)$nodeCat |> unique()
+    cols <- V(coGraph)$nodeCat |> unique()
     if (is.null(cat_colors)) {
         cat_colors <- RColorBrewer::brewer.pal(length(cols), "Dark2")
         names(cat_colors) <- cols

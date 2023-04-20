@@ -18,6 +18,7 @@
 #' @param colNum color number to be used in plot
 #' @param colorText whether to color text based on category
 #' @param ovlThresh show text with this number of overlap between graphs
+#' @param community compare based on community (igraph), override tag 
 #' 
 #' @export
 #' @examples
@@ -32,7 +33,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
                            freqMean=FALSE, scaleRange=c(5,10), ovlThresh=0,
                            returnNet=FALSE, colPal="Pastel1", colNum=20,
-                           colorText=FALSE) {
+                           colorText=FALSE, community=FALSE, returnClass=TRUE) {
+  ret <- new("biotext")
+  ret@type <- "combine"
   listOfIGs <- list()
   listOfNodes <- list()
 
@@ -62,12 +65,30 @@ compareWordNet <- function(listOfNets, titles=NULL,
   uig <- simplify(Reduce(igraph::union, listOfIGs))
   nodeAttr <- names(get.vertex.attribute(uig))
   tagName <- nodeAttr[grepl("tag", nodeAttr)]
+  communityName <- nodeAttr[grepl("community", nodeAttr)]
   freqName <- nodeAttr[grepl("Freq", nodeAttr)]
 
   ## concatenate tags
   if (tag) {
       tags <- c()
       for (tn in tagName){
+          tags <- cbind(tags, get.vertex.attribute(uig, tn))
+      }
+      contag <- apply(tags, 1, function(x){
+          septag <- x[!is.na(x) & x!="not_assigned"]
+          
+        if (length(septag)>=tagLevel) {
+            return(paste(septag, collapse="_"))
+        } else {
+            return(NA)
+        }
+      } )
+      V(uig)$tag <- contag
+  }
+
+  if (community) {
+      tags <- c()
+      for (tn in communityName){
           tags <- cbind(tags, get.vertex.attribute(uig, tn))
       }
       contag <- apply(tags, 1, function(x){
@@ -121,36 +142,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
   V(uig)$col <- col
   V(uig)$ovl <- ovl
   
-  ## concatenate tags
-  # if (tag) {
-  #   contag <- c()
-  #   for (i in seq_along(names(V(uig)))){
-  #     t1 <- str_replace(V(uig)$tag_1[i], "cluster", "")
-  #     t2 <- str_replace(V(uig)$tag_2[i], "cluster", "")
-  #     if (is.na(t1) | is.na(t2)) {
-  #       contag <- c(contag, NA)
-  #     } else if (t1=="not_assigned"|t2=="not_assigned"){
-  #       contag <- c(contag, NA)
-  #     } else {
-  #       contag <- c(contag, paste0(t1,t2))
-  #     }
-  #   }
 
-  #   V(uig)$tag <- contag
-  # }
-  # print(contag)
-  
-  # col <- c()
-  # for (node in names(V(uig))){
-  #   if (node %in% commonNodes) {
-  #     col <- c(col, "Common")
-  #   } else if (node %in% names(V(wc1$ig))){
-  #     col <- c(col, titles[1])
-  #   } else {
-  #     col <- c(col, titles[2])
-  #   }
-  # }
-  # V(uig)$col <- col
 
   if (size=="freq") {
     V(uig)$size <- V(uig)$Freqs
@@ -163,6 +155,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
   if (returnNet){
     return(uig)
   }
+  
+  ret@igraphRaw <- uig
 
   catNum <- length(unique(V(uig)$col))
   ## You can change it later
@@ -182,41 +176,35 @@ compareWordNet <- function(listOfNets, titles=NULL,
     geom_edge_diagonal(color="grey")
   }
   
-  if (tag){
-    ## Hull sometimes make groups inconsistent
-    comNet <- comNet + 
-              geom_mark_hull(
-                aes(.data$x,
-                  .data$y,
-                  group=.data$tag,
-                  fill=.data$tag,
-                filter=!is.na(.data$tag)),
-                concavity=conc,
-                alpha=0.25,
-                na.rm=FALSE,
-                show.legend=TRUE,
-                inherit.aes=TRUE)
-    ## TODO:
-    ## specifying label produces an error,
-    ## thus show.legend=TRUE is specified
-    comNet <- comNet + 
-      geom_node_point(aes(color=.data$col,
-        size=.data$size))+
-        scale_color_discrete(name="Group")
-    # comNet <- comNet + geom_mark_hull(
-    #   aes(comNet$data$x,
-    #       comNet$data$y,
-    #       group=tag,
-    #       fill=tag,
-    #       label=tag,
-    #       filter = !is.na(tag)),
-    #   concavity = conc,
-    #   # expand = unit(2, "mm"),
-    #   alpha = 0.25,
-    #   na.rm = TRUE,
-    #   # label.fill="transparent",
-    #   show.legend = FALSE
-    # )
+  if (tag | community){
+    if (hull) {
+      ## Hull sometimes make groups inconsistent
+      comNet <- comNet + 
+                geom_mark_hull(
+                  aes(.data$x,
+                    .data$y,
+                    group=.data$tag,
+                    fill=.data$tag,
+                  filter=!is.na(.data$tag)),
+                  concavity=conc,
+                  alpha=0.25,
+                  na.rm=FALSE,
+                  show.legend=TRUE,
+                  inherit.aes=TRUE)
+      ## TODO:
+      ## specifying label produces an error,
+      ## thus show.legend=TRUE is specified
+      comNet <- comNet + 
+        geom_node_point(aes(color=.data$col,
+          size=.data$size))+
+          scale_color_discrete(name="Group")
+    } else {
+      comNet <- comNet + 
+        geom_node_point(aes(color=.data$tag,
+          size=.data$size))+
+          scale_color_discrete(name="Tag")      
+    }
+
   } else {
   
     if (hull) {
@@ -262,6 +250,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
     scale_size(range=scaleRange, name="Frequency")+
     theme_graph()
   }
+  ret@net <- comNet
+  ret@numWords <- length(V(uig))
+  if (returnClass) {return(ret)}
   comNet
 }
 

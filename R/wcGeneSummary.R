@@ -384,9 +384,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
         coGraph <- matrixs$coGraph
-        ret@igraphRaw <- coGraph
-        ret <- matrixs$ret
 
+        ret <- matrixs$ret
+        ret@igraphRaw <- coGraph
         ## before or after?
         coGraph <- induced.subgraph(coGraph,
             names(V(coGraph)) %in% freqWords)
