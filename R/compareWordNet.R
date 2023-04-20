@@ -32,7 +32,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size="freq", conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
                            freqMean=FALSE, scaleRange=c(5,10), ovlThresh=0,
-                           returnNet=FALSE, colPal="Pastel1", colNum=20,
+                           returnNet=FALSE, colPal="Pastel1", colNum=5,
                            colorText=FALSE, community=FALSE, returnClass=TRUE) {
   ret <- new("biotext")
   ret@type <- "combine"

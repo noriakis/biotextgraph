@@ -44,7 +44,7 @@
 #' @param stem whether to use stemming
 #' @param curate include articles in bugsigdb
 #' @param abstArg passed to PubMed function when using curate=FALSE
-#' @param nodePal node palette when tag is TRUE
+#' @param tagPalette tag palette when tag is TRUE
 #' @param ecPlot plot link between enzyme and microbes
 #' this option requires two files to be passed to wcEC() and getUPTax().
 #' @param ecFile enzyme database file
@@ -69,6 +69,7 @@
 #' @param colorizeNoFreq color the nodes and texts based on their category,
 #' erase the frequency information (only the discrete mapping)
 #' @param useSeed use seed
+#' @param scaleFreq scale the frequency
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -99,12 +100,12 @@ wcBSDB <- function (mbList,
                     madeUpper=c("dna","rna"), redo=NULL, fontFamily="sans",
                     pal=c("blue","red"), numWords=15, preserve=TRUE,
                     metab=NULL, metThresh=0.2, curate=TRUE,
-                    abstArg=list(), nodePal=NULL, metCol=NULL,
+                    abstArg=list(), tagPalette=NULL, metCol=NULL,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
                     useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
-                    udpipeModel="english-ewt-ud-2.5-191206.udpipe",
+                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
                     ngram=NA, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
                     catColors=NULL, colorizeNoFreq=FALSE, useSeed=42,
@@ -319,7 +320,7 @@ wcBSDB <- function (mbList,
         ret <- retUdpipeNet(ret=ret,texts=abstDf,udmodel_english=udmodel_english,
           orgDb=NULL, filterWords=filterWords, additionalRemove=additionalRemove,
           colorText=colorText,edgeLink=edgeLink,queryPlot=mbPlot, layout=layout,
-          pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=nodePal,addNet=addNet)
+          pal=pal,showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette,addNet=addNet)
         ## TODO: add disPlot and the other options
         return(ret)
     }
@@ -619,9 +620,9 @@ wcBSDB <- function (mbList,
         netPlot <- appendEdges(netPlot, FALSE, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
-        netPlot <- appendNodesAndTexts(netPlot,tag,colorize,nodePal,
+        netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed, ret, tagColors=nodePal)
+                          useSeed, ret, tagColors=tagPalette)
         netPlot <- netPlot +
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
@@ -671,9 +672,9 @@ wcBSDB <- function (mbList,
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
-                    wcCol[wcCol==j] <- pal[i]
+                    wcCol[wcCol==j] <- tagPalette[i]
             }
-            wcCol[!wcCol %in% pal] <- "grey"
+            wcCol[!wcCol %in% tagPalette] <- "grey"
         }
         
         for (i in madeUpper) {
@@ -687,11 +688,12 @@ wcBSDB <- function (mbList,
                 }
             }
         }
-        if (tfidf) {
-            showFreq <- returnDf$freq*10
+        if (!is.null(scaleFreq)) {
+            showFreq <- returnDf$freq*scaleFreq
         } else {
             showFreq <- returnDf$freq
         }
+
         if (tag){
             argList[["words"]] <- returnDf$word
             argList[["freq"]] <- showFreq

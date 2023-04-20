@@ -20,6 +20,7 @@ wcMan(
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
+  scaleFreq = NULL,
   showLegend = FALSE,
   plotType = "network",
   colorText = FALSE,
@@ -36,7 +37,7 @@ wcMan(
   edgeLink = TRUE,
   ngram = NA,
   colorize = FALSE,
-  nodePal = NULL,
+  tagPalette = NULL,
   preserve = TRUE,
   takeMax = FALSE,
   catColors = NULL,
@@ -90,6 +91,8 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
 \item{scaleRange}{scale for label and node size in correlation network}
 
+\item{scaleFreq}{scale the frequency}
+
 \item{showLegend}{whether to show legend in correlation network}
 
 \item{plotType}{"wc" or "network"}
@@ -124,7 +127,7 @@ erase the frequency information (only the discrete mapping)}
 
 \item{colorize}{color the nodes and texts based on their category}
 
-\item{nodePal}{node palette when tag is TRUE, default to NULL}
+\item{tagPalette}{palette for each tag when tag is TRUE, default to NULL}
 
 \item{preserve}{try to preserve the original characters}
 
