@@ -360,6 +360,24 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     } else {
       E(coGraph)$edgeColor <- E(coGraph)$weight
     }
+
+    ## Assign node category
+    if (genePlot) {
+        nodeN <- NULL
+        genes <- ret@geneMap[,2] |> unique()
+        for (nn in V(coGraph)$name) {
+            if (nn %in% genes) {
+                nodeN <- c(nodeN, "Queries")
+            } else {
+                nodeN <- c(nodeN, "Words")
+            }
+        }
+        V(coGraph)$nodeCat <- nodeN
+    } else {
+        nodeN <- rep("Words", length(V(coGraph)))
+        V(coGraph)$nodeCat <- nodeN
+    }
+    names(nodeN) <- V(coGraph)$name
     
     if (tag) {
       netCol <- tolower(names(V(coGraph)))
@@ -369,7 +387,20 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       }
       netCol[!startsWith(netCol, "cluster")] <- "not_assigned"
       V(coGraph)$tag <- netCol
+      if (!is.null(nodeN)) {
+        addC <- V(coGraph)$tag
+        for (nn in seq_along(names(V(coGraph)))) {
+          if (V(coGraph)$tag[nn]!="not_assigned"){next}
+          if (names(V(coGraph))[nn] %in% names(nodeN)) {
+            addC[nn] <- nodeN[names(V(coGraph))[nn]]
+          } else {
+            next
+          }
+        }
+        V(coGraph)$tag <- addC
+      }
     }
+
     if (preserve) {
       newGname <- NULL
       for (nm in names(V(coGraph))) {
@@ -399,7 +430,14 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     netPlot <- ggraph(coGraph, layout=layout)
     netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
-    
+
+    if (tag) {
+        cols <- V(coGraph)$tag |> unique()
+        tagPalette <- tagPalette[1:length(cols)]
+        names(tagPalette) <- cols
+        tagPalette["Queries"] <- queryColor
+    }    
+
     if (colorize) {
         netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq),
