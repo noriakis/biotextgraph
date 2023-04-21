@@ -415,7 +415,7 @@ wcMan <- function(df, madeUpper=NULL,
       if (tag) {
         if (is.null(tagPalette)) {
           cols <- V(coGraph)$tag |> unique()
-          tagPalette <- tagPalette[1:length(cols)]
+          tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
           names(tagPalette) <- cols
           tagPalette["query"] <- queryColor
         }

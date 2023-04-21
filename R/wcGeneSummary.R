@@ -115,7 +115,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
                             onWholeDTM=FALSE, pre=TRUE, takeMean=FALSE,
-                            tagPalette=palette(), collapse=FALSE, addFreqToGene=FALSE,
+                            tagPalette=NULL, collapse=FALSE, addFreqToGene=FALSE,
                             useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             scaleFreq=NULL, colorize=FALSE, geneColor="grey",
@@ -125,7 +125,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     ret <- new("biotext")
     ret@query <- geneList
     ret@type <- "refseq"
-
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
@@ -301,6 +300,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
     freqWords <- names(matSorted)
 
     if (plotType=="network"){
+        incGene <- NULL
         
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         for (i in madeUpper) {
@@ -520,13 +520,22 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             edgeLabel, showLegend, fontFamily)
 
         if (tag) { ## Obtain tag coloring
-            cols <- V(coGraph)$tag |> unique()
-            tagPalette <- tagPalette[1:length(cols)]
-            names(tagPalette) <- cols
-            tagPalette["Genes"] <- geneColor
+            if (is.null(tagPalette)) {
+              cols <- V(coGraph)$tag |> unique()
+              tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+              names(tagPalette) <- cols
+              tagPalette["Genes"] <- geneColor
+            }
         }
 
-        if (colorize) {
+        if (tag) {
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                    color=.data$tag), show.legend = showLegend)+
+                scale_color_manual(values=tagPalette)
+
+        } else {
+            if (colorize) {
+
             netPlot <- netPlot + 
                 geom_node_point(aes(
                     size=.data$Freq,
@@ -537,12 +546,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 geom_node_point(aes(size=.data$Freq,
                     filter=.data$name %in% incGene),
                 show.legend = FALSE, color=geneColor)
-
-        } else {
-            if (tag) {
-                netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                    color=.data$tag), show.legend = showLegend)+
-                scale_color_manual(values=tagPalette)
             } else { 
                 netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                     color=.data$Freq), show.legend = showLegend)+
@@ -552,7 +555,17 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         if (colorText){
-            if (colorize) {
+            if (tag) {
+                    netPlot <- netPlot + 
+                        geom_node_text(aes(label=.data$name,
+                            size=.data$Freq, color=.data$tag),
+                            family=fontFamily,
+                            check_overlap=TRUE, repel=TRUE,
+                            bg.color = "white", segment.color="black",
+                            bg.r = .15, show.legend=showLegend)
+            } else {
+                if (colorize) {
+
                     ## This obtain ggrepel text position and 
                     ## show text based on these potisions
                     netPlot <- netPlot + 
@@ -566,7 +579,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                     layerNum <- length(netPlot$layers)
                     geom_param_list <- netPlot$layers[[layerNum]]$geom_params
                     build <- ggplot_build(netPlot)$data[[layerNum]]
-                    build[ netPlot$data$name %in% incGene, ]$colour <- geneColor
+                    if (!is.null(incGene)) {
+                        build[ netPlot$data$name %in% incGene, ]$colour <- geneColor
+                    }
 
                     aes_list <- netPlot$layers[[layerNum]]$mapping
                     aes_list["filter"] <- NULL
@@ -589,15 +604,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                        label=build$label,
                                         color=build$colour)))
 
-            } else {
-                if (tag) {
-                    netPlot <- netPlot + 
-                        geom_node_text(aes(label=.data$name,
-                            size=.data$Freq, color=.data$tag),
-                            family=fontFamily,
-                            check_overlap=TRUE, repel=TRUE,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
+
                 } else {
                     netPlot <- netPlot + 
                         geom_node_text(aes(label=.data$name, size=.data$Freq,

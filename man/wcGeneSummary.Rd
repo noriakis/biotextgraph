@@ -54,7 +54,7 @@ wcGeneSummary(
   onWholeDTM = FALSE,
   pre = TRUE,
   takeMean = FALSE,
-  tagPalette = palette(),
+  tagPalette = NULL,
   collapse = FALSE,
   addFreqToGene = FALSE,
   useUdpipe = FALSE,
