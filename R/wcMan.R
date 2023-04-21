@@ -48,8 +48,6 @@
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
 #' @param colorize color the nodes and texts based on their category
-#' @param colorizeNoFreq color the nodes and texts based on their category,
-#' erase the frequency information (only the discrete mapping)
 #' @param catColors named vector showing colors for each category
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
@@ -59,6 +57,8 @@
 #' @param fontFamily font family to use, default to "sans"
 #' @param useSeed seed
 #' @param scaleFreq scale the frequency
+#' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
+#' frequency of the words to nodes other than words
 #' @examples
 #' ret <- wcGeneSummary("DDX41", plotType="wc")
 #' wcMan(ret@rawText$Gene_summary, plotType="wc")
@@ -82,13 +82,13 @@ wcMan <- function(df, madeUpper=NULL,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
                    showLegend=FALSE, plotType="network", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, colorizeNoFreq=FALSE,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
-                   useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
+                   useggwordcloud=TRUE, wcScale=10, fontFamily="sans", addFreqToNonWords=FALSE,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
@@ -278,6 +278,10 @@ wcMan <- function(df, madeUpper=NULL,
         }
       }
 
+
+      ## `nodeN` holds the named vector
+      ## of which category each node in the network
+      ## belongs to.
       nodeN <- NULL
       for (coln in c(incCols, "query")) {
         tmpn <- df[[coln]]
@@ -338,6 +342,12 @@ wcMan <- function(df, madeUpper=NULL,
         V(coGraph)$tag <- addC
       }
 
+      if (addFreqToNonWords) {
+        fre <- V(coGraph)$Freq
+        fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+        V(coGraph)$Freq <- fre
+      }
+
       if (colorize) {
         ## Set pseudo freq based on min value of freq
         fre <- V(coGraph)$Freq
@@ -372,11 +382,6 @@ wcMan <- function(df, madeUpper=NULL,
       }
       V(coGraph)$nodeCat <- nodeCat
 
-
-      if (colorize & colorizeNoFreq) {
-        colorize <- FALSE
-        tag <- TRUE
-      }
 
       if (preserve) {
         newGname <- NULL
@@ -503,10 +508,6 @@ wcMan <- function(df, madeUpper=NULL,
     freqWordsDTM <- t(as.matrix(docs[row.names(docs) %in% freqWords, ]))
     
     if (tag) {
-      # if (!is.null(redo) & length(redo@pvpick)!=0) {
-      #   qqcat("Using previous pvclust results")
-      #   pvcl <- redo@pvpick
-      # } else {
       if (tagWhole){
         pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
       } else {

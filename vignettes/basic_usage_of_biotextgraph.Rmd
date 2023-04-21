@@ -138,7 +138,7 @@ The options in `wordcloud` or `ggwordcloud` including color and rotation can be 
 gwc <- wcGeneSummary(inpSymbol, numWords=200,
                      argList=list(max.words=200, random.order=FALSE,
                      colors=RColorBrewer::brewer.pal(5, "Dark2"),
-                     rot.per=0.4), plotType="wc", scaleLowFreq=2)
+                     rot.per=0.4), plotType="wc", scaleFreq=2)
 gwc
 gwc@wc
 ```

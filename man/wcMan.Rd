@@ -32,7 +32,6 @@ wcMan(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
-  colorizeNoFreq = FALSE,
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -55,6 +54,7 @@ wcMan(
   useggwordcloud = TRUE,
   wcScale = 10,
   fontFamily = "sans",
+  addFreqToNonWords = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   useSeed = 42
 )
@@ -116,9 +116,6 @@ instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
 
-\item{colorizeNoFreq}{color the nodes and texts based on their category,
-erase the frequency information (only the discrete mapping)}
-
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
@@ -164,6 +161,9 @@ on whole dataset or top-words specified by numWords}
 \item{wcScale}{scaling size for ggwordcloud}
 
 \item{fontFamily}{font family to use, default to "sans"}
+
+\item{addFreqToNonWords}{add pseudo-frequency corresponding to minimum
+frequency of the words to nodes other than words}
 
 \item{udpipeModel}{udpipe model file name}
 

@@ -21,6 +21,7 @@ plot_biotextgraph(
   pal = c("blue", "red"),
   layout = "nicely",
   na_edge_color = "grey",
+  add_pseudo_freq = FALSE,
   use_seed = 42
 )
 }
@@ -57,6 +58,8 @@ if FALSE, no node is plotted for query nodes. it overrides color_by_tag.}
 \item{layout}{graph layout}
 
 \item{na_edge_color}{edge color for NA value}
+
+\item{add_pseudo_freq}{add pseudo value for nodes other than words}
 
 \item{use_seed}{seed value for ggrepel}
 }

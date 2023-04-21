@@ -67,7 +67,8 @@ wcGeneSummary(
   argList = list(),
   useggwordcloud = TRUE,
   wcScale = 10,
-  useSeed = 42
+  useSeed = 42,
+  scaleEdgeWidth = c(1, 3)
 )
 }
 \arguments{
@@ -100,7 +101,7 @@ Otherwise take sum.}
 
 \item{organism}{organism ID to use}
 
-\item{pal}{palette for color gradient in correlation network and tag coloring}
+\item{pal}{palette for color gradient in correlation network}
 
 \item{numWords}{the number of words to be shown}
 
@@ -189,7 +190,9 @@ on whole dataset or top-words specified by numWords}
 
 \item{scaleFreq}{default to NULL, scale the value if specified}
 
-\item{colorize}{color the nodes and texts based on their category}
+\item{colorize}{color the word nodes by their frequency, and the other nodes by their category
+if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
+of the words in the network}
 
 \item{geneColor}{color for associated genes with words}
 
@@ -200,6 +203,8 @@ on whole dataset or top-words specified by numWords}
 \item{wcScale}{scaling size for ggwordcloud}
 
 \item{useSeed}{seed}
+
+\item{scaleEdgeWidth}{scale for edge width}
 }
 \value{
 list of data frame and ggplot2 object
