@@ -44,7 +44,14 @@
 #' @param stem whether to use stemming
 #' @param curate include articles in bugsigdb
 #' @param abstArg passed to PubMed function when using curate=FALSE
-#' @param tagPalette tag palette when tag is TRUE
+#' @param tagPalette tag palette when tag is TRUE.
+#' named vector containing `Microbes`, `Diseases`, `Metabolites`, `Enzymes`,
+#' `cluster_1`, `cluster_2`, etc.
+#' @param catColors named vector showing colors for each category
+#' when the tag=FALSE, and colorize=TRUE
+#' @param mbColor color for Microbes when tagPalette or catColors 
+#' is not specified
+#' 
 #' @param ecPlot plot link between enzyme and microbes
 #' this option requires two files to be passed to wcEC() and getUPTax().
 #' @param ecFile enzyme database file
@@ -63,11 +70,8 @@
 #' @param wcScale scaling size for ggwordcloud
 #' @param fontFamily font family to use, default to "sans"
 #' @param addFreqToMB add pseudo frequency to microbes in mbPlot
-#' @param catColors named vector showing colors for each category
 #' @param colorize color the nodes and texts based on their category,
 #' except for words which have frequency mapping
-#' @param colorizeNoFreq color the nodes and texts based on their category,
-#' erase the frequency information (only the discrete mapping)
 #' @param useSeed use seed
 #' @param scaleFreq scale the frequency
 #' @return object consisting of data frame and ggplot2 object
@@ -103,7 +107,7 @@ wcBSDB <- function (mbList,
                     abstArg=list(), tagPalette=NULL, metCol=NULL,
                     scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
                     edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
-                    ecFile=NULL, upTaxFile=NULL, filterMax=FALSE,
+                    ecFile=NULL, upTaxFile=NULL, filterMax=FALSE, mbColor="grey",
                     useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
                     ngram=NA, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
@@ -567,29 +571,6 @@ wcBSDB <- function (mbList,
         }
         V(coGraph)$nodeCat <- nodeCat
 
-        if (colorize) {
-            if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
-            addFreqToMB <- TRUE
-            if (!is.null(nodeN)) {
-                addC <- NULL
-                for (nn in seq_along(names(V(coGraph)))) {
-                    if (names(V(coGraph))[nn] %in% names(nodeN)) {
-                        addC[nn] <- nodeN[names(V(coGraph))[nn]]
-                    } else {
-                        addC[nn] <- "Words"
-                    }
-                }
-                V(coGraph)$tag <- addC
-            } else {
-                V(coGraph)$tag <- rep("Words", length(names(V(coGraph))))
-            }
-        }
-
-        if (colorize & colorizeNoFreq) {
-            ## Only discrete mapping (e.g. Words, Microbes, Diseases)
-            colorize <- FALSE
-            tag <- TRUE
-        }
 
         if (preserve) {
             newGname <- NULL
@@ -603,13 +584,30 @@ wcBSDB <- function (mbList,
             coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }
 
-
+        if (colorize) {addFreqToMB <- TRUE}
         if (addFreqToMB) {
             ## Set pseudo freq based on min value of freq
             fre <- V(coGraph)$Freq
             fre[is.na(fre)] <- min(fre, na.rm=TRUE)
             V(coGraph)$Freq <- fre
         }
+
+
+          ## Define colors
+          if (tag) {
+            if (is.null(tagPalette)) {
+              cols <- V(coGraph)$tag |> unique()
+              tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+              names(tagPalette) <- cols
+              tagPalette["Microbes"] <- mbColor
+            }
+          }
+
+          if (is.null(catColors)) {
+            catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+            names(catColors) <- unique(V(coGraph)$nodeCat)
+            catColors["Microbes"] <- mbColor
+          }
 
 
         ret@igraph <- coGraph

@@ -44,12 +44,13 @@ wcAbst(
   genePlot = FALSE,
   scaleFreq = NULL,
   onlyDf = FALSE,
-  tagPalette = palette(),
+  tagPalette = NULL,
   preserve = TRUE,
   takeMax = FALSE,
   useUdpipe = FALSE,
   udpipeOnlyFreq = FALSE,
   udpipeOnlyFreqN = FALSE,
+  addFreqToQuery = FALSE,
   naEdgeColor = "grey50",
   cooccurrence = FALSE,
   colorize = FALSE,
@@ -167,6 +168,8 @@ Otherwise take sum.}
 
 \item{udpipeOnlyFreqN}{when using udpipe, include only the neighbors of
 high-frequent words}
+
+\item{addFreqToQuery}{add pseudo-frequency to query node}
 
 \item{naEdgeColor}{edge color linking query with the other category than text}
 

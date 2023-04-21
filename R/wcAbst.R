@@ -76,6 +76,7 @@
 #' @param queryColor color for associated queries with words
 #' @param useSeed use seed
 #' @param scaleFreq scale the frequency
+#' @param addFreqToQuery add pseudo-frequency to query node
 #' @export
 #' @examples \donttest{wcAbst("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -100,8 +101,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE, scaleFreq=NULL,
-                   onlyDf=FALSE, tagPalette=palette(), preserve=TRUE, takeMax=FALSE,
-                   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE,
+                   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
+                   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE, addFreqToQuery=FALSE,
                    naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE, queryColor="grey",
                    useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
@@ -319,8 +320,7 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     V(coGraph)$name <- nodeName
     colnames(DTM) <- dtmCol
-    
-    if (colorize) {genePlot <- TRUE}
+    incQuery <- NULL
     if (genePlot) {
       genemap <- c()
       for (rn in nodeName){
@@ -413,6 +413,13 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
     }
     ## Set pseudo freq as min value of freq
+
+    if (addFreqToQuery) {
+      fre <- V(coGraph)$Freq
+      fre[is.na(fre)] <- min(fre, na.rm=TRUE)
+      V(coGraph)$Freq <- fre
+    }
+
     if (colorize) {
       fre <- V(coGraph)$Freq
       fre[is.na(fre)] <- min(fre, na.rm=TRUE)
@@ -432,14 +439,21 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
             edgeLabel, showLegend, fontFamily)
 
     if (tag) {
-        cols <- V(coGraph)$tag |> unique()
-        tagPalette <- tagPalette[1:length(cols)]
-        names(tagPalette) <- cols
-        tagPalette["Queries"] <- queryColor
+        if (is.null(tagPalette)) {
+          cols <- V(coGraph)$tag |> unique()
+          tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+          names(tagPalette) <- cols
+          tagPalette["Queries"] <- queryColor
+        }
     }    
-
-    if (colorize) {
+    ## Tag prior
+    if (tag) {
         netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+            color=.data$tag), show.legend = showLegend) +
+        scale_color_manual(values=tagPalette)
+    } else {
+        if (colorize) {
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq),
             show.legend = showLegend)+
             scale_color_gradient(low=pal[1],high=pal[2],
@@ -447,11 +461,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
             geom_node_point(aes(size=.data$Freq,
                 filter=.data$name %in% incQuery),
             show.legend = FALSE, color=queryColor)
-    } else {
-        if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$tag), show.legend = showLegend) +
-            scale_color_manual(values=tagPalette)
         } else { 
             netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                 color=.data$Freq), show.legend = showLegend)+
@@ -461,7 +470,18 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
 
     if (colorText){
-        if (colorize) {
+        if (tag) {
+                netPlot <- netPlot + 
+                    geom_node_text(aes(label=.data$name,
+                        size=.data$Freq, color=.data$tag),
+                        family=fontFamily,
+                        check_overlap=TRUE, repel=TRUE,
+                        bg.color = "white", segment.color="black",
+                        bg.r = .15, show.legend=showLegend)
+
+        } else {
+            if (colorize) {
+
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name, size=.data$Freq,
                         color=.data$Freq),
@@ -473,7 +493,9 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
 
                 geom_param_list <- netPlot$layers[[layerNum]]$geom_params
                 build <- ggplot_build(netPlot)$data[[layerNum]]
-                build[ netPlot$data$name %in% incQuery, ]$colour <- queryColor
+                if (!is.null(incQuery)) {
+                  build[ netPlot$data$name %in% incQuery, ]$colour <- queryColor
+                }
 
                 aes_list <- netPlot$layers[[layerNum]]$mapping
                 aes_list["filter"] <- NULL
@@ -495,21 +517,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                                   geom_param_list, list(
                                    label=build$label,
                                     color=build$colour)))
-                    # geom_node_text(aes(label=.data$name, size=.data$Freq,
-                    #     filter=.data$name %in% incQuery),
-                    #     check_overlap=TRUE, repel=TRUE,
-                    #     family=fontFamily, color=queryColor,
-                    #     bg.color = "white", segment.color="black",
-                    #     bg.r = .15, show.legend=FALSE)
-        } else {
-            if (tag) {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name,
-                        size=.data$Freq, color=.data$tag),
-                        family=fontFamily,
-                        check_overlap=TRUE, repel=TRUE,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
             } else {
                 netPlot <- netPlot + 
                     geom_node_text(aes(label=.data$name, size=.data$Freq,
@@ -528,9 +535,6 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                         family=fontFamily,
                         bg.color = "white", segment.color="black",
                         bg.r = .15, show.legend=showLegend) 
-    }
-    if (colorize) {
-      # netPlot <- netPlot +  guides(size = FALSE)
     }
     netPlot <- netPlot+
       scale_size(range=scaleRange, name="Frequency")+

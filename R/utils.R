@@ -196,9 +196,9 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 
   if (tag) { ## use pvpick
       useTagColors <- tagColors[ netPlot$data$tag ]
-      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq),color=useTagColors,
-                                          show.legend = showLegend)
-                           # scale_color_manual(values=nodePal)
+      netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
+                                          show.legend = showLegend)+
+                           scale_color_manual(values=tagColors)
   } else {
       if (colorize) {## Colorize by node category (except for words)
           ## colorize points of texts
@@ -222,7 +222,16 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
   }
 
   if (colorText){
-      if (colorize) {
+      if (tag) {
+          useTagColors <- tagColors[ netPlot$data$tag ]
+          netPlot <- netPlot + 
+              geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
+                # color=useTagColors,
+                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  bg.color = "white", segment.color="black",family=fontFamily,
+                  bg.r = .15, show.legend=showLegend)
+      } else {
+        if (colorize) {
         ## [TODO] discrete and continuous scale in same ggplot is discouraged
         ##        use ggnewscale?
         ## [TODO] repel not work for multiple layers
@@ -268,22 +277,13 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
           #         bg.r = .15, show.legend=FALSE)
 
       } else {
-          if (tag) {
-              useTagColors <- tagColors[ netPlot$data$tag ]
-              netPlot <- netPlot + 
-                  geom_node_text(aes(label=.data$name, size=.data$Freq),
-                    color=useTagColors,
-                      check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                      bg.color = "white", segment.color="black",family=fontFamily,
-                      bg.r = .15, show.legend=showLegend)
-          } else {
-              netPlot <- netPlot + 
-                  geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
-                      check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                      bg.color = "white", segment.color="black",family=fontFamily,
-                      bg.r = .15, show.legend=showLegend)
-          }
+          netPlot <- netPlot + 
+              geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$Freq),
+                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  bg.color = "white", segment.color="black",family=fontFamily,
+                  bg.r = .15, show.legend=showLegend)
       }
+    }
   } else {
       netPlot <- netPlot +
                   geom_node_text(aes(label=.data$name, size=.data$Freq),
@@ -291,14 +291,10 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                       color = "black",
                       bg.color = "white", segment.color="black",family=fontFamily,
                       bg.r = .15, show.legend=showLegend) 
-  }
-  ## [TODO] When colorize, node size not representing text frequency in all nodes.
-  # if (!colorize) {
-  if (colorize) {
-    netPlot <- netPlot + guides(size = "none")
-  }
+    }
+
+
   netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
-  # }
   netPlot
 }
 

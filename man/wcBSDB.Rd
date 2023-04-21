@@ -40,6 +40,7 @@ wcBSDB(
   ecFile = NULL,
   upTaxFile = NULL,
   filterMax = FALSE,
+  mbColor = "grey",
   useUdpipe = FALSE,
   colorize = FALSE,
   cooccurrence = FALSE,
@@ -117,7 +118,9 @@ wcBSDB(
 
 \item{abstArg}{passed to PubMed function when using curate=FALSE}
 
-\item{tagPalette}{tag palette when tag is TRUE}
+\item{tagPalette}{tag palette when tag is TRUE.
+named vector containing `Microbes`, `Diseases`, `Metabolites`, `Enzymes`,
+`cluster_1`, `cluster_2`, etc.}
 
 \item{metCol}{metabolite data frame column name in the order of
 "candidate taxon", "metabolite", "quantitative values for thresholding"}
@@ -141,6 +144,9 @@ this option requires two files to be passed to wcEC() and getUPTax().}
 
 \item{filterMax}{use pre-calculated filter based on max-values when excluding TfIdf
 Otherwise take sum.}
+
+\item{mbColor}{color for Microbes when tagPalette or catColors 
+is not specified}
 
 \item{useUdpipe}{use udpipe to make a network}
 
@@ -170,10 +176,8 @@ on whole dataset or top-words specified by numWords}
 
 \item{addFreqToMB}{add pseudo frequency to microbes in mbPlot}
 
-\item{catColors}{named vector showing colors for each category}
-
-\item{colorizeNoFreq}{color the nodes and texts based on their category,
-erase the frequency information (only the discrete mapping)}
+\item{catColors}{named vector showing colors for each category
+when the tag=FALSE, and colorize=TRUE}
 
 \item{useSeed}{use seed}
 
