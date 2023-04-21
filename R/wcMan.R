@@ -37,7 +37,15 @@
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param stem whether to use stemming
+#' 
+#' @param catColors named vector showing colors for each category
+#' (e.g. `query`, `Words` and specified column names in data.frame)
 #' @param tagPalette palette for each tag when tag is TRUE, default to NULL
+#' (e.g. `cluster_1`, `cluster_2`, ...)
+#' @param queryColor color for query in the network plot
+#' if tagPalette or catColors is NULL, determined palettes with 
+#' queryColor replaced with this color will be used.
+#' 
 #' @param takeMax when summarizing term-document matrix, take max.
 #' Otherwise take sum.
 #' @param argList parameters to pass to wordcloud()
@@ -48,7 +56,6 @@
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
 #' @param colorize color the nodes and texts based on their category
-#' @param catColors named vector showing colors for each category
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
@@ -82,7 +89,7 @@ wcMan <- function(df, madeUpper=NULL,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
                    showLegend=FALSE, plotType="network", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20,
+                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
@@ -401,91 +408,23 @@ wcMan <- function(df, madeUpper=NULL,
       ## Main plot
       ret@igraph <- coGraph
       netPlot <- ggraph(coGraph, layout=layout)
-    
-      if (bn){
-        if (edgeLink){
-          if (edgeLabel){
-            netPlot <- netPlot +
-              geom_edge_link(
-                aes(width=.data$weight,
-                    color=.data$edgeColor,
-                    label=round(.data$weight,3)),
-                angle_calc = 'along',
-                family=fontFamily,
-                label_dodge = unit(2.5, 'mm'),
-                arrow = arrow(length = unit(4, 'mm')), 
-                start_cap = circle(3, 'mm'),
-                end_cap = circle(3, 'mm'),
-                alpha=0.5,
-                show.legend = showLegend)
-          } else {
-            netPlot <- netPlot +
-              geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
-                             arrow = arrow(length = unit(4, 'mm')), 
-                             start_cap = circle(3, 'mm'),
-                             end_cap = circle(3, 'mm'),
-                             alpha=0.5, show.legend = showLegend)
-          }
-        } else {
-          if (edgeLabel){
-            netPlot <- netPlot +
-              geom_edge_diagonal(
-                aes(width=.data$weight,
-                    color=.data$edgeColor,
-                    label=round(.data$weight,3)),
-                angle_calc = 'along',
-                family=fontFamily,
-                label_dodge = unit(2.5, 'mm'),
-                arrow = arrow(length = unit(4, 'mm')), 
-                start_cap = circle(3, 'mm'),
-                end_cap = circle(3, 'mm'),
-                alpha=0.5,
-                show.legend = showLegend)
-          } else {
-            netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
-                                 arrow = arrow(length = unit(4, 'mm')), 
-                                 start_cap = circle(3, 'mm'),
-                                 end_cap = circle(3, 'mm'),                                    
-                                 alpha=0.5, show.legend = showLegend)                
-          }
+      netPlot <- appendEdges(netPlot, bn, edgeLink,
+            edgeLabel, showLegend, fontFamily)
+
+      ## Define colors
+      if (tag) {
+        if (is.null(tagPalette)) {
+          cols <- V(coGraph)$tag |> unique()
+          tagPalette <- tagPalette[1:length(cols)]
+          names(tagPalette) <- cols
+          tagPalette["query"] <- queryColor
         }
-      } else {
-        if (edgeLink){
-          if (edgeLabel){
-            netPlot <- netPlot +
-              geom_edge_link(
-                aes(width=.data$weight,
-                    color=.data$edgeColor,
-                    label=round(.data$weight,3)),
-                angle_calc = 'along',
-                family=fontFamily,
-                label_dodge = unit(2.5, 'mm'),
-                alpha=0.5,
-                show.legend = showLegend)
-          } else {
-            netPlot <- netPlot +
-              geom_edge_link(aes(width=.data$weight, color=.data$edgeColor),
-                             alpha=0.5, show.legend = showLegend)
-          }
-        } else {
-          if (edgeLabel){
-            netPlot <- netPlot +
-              geom_edge_diagonal(
-                aes(width=.data$weight,
-                    color=.data$edgeColor,
-                    label=round(.data$weight,3)),
-                angle_calc = 'along',
-                family=fontFamily,
-                label_dodge = unit(2.5, 'mm'),
-                alpha=0.5,
-                show.legend = showLegend)
-          } else {
-            netPlot <- netPlot +
-              geom_edge_diagonal(aes(width=.data$weight, color=.data$edgeColor),
-                                 alpha=0.5, show.legend = showLegend)                
-          }
-        }
+      }
+
+      if (is.null(catColors)) {
+        catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+        names(catColors) <- unique(V(coGraph)$nodeCat)
+        catColors["query"] <- queryColor
       }
 
       tagColors <- tagPalette

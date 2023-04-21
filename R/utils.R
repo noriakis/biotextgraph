@@ -208,6 +208,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                                                 na.value="grey50")
           ## colorize the other points
           useCatColors <- catColors[ netPlot$data[ netPlot$data$nodeCat != "Words", ]$nodeCat ]
+          if (sum(is.na(useCatColors))>0) {qqcat("Some color contains NA, proceeding\n")}
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
                                               filter=.data$nodeCat != "Words"),
                                               show.legend=FALSE,
