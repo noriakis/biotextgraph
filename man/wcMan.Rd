@@ -32,6 +32,7 @@ wcMan(
   onlyTDM = FALSE,
   bn = FALSE,
   R = 20,
+  queryColor = "grey",
   edgeLabel = FALSE,
   edgeLink = TRUE,
   ngram = NA,
@@ -116,6 +117,10 @@ instead of correlation using bnlearn}
 
 \item{R}{how many bootstrap when bn is stated}
 
+\item{queryColor}{color for query in the network plot
+if tagPalette or catColors is NULL, determined palettes with 
+queryColor replaced with this color will be used.}
+
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
@@ -124,14 +129,16 @@ instead of correlation using bnlearn}
 
 \item{colorize}{color the nodes and texts based on their category}
 
-\item{tagPalette}{palette for each tag when tag is TRUE, default to NULL}
+\item{tagPalette}{palette for each tag when tag is TRUE, default to NULL
+(e.g. `cluster_1`, `cluster_2`, ...)}
 
 \item{preserve}{try to preserve the original characters}
 
 \item{takeMax}{when summarizing term-document matrix, take max.
 Otherwise take sum.}
 
-\item{catColors}{named vector showing colors for each category}
+\item{catColors}{named vector showing colors for each category
+(e.g. `query`, `Words` and specified column names in data.frame)}
 
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
