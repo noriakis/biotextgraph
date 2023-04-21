@@ -8,13 +8,13 @@ This package makes a summarized visualization of biological entities using textu
 
 ### Installation
 ```R
-devtools::install_github("noriakis/wcGeneSummary")
+devtools::install_github("noriakis/biotextgraph")
 library(biotextgraph)
 ```
 
-### [Documentation](https://noriakis.github.io/software/wcGeneSummary/)
+### [Documentation](https://noriakis.github.io/software/biotextgraph/)
 
-### [Shiny web server](https://nsato.shinyapps.io/osplotweb/)
+### [Shiny web server](https://nsato.shinyapps.io/biotextgraphweb/)
 
 <p align="center">
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
