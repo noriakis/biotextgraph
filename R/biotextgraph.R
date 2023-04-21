@@ -84,10 +84,27 @@ setMethod("show",
     qqcat("Type: @{object@type}\n")
     qqcat("Number of words: @{object@numWords}\n")
     if (length(object@query)<10) {
-      cat(paste(object@query, collapse="/"));cat("\n")
+      cat(paste0("Query: ",paste(object@query, collapse="/")));cat("\n")
     } else {
-      cat(paste0(paste(object@query[1:10],
-        collapse="/"), "/truncated"));cat("\n")
+      cat(paste0("Query: ",paste0(paste(object@query[1:10],
+        collapse="/"), "/truncated")));cat("\n")
+    }
+    deg <- NULL; vnum <- NULL; enum <- NULL;
+    if (is.igraph(object@igraphRaw)) {
+      deg <- degree(object@igraphRaw)
+      vnum <- length(V(object@igraphRaw)); enum <- length(E(object@igraphRaw))
+      ord <- V(object@igraphRaw)$name[order(deg, decreasing=TRUE)]
+    }
+    if (is.igraph(object@igraph)) {
+      deg <- degree(object@igraph)
+      vnum <- length(V(object@igraph)); enum <- length(E(object@igraph))
+      ord <- V(object@igraph)$name[order(deg, decreasing=TRUE)]
+    }
+    if (!is.null(deg)) {
+      showdeg <- paste0(paste0(ord[1:5], "(",deg[order(deg, decreasing=TRUE)][1:5],")"),
+        collapse="/")
+      qqcat("Graph: V(@{vnum}), E(@{enum})\n")
+      qqcat("Degree: @{showdeg}\n")
     }
     print(object.size(object), units="auto")
   })

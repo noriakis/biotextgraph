@@ -1270,6 +1270,7 @@ assign_community <- function(ret, coGraph) {
 #' @param na_edge_color edge color for NA value
 #' @param use_seed seed value for ggrepel
 #' @param scale_range scale range for node and text size
+#' @param add_pseudo_freq add pseudo value for nodes other than words
 #' @export
 #' @return biotext class object
 plot_biotextgraph <- function(ret,
@@ -1288,6 +1289,7 @@ plot_biotextgraph <- function(ret,
 	pal=c("blue","red"),
 	layout="nicely",
 	na_edge_color="grey",
+    add_pseudo_freq=FALSE,
 	use_seed=42) {
 
     if (color_by_community & color_by_tag) {
@@ -1296,7 +1298,7 @@ plot_biotextgraph <- function(ret,
 
 	coGraph <- ret@igraph
 
-    if (colorize) {
+    if (colorize | add_pseudo_freq) {
         fre <- V(coGraph)$Freq
         fre[is.na(fre)] <- min(fre, na.rm=TRUE)
         V(coGraph)$Freq <- fre

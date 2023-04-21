@@ -19,7 +19,7 @@ compareWordNet(
   ovlThresh = 0,
   returnNet = FALSE,
   colPal = "Pastel1",
-  colNum = 20,
+  colNum = 5,
   colorText = FALSE,
   community = FALSE,
   returnClass = TRUE
@@ -59,6 +59,8 @@ compareWordNet(
 \item{colorText}{whether to color text based on category}
 
 \item{community}{compare based on community (igraph), override tag}
+
+\item{returnClass}{return biotext class object, default to TRUE}
 }
 \value{
 plot comparing gene clusters

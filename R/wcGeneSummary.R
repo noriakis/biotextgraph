@@ -11,7 +11,7 @@
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
 #' @param pre remove words "pmids", "geneids"
-#' @param pal palette for color gradient in correlation network and tag coloring
+#' @param pal palette for color gradient in correlation network
 #' @param numWords the number of words to be shown
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
@@ -66,10 +66,13 @@
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
-#' @param colorize color the nodes and texts based on their category
+#' @param colorize color the word nodes by their frequency, and the other nodes by their category
+#' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
+#' of the words in the network
 #' @param geneColor color for associated genes with words
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param useSeed seed
+#' @param scaleEdgeWidth scale for edge width
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -117,17 +120,17 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             scaleFreq=NULL, colorize=FALSE, geneColor="grey",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
-                            useSeed=42) {
+                            useSeed=42, scaleEdgeWidth=c(1,3)) {
+    ## Make class object to store results
     ret <- new("biotext")
     ret@query <- geneList
     ret@type <- "refseq"
 
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
-        # if (bn) {stop("verb can be only used with undirected graph")}
-        # edgeLabel <- TRUE
         plotType="network"
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)}
+
     if (madeUpperGenes){
         madeUpper <- c(madeUpper, tolower(keys(orgDb, "SYMBOL")))
     }
@@ -165,8 +168,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
         qqcat("Filtered @{length(filterWords)} words (frequency and/or tfidf)\n")
 
-        ## If specified pathway option
-        if (!is.null(enrich)) {
+        if (!is.null(enrich)) { ## mining pathway enrichment analysis text
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
             qqcat("Performing enrichment analysis\n")
             if (enrich=="reactome"){
@@ -192,10 +194,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 ret@dic <- pdic
             }
             docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
-        } else {
-            ## Load from GeneSummary
-            ## Already performed, and automatically loaded
-            # load("allFreqGeneSummary.rda") 
+        } else { ## Mining RefSeq text 
             tb <- loadGeneSummary(organism = organism)
             fil <- tb %>% filter(tb$Gene_ID %in% geneList)
             fil <- fil[!duplicated(fil$Gene_ID),]
@@ -208,20 +207,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                 qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
                 filterWords <- c(filterWords, sigFilter)
                 ret@ora <- sig
-                # if (oraPlot) {
-                #     ret <- returnORAPlot(ret)
-                # }
             }
-
-            # if (udp) {
-                ## Annotate verbs
-                # s <- udpipe::udpipe_annotate(udmodel_english, fil$Gene_summary)
-                # x <- data.frame(s)
-                # x2 <- x |> dplyr::filter(upos=="VERB")
-                # x3 <- x2[x2$xpos %in% verbPOS,]
-                # verbs <- tolower(unique(x3$token))
-                # print("Use udpipe model")
-            # }
 
             ## Make corpus
             if (collapse) {
@@ -323,8 +309,6 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         ## TODO: Force all functions to return lower freqDf.
         ret@freqDf <- returnDf
 
-        # freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
-        ## TODO: before or after?
         DTM <- t(as.matrix(docs))
         
         if (tag) {
@@ -383,10 +367,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
         coGraph <- matrixs$coGraph
-
         ret <- matrixs$ret
+
         ret@igraphRaw <- coGraph
-        ## before or after?
+
         coGraph <- induced.subgraph(coGraph,
             names(V(coGraph)) %in% freqWords)
         V(coGraph)$Freq <- matSorted[V(coGraph)$name]
@@ -463,6 +447,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             V(coGraph)$grp <- grp
         }
         if (colorize) {addFreqToGene<-TRUE}
+
         if (addFreqToGene) {
             ## Set pseudo freq as min value of freq
             fre <- V(coGraph)$Freq
@@ -489,6 +474,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         names(nodeN) <- V(coGraph)$name
 
         if (tag) {
+            ## If tag=TRUE, significant words are assigned `cluster`
+            ## The other words and gene nodes are assigned their category.
             netCol <- tolower(names(V(coGraph)))
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
@@ -522,6 +509,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
             coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }
+
         ret@igraph <- coGraph
 
         ## Main plot
@@ -531,7 +519,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
-        if (tag) {
+        if (tag) { ## Obtain tag coloring
             cols <- V(coGraph)$tag |> unique()
             tagPalette <- tagPalette[1:length(cols)]
             names(tagPalette) <- cols
@@ -565,6 +553,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
 
         if (colorText){
             if (colorize) {
+                    ## This obtain ggrepel text position and 
+                    ## show text based on these potisions
                     netPlot <- netPlot + 
                         geom_node_text(aes(label=.data$name, size=.data$Freq,
                             color=.data$Freq),
@@ -598,12 +588,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                                       geom_param_list, list(
                                        label=build$label,
                                         color=build$colour)))
-                        # geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        #     filter=.data$name %in% incGene),
-                        #     check_overlap=TRUE, repel=TRUE,
-                        #     family=fontFamily, color=geneColor,
-                        #     bg.color = "white", segment.color="black",
-                        #     bg.r = .15, show.legend=FALSE)
+
             } else {
                 if (tag) {
                     netPlot <- netPlot + 
@@ -632,12 +617,10 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             bg.color = "white", segment.color="black",
                             bg.r = .15, show.legend=showLegend) 
         }
-        if (colorize) {
-            # netPlot <- netPlot +  guides(size = "none")
-        }
+
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
-            scale_edge_width(range=c(1,3), name = "Correlation")+
+            scale_edge_width(range=scaleEdgeWidth, name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
                 name = "Correlation", na.value=naEdgeColor)+
             theme_graph()

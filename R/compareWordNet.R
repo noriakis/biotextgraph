@@ -19,6 +19,7 @@
 #' @param colorText whether to color text based on category
 #' @param ovlThresh show text with this number of overlap between graphs
 #' @param community compare based on community (igraph), override tag 
+#' @param returnClass return biotext class object, default to TRUE
 #' 
 #' @export
 #' @examples
