@@ -38,8 +38,10 @@
 #'                   on whole dataset or top-words specified by numWords
 #' @param stem whether to use stemming
 #' 
+#' @param colorize color the nodes and texts based on their category
 #' @param catColors named vector showing colors for each category
 #' (e.g. `query`, `Words` and specified column names in data.frame)
+#' @param discreteColorWord colorize words by "Words" category, not frequency.
 #' @param tagPalette palette for each tag when tag is TRUE, default to NULL
 #' (e.g. `cluster_1`, `cluster_2`, ...)
 #' @param queryColor color for query in the network plot
@@ -55,7 +57,6 @@
 #' @param useQuanteda use quanteda functions to generate
 #' @param quantedaArgs list of arguments to be passed to tokens()
 #' @param naEdgeColor edge color values for NA
-#' @param colorize color the nodes and texts based on their category
 #' @param collapse default to FALSE, collapse all the sentences
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
@@ -95,6 +96,7 @@ wcMan <- function(df, madeUpper=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
                    onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
+                   discreteColorWord=FALSE,
                    useggwordcloud=TRUE, wcScale=10, fontFamily="sans", addFreqToNonWords=FALSE,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
@@ -430,7 +432,7 @@ wcMan <- function(df, madeUpper=NULL,
       tagColors <- tagPalette
       netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed, ret, tagColors)
+                          useSeed, ret, tagColors, discreteColorWord=discreteColorWord)
       netPlot <- netPlot+
         scale_size(range=scaleRange, name="Frequency")+
         scale_edge_width(range=c(1,3), name = "Correlation")+

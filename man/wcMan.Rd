@@ -52,6 +52,7 @@ wcMan(
   stem = FALSE,
   argList = list(),
   useUdpipe = FALSE,
+  discreteColorWord = FALSE,
   useggwordcloud = TRUE,
   wcScale = 10,
   fontFamily = "sans",
@@ -162,6 +163,8 @@ on whole dataset or top-words specified by numWords}
 \item{argList}{parameters to pass to wordcloud()}
 
 \item{useUdpipe}{use udpipe to make a network}
+
+\item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
 \item{useggwordcloud}{default to TRUE}
 

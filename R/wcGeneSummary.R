@@ -65,14 +65,19 @@
 #' @param fontFamily font family to use, default to "sans"
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
+#' 
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
 #' @param colorize color the word nodes by their frequency, and the other nodes by their category
 #' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 #' of the words in the network
-#' @param geneColor color for associated genes with words
+#' @param discreteColorWord colorize words by "Words" category, not frequency.
+#' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
+#' @param geneColor color for associated genes with words (when tag or colorize option is TRUE)
+#' 
 #' @param scaleFreq default to NULL, scale the value if specified
-#' @param useSeed seed
 #' @param scaleEdgeWidth scale for edge width
+#' 
+#' @param useSeed seed
 #' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
@@ -120,6 +125,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
                             udpipeModel="english-ewt-ud-2.5-191206.udpipe",
                             scaleFreq=NULL, colorize=FALSE, geneColor="grey",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
+                            catColors=NULL, discreteColorWord=FALSE,
                             useSeed=42, scaleEdgeWidth=c(1,3)) {
     ## Make class object to store results
     ret <- new("biotext")
@@ -519,6 +525,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
+
         if (tag) { ## Obtain tag coloring
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
@@ -528,102 +535,15 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             }
         }
 
-        if (tag) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                    color=.data$tag), show.legend = showLegend)+
-                scale_color_manual(values=tagPalette)
-
-        } else {
-            if (colorize) {
-
-            netPlot <- netPlot + 
-                geom_node_point(aes(
-                    size=.data$Freq,
-                    color=.data$Freq),
-                    show.legend = showLegend)+
-                scale_color_gradient(low=pal[1],high=pal[2],
-                                    name = "Frequency")+
-                geom_node_point(aes(size=.data$Freq,
-                    filter=.data$name %in% incGene),
-                show.legend = FALSE, color=geneColor)
-            } else { 
-                netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                    color=.data$Freq), show.legend = showLegend)+
-                scale_color_gradient(low=pal[1],high=pal[2],
-                                    name = "Frequency")
-            }
+        if (is.null(catColors)) {
+            catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+            names(catColors) <- unique(V(coGraph)$nodeCat)
+            catColors["Genes"] <- geneColor
         }
 
-        if (colorText){
-            if (tag) {
-                    netPlot <- netPlot + 
-                        geom_node_text(aes(label=.data$name,
-                            size=.data$Freq, color=.data$tag),
-                            family=fontFamily,
-                            check_overlap=TRUE, repel=TRUE,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
-            } else {
-                if (colorize) {
-
-                    ## This obtain ggrepel text position and 
-                    ## show text based on these potisions
-                    netPlot <- netPlot + 
-                        geom_node_text(aes(label=.data$name, size=.data$Freq,
-                            color=.data$Freq),
-                            check_overlap=TRUE, repel=TRUE,
-                            family=fontFamily,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=FALSE)
-
-                    layerNum <- length(netPlot$layers)
-                    geom_param_list <- netPlot$layers[[layerNum]]$geom_params
-                    build <- ggplot_build(netPlot)$data[[layerNum]]
-                    if (!is.null(incGene)) {
-                        build[ netPlot$data$name %in% incGene, ]$colour <- geneColor
-                    }
-
-                    aes_list <- netPlot$layers[[layerNum]]$mapping
-                    aes_list["filter"] <- NULL
-                    geom_param_list[["repel"]] <- TRUE
-
-                    geom_param_list[["seed"]] <- useSeed
-                    netPlot$layers[[layerNum]]$geom_params[["seed"]] <- useSeed
-                    geom_param_list[["show.legend"]] <- FALSE
-                    geom_param_list["color"] <- NULL;
-                    aes_list["label"] <- NULL
-                    aes_list["color"] <- NULL
-                    aes_list["colour"] <- NULL
-                    geom_param_list["na.rm"] <- NULL
-                    aes_params <- netPlot$layers[[layerNum]]$aes_params
-
-                    netPlot <- netPlot + do.call(geom_node_text,
-                                    c(aes_params,
-                                      list(mapping=aes_list),
-                                      geom_param_list, list(
-                                       label=build$label,
-                                        color=build$colour)))
-
-
-                } else {
-                    netPlot <- netPlot + 
-                        geom_node_text(aes(label=.data$name, size=.data$Freq,
-                            color=.data$Freq),
-                            check_overlap=TRUE, repel=TRUE,
-                            family=fontFamily,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend)
-                }
-            }
-        } else {
-            netPlot <- netPlot +
-                        geom_node_text(aes(label=.data$name, size=.data$Freq),
-                            check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                            color = "black",
-                            family=fontFamily,
-                            bg.color = "white", segment.color="black",
-                            bg.r = .15, show.legend=showLegend) 
-        }
+        netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
+                          showLegend,catColors,pal,fontFamily,colorText,scaleRange,
+                          useSeed,ret,tagColors=tagPalette, discreteColorWord=discreteColorWord)
 
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+

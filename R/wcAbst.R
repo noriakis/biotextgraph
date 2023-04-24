@@ -77,6 +77,8 @@
 #' @param useSeed use seed
 #' @param scaleFreq scale the frequency
 #' @param addFreqToQuery add pseudo-frequency to query node
+#' @param discreteColorWord colorize words by "Words" category, not frequency.
+#' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
 #' @export
 #' @examples \donttest{wcAbst("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -101,7 +103,8 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE, scaleFreq=NULL,
-                   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
+                   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
+                   discreteColorWord=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE, addFreqToQuery=FALSE,
                    naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE, queryColor="grey",
                    useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
@@ -445,97 +448,20 @@ wcAbst <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
           names(tagPalette) <- cols
           tagPalette["Queries"] <- queryColor
         }
-    }    
-    ## Tag prior
-    if (tag) {
-        netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-            color=.data$tag), show.legend = showLegend) +
-        scale_color_manual(values=tagPalette)
-    } else {
-        if (colorize) {
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$Freq),
-            show.legend = showLegend)+
-            scale_color_gradient(low=pal[1],high=pal[2],
-                                name = "Frequency")+
-            geom_node_point(aes(size=.data$Freq,
-                filter=.data$name %in% incQuery),
-            show.legend = FALSE, color=queryColor)
-        } else { 
-            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                color=.data$Freq), show.legend = showLegend)+
-            scale_color_gradient(low=pal[1],high=pal[2],
-                                name = "Frequency")
-        }
     }
 
-    if (colorText){
-        if (tag) {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name,
-                        size=.data$Freq, color=.data$tag),
-                        family=fontFamily,
-                        check_overlap=TRUE, repel=TRUE,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
 
-        } else {
-            if (colorize) {
-
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        color=.data$Freq),
-                        check_overlap=TRUE, repel=TRUE,
-                        family=fontFamily,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=FALSE)
-                layerNum <- length(netPlot$layers)
-
-                geom_param_list <- netPlot$layers[[layerNum]]$geom_params
-                build <- ggplot_build(netPlot)$data[[layerNum]]
-                if (!is.null(incQuery)) {
-                  build[ netPlot$data$name %in% incQuery, ]$colour <- queryColor
-                }
-
-                aes_list <- netPlot$layers[[layerNum]]$mapping
-                aes_list["filter"] <- NULL
-                geom_param_list[["repel"]] <- TRUE
-                geom_param_list[["show.legend"]] <- FALSE
-                geom_param_list[["seed"]] <- useSeed
-                netPlot$layers[[layerNum]]$geom_params[["seed"]] <- useSeed
-                  
-                geom_param_list["color"] <- NULL;
-                aes_list["label"] <- NULL
-                aes_list["color"] <- NULL
-                aes_list["colour"] <- NULL
-                geom_param_list["na.rm"] <- NULL
-                aes_params <- netPlot$layers[[layerNum]]$aes_params
-
-                netPlot <- netPlot + do.call(geom_node_text,
-                                c(aes_params,
-                                  list(mapping=aes_list),
-                                  geom_param_list, list(
-                                   label=build$label,
-                                    color=build$colour)))
-            } else {
-                netPlot <- netPlot + 
-                    geom_node_text(aes(label=.data$name, size=.data$Freq,
-                        color=.data$Freq),
-                        check_overlap=TRUE, repel=TRUE,
-                        family=fontFamily,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend)
-            }
-        }
-    } else {
-        netPlot <- netPlot +
-                    geom_node_text(aes(label=.data$name, size=.data$Freq),
-                        check_overlap=TRUE, repel=TRUE,# size = labelSize,
-                        color = "black",
-                        family=fontFamily,
-                        bg.color = "white", segment.color="black",
-                        bg.r = .15, show.legend=showLegend) 
+    if (is.null(catColors)) {
+        catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+        names(catColors) <- unique(V(coGraph)$nodeCat)
+        catColors["Queries"] <- queryColor
     }
+
+    netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
+                      showLegend,catColors,pal,fontFamily,colorText,scaleRange,
+                      useSeed,ret,tagColors=tagPalette, discreteColorWord=discreteColorWord)
+
+
     netPlot <- netPlot+
       scale_size(range=scaleRange, name="Frequency")+
       scale_edge_width(range=c(1,3), name = "Correlation")+

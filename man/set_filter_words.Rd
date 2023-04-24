@@ -41,4 +41,5 @@ biotext class object
 }
 \description{
 set filtering words to class
+If filtered words are already present, add words to them
 }

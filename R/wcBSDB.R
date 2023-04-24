@@ -64,7 +64,7 @@
 #' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
-
+#' @param discreteColorWord colorize words by "Words" category, not frequency.
 #' @param naEdgeColor edge color linking query with the other category than text
 #' @param useggwordcloud default to TRUE
 #' @param wcScale scaling size for ggwordcloud
@@ -112,7 +112,7 @@ wcBSDB <- function (mbList,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
                     ngram=NA, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
-                    catColors=NULL, colorizeNoFreq=FALSE, useSeed=42,
+                    catColors=NULL, useSeed=42,discreteColorWord=FALSE,
                     colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
 
@@ -620,7 +620,7 @@ wcBSDB <- function (mbList,
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed, ret, tagColors=tagPalette)
+                          useSeed, ret, tagColors=tagPalette, discreteColorWord=discreteColorWord)
         netPlot <- netPlot +
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
