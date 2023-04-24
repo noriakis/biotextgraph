@@ -11,14 +11,14 @@ vignette: >
     %\VignetteEncoding{UTF-8}  
 ---
 
-This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, integrate, and compare the clusters based on those information. It contributes to understanding the functional implications of omics identifier lists and aid in interpretation and visualization. In this vignette, the basic usage for generating the network and combining them are introduced, as well as customized usage. The detailed options and usage like the integration with the other packages are available in the package's [bookdown](https://noriakis.github.io/software/wcGeneSummary). The web server is available for the convenient querying [here](https://nsato.shinyapps.io/osplotweb).
+This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome, and identify important words among the clusters, integrate, and compare the clusters based on those information. It contributes to understanding the functional implications of omics identifier lists and aid in interpretation and visualization. In this vignette, the basic usage for generating the network and combining them are introduced, as well as customized usage. The detailed options and usage like the integration with the other packages are available in the package's [bookdown](https://noriakis.github.io/software/biotextgraph). The web server is available for the convenient querying [here](https://nsato.shinyapps.io/biotextgraphweb).
 
 # Basic usage
 
 Install and load the package and the database for converting identifiers. In this example, we use mostly human-derived data, and use `org.Hs.eg.db`.
 
 ```{r load, warning=FALSE, message=FALSE}
-# devtools::install_github("noriakis/wcGeneSummary")
+# devtools::install_github("noriakis/biotextgraph")
 library(biotextgraph)
 library(org.Hs.eg.db)
 library(ggplot2)

@@ -368,6 +368,7 @@ obtain_pubmed <- function(queries, target="title",
 #' set_filter_words
 #' 
 #' set filtering words to class
+#' If filtered words are already present, add words to them
 #' 
 #' @param ret biotext object
 #' @param exclude GS for using GeneSummary, 
@@ -413,8 +414,8 @@ set_filter_words <- function(ret, exclude_by="frequency",
         "including","samples","sample","otu","otus","investigated",
         "taxa","taxon")
 	}
-    qqcat("Filtered @{length(filterWords)} words (frequency and/or tfidf)\n")
-    ret@filtered <- filterWords
+    qqcat("Filtered @{length(unique(filterWords))} words (frequency and/or tfidf)\n")
+    ret@filtered <- unique(filterWords)
     ret
 }
 
