@@ -47,6 +47,8 @@ wcAbst(
   tagPalette = NULL,
   preserve = TRUE,
   takeMax = FALSE,
+  catColors = NULL,
+  discreteColorWord = FALSE,
   useUdpipe = FALSE,
   udpipeOnlyFreq = FALSE,
   udpipeOnlyFreqN = FALSE,
@@ -161,6 +163,10 @@ Query gene name is shown with (Q)}
 
 \item{takeMax}{when summarizing term-document matrix, take max.
 Otherwise take sum.}
+
+\item{catColors}{colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE}
+
+\item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
 \item{useUdpipe}{use udpipe to make a network}
 

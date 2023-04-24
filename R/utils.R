@@ -173,17 +173,16 @@ appendEdges <- function(netPlot,
 #' appendNodesAndTexts
 #' 
 #' function to append nodes and texts based on parameters
-#' to ggraph
+#' to ggraph. Colorize by these combinations based on the parameter
+#' 
+#' words (tag / community [disc]) - other nodes (category [disc])
+#' words (frequency [cont]) - other nodes (category [disc])
+#' words (category [disc]) - other nodes (category [disc])
 #' 
 #' @noRd
 appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
-  showLegend,catColors,pal,fontFamily,colorText,scaleRange,useSeed,ret,tagColors){
-
-  if (dim(ret@geneMap)[1]!=0) {
-    included <- unique(ret@geneMap[,2])
-  } else {
-    included <- NULL
-  }
+  showLegend,catColors,pal,fontFamily,colorText,scaleRange,useSeed,ret,tagColors,
+  discreteColorWord){
 
   if (is.null(catColors)) {
       catColors <- RColorBrewer::brewer.pal(length(unique(V(ret@igraph)$nodeCat)), "Dark2")
@@ -201,18 +200,27 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                            scale_color_manual(values=tagColors)
   } else {
       if (colorize) {## Colorize by node category (except for words)
-          ## colorize points of texts
-          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
-                                              show.legend = showLegend)+
-                              scale_color_gradient(low=pal[1],high=pal[2],
-                                                na.value="grey50")
-          ## colorize the other points
-          useCatColors <- catColors[ netPlot$data[ netPlot$data$nodeCat != "Words", ]$nodeCat ]
-          if (sum(is.na(useCatColors))>0) {qqcat("Some color contains NA, proceeding\n")}
-          netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
-                                              filter=.data$nodeCat != "Words"),
-                                              show.legend=FALSE,
-                                              color=useCatColors)
+          if (discreteColorWord){
+            ## All the nodes are discrete (e.g. Words, Genes, ...)
+            useCatColors <- catColors[ netPlot$data$nodeCat ]
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$nodeCat),
+                                          show.legend = showLegend)+
+                           scale_color_manual(values=catColors)
+
+          } else {
+            ## colorize points of texts
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
+                                                show.legend = showLegend)+
+                                scale_color_gradient(low=pal[1],high=pal[2],
+                                                  na.value="grey50")
+            ## colorize the other points
+            useCatColors <- catColors[ netPlot$data[ netPlot$data$nodeCat != "Words", ]$nodeCat ]
+            if (sum(is.na(useCatColors))>0) {qqcat("Some color contains NA, proceeding\n")}
+            netPlot <- netPlot + geom_node_point(aes(size=.data$Freq,
+                                                filter=.data$nodeCat != "Words"),
+                                                show.legend=FALSE,
+                                                color=useCatColors)
+          }
       } else {
           netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$Freq),
                                               show.legend = showLegend)+
@@ -220,18 +228,23 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                                                     name = "Frequency")
       }
   }
-
   if (colorText){
       if (tag) {
-          useTagColors <- tagColors[ netPlot$data$tag ]
           netPlot <- netPlot + 
               geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                 # color=useTagColors,
-                  check_overlap=TRUE, repel=TRUE,# size = labelSize,
+                  check_overlap=TRUE, repel=TRUE,
                   bg.color = "white", segment.color="black",family=fontFamily,
                   bg.r = .15, show.legend=showLegend)
       } else {
         if (colorize) {
+          if (discreteColorWord) {
+            netPlot <- netPlot + 
+              geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$nodeCat),
+                  check_overlap=TRUE, repel=TRUE,
+                  bg.color = "white", segment.color="black",family=fontFamily,
+                  bg.r = .15, show.legend=showLegend)
+          } else {
         ## [TODO] discrete and continuous scale in same ggplot is discouraged
         ##        use ggnewscale?
         ## [TODO] repel not work for multiple layers
@@ -275,6 +288,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
           #         check_overlap=TRUE, repel=TRUE, seed=useSeed,
           #         bg.color = "white", segment.color="black",family=fontFamily,
           #         bg.r = .15, show.legend=FALSE)
+        }
 
       } else {
           netPlot <- netPlot + 

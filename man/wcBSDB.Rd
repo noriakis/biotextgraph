@@ -55,8 +55,8 @@ wcBSDB(
   wcScale = 10,
   addFreqToMB = FALSE,
   catColors = NULL,
-  colorizeNoFreq = FALSE,
   useSeed = 42,
+  discreteColorWord = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   tag = FALSE,
@@ -180,6 +180,8 @@ on whole dataset or top-words specified by numWords}
 when the tag=FALSE, and colorize=TRUE}
 
 \item{useSeed}{use seed}
+
+\item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
 \item{colorText}{color text label based on frequency in correlation network}
 

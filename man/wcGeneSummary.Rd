@@ -67,6 +67,8 @@ wcGeneSummary(
   argList = list(),
   useggwordcloud = TRUE,
   wcScale = 10,
+  catColors = NULL,
+  discreteColorWord = FALSE,
   useSeed = 42,
   scaleEdgeWidth = c(1, 3)
 )
@@ -194,13 +196,17 @@ on whole dataset or top-words specified by numWords}
 if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 of the words in the network}
 
-\item{geneColor}{color for associated genes with words}
+\item{geneColor}{color for associated genes with words (when tag or colorize option is TRUE)}
 
 \item{argList}{parameters to pass to wordcloud()}
 
 \item{useggwordcloud}{default to TRUE}
 
 \item{wcScale}{scaling size for ggwordcloud}
+
+\item{catColors}{colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE}
+
+\item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
 \item{useSeed}{seed}
 
