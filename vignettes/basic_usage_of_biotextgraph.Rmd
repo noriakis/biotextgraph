@@ -75,6 +75,19 @@ pmquery <- net@geneCount |> head() |> names()
 # wcAbst(pmquery, plotType="network")
 ```
 
+Each process can be break down to piping operation or storing the results for the later analysis.
+```{r pipe, message=FALSE, warning=FALSE}
+btg <- obtain_refseq(inpSymbol) |> ## obtain RefSeq description
+  set_filter_words() |> ## Set filtering words
+  make_corpus() |> ## Make corpus
+  make_TDM() |> ## Make term-document matrix
+  make_graph() |> ## Make graph
+  process_network_gene(gene_plot=TRUE) |> ## Process graph for showing associated genes to words
+  plot_biotextgraph(edge_link=FALSE) |> ## Make plot for the network (stored in `net` slot)
+  plot_wordcloud() ## Make wordcloud plot (stored in `wc` slot)
+```
+
+
 ## An example of comparing networks of words in the biological pathway
 
 As an example of comparing text information on a network, this section demonstrates the comparison of gene lists within KEGG pathways. For applications using actual public data, please refer to the documentation.
@@ -118,7 +131,7 @@ compareWordNet(list(hCNet, hCNetReac, ecoli),
 
 ## Summarizing other identifiers' data
 
-Other than genes, microbial information can also be summarized in the similar manner. For obtaining and summarizing information on disease relationship, enzymes, metabolites, and biological pathways, please refer to the documentation. Furthermore, a manual function (`wcMan`) is available that performs similar operations based on customized user input.
+Other than genes, microbial information can also be summarized in the similar manner. For obtaining and summarizing information on disease relationship, enzymes, metabolites, and biological pathways, please refer to the [documentation](https://noriakis.github.io/software/biotextgraph). Furthermore, a manual function (`wcMan`) is available that performs similar operations based on customized user input.
 
 # The other visualization options
 
