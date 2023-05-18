@@ -43,6 +43,9 @@ process_network_microbe(
 
 \item{up_tax_file}{UniProt taxonomy file}
 }
+\value{
+biotext class object
+}
 \description{
 perform tasks before plotting
 like obtaining associated diseases to plot

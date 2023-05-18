@@ -12,3 +12,7 @@ obtain_manual(df)
 \description{
 obtain biotext class object from manually specified data
 }
+\examples{
+obtain_manual(data.frame(text=c("test")))
+
+}

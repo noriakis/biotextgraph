@@ -35,3 +35,7 @@ biotext class object
 \description{
 make correlation or cooccurrence network
 }
+\examples{
+obtain_refseq(c("DDX41", "PNKP")) |> 
+make_corpus() |> make_TDM() |> make_graph()
+}

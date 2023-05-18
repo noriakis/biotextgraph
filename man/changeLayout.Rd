@@ -14,3 +14,6 @@ changeLayout(g, layout_func)
 \description{
 changeLayout
 }
+\examples{
+wcGeneSummary(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
+}

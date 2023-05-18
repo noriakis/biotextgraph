@@ -34,3 +34,6 @@ biotext class object
 make_corpus
 make corpus based on biotext class
 }
+\examples{
+obtain_refseq("PNKP") |> make_corpus()
+}

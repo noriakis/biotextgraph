@@ -44,3 +44,7 @@ biotext class object
 \description{
 plot_wordcloud
 }
+\examples{
+wcGeneSummary("DDX41", plotType="wc") |>
+plot_wordcloud()
+}

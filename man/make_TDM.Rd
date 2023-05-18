@@ -29,3 +29,6 @@ biotext class object
 \description{
 make_TDM
 }
+\examples{
+obtain_refseq("PNKP") |> make_corpus() |> make_TDM()
+}
