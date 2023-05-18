@@ -24,3 +24,7 @@ biotext class object
 \description{
 tag the words based on pvclust and word matrix
 }
+\examples{
+obtain_refseq(c("IRF3","PNKP")) |> 
+make_corpus() |> make_TDM() |> tag_words()
+}

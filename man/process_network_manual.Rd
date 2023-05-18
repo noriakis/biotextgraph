@@ -29,3 +29,13 @@ biotext class object
 \description{
 process graph made from user-specified df
 }
+\examples{
+obtain_manual(data.frame(text=c("test4 test4",
+                                "test3 test3 testi",
+                                "test2 test2"))) |>
+make_corpus(num_only=TRUE) |>
+make_TDM() |>
+make_graph() |>
+process_network_manual()
+
+}

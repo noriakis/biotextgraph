@@ -19,3 +19,6 @@ biotext class object
 \description{
 graph_cluster
 }
+\examples{
+wcGeneSummary(c("PNKP","DDX41")) |> graph_cluster()
+}

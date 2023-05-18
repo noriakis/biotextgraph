@@ -69,3 +69,6 @@ biotext class object
 \description{
 plot biotextgraph after processing graph
 }
+\examples{
+wcGeneSummary(c("PNKP","DDX41")) |> plot_biotextgraph()
+}

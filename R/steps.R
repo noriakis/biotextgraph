@@ -3,6 +3,8 @@
 #' obtain biotext class object from manually specified data
 #' 
 #' @param df data frame
+#' @export
+#' @examples obtain_manual(data.frame(text=c("test")))
 #' 
 obtain_manual <- function(df) {
     if (!is.data.frame(df)) {
@@ -446,6 +448,7 @@ perform_ora <- function(ret, threshold=0.05) {
 #' @param preserve preserve the original cases
 #' @param ngram n-gram
 #' @export
+#' @examples obtain_refseq("PNKP") |> make_corpus()
 #' @return biotext class object
 make_corpus <- function(ret, collapse=FALSE,
 	num_only=TRUE, stem=FALSE, preserve=TRUE, ngram=1) {
@@ -482,6 +485,7 @@ make_corpus <- function(ret, collapse=FALSE,
 #' @param takeMean take the mean value for words to rank
 #' @param takeMax take the max value for words to rank
 #' @return biotext class object
+#' @examples obtain_refseq("PNKP") |> make_corpus() |> make_TDM()
 #' @export
 make_TDM <- function(ret, tfidf=FALSE,
 	normalize=FALSE, takeMean=FALSE, takeMax=FALSE) {
@@ -543,6 +547,8 @@ make_TDM <- function(ret, tfidf=FALSE,
 #' @param num_words if set, subset to this number of words
 #' based on ranking
 #' @return biotext class object
+#' @examples obtain_refseq(c("IRF3","PNKP")) |> 
+#' make_corpus() |> make_TDM() |> tag_words()
 #' @export
 tag_words <- function(ret, cl=FALSE, pvclAlpha=0.95, whole=FALSE,
 	num_words=30) {
@@ -575,6 +581,8 @@ tag_words <- function(ret, cl=FALSE, pvclAlpha=0.95, whole=FALSE,
 #' @param R parameter for boot.strength function
 #' @param whole return correlation or cooccurrence for whole words
 #' @return biotext class object
+#' @examples obtain_refseq(c("DDX41", "PNKP")) |> 
+#' make_corpus() |> make_TDM() |> make_graph()
 #' @export
 make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 	cooccurrence=FALSE, whole=FALSE, bn=FALSE, R=20) {
@@ -597,6 +605,7 @@ make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 #' @param func community detection algorithm in igraph
 #' @param factorize convert to factor upon assigning
 #' @return biotext class object
+#' @examples wcGeneSummary(c("PNKP","DDX41")) |> graph_cluster()
 #' @export
 graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 	ret@communities <- do.call(func, list(graph=ret@igraphRaw))
@@ -627,6 +636,9 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 #' @param mb_plot microbe plotting
 #' @param ec_file enzyme database file
 #' @param up_tax_file UniProt taxonomy file
+#' @export
+#' @return biotext class object
+#' 
 process_network_microbe <- function(ret, delete_zero_degree=TRUE,
     make_upper=NULL, disease_plot=FALSE, ec_plot=FALSE,
     metab=NULL, metab_col=NULL, metab_thresh=0.2,
@@ -848,6 +860,8 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
 #' @param distinguish_query distinguish query with words in obtained text
 #' @param org_db organism database to convert IDs
 #' @return biotext class object
+#' @examples wcGeneSummary(c("DDX41","PNKP")) |>
+#' process_network_gene()
 #' @export
 process_network_gene <- function(ret, delete_zero_degree=TRUE,
 	make_upper=NULL, make_upper_gene=TRUE, org_db=org.Hs.eg.db,
@@ -1083,6 +1097,16 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 #' @param drop_ID drop `ID` column
 #' @export
 #' @return biotext class object
+#' @examples 
+#' obtain_manual(data.frame(text=c("test4 test4",
+#'                                 "test3 test3 testi",
+#'                                 "test2 test2"))) |>
+#' make_corpus(num_only=TRUE) |>
+#' make_TDM() |>
+#' make_graph() |>
+#' process_network_manual()
+#' 
+
 process_network_manual <- function(ret, delete_zero_degree=TRUE,
                        make_upper=NULL, query_plot=FALSE, drop_ID=TRUE) {
   DTM <- t(as.matrix(ret@TDM))
@@ -1273,6 +1297,7 @@ assign_community <- function(ret, coGraph) {
 #' @param scale_range scale range for node and text size
 #' @param add_pseudo_freq add pseudo value for nodes other than words
 #' @export
+#' @examples wcGeneSummary(c("PNKP","DDX41")) |> plot_biotextgraph()
 #' @return biotext class object
 plot_biotextgraph <- function(ret,
 	edge_link=TRUE,
@@ -1394,6 +1419,8 @@ plot_biotextgraph <- function(ret,
 #' @param arg_list arguments to pass to wordcloud functions
 #' @param wc_scale scale factor for ggwordcloud
 #' @export
+#' @examples wcGeneSummary("DDX41", plotType="wc") |>
+#' plot_wordcloud()
 #' @return biotext class object
 plot_wordcloud <- function(ret, num_words=30, pal=palette(),
 	make_upper=NULL, scale_freq=NULL, color_by_tag=FALSE,

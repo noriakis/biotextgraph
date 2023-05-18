@@ -1,6 +1,7 @@
 #' changeLayout
 #' @param g biotext object
 #' @param layout_func layout function in igraph
+#' @examples wcGeneSummary(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
 #' @export
 changeLayout <- function(g, layout_func) {
   lyt <- do.call(layout_func, list(graph=g@igraph))
