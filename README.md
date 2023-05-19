@@ -1,7 +1,7 @@
 # biotextgraph
 
   <!-- badges: start -->
-  [![R-CMD-check](https://github.com/noriakis/biotextgraph/workflows/R-CMD-check/badge.svg)](https://github.com/noriakis/biotextgraph/actions)
+  [![R-CMD-check](https://github.com/noriakis/biotextgraph/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/noriakis/biotextgraph/actions/workflows/R-CMD-check.yaml)
   <!-- badges: end -->
 
 This package makes a summarized visualization of biological entities using textual information from various sources through network approach. The package makes word network using R libraries such as [`GeneSummary`](https://bioconductor.org/packages/release/data/annotation/html/GeneSummary.html), [`tm`](https://www.jstatsoft.org/article/view/v025i05), `ggraph` and `wordcloud`.

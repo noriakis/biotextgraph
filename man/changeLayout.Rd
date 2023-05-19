@@ -11,6 +11,9 @@ changeLayout(g, layout_func)
 
 \item{layout_func}{layout function in igraph}
 }
+\value{
+biotext class object
+}
 \description{
 changeLayout
 }

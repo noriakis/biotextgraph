@@ -3,6 +3,7 @@
 #' @param layout_func layout function in igraph
 #' @examples wcGeneSummary(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
 #' @export
+#' @return biotext class object
 changeLayout <- function(g, layout_func) {
   lyt <- do.call(layout_func, list(graph=g@igraph))
   # lyt <- eval(parse(text=layout_func))(g@igraph)
@@ -324,6 +325,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 #'
 #' @param nets named list of nets
 #' @param query_word word to connect
+#' @return igraph object
 connectGenes <- function(nets, query_word) {
   words <- NULL
   if (is.null(names(nets))) {

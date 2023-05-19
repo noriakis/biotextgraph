@@ -42,7 +42,23 @@ obtainMarkersWCScran(
 
 \item{ggfxParams}{parameter list for ggfx}
 }
+\value{
+list of ggplot containing wordclouds
+}
 \description{
 obtainMarkersWCScran
 make gene wordcloud from scran::findMarkers() results
+}
+\examples{
+df <- data.frame(
+  p.value=c(0.01, 0.01),gene=c("PNKP","DDX41")
+)
+row.names(df) <- df$gene
+markers <- list("1"=df)
+colors <- list("1"="blue")
+obtainMarkersWCScran(markers,
+                     cols=colors,
+                     wcArgs=list(),
+                     sortBy="p.value",
+                     geneNum=2)
 }

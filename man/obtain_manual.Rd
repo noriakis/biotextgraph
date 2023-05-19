@@ -9,10 +9,12 @@ obtain_manual(df)
 \arguments{
 \item{df}{data frame}
 }
+\value{
+biotext class object
+}
 \description{
 obtain biotext class object from manually specified data
 }
 \examples{
 obtain_manual(data.frame(text=c("test")))
-
 }

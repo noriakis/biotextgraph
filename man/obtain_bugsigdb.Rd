@@ -22,3 +22,6 @@ biotext class object
 \description{
 obtain microbe-related information from bugsigdb
 }
+\examples{
+obtain_bugsigdb("Veillonella dispar")
+}

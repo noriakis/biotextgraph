@@ -26,3 +26,6 @@ biotext class object
 \description{
 obtain RefSeq text data
 }
+\examples{
+obtain_refseq(c("PNKP"))
+}

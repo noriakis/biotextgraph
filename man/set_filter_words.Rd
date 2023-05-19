@@ -43,3 +43,6 @@ biotext class object
 set filtering words to class
 If filtered words are already present, add words to them
 }
+\examples{
+obtain_refseq(c("PNKP")) |> set_filter_words()
+}
