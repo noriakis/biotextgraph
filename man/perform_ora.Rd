@@ -17,3 +17,6 @@ biotext class object
 \description{
 perform_ora
 }
+\examples{
+obtain_refseq(c("DDX41")) |> perform_ora()
+}

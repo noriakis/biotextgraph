@@ -81,6 +81,9 @@ in `gene_name`}
 
 \item{ggfxParams}{parameter list for ggfx}
 }
+\value{
+ggplot
+}
 \description{
 geom_sc_wordcloud
 }

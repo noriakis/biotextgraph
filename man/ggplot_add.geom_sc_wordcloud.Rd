@@ -14,6 +14,9 @@ use ggplot_add to populate single-cell plot with textual information}
 
 \item{object_name}{The name of the object to add}
 }
+\value{
+ggplot
+}
 \description{
 ggplot_add.geom_sc_wordcloud
 use ggplot_add to populate single-cell plot with textual information

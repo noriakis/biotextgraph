@@ -5,6 +5,7 @@
 #' @param df data frame
 #' @export
 #' @examples obtain_manual(data.frame(text=c("test")))
+#' @return biotext class object
 #' 
 obtain_manual <- function(df) {
     if (!is.data.frame(df)) {
@@ -29,6 +30,7 @@ obtain_manual <- function(df) {
 #' @param curate curated articles (TRUE) or search for PubMed (FALSE)
 #' if FALSE, same for fetching from PubMed by specified query
 #' @export
+#' @examples obtain_bugsigdb("Veillonella dispar")
 #' @return biotext class object
 obtain_bugsigdb <- function(mb_list,
 	target="title",
@@ -261,6 +263,7 @@ obtain_enzyme <- function(file, ec_num,
 #' @param top_path the number of pathways to be obtained
 #' sorted by p-values
 #' @export
+#' @examples obtain_enrich(c("PNKP","DDX41"))
 #' @return biotext class object
 obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
     org_db=org.Hs.eg.db, top_path=30) {
@@ -305,6 +308,7 @@ obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
 #' @param organism organism
 #' @param org_db used to convert ID
 #' @export
+#' @examples obtain_refseq(c("PNKP"))
 #' @return biotext class object
 obtain_refseq <- function(geneList, keyType="SYMBOL", organism=9606, org_db=org.Hs.eg.db) {
     ret <- new("biotext")
@@ -383,6 +387,7 @@ obtain_pubmed <- function(queries, target="title",
 #' @param pre remove pre-defined words
 #' @param pre_microbe remove pre-defined words for microbes
 #' @export
+#' @examples obtain_refseq(c("PNKP")) |> set_filter_words()
 #' @return biotext class object
 set_filter_words <- function(ret, exclude_by="frequency",
 	exclude_type=">", exclude="GS", exclude_number=2000, filterMax=FALSE,
@@ -426,6 +431,7 @@ set_filter_words <- function(ret, exclude_by="frequency",
 #' @param ret biotext class
 #' @param threshold ORA threshold to filter (bonferroni-corrected p-value)
 #' @export
+#' @examples obtain_refseq(c("DDX41")) |> perform_ora()
 #' @return biotext class object
 perform_ora <- function(ret, threshold=0.05) {
 	if (ret@type!="refseq") {stop("ORA for type other than refseq is not supported")}
@@ -637,6 +643,7 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 #' @param ec_file enzyme database file
 #' @param up_tax_file UniProt taxonomy file
 #' @export
+#' @examples wcBSDB("Veillonella dispar") |> process_network_microbe()
 #' @return biotext class object
 #' 
 process_network_microbe <- function(ret, delete_zero_degree=TRUE,

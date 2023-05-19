@@ -11,6 +11,9 @@ connectGenes(nets, query_word)
 
 \item{query_word}{word to connect}
 }
+\value{
+igraph object
+}
 \description{
 When an interesting word is found in two or more networks,
 connect the words and gene names and return the graph.

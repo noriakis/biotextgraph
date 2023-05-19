@@ -30,3 +30,6 @@ biotext class object
 \description{
 obtain enrichment analysis description
 }
+\examples{
+obtain_enrich(c("PNKP","DDX41"))
+}

@@ -50,7 +50,21 @@ TextMarkersScran(
 
 \item{ggfxParams}{parameter list for ggfx}
 }
+\value{
+list of ggplot
+}
 \description{
 Take results of scran::findMarkers as input,
 and plot wordcloud or network for all the clusters.
+}
+\examples{
+df <- data.frame(
+  p.value=c(0.01, 0.01),gene=c("PNKP","DDX41"),
+  Top=c(1,2)
+)
+row.names(df) <- df$gene
+markers <- list("1"=df)
+colors <- list("1"="blue")
+TextMarkersScran(markers, col=colors)
+
 }

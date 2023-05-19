@@ -58,3 +58,9 @@ list of plots on textual information in the gene cluster
 Take results of Seurat::FindAllMarkers as input,
 and plot wordcloud or network for all the clusters.
 }
+\examples{
+markers <- data.frame(p_val_adj=c(0.01, 0.01, 0.04),
+gene=c("PNKP","DDX41","IRF3"),cluster=c("1","1","1"))
+colors <- list("1"="red")
+TextMarkers(markers, col=colors, type="wc")
+}

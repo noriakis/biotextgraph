@@ -19,6 +19,11 @@
 #' @param withggfx applying ggfx filters
 #' @param ggfxParams parameter list for ggfx
 #' @export
+#' @examples 
+#' markers <- data.frame(p_val_adj=c(0.01, 0.01, 0.04),
+#' gene=c("PNKP","DDX41","IRF3"),cluster=c("1","1","1"))
+#' colors <- list("1"="red")
+#' TextMarkers(markers, col=colors, type="wc")
 #' @return list of plots on textual information in the gene cluster
 TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
          genePlotNum=5, colorText=TRUE, args=list(), wcArgs=NULL,
@@ -109,6 +114,17 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 #' @param withTitle ggtitle({cluster name}) will be added
 #' @param withggfx applying ggfx filters
 #' @param ggfxParams parameter list for ggfx
+#' @examples 
+#' df <- data.frame(
+#'   p.value=c(0.01, 0.01),gene=c("PNKP","DDX41"),
+#'   Top=c(1,2)
+#' )
+#' row.names(df) <- df$gene
+#' markers <- list("1"=df)
+#' colors <- list("1"="blue")
+#' TextMarkersScran(markers, col=colors)
+#'
+#' @return list of ggplot
 #' @export
 TextMarkersScran <- function(res,
     keyType="SYMBOL",
@@ -469,17 +485,17 @@ DimPlotWithTexts <- function(seu, markers,
         bg.colour=bg.colour)
     if (gene_name) {
         subset.markers <- subset(markers, markers$cluster %in% which.label)
-        texts <- suppressMessages(obtainMarkersWC(subset.markers,
-                                                    cols=cols,
-                                                    wcArgs=wcArgs,
-                                                    wcScale=wcScale,
-                                                    scaleNumber=scaleNumber,
-                                                    sortBy=sortBy,
-                                                    decreasing=decreasing,
-                                                    geneNum=geneNum,
-                                                    withggfx=withggfx,
-                                                    ggfxParams=ggfxParams
-                                                    ))
+        texts <- obtainMarkersWC(subset.markers,
+                                cols=cols,
+                                wcArgs=wcArgs,
+                                wcScale=wcScale,
+                                scaleNumber=scaleNumber,
+                                sortBy=sortBy,
+                                decreasing=decreasing,
+                                geneNum=geneNum,
+                                withggfx=withggfx,
+                                ggfxParams=ggfxParams
+                                )
     } else {
         texts <- subset(markers, markers$cluster %in% which.label) |> TextMarkers(
                                             wcArgs=wcArgs,

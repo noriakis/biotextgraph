@@ -1,5 +1,8 @@
 
 #' obtainMarkersWC
+#' 
+#' obtain wordclouds of cluster markers identified in Seurat
+#' 
 #' @param markers marker data frame
 #' @param cols list of colors
 #' @param wcArgs arguments for ggwordcloud
@@ -11,6 +14,11 @@
 #' @param eps when taking log of p-values, this value will be added
 #' @param withggfx applying ggfx filters
 #' @param ggfxParams parameter list for ggfx
+#' @return list of ggplot containing wordclouds
+#' @examples
+#' markers <- data.frame(p_val=c(0.01, 0.01),gene=c("PNKP","DDX41"),cluster=c("1","1"))
+#' colors <- list("1"="red")
+#' obtainMarkersWC(markers, sortBy="p_val", cols=colors, wcArgs=list(), geneNum=2)
 #' @export
 obtainMarkersWC <- function(markers,
                             cols,
@@ -65,6 +73,19 @@ obtainMarkersWC <- function(markers,
 #' @param eps when taking log of p-values, this value will be added
 #' @param withggfx applying ggfx filters
 #' @param ggfxParams parameter list for ggfx
+#' @return list of ggplot containing wordclouds
+#' @examples
+#' df <- data.frame(
+#'   p.value=c(0.01, 0.01),gene=c("PNKP","DDX41")
+#' )
+#' row.names(df) <- df$gene
+#' markers <- list("1"=df)
+#' colors <- list("1"="blue")
+#' obtainMarkersWCScran(markers,
+#'                      cols=colors,
+#'                      wcArgs=list(),
+#'                      sortBy="p.value",
+#'                      geneNum=2)
 #' @export
 obtainMarkersWCScran <- function(markers,
                             cols,
@@ -112,6 +133,7 @@ obtainMarkersWCScran <- function(markers,
 #' @param object_name The name of the object to add
 #' @export ggplot_add.geom_sc_wordcloud
 #' @export
+#' @return ggplot
 ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
   
   if (is.null(object$show_markers)) {
@@ -230,29 +252,27 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
   
 
   if (object$gene_name) {
-      wcMarkers <- suppressMessages(obtainMarkersWC(markers,
-                                                cols=cols,
-                                                wcArgs=wcArgs,
-                                                wcScale=object$wcScale,
-                                                scaleNumber=object$scaleNumber,
-                                                sortBy=object$sortBy,
-                                                decreasing=object$decreasing,
-                                                geneNum=object$geneNum,
-                                                withggfx=object$withggfx,
-                                                ggfxParams=object$ggfxParams)
-      )
+      wcMarkers <- obtainMarkersWC(markers,
+                                  cols=cols,
+                                  wcArgs=wcArgs,
+                                  wcScale=object$wcScale,
+                                  scaleNumber=object$scaleNumber,
+                                  sortBy=object$sortBy,
+                                  decreasing=object$decreasing,
+                                  geneNum=object$geneNum,
+                                  withggfx=object$withggfx,
+                                  ggfxParams=object$ggfxParams)
   } else {
-      wcMarkers <- suppressMessages(TextMarkers(markers,
-                                                keyType=object$keyType,
-                                                type="wc",
-                                                genePlot=FALSE,
-                                                col=cols,
-                                                withTitle=object$withTitle,
-                                                args=args,
-                                                wcArgs=wcArgs,
-                                                withggfx=object$withggfx,
-                                                ggfxParams=object$ggfxParams)
-      )      
+      wcMarkers <- TextMarkers(markers,
+                                  keyType=object$keyType,
+                                  type="wc",
+                                  genePlot=FALSE,
+                                  col=cols,
+                                  withTitle=object$withTitle,
+                                  args=args,
+                                  wcArgs=wcArgs,
+                                  withggfx=object$withggfx,
+                                  ggfxParams=object$ggfxParams)
   }
   
   for (i in names(wcMarkers)) {
@@ -299,6 +319,7 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
 #' @param ggfxParams parameter list for ggfx
 #' @importFrom MASS cov.trob
 #' @importFrom ggplot2 ggplot_add
+#' @return ggplot
 #' @export
 geom_sc_wordcloud <- function(markers,
                               show_markers=NULL,

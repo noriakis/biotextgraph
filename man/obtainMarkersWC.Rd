@@ -41,6 +41,14 @@ obtainMarkersWC(
 
 \item{ggfxParams}{parameter list for ggfx}
 }
+\value{
+list of ggplot containing wordclouds
+}
 \description{
-obtainMarkersWC
+obtain wordclouds of cluster markers identified in Seurat
+}
+\examples{
+markers <- data.frame(p_val=c(0.01, 0.01),gene=c("PNKP","DDX41"),cluster=c("1","1"))
+colors <- list("1"="red")
+obtainMarkersWC(markers, sortBy="p_val", cols=colors, wcArgs=list(), geneNum=2)
 }

@@ -50,3 +50,6 @@ biotext class object
 perform tasks before plotting
 like obtaining associated diseases to plot
 }
+\examples{
+wcBSDB("Veillonella dispar") |> process_network_microbe()
+}
