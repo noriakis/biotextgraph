@@ -101,7 +101,8 @@ setMethod("show",
       ord <- V(object@igraph)$name[order(deg, decreasing=TRUE)]
     }
     if (!is.null(deg)) {
-      showdeg <- paste0(paste0(ord[1:5], "(",deg[order(deg, decreasing=TRUE)][1:5],")"),
+      showdeg <- paste0(paste0(ord[1:5],
+        "(",deg[order(deg, decreasing=TRUE)][1:5],")"),
         collapse="/")
       qqcat("Graph: V(@{vnum}), E(@{enum})\n")
       qqcat("Degree: @{showdeg}\n")
@@ -127,7 +128,9 @@ setMethod("plot",
             
             if (length(x@pvpick)!=0) {
               pal <- colorRampPalette(brewer.pal(8,"Set2"))
-              gradn <- adjustcolor(pal(unique(length(V(g)$tag)))[as.numeric(factor(V(g)$tag))], 0.8)
+              gradn <- adjustcolor(
+                pal(unique(length(V(g)$tag)))[as.numeric(factor(V(g)$tag))], 0.8
+                )
             } else {
               pal <- colorRampPalette(c("blue","red"))
               gradn <- adjustcolor(pal(length(V(g)))[V(g)$Freq],0.5)

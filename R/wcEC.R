@@ -90,8 +90,8 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
       taxo <- getUPtax(taxFile, candUP="all", candTax=candTax)
       for (num in candecs$number) {
         desc <- subset(candecs, candecs$number==num)$desc
-        allCharIDs <- as.character(unlist(sapply(unlist(strsplit(subset(candecs, candecs$number==num)$DRs,";")),
-                                                 function(x) unlist(strsplit(x, "_"))[2])))
+        allCharIDs <- as.character(unlist(vapply(unlist(strsplit(subset(candecs, candecs$number==num)$DRs,";")),
+                                                 function(x) unlist(strsplit(x, "_"))[2], "character")))
         if (length(intersect(allCharIDs, taxo$UPID))>=1) {
           for (ta in intersect(allCharIDs, taxo$UPID)) {
             for (cta in subset(taxo, taxo$UPID==ta)$Taxonomy) {

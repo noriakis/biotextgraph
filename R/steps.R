@@ -209,8 +209,8 @@ obtain_enzyme <- function(file, ec_num,
       taxo <- getUPtax(tax_file, candUP="all", candTax=cand_tax)
       for (num in candecs$number) {
         desc <- subset(candecs, candecs$number==num)$desc
-        allCharIDs <- as.character(unlist(sapply(unlist(strsplit(subset(candecs, candecs$number==num)$DRs,";")),
-                                                 function(x) unlist(strsplit(x, "_"))[2])))
+        allCharIDs <- as.character(unlist(vapply(unlist(strsplit(subset(candecs, candecs$number==num)$DRs,";")),
+                                                 function(x) unlist(strsplit(x, "_"))[2], "character")))
         if (length(intersect(allCharIDs, taxo$UPID))>=1) {
           for (ta in intersect(allCharIDs, taxo$UPID)) {
             for (cta in subset(taxo, taxo$UPID==ta)$Taxonomy) {
