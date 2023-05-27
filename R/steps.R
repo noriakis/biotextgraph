@@ -20,6 +20,43 @@ obtain_manual <- function(df) {
 }
 
 
+
+#' obtain_alliance
+#' 
+#' obtain gene description from 
+#' The Alliance of Genome Resources
+#' https://www.alliancegenome.org/downloads
+#' 
+#' @param geneList gene ID list
+#' @param file filename, default to "GENE-DESCRIPTION-TSV_HUMAN.tsv"
+#' @param keyType key type of gene list
+#' @param org_db used to convert ID
+#' @export
+#' @examples \dontrun{obtain_alliance(c("PNKP"))}
+#' @return biotext class object
+obtain_alliance <- function(geneList, file="GENE-DESCRIPTION-TSV_HUMAN.tsv",
+    keyType="SYMBOL", org_db=org.Hs.eg.db) {
+    ret <- new("biotext")
+    ret@query <- geneList
+    ret@type <- "alliance_genome_resources"
+
+    qqcat("Input genes: @{length(geneList)}\n")
+    if (keyType!="SYMBOL"){
+        geneList <- AnnotationDbi::select(org_db,
+            keys = geneList, columns = c("SYMBOL"),
+            keytype = keyType)$SYMBOL
+        geneList <- geneList[!is.na(geneList)] |> unique()
+        qqcat("  Converted input genes: @{length(geneList)}\n")
+    }
+
+    df <- data.table::fread(file, header=FALSE)
+    df <- df |> dplyr::filter(V2 %in% geneList)
+    colnames(df) <- c("HGNC", "Gene_ID", "text")
+    ret@rawText <- data.frame(df)
+    ret
+}
+
+
 #' obtain_bugsigdb
 #' 
 #' obtain microbe-related information from bugsigdb
@@ -885,10 +922,14 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
 		if (startsWith(ret@type,"pubmed")) {
 			row.names(DTM) <- ret@rawText$query
 		} else {
-	        revID <- AnnotationDbi::select(org_db,
-	            keys = as.character(ret@rawText$Gene_ID), 
-	            columns = c("SYMBOL"),
-	            keytype = "ENTREZID")$SYMBOL
+            if (ret@type=="refseq") {
+                revID <- AnnotationDbi::select(org_db,
+                    keys = as.character(ret@rawText$Gene_ID), 
+                    columns = c("SYMBOL"),
+                    keytype = "ENTREZID")$SYMBOL                
+            } else {
+                revID <- ret@rawText$Gene_ID
+            }
 	        row.names(DTM) <- revID
 	    }
     }
