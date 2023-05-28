@@ -11,7 +11,8 @@
 retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
                          filterWords,additionalRemove,colorText,
                          edgeLink, queryPlot, layout, pal,
-                         showNeighbors, showFreq, nodePal,addNet=NULL) {
+                         showNeighbors, showFreq, nodePal,addNet=NULL,
+                         queryName="Queries") {
 
   ret@model <- "udpipe"
   ## Frequency
@@ -44,6 +45,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     ges <- NULL
     tmp <- subset(texts, texts$ID==gid)
     gsym <- tmp$query
+
     if (grepl(",",gsym)) {
       gsym <- unlist(strsplit(gsym,","))
     }
@@ -88,28 +90,55 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
         unique(x)
       }})
 
-  geGraph <- simplify(igraph::graph_from_data_frame(allqueries, directed=FALSE))
-  udpGraph <- simplify(igraph::graph_from_data_frame(alledges,directed=FALSE))
+  # geGraph <- simplify(igraph::graph_from_data_frame(allqueries, directed=FALSE))
+  vtx <- data.frame(cbind(c(allqueries[,2], allqueries[,1]),
+    c(rep(queryName,length(allqueries[,2])),
+      rep("Words",length(allqueries[,1]))))) |> 
+  `colnames<-`(c("name","type"))
+  vtx <- vtx[!duplicated(vtx),]
+  vtx <- vtx |> `rownames<-`(1:nrow(vtx))
+  eds <- data.frame(allqueries)
+  words <- vtx |> subset(type=="Words")
+  queriesDf <- vtx |> subset(type==queryName)
+  row.names(words)[which(words$name %in% eds[,1])]
+  row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
+  eds[,1] <- sapply(eds[,1], function(x) {
+    as.integer(row.names(words)[which(words$name %in% x)])
+  })
+  eds[,2] <- sapply(eds[,2], function(x) {
+    as.integer(row.names(queriesDf)[which(queriesDf$name %in% x)])
+  })
+
+  geGraph <- tbl_graph(nodes=vtx,edges=eds,directed=FALSE)
+  udpGraph <- as_tbl_graph(simplify(igraph::graph_from_data_frame(alledges,directed=FALSE)))
+  V(udpGraph)$type <- "Words"
 
   if (queryPlot) {
-    udpGraph <- igraph::union(udpGraph, geGraph)
+    udpGraph <- graph_join(as_tbl_graph(udpGraph),
+                        geGraph)
+    # udpGraph <- igraph::union(udpGraph, geGraph)
   }
 
   nodeN <- NULL  
   if (!is.null(addNet)) {
     for (netName in names(addNet)) {
+        # tmpAdd <- addNet[[netName]]
+        # tmpNN <- names(V(tmpAdd))
+        # tmpNN <- tmpNN[!tmpNN %in% names(nodeN)]
+        # newNN <- rep(netName, length(tmpNN))
+        # names(newNN) <- tmpNN
+        # nodeN <- c(nodeN, newNN)
+        # udpGraph <- igraph::union(udpGraph, tmpAdd)
+
         tmpAdd <- addNet[[netName]]
-        tmpNN <- names(V(tmpAdd))
-        tmpNN <- tmpNN[!tmpNN %in% names(nodeN)]
+        udpGraph <- graph_join(as_tbl_graph(udpGraph),
+            as_tbl_graph(tmpAdd))
+        udpGraph <- udpGraph |> activate(nodes) |>
+            mutate(type=ifelse(is.na(type),netName,type))
 
-        newNN <- rep(netName, length(tmpNN))
-        names(newNN) <- tmpNN
-        nodeN <- c(nodeN, newNN)
-
-        udpGraph <- igraph::union(udpGraph, tmpAdd)
     }
   }
-
+  nodeN <- (udpGraph |> activate(nodes) |> data.frame())$type
 
   cat <- NULL
   fre <- NULL
@@ -118,7 +147,7 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     if (i %in% names(allwordatt)) {
       cat <- c(cat, allwordatt[i])
     } else if (i %in% texts$query ){
-      cat <- c(cat, "Query")
+      cat <- c(cat, queryName)
     } else if (i %in% names(nodeN)) {
       cat <- c(cat, nodeN[i])
     } else {

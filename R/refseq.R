@@ -1,4 +1,4 @@
-#' wcGeneSummary
+#' refseq
 #' 
 #' Text mining RefSeq description obtained by GeneSummary
 #' 
@@ -84,6 +84,7 @@
 #' @import org.Hs.eg.db
 #' @import wordcloud
 #' @import igraph
+#' @import tidygraph
 #' @import ggraph ggplot2
 #' @importFrom pvclust pvclust pvpick
 #' @import methods
@@ -99,9 +100,9 @@
 #' @export
 #' @examples
 #' geneList <- c("DDX41","PNKP")
-#' wcGeneSummary(geneList)
+#' refseq(geneList)
 #' 
-wcGeneSummary <- function (geneList, keyType="SYMBOL",
+refseq <- function (geneList, keyType="SYMBOL",
                             excludeFreq=2000, exclude="frequency",
                             filterMax=FALSE, excludeType=">",
                             tfidf=FALSE, genePlotNum=10,
@@ -417,8 +418,12 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             ret@geneMap <- genemap
             genemap <- simplify(igraph::graph_from_edgelist(genemap,
                 directed = FALSE))
-            coGraph <- igraph::union(coGraph, genemap)
 
+            coGraph <- tidygraph::graph_join(as_tbl_graph(coGraph),
+                as_tbl_graph(genemap))
+            coGraph <- coGraph |> activate(nodes) |>
+                mutate(type=ifelse(is.na(Freq),"Genes","Words"))
+            # coGraph <- igraph::union(coGraph, genemap)
             E(coGraph)$edgeColor <- E(coGraph)$weight
             tmpW <- E(coGraph)$weight
             if (corThresh < 0.1) {corThreshGenePlot <- 0.01} else {
@@ -426,6 +431,8 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             tmpW[is.na(tmpW)] <- corThreshGenePlot
             E(coGraph)$weight <- tmpW
         } else {
+            coGraph <- as_tbl_graph(coGraph) |> activate(nodes) |>
+                mutate(type=ifelse(is.na(Freq),"Genes","Words"))
             E(coGraph)$edgeColor <- E(coGraph)$weight
         }
 
@@ -463,23 +470,9 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
         }
 
         ## Assign node category
-        if (genePlot) {
-            nodeN <- NULL
-            genes <- ret@geneMap[,2] |> unique()
-            for (nn in V(coGraph)$name) {
-                if (nn %in% genes) {
-                    nodeN <- c(nodeN, "Genes")
-                } else {
-                    nodeN <- c(nodeN, "Words")
-                }
-            }
-            V(coGraph)$nodeCat <- nodeN
-        } else {
-            nodeN <- rep("Words", length(V(coGraph)))
-            V(coGraph)$nodeCat <- nodeN
-        }
-        names(nodeN) <- V(coGraph)$name
-
+        nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+        V(coGraph)$nodeCat <- nodeN
+        
         if (tag) {
             ## If tag=TRUE, significant words are assigned `cluster`
             ## The other words and gene nodes are assigned their category.
@@ -517,7 +510,7 @@ wcGeneSummary <- function (geneList, keyType="SYMBOL",
             coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }
 
-        ret@igraph <- coGraph
+        ret@igraph <- as.igraph(coGraph)
 
         ## Main plot
         E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
