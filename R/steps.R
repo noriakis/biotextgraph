@@ -1020,6 +1020,7 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         E(coGraph)$weight <- tmpW
     } else {
         E(coGraph)$edgeColor <- E(coGraph)$weight
+        V(coGraph)$type <- "Words"
     }
 
     if (!is.null(gene_path_plot)) {
@@ -1046,23 +1047,20 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         }
         V(coGraph)$grp <- grp
     }
+    ## Assign node category
+    nodeN <- (as_tbl_graph(coGraph) |> activate(nodes) |> data.frame())$type
+    V(coGraph)$nodeCat <- nodeN
+    names(nodeN) <- V(coGraph)$name
 
     ## Node attributes
-
-
     if (!identical(ret@dic, logical(0))) {
     	pdic <- ret@dic
-        nodeDf <- coGraph |> activate(nodes) |> data.frame()
+        nodeDf <- as_tbl_graph(coGraph) |> activate(nodes) |> data.frame()
         V(coGraph)$name <- apply(nodeDf,
               1,
               function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
                 x["name"])})
     }
-
-    ## Assign node category
-    nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
-    V(coGraph)$nodeCat <- nodeN
-    names(nodeN) <- V(coGraph)$name
 
     if (length(ret@pvpick)!=0) { ## If tag
         netCol <- tolower(names(V(coGraph)))
