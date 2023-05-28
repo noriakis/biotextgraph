@@ -852,6 +852,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         E(coGraph)$weight <- tmpW
 
     } else {
+        V(coGraph)$type <- "Words"
         E(coGraph)$edgeColor <- E(coGraph)$weight
     }
 
@@ -1195,7 +1196,7 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   df <- ret@rawText
   incCols <- colnames(df)
   incCols <- incCols[!incCols %in% c("query","text")]
-  
+  V(coGraph)$type <- "Words"
   if (length(incCols)!=0) {
     qqcat("Including columns @{paste(incCols, collapse=' and ')} to link with query\n")
     for (ic in incCols) {
