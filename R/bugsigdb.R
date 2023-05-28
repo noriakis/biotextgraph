@@ -616,8 +616,11 @@ bugsigdb <- function (mbList,
             catColors["Microbes"] <- mbColor
           }
 
-
-        ret@igraph <- as.igraph(coGraph)
+          if (!is.tbl_graph(coGraph)) {
+              ret@igraph <- coGraph
+          } else {
+              ret@igraph <- as.igraph(coGraph)
+          }
 
         ## Main plot
         netPlot <- ggraph(coGraph, layout=layout)

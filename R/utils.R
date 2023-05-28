@@ -89,18 +89,18 @@ appendEdges <- function(netPlot,
                               angle_calc = 'along',
                               family=fontFamily,
                               label_dodge = unit(2.5, 'mm'),
-                              arrow = arrow(length = unit(4, 'mm')), 
-                              start_cap = circle(3, 'mm'),
-                              end_cap = circle(3, 'mm'),
+                              # arrow = arrow(length = unit(4, 'mm')), 
+                              # start_cap = circle(3, 'mm'),
+                              # end_cap = circle(3, 'mm'),
                               alpha=0.5,
                               show.legend = showLegend)
           } else {
               netPlot <- netPlot +
                           geom_edge_link(aes(width=.data$weight,
                               color=.data$edgeColor),
-                              arrow = arrow(length = unit(4, 'mm')), 
-                              start_cap = circle(3, 'mm'),
-                              end_cap = circle(3, 'mm'),
+                              # arrow = arrow(length = unit(4, 'mm')), 
+                              # start_cap = circle(3, 'mm'),
+                              # end_cap = circle(3, 'mm'),
                               alpha=0.5, show.legend = showLegend)
           }
       } else {
@@ -113,18 +113,18 @@ appendEdges <- function(netPlot,
                               angle_calc = 'along',
                               family=fontFamily,
                               label_dodge = unit(2.5, 'mm'),
-                              arrow = arrow(length = unit(4, 'mm')), 
-                              start_cap = circle(3, 'mm'),
-                              end_cap = circle(3, 'mm'),
+                              # arrow = arrow(length = unit(4, 'mm')), 
+                              # start_cap = circle(3, 'mm'),
+                              # end_cap = circle(3, 'mm'),
                               alpha=0.5,
                               show.legend = showLegend)
           } else {
               netPlot <- netPlot +
                           geom_edge_diagonal(aes(width=.data$weight,
                               color=.data$edgeColor),
-                              arrow = arrow(length = unit(4, 'mm')), 
-                              start_cap = circle(3, 'mm'),
-                              end_cap = circle(3, 'mm'),                                    
+                              # arrow = arrow(length = unit(4, 'mm')), 
+                              # start_cap = circle(3, 'mm'),
+                              # end_cap = circle(3, 'mm'),                                    
                               alpha=0.5, show.legend = showLegend)                
           }
       }

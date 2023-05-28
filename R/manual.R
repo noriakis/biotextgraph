@@ -446,7 +446,11 @@ manual <- function(df, madeUpper=NULL,
 
     
       ## Main plot
-      ret@igraph <- as.igraph(coGraph)
+      if (!is.tbl_graph(coGraph)) {
+          ret@igraph <- coGraph
+      } else {
+          ret@igraph <- as.igraph(coGraph)
+      }
       netPlot <- ggraph(coGraph, layout=layout)
       netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)

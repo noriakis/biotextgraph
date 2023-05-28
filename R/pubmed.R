@@ -461,7 +461,13 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       coGraph <- induced_subgraph(coGraph, included)
     }
 
-    ret@igraph <- as.igraph(coGraph)
+
+    if (!is.tbl_graph(coGraph)) {
+        ret@igraph <- coGraph
+    } else {
+        ret@igraph <- as.igraph(coGraph)
+    }
+
     netPlot <- ggraph(coGraph, layout=layout)
     netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)

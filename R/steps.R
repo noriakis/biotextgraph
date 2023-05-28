@@ -702,21 +702,34 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         }
         dis <- dis[!is.na(dis[,1]),]
         dis <- dis[!is.na(dis[,2]),]
-        dmg <- simplify(graph_from_data_frame(dis, directed=FALSE))
+        vtx <- data.frame(cbind(c(dis[,1], dis[,2]), c(rep("Diseases",length(dis[,1])),
+            rep("Microbes",length(dis[,2]))))) |> `colnames<-`(c("name","type"))
+        vtx <- vtx[!duplicated(vtx),]
+        dmg <- tbl_graph(nodes=vtx, edges=data.frame(dis), directed=FALSE)
         addNet[["Diseases"]] <- dmg
     }
+
     if (ec_plot) {
         mb_plot <- TRUE
         if (is.null(ec_file)) {stop("Please provide EC file")}
         if (is.null(up_tax_file)) {stop("Please provide UniProt taxonomy file")}
         ecDf <- wcEC(file=ec_file, ecnum="all", taxec=TRUE,
-            taxFile=up_tax_file, candTax=mb_list)
+            taxFile=up_tax_file, candTax=ret@query)
         if (!is.null(ecDf)) {
-           ecg <- simplify(graph_from_data_frame(ecDf[,c("desc","query")], 
-                directed=FALSE))
-           addNet[["Enzymes"]] <- ecg
+            ecDf <- ecDf[,c("desc","query")]
+            vtx <- data.frame(
+                cbind(c(ecDf[,1], ecDf[,2]),
+                      c(rep("Enzymes",length(ecDf[,1])),
+                        rep("Microbes",length(ecDf[,2]))))) |> 
+            `colnames<-`(c("name","type"))
+            vtx <- vtx[!duplicated(vtx),]
+            ecGraph <- tbl_graph(nodes=vtx,
+                edges=data.frame(ecDf),
+                directed=FALSE)
+            addNet[["Enzymes"]] <- ecGraph
         }
     }
+
     if (!is.null(metab)) {
         mb_plot<-TRUE
         if (is.null(metab_col)) {
@@ -736,8 +749,12 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
             }
         }
         if (!is.null(metabGraph)) {
-            metabGraph <- simplify(graph_from_edgelist(metabGraph,
-                directed=FALSE))
+            vtx <- data.frame(
+                cbind(c(metabGraph[,1], metabGraph[,2]),
+                      c(rep("Microbes",length(metabGraph[,1])),
+                        rep("Metabolites",length(metabGraph[,2]))))) |> `colnames<-`(c("name","type"))
+            vtx <- vtx[!duplicated(vtx),]
+            metabGraph <- tbl_graph(nodes=vtx, edges=data.frame(metabGraph), directed=FALSE)
             addNet[["Metabolites"]] <- metabGraph
         }
     }
@@ -793,34 +810,41 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
             ret@geneCount <- gcnt
         }
         
-        inc_microbes <- names(gcnt)[1:length(mb_list)]
-        mbmap <- mbmap[mbmap[,2] %in% inc_microbes,]
+        incGene <- names(gcnt)[1:length(mb_list)]
+        mbmap <- mbmap[mbmap[,2] %in% incGene,]
         ret@geneMap <- mbmap
 
-        candMb <- unique(mb_list)
-        nodeN <- rep("Microbes",length(candMb))
-        names(nodeN) <- candMb
-
-        mbmap <- simplify(graph_from_edgelist(mbmap,
-            directed = FALSE))
-        coGraph <- igraph::union(coGraph, mbmap)
+        vtx <- data.frame(cbind(c(mbmap[,1], mbmap[,2]), c(rep("Words",length(mbmap[,1])),
+            rep("Microbes",length(mbmap[,2]))))) |> `colnames<-`(c("name","type"))
+        vtx <- vtx[!duplicated(vtx),]
         
-        ## If present, add additional edges
+        ####
+        ## It is possible not to distinguish between query microbe name 
+        ## and words as in `pubmed()`, as the words are lowercases here, 
+        ## and altered to titlecase after
+        ####
+
+        mbmap <- tbl_graph(nodes=vtx,
+            edges=data.frame(mbmap), directed=FALSE)
+        V(coGraph)$type <- "Words"
+        coGraph <- graph_join(as_tbl_graph(coGraph),
+            as_tbl_graph(mbmap))
+        coGraph <- coGraph |> activate(nodes) |>
+            mutate(type=ifelse(is.na(Freq),"Microbes","Words"))
+
+        ## If present, add additional graphs
         if (length(addNet)!=0) {
             for (netName in names(addNet)) {
                 tmpAdd <- addNet[[netName]]
-                tmpNN <- names(V(tmpAdd))
-                tmpNN <- tmpNN[!tmpNN %in% names(nodeN)]
-
-                newNN <- rep(netName, length(tmpNN))
-                names(newNN) <- tmpNN
-                nodeN <- c(nodeN, newNN)
-
-                coGraph <- igraph::union(coGraph, tmpAdd)
+                coGraph <- graph_join(as_tbl_graph(coGraph),
+                    as_tbl_graph(tmpAdd))
+                coGraph <- coGraph |> activate(nodes) |>
+                    mutate(type=ifelse(is.na(type),netName,type))
             }
         }
-        ## Set pseudo-edge weight
+        ## Set edge weight
         ## Probably set to NA would be better.
+
 
         E(coGraph)$edgeColor <- E(coGraph)$weight
         tmpW <- E(coGraph)$weight
@@ -857,34 +881,23 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         }
     }
 
-    if (!is.null(nodeN)) {
-        nodeCat <- NULL
-        for (nn in seq_along(names(V(coGraph)))) {
-            if (names(V(coGraph))[nn] %in% names(nodeN)) {
-                nodeCat[nn] <- nodeN[names(V(coGraph))[nn]]
-            } else {
-                nodeCat[nn] <- "Words"
-            }
-        }
-    } else {
-        nodeCat <- rep("Words",length(V(coGraph)))
-    }    
-    V(coGraph)$nodeCat <- nodeCat
+    nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+    V(coGraph)$nodeCat <- nodeN
 
     if (!identical(ret@dic, logical(0))) {
         pdic <- ret@dic
-        newGname <- NULL
-        for (nm in names(V(coGraph))) {
-          if (nm %in% names(pdic)) {
-            newGname <- c(newGname, pdic[nm])
-          } else {
-            newGname <- c(newGname, nm)
-          }
-        }
-        coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+        nodeDf <- coGraph |> activate(nodes) |> data.frame()
+        V(coGraph)$name <- apply(nodeDf,
+              1,
+              function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
+                x["name"])})
     }
     coGraph <- assign_community(ret, coGraph)  
-    ret@igraph <- coGraph
+      if (!is.tbl_graph(coGraph)) {
+          ret@igraph <- coGraph
+      } else {
+          ret@igraph <- as.igraph(coGraph)
+      }
     ret
 }
 
@@ -996,7 +1009,10 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         ret@geneMap <- genemap
         genemap <- simplify(igraph::graph_from_edgelist(genemap,
             directed = FALSE))
-        coGraph <- igraph::union(coGraph, genemap)
+        coGraph <- tidygraph::graph_join(as_tbl_graph(coGraph),
+            as_tbl_graph(genemap))
+        coGraph <- coGraph |> activate(nodes) |>
+            mutate(type=ifelse(is.na(Freq),"Genes","Words"))
         E(coGraph)$edgeColor <- E(coGraph)$weight
 
         tmpW <- E(coGraph)$weight
@@ -1036,32 +1052,16 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
 
     if (!identical(ret@dic, logical(0))) {
     	pdic <- ret@dic
-        newGname <- NULL
-        for (nm in names(V(coGraph))) {
-          if (nm %in% names(pdic)) {
-            newGname <- c(newGname, pdic[nm])
-          } else {
-            newGname <- c(newGname, nm)
-          }
-        }
-        coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+        nodeDf <- coGraph |> activate(nodes) |> data.frame()
+        V(coGraph)$name <- apply(nodeDf,
+              1,
+              function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
+                x["name"])})
     }
 
-    if (gene_plot) {
-        nodeN <- NULL
-        genes <- ret@geneMap[,2] |> unique()
-        for (nn in V(coGraph)$name) {
-            if (nn %in% genes) {
-                nodeN <- c(nodeN, "Genes")
-            } else {
-                nodeN <- c(nodeN, "Words")
-            }
-        }
-        V(coGraph)$nodeCat <- nodeN
-    } else {
-        nodeN <- rep("Words", length(V(coGraph)))
-        V(coGraph)$nodeCat <- nodeN
-    }
+    ## Assign node category
+    nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+    V(coGraph)$nodeCat <- nodeN
     names(nodeN) <- V(coGraph)$name
 
     if (length(ret@pvpick)!=0) { ## If tag
@@ -1088,8 +1088,12 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
           V(coGraph)$tag <- addC
         }
     }
-    coGraph <- assign_community(ret, coGraph)  
-    ret@igraph <- coGraph
+    coGraph <- assign_community(ret, coGraph)
+      if (!is.tbl_graph(coGraph)) {
+          ret@igraph <- coGraph
+      } else {
+          ret@igraph <- as.igraph(coGraph)
+      }
     ret
 }
 
@@ -1169,7 +1173,7 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   }
 
   matSorted <- ret@wholeFreq
-  coGraph <- ret@igraphRaw
+  coGraph <- as_tbl_graph(ret@igraphRaw)
   freqWords <- names(matSorted[1:ret@numWords])
   
   coGraph <- induced.subgraph(coGraph,
@@ -1197,9 +1201,27 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
   if (length(incCols)!=0) {
     qqcat("Including columns @{paste(incCols, collapse=' and ')} to link with query\n")
     for (ic in incCols) {
-      qmap <- simplify(igraph::graph_from_data_frame(df[,c(ic, "query")],
-                                                     directed = FALSE))
-      coGraph <- igraph::union(coGraph, qmap)
+          querymap <- df[,c(ic, "query")]
+          vtx <- data.frame(cbind(c(querymap[,2], querymap[,1]),
+            c(rep("Queries",length(querymap[,2])),
+              rep(ic,length(querymap[,1]))))) |> 
+          `colnames<-`(c("name","type"))
+          vtx <- vtx[!duplicated(vtx),]
+          vtx <- vtx |> `rownames<-`(1:nrow(vtx))
+          eds <- data.frame(querymap)
+          words <- vtx |> subset(type==ic)
+          queriesDf <- vtx |> subset(type=="Queries")
+          row.names(words)[which(words$name %in% eds[,1])]
+          row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
+          eds[,1] <- sapply(eds[,1], function(x) {
+            as.integer(row.names(words)[which(words$name %in% x)])
+          })
+          eds[,2] <- sapply(eds[,2], function(x) {
+            as.integer(row.names(queriesDf)[which(queriesDf$name %in% x)])
+          })
+          qmap <- tbl_graph(nodes=vtx,edges=eds,directed=FALSE)
+          coGraph <- graph_join(as_tbl_graph(coGraph),
+                                qmap)
     }
   }
   
@@ -1227,8 +1249,26 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
         }
       }
     }
-    genemap <- simplify(igraph::graph_from_edgelist(genemap, directed = FALSE))
-    coGraph <- igraph::union(coGraph, genemap)
+    vtx <- data.frame(cbind(c(genemap[,2], genemap[,1]),
+      c(rep("Queries",length(genemap[,2])),
+        rep("Words",length(genemap[,1]))))) |> 
+    `colnames<-`(c("name","type"))
+    vtx <- vtx[!duplicated(vtx),]
+    vtx <- vtx |> `rownames<-`(1:nrow(vtx))
+    eds <- data.frame(genemap)
+    words <- vtx |> subset(type=="Words")
+    queriesDf <- vtx |> subset(type=="Queries")
+    row.names(words)[which(words$name %in% eds[,1])]
+    row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
+    eds[,1] <- sapply(eds[,1], function(x) {
+      as.integer(row.names(words)[which(words$name %in% x)])
+    })
+    eds[,2] <- sapply(eds[,2], function(x) {
+      as.integer(row.names(queriesDf)[which(queriesDf$name %in% x)])
+    })
+    qmap <- tbl_graph(nodes=vtx,edges=eds,directed=FALSE)
+    coGraph <- graph_join(as_tbl_graph(coGraph),
+                          qmap)
   }
   
   if (length(E(coGraph))==0) {stop("No edge present, stopping.")}
@@ -1282,17 +1322,17 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
 
   if (!identical(ret@dic, logical(0))) {
     pdic <- ret@dic
-    newGname <- NULL
-    for (nm in names(V(coGraph))) {
-      if (nm %in% names(pdic)) {
-        newGname <- c(newGname, pdic[nm])
-      } else {
-        newGname <- c(newGname, nm)
-      }
-    }
-    coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+    nodeDf <- as_tbl_graph(coGraph) |> activate(nodes) |> data.frame()
+    V(coGraph)$name <- apply(nodeDf,
+          1,
+          function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
+            x["name"])})
   }
-  ret@igraph <- coGraph
+  if (!is.tbl_graph(coGraph)) {
+      ret@igraph <- coGraph
+  } else {
+      ret@igraph <- as.igraph(coGraph)
+  }
   ret
 }
 
@@ -1343,6 +1383,7 @@ assign_community <- function(ret, coGraph) {
 #' @param na_edge_color edge color for NA value
 #' @param use_seed seed value for ggrepel
 #' @param scale_range scale range for node and text size
+#' @param discrete_color_word colorize words by "Words" category, not frequency.
 #' @param add_pseudo_freq add pseudo value for nodes other than words
 #' @export
 #' @examples wcGeneSummary(c("PNKP","DDX41")) |> plot_biotextgraph()
@@ -1364,6 +1405,7 @@ plot_biotextgraph <- function(ret,
 	layout="nicely",
 	na_edge_color="grey",
     add_pseudo_freq=FALSE,
+    discrete_color_word=FALSE,
 	use_seed=42) {
 
     if (color_by_community & color_by_tag) {
@@ -1429,7 +1471,8 @@ plot_biotextgraph <- function(ret,
         scaleRange=scale_range,
         useSeed=use_seed,
         ret=ret,
-        tagColors=tag_colors)
+        tagColors=tag_colors,
+        discreteColorWord=discrete_color_word)
 
     netPlot <- netPlot +
         scale_edge_width(range=c(1,3), name = "Correlation")+

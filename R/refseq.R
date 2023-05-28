@@ -114,7 +114,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                             orgDb=org.Hs.eg.db, edgeLabel=FALSE,
                             naEdgeColor="grey50", cooccurrence=FALSE,
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
-                            ngram=NA, plotType="network", onlyTDM=FALSE, stem=FALSE,
+                            ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
                             genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
@@ -128,10 +128,6 @@ refseq <- function (geneList, keyType="SYMBOL",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
                             catColors=NULL, discreteColorWord=FALSE,
                             useSeed=42, scaleEdgeWidth=c(1,3)) {
-    ## Make class object to store results
-    ret <- new("biotext")
-    ret@query <- geneList
-    ret@type <- "refseq"
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
@@ -143,90 +139,55 @@ refseq <- function (geneList, keyType="SYMBOL",
     }
 
     if (is.null(mergeCorpus)) {
-        qqcat("Input genes: @{length(geneList)}\n")
-        if (keyType!="ENTREZID"){
-            geneList <- AnnotationDbi::select(orgDb,
-                keys = geneList, columns = c("ENTREZID"),
-                keytype = keyType)$ENTREZID
-            geneList <- geneList[!is.na(geneList)] |> unique()
-            qqcat("  Converted input genes: @{length(geneList)}\n")
-        }
-
-        ## Filter high frequency words if needed
-        if (exclude=="frequency") {
-            pref = "GS_Freq"
-        } else {
-            pref = "GS_TfIdf"
-        }
-        if (filterMax) {
-            pref <- paste0(pref, "_Max")
-        }
-        filterWords <- retFiltWords(useFil=pref, filType=excludeType, filNum=excludeFreq)
-
-        if (pre){
-            filterWords <- c(filterWords, "pmids", "geneid", "pmid", "geneids") ## Excluded by default
-        }
-        if (length(filterWords)!=0 | length(additionalRemove)!=0){
-            allfils <- c(filterWords, additionalRemove)
-            allfils <- allfils[!is.na(allfils)]
-            if (length(allfils)!=0) {
-                ret@filtered <- allfils
-            }
-        }
-        qqcat("Filtered @{length(filterWords)} words (frequency and/or tfidf)\n")
-
         if (!is.null(enrich)) { ## mining pathway enrichment analysis text
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
-            qqcat("Performing enrichment analysis\n")
-            if (enrich=="reactome"){
-                pathRes <- ReactomePA::enrichPathway(geneList)
-                pathRes@result$Description <- gsub("Homo sapiens\r: ",
-                                "",
-                                pathRes@result$Description)                
-            } else if (enrich=="kegg"){
-                pathRes <- clusterProfiler::enrichKEGG(geneList)
-            } else {
-                ## Currently only supports some pathways
-                stop("Please specify 'reactome' or 'kegg'")
-            }
-            ret@enrichResults <- pathRes@result
-            ## Make corpus
-            if (collapse) {
-                docs <- VCorpus(VectorSource(paste(pathRes@result$Description[1:topPath], collapse=" ")))
-            } else {
-                docs <- VCorpus(VectorSource(pathRes@result$Description[1:topPath]))
-            }
-            if (preserve) {
-                pdic <- preserveDict(docs, ngram, numOnly, stem)
-                ret@dic <- pdic
-            }
-            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
-        } else { ## Mining RefSeq text 
-            tb <- loadGeneSummary(organism = organism)
-            fil <- tb %>% filter(tb$Gene_ID %in% geneList)
-            fil <- fil[!duplicated(fil$Gene_ID),]
-            ret@rawText <- fil
 
+            ret <- obtain_enrich(geneList, keyType="SYMBOL", enrich="reactome",
+                                 org_db=org.Hs.eg.db, top_path=30)
+            ret <- ret |> set_filter_words(exclude_by=exclude,
+                exclude_type=excludeType, exclude="GS",
+                exclude_number=excludeFreq, filterMax=filterMax,
+                additional_remove=additionalRemove,
+                pre=pre, pre_microbe=FALSE)
+            ret <- ret |> make_corpus(collapse=collapse,
+                                      num_only=numOnly,
+                                      stem=stem, preserve=preserve,
+                                      ngram=ngram)
+            docs <- ret@corpus
+
+        } else { ## Mining RefSeq text 
+            ret <- obtain_refseq(geneList, keyType=keyType, organism=organism, org_db=orgDb)
+            ret <- ret |> set_filter_words(exclude_by=exclude,
+                exclude_type=excludeType, exclude="GS",
+                exclude_number=excludeFreq, filterMax=filterMax,
+                additional_remove=additionalRemove,
+                pre=pre, pre_microbe=FALSE)
+            fil <- ret@rawText
             if (ora){
                 qqcat("Performing ORA\n")
                 sig <- textORA(geneList)
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
                 qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
-                filterWords <- c(filterWords, sigFilter)
+                ret@filtered <- c(ret@filtered, sigFilter)
                 ret@ora <- sig
             }
+            ret <- ret |> make_corpus(collapse=collapse,
+                                      num_only=numOnly,
+                                      stem=stem, preserve=preserve,
+                                      ngram=ngram)
+            docs <- ret@corpus
 
-            ## Make corpus
-            if (collapse) {
-                docs <- VCorpus(VectorSource(paste(fil$Gene_summary, collapse=" ")))
-            } else {
-                docs <- VCorpus(VectorSource(fil$Gene_summary))
+            ## Udpipe mode can only be used with default RefSeq
+            if (useUdpipe) {
+                fil$text <- fil$Gene_summary
+                fil$ID <- fil$Gene_ID
+                ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
+                    orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
+                    colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
+                    pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
+                return(ret)
             }
-            if (preserve) {pdic <- preserveDict(docs, ngram, numOnly, stem)
-                        ret@dic <- pdic}
-            docs <- makeCorpus(docs, filterWords, additionalRemove, numOnly, stem)
         }
-
         if (onlyCorpus){
             return(docs)
         }
@@ -234,73 +195,34 @@ refseq <- function (geneList, keyType="SYMBOL",
         if (length(mergeCorpus)<2){
             stop("Please provide multile corpus")
         }
+        ret <- new("biotext")
+        ret@query <- geneList
+        ret@type <- "merged"
         docs <- mergeCorpus
     }
 
-    if (useUdpipe) {
-        fil$text <- fil$Gene_summary
-        fil$ID <- fil$Gene_ID
-        ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
-            orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
-            colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
-            pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
-        return(ret)
-    }
     ret@corpus <- docs
+    pdic <- ret@dic
+    ret <- ret |> make_TDM(tfidf=tfidf,
+                           normalize=normalize,
+                           takeMean=takeMean,
+                           takeMax=takeMax)
 
-    ## Set parameters for correlation network
-    if (is.na(corThresh)){corThresh<-0.6}
-    if (is.na(numWords)){numWords<-10}
-    if (!is.na(ngram)){
-        NgramTokenizer <- function(x)
-            unlist(lapply(ngrams(words(x), ngram),
-                paste, collapse = " "),
-                use.names = FALSE)
-        if (tfidf) {
-            docs <- TermDocumentMatrix(docs,
-                control = list(tokenize = NgramTokenizer,
-                    weighting = weightTfIdf))
-        } else {
-            docs <- TermDocumentMatrix(docs,
-                control = list(tokenize = NgramTokenizer))
-        }
-    } else {
-        if (tfidf) {
-            docs <- TermDocumentMatrix(docs,
-                control = list(weighting = weightTfIdf))
-        } else {
-            docs <- TermDocumentMatrix(docs)
-        }
-    }
-
-    mat <- as.matrix(docs)
-    if (normalize) {
-        mat <- sweep(mat, 2, colSums(mat), `/`)
-    }
-
-    if (takeMax & takeMean) {stop("Should specify either of takeMax or takeMean")}
-    if (takeMax) {
-        perterm <- apply(mat, 1, max, na.rm=TRUE)
-    } else {
-        if (takeMean) {
-            perterm <- apply(mat,1,mean)
-        } else {
-            perterm <- rowSums(mat)
-        }
-    }
-
-    matSorted <- sort(perterm, decreasing=TRUE)
-    ret@wholeFreq <- matSorted
+    matSorted <- ret@wholeFreq
 
     if (numWords > length(matSorted)){
         numWords <- length(matSorted)
     }
 
-    ret@TDM <- docs
+    docs <- ret@TDM
 
     if (onlyTDM) {
         return(docs)
     }
+
+    ## Set parameters for correlation network
+    if (is.na(corThresh)){corThresh<-0.6}
+    if (is.na(numWords)){numWords<-10}
 
     ## Subset to numWords
     ret@numWords <- numWords
@@ -499,19 +421,27 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         if (preserve) {
-            newGname <- NULL
-            for (nm in names(V(coGraph))) {
-              if (nm %in% names(pdic)) {
-                newGname <- c(newGname, pdic[nm])
-              } else {
-                newGname <- c(newGname, nm)
-              }
-            }
-            coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+            # newGname <- NULL
+            # for (nm in names(V(coGraph))) {
+            #   if (nm %in% names(pdic)) {
+            #     newGname <- c(newGname, pdic[nm])
+            #   } else {
+            #     newGname <- c(newGname, nm)
+            #   }
+            # }
+            # coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+            nodeDf <- coGraph |> activate(nodes) |> data.frame()
+            V(coGraph)$name <- apply(nodeDf,
+                  1,
+                  function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
+                    x["name"])})
         }
 
-        ret@igraph <- as.igraph(coGraph)
-
+          if (!is.tbl_graph(coGraph)) {
+              ret@igraph <- coGraph
+          } else {
+              ret@igraph <- as.igraph(coGraph)
+          }
         ## Main plot
         E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
         netPlot <- ggraph(coGraph, layout=layout)
