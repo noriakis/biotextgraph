@@ -21,17 +21,18 @@ textORA <- function(queries, notGene=FALSE, bg=NULL) {
 
         ## Make corpus for queried genes
         docs <- VCorpus(VectorSource(fil$Gene_summary))
+
+        ## The same filtering as the `allFreqGeneSummary`
+        docs <- docs |>
+            tm_map(FUN=content_transformer(tolower)) |> 
+            tm_map(FUN=removeNumbers) |>
+            tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) |>
+            tm_map(FUN=removePunctuation) |>
+            tm_map(FUN=stripWhitespace)
     } else {
         docs <- VCorpus(VectorSource(queries))
     }
-    
-    docs <- docs |>
-        tm_map(FUN=content_transformer(tolower)) |> 
-        tm_map(FUN=removeNumbers) |>
-        tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) |>
-        tm_map(FUN=removePunctuation) |>
-        tm_map(FUN=stripWhitespace)
-    
+
     docs <- TermDocumentMatrix(docs)
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
