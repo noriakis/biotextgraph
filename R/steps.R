@@ -32,6 +32,7 @@ obtain_manual <- function(df) {
 #' @param keyType key type of gene list
 #' @param org_db used to convert ID
 #' @export
+#' @importFrom data.table fread
 #' @examples \dontrun{obtain_alliance(c("PNKP"))}
 #' @return biotext class object
 obtain_alliance <- function(geneList, file="GENE-DESCRIPTION-TSV_HUMAN.tsv",
@@ -49,8 +50,8 @@ obtain_alliance <- function(geneList, file="GENE-DESCRIPTION-TSV_HUMAN.tsv",
         qqcat("  Converted input genes: @{length(geneList)}\n")
     }
 
-    df <- data.table::fread(file, header=FALSE)
-    df <- df |> dplyr::filter(V2 %in% geneList)
+    df <- fread(file, header=FALSE)
+    df <- df |> dplyr::filter(.data$V2 %in% geneList)
     colnames(df) <- c("HGNC", "Gene_ID", "text")
     ret@rawText <- data.frame(df)
     ret
