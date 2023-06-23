@@ -15,7 +15,7 @@ biotextgraph(target, argList)
 list of data frames and ggplot2 object
 }
 \description{
-wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
+wrapper for functions refseq, pubmed, enzyme, and bugsigdb
 }
 \examples{
 geneList <- c("DDX41","PNKP")

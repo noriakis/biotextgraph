@@ -82,7 +82,7 @@ in `gene_name`}
 
 \item{withTitle}{whether to append title on wordcloud}
 
-\item{args}{parameters to passed to wcGeneSummary}
+\item{args}{parameters to passed to refseq}
 }
 \value{
 single-cell plot with text annotation

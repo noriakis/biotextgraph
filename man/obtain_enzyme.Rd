@@ -22,7 +22,7 @@ obtain_enzyme(
 
 \item{ec_num}{candidate ecnum, like those obtained from eggNOG-mapper}
 
-\item{only_term}{only return quoted queries to wcAbst}
+\item{only_term}{only return quoted queries to pubmed}
 
 \item{only_df}{only return ec description data.frame
 if onlyTerm and onlyDf are both specified, onlyTerm have priority}

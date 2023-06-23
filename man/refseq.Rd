@@ -31,14 +31,14 @@ refseq(
   bn = FALSE,
   R = 20,
   cl = FALSE,
-  ngram = NA,
+  ngram = 1,
   plotType = "network",
   onlyTDM = FALSE,
   stem = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
   genePlot = FALSE,
-  genePathPlot = NA,
+  genePathPlot = NULL,
   genePathPlotSig = 0.05,
   tag = FALSE,
   layout = "nicely",
@@ -141,7 +141,7 @@ Otherwise take sum.}
 
 \item{genePlot}{plot associated genes (default: FALSE)}
 
-\item{genePathPlot}{plot associated genes and pathways (default: FALSE)
+\item{genePathPlot}{plot associated genes and pathways (default: NULL)
 "kegg" or "reactome"}
 
 \item{genePathPlotSig}{threshold for adjusted p-values (default: 0.05)}

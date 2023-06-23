@@ -45,6 +45,6 @@ biotext class object
 plot_wordcloud
 }
 \examples{
-wcGeneSummary("DDX41", plotType="wc") |>
+refseq("DDX41", plotType="wc") |>
 plot_wordcloud()
 }

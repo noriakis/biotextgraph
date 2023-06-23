@@ -96,7 +96,7 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 
 \item{highlight}{words to highlight}
 
-\item{argList}{passed to wcGeneSummary()}
+\item{argList}{passed to refseq()}
 
 \item{useFunc}{if not specified, use RefSeq summary data}
 

@@ -8,7 +8,7 @@ findTerm(
   query,
   listOfGenes,
   split = FALSE,
-  ngram = NA,
+  ngram = 1,
   tfidf = TRUE,
   calc = "sum",
   keyType = "SYMBOL",
@@ -30,7 +30,7 @@ findTerm(
 
 \item{keyType}{key type of listOfGenes}
 
-\item{argList}{passed to wcGeneSummary}
+\item{argList}{passed to refseq}
 }
 \value{
 named list of frequency

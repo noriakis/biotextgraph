@@ -23,8 +23,8 @@
 #' 
 #' @export
 #' @examples
-#' net1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
-#' net2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
+#' net1 <- refseq(c("DDX41","IRF3"), plotType="network")
+#' net2 <- refseq(c("DDX41","PNKP"), plotType="network")
 #' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
 #' @importFrom grDevices colorRampPalette
@@ -63,7 +63,12 @@ compareWordNet <- function(listOfNets, titles=NULL,
   }
 
   commonNodes <- Reduce(intersect, listOfNodes)
-  uig <- simplify(Reduce(igraph::union, listOfIGs))
+  listOfTGs <- list()
+  for (e in seq_along(listOfIGs)) {
+    listOfTGs[[e]] <- as_tbl_graph(listOfIGs[[e]])
+  }
+  uig <- Reduce(function(x,y) graph_join(x,y, by="name"), listOfTGs)
+  #simplify(Reduce(igraph::union, listOfIGs))
   nodeAttr <- names(get.vertex.attribute(uig))
   tagName <- nodeAttr[grepl("tag", nodeAttr)]
   communityName <- nodeAttr[grepl("community", nodeAttr)]
@@ -157,7 +162,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
     return(uig)
   }
   
-  ret@igraphRaw <- uig
+  ret@igraphRaw <- as.igraph(uig)
 
   catNum <- length(unique(V(uig)$col))
   ## You can change it later
@@ -272,8 +277,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' @export
 #' @examples
 #' library(igraph)
-#' wc1 <- wcGeneSummary(c("DDX41","IRF3"), plotType="network")
-#' wc2 <- wcGeneSummary(c("DDX41","PNKP"), plotType="network")
+#' wc1 <- refseq(c("DDX41","IRF3"), plotType="network")
+#' wc2 <- refseq(c("DDX41","PNKP"), plotType="network")
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
 #' @importFrom dplyr arrange

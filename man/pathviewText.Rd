@@ -36,7 +36,7 @@ for coloring of nodes}
 
 \item{target}{target DB for word, "refseq" or "abstract"}
 
-\item{searchTerms}{search terms to be used in wcAbst,
+\item{searchTerms}{search terms to be used in pubmed,
 if different than query geneList}
 
 \item{node.types}{passed to node.map e.g. "genes" and "ortholog"}

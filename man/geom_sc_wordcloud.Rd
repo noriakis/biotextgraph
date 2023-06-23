@@ -60,7 +60,7 @@ used to define positions of annotation_custom.}
 
 \item{wcScale}{word cloud scaling factor}
 
-\item{args}{passed to wcGeneSummary()}
+\item{args}{passed to refseq()}
 
 \item{wcArgs}{passed to ggwordcloud()}
 

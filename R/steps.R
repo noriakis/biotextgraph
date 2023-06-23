@@ -155,7 +155,7 @@ obtain_bugsigdb <- function(mb_list,
         abstArg[["queries"]] <- mb_list
         abstArg[["quote"]] <- TRUE
         abstArg[["target"]] <- target
-        abstDf <- do.call(wcAbst, abstArg)
+        abstDf <- do.call(pubmed, abstArg)
         ret@rawText <- abstDf
     }
     ret
@@ -167,7 +167,7 @@ obtain_bugsigdb <- function(mb_list,
 #' 
 #' @param file file downloaded from expasy
 #' @param ec_num candidate ecnum, like those obtained from eggNOG-mapper
-#' @param only_term only return quoted queries to wcAbst
+#' @param only_term only return quoted queries to pubmed
 #' @param only_df only return ec description data.frame
 #' if onlyTerm and onlyDf are both specified, onlyTerm have priority
 #' @param tax_ec link taxonomy to EC using UniProt Taxonomy ID file
@@ -648,7 +648,7 @@ make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 #' @param func community detection algorithm in igraph
 #' @param factorize convert to factor upon assigning
 #' @return biotext class object
-#' @examples wcGeneSummary(c("PNKP","DDX41")) |> graph_cluster()
+#' @examples refseq(c("PNKP","DDX41")) |> graph_cluster()
 #' @export
 graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 	ret@communities <- do.call(func, list(graph=ret@igraphRaw))
@@ -680,7 +680,7 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 #' @param ec_file enzyme database file
 #' @param up_tax_file UniProt taxonomy file
 #' @export
-#' @examples wcBSDB("Veillonella dispar") |> process_network_microbe()
+#' @examples bugsigdb("Veillonella dispar") |> process_network_microbe()
 #' @return biotext class object
 #' 
 process_network_microbe <- function(ret, delete_zero_degree=TRUE,
@@ -713,7 +713,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         mb_plot <- TRUE
         if (is.null(ec_file)) {stop("Please provide EC file")}
         if (is.null(up_tax_file)) {stop("Please provide UniProt taxonomy file")}
-        ecDf <- wcEC(file=ec_file, ecnum="all", taxec=TRUE,
+        ecDf <- enzyme(file=ec_file, ecnum="all", taxec=TRUE,
             taxFile=up_tax_file, candTax=ret@query)
         if (!is.null(ecDf)) {
             ecDf <- ecDf[,c("desc","query")]
@@ -827,6 +827,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         mbmap <- tbl_graph(nodes=vtx,
             edges=data.frame(mbmap), directed=FALSE)
         V(coGraph)$type <- "Words"
+
         coGraph <- graph_join(as_tbl_graph(coGraph),
             as_tbl_graph(mbmap))
         coGraph <- coGraph |> activate(nodes) |>
@@ -854,6 +855,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
     } else {
         V(coGraph)$type <- "Words"
         E(coGraph)$edgeColor <- E(coGraph)$weight
+        coGraph <- as_tbl_graph(coGraph)
     }
 
     ## Node attributes
@@ -918,7 +920,7 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
 #' @param distinguish_query distinguish query with words in obtained text
 #' @param org_db organism database to convert IDs
 #' @return biotext class object
-#' @examples wcGeneSummary(c("DDX41","PNKP")) |>
+#' @examples refseq(c("DDX41","PNKP")) |>
 #' process_network_gene()
 #' @export
 process_network_gene <- function(ret, delete_zero_degree=TRUE,
@@ -1101,14 +1103,25 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
 return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 	org_db=org.Hs.eg.db,
 	threshold=0.05) {
+
+    if (ret@type=="alliance_genome_resources") {
+        gene_list <- AnnotationDbi::select(org_db,
+            keys = ret@rawText$Gene_ID, columns = c("ENTREZID"),
+            keytype = "SYMBOL")$ENTREZID
+        gene_list <- gene_list[!is.na(gene_list)] |> unique()
+    } else {
+        gene_list <- ret@rawText$Gene_ID |> unique()
+    }
+
+
     if (gene_path_plot == "reactome") {
-        pathRes <- ReactomePA::enrichPathway(ret@rawText$Gene_ID)
+        pathRes <- ReactomePA::enrichPathway(gene_list)
         pathRes@result$Description <- gsub("Homo sapiens\r: ",
                         "",
                         pathRes@result$Description)
     }
     else if (gene_path_plot == "kegg") {
-        pathRes <- clusterProfiler::enrichKEGG(ret@rawText$Gene_ID)
+        pathRes <- clusterProfiler::enrichKEGG(gene_list)
     }
     else {
         stop("Please specify 'reactome' or 'kegg'")
@@ -1385,7 +1398,7 @@ assign_community <- function(ret, coGraph) {
 #' @param discrete_color_word colorize words by "Words" category, not frequency.
 #' @param add_pseudo_freq add pseudo value for nodes other than words
 #' @export
-#' @examples wcGeneSummary(c("PNKP","DDX41")) |> plot_biotextgraph()
+#' @examples refseq(c("PNKP","DDX41")) |> plot_biotextgraph()
 #' @return biotext class object
 plot_biotextgraph <- function(ret,
 	edge_link=TRUE,
@@ -1509,7 +1522,7 @@ plot_biotextgraph <- function(ret,
 #' @param arg_list arguments to pass to wordcloud functions
 #' @param wc_scale scale factor for ggwordcloud
 #' @export
-#' @examples wcGeneSummary("DDX41", plotType="wc") |>
+#' @examples refseq("DDX41", plotType="wc") |>
 #' plot_wordcloud()
 #' @return biotext class object
 plot_wordcloud <- function(ret, num_words=30, pal=palette(),

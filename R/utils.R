@@ -1,7 +1,7 @@
 #' changeLayout
 #' @param g biotext object
 #' @param layout_func layout function in igraph
-#' @examples wcGeneSummary(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
+#' @examples refseq(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
 #' @export
 #' @return biotext class object
 changeLayout <- function(g, layout_func) {
@@ -585,7 +585,7 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
 retFiltWords <- function(useFil, filType, filNum) {
 
     data_env <- new.env(parent = emptyenv())
-    load(system.file("extdata", "sysdata.rda", package = "wcGeneSummary"),
+    load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
         envir=data_env)
 
     if (filType=="above" | filType==">") {
@@ -826,7 +826,7 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 #' @param tfidf use tfidf when creating TDM or not
 #' @param keyType key type of listOfGenes
 #' @param calc "sum", "mean" or "highest"
-#' @param argList passed to wcGeneSummary
+#' @param argList passed to refseq
 #' @return named list of frequency
 #' @export
 #' @examples
@@ -835,7 +835,7 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 #' lg[["sample"]] <- c("ERCC1","ERCC2")
 #' findTerm(query, lg)
 #' 
-findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
+findTerm <- function (query, listOfGenes, split=FALSE, ngram=1,
                       tfidf=TRUE, calc="sum", keyType="SYMBOL", argList=list()) {
     qqcat("Finding query in @{length(listOfGenes)} clusters ...\n")
     if (split) {
@@ -850,8 +850,8 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
         argList[["ngram"]] <- ngram
         argList[["tfidf"]] <- tfidf
         argList[["onlyTDM"]] <- TRUE
-        tmptdm <- do.call("wcGeneSummary", argList)
-        # tmptdm <- wcGeneSummary(listOfGenes[[clus]],
+        tmptdm <- do.call("refseq", argList)
+        # tmptdm <- refseq(listOfGenes[[clus]],
         #                         keyType = keyType, ngram=ngram,
         #                         tfidf=tfidf, onlyTDM=TRUE)
         querytdm <- t(as.matrix(tmptdm[Terms(tmptdm) %in% querySplit, ]))
@@ -884,7 +884,7 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=NA,
 #' @param numLimit threshold for gene number limit
 #'                 default to 5000
 #' @param target target to query
-#' @param argList parameters to pass to wcGeneSummary()
+#' @param argList parameters to pass to refseq()
 #' @return similarity matrix
 #' @export
 #' @examples
@@ -912,7 +912,7 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000,
             argList[["geneList"]] <- converted[[i]]
             argList[["keyType"]] <- keyType
             store[[i]] <-
-                do.call("wcGeneSummary", argList)@freqDf
+                do.call("refseq", argList)@freqDf
         }
     }
     sim <- sapply(store, function(x) sapply(store,
@@ -938,8 +938,8 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000,
 #' @param reord order by frequency or not
 #' @param flip flip the barplot (gene name in y-axis)
 #' @param orgDb orgDb
-#' @param retList return result of wcGeneSummary
-#' @param argList passed to wcGeneSummary()
+#' @param retList return result of refseq
+#' @param argList passed to refseq()
 #' @import org.Hs.eg.db
 #' @return barplot of word frequency
 #' @importFrom stats reorder
@@ -964,7 +964,7 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
   argList[["madeUpper"]] <- c("dna","rna",
                                   tolower(AnnotationDbi::keys(orgDb,
                                                               keytype="SYMBOL")))
-  wc <- do.call("wcGeneSummary",argList)
+  wc <- do.call("refseq",argList)
   barp <- utils::head(wc@freqDf, n=top)
   ## Need rewrite
   if (reord){

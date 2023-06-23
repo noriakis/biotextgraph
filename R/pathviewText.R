@@ -13,7 +13,7 @@
 #' @param target target DB for word, "refseq" or "abstract"
 #' @param numWords number of words in barplot
 #' @param node.types passed to node.map e.g. "genes" and "ortholog"
-#' @param searchTerms search terms to be used in wcAbst,
+#' @param searchTerms search terms to be used in pubmed,
 #' if different than query geneList
 #' @param termMap data.frame consisting of columns
 #' "query" and "description", which shows query as "geneList",
@@ -117,7 +117,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         argList[["genePlot"]] <- TRUE
         # argList[["preserve"]] <- TRUE
         # argList[["genePlotNum"]] <- length(geneList)
-        barp <- do.call("wcAbst", argList)
+        barp <- do.call("pubmed", argList)
         barp@geneMap[,2] <- gsub(" \\(Q\\)", "", barp@geneMap[,2])
     } else {
         argList[["geneList"]] <- geneList
@@ -127,7 +127,7 @@ pathviewText <- function(geneList, keyType, pid, org="hsa",
         argList[["genePlot"]] <- TRUE
         # argList[["preserve"]] <- TRUE
         argList[["genePlotNum"]] <- length(geneList)
-        barp <- do.call("wcGeneSummary", argList)
+        barp <- do.call("refseq", argList)
     }
     
     ## Obtain words related to genes listed in map

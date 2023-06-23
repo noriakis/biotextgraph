@@ -9,8 +9,8 @@
 #' @param genePlot whether to plot relevant genes
 #' @param genePlotNum number of genes to plot
 #' @param wcArgs parameters to pass to ggwordcloud
-#' @param args parameters to pass to wcGeneSummary
-#' @param raw obtain raw results of wcGeneSummary instead of plot
+#' @param args parameters to pass to refseq
+#' @param raw obtain raw results of refseq instead of plot
 #' @param colorText colorlize text or not, default to TRUE
 #' @param col color to be used in wordcloud,
 #' named list of clusters
@@ -59,7 +59,7 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
         cand_genes <- candidate$gene
         args[["geneList"]] <- cand_genes
 
-        wres <- do.call(wcGeneSummary, args)
+        wres <- do.call(refseq, args)
 
         if (type=="wc"){
             if (!is.null(withggfx)) {
@@ -106,8 +106,8 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 #' @param genePlot whether to plot relevant genes
 #' @param genePlotNum number of genes to plot
 #' @param wcArgs parameters to pass to ggwordcloud
-#' @param args parameters to pass to wcGeneSummary
-#' @param raw obtain raw results of wcGeneSummary instead of plot
+#' @param args parameters to pass to refseq
+#' @param raw obtain raw results of refseq instead of plot
 #' @param colorText colorlize text or not, default to TRUE
 #' @param col color to be used in wordcloud
 #' @param top Top-{top} genes for each cluster will be included
@@ -174,7 +174,7 @@ TextMarkersScran <- function(res,
         cand_genes <- candidate |> row.names()
         args[["geneList"]] <- cand_genes
 
-        wres <- do.call(wcGeneSummary, args)
+        wres <- do.call(refseq, args)
 
         if (type=="wc"){
             if (!is.null(withggfx)) {
@@ -223,7 +223,7 @@ TextMarkersScran <- function(res,
 #' @param wc_alpha alpha value for wordcloud
 #' @param wcScale scaling value for wordcloud
 #' @param withTitle whether to append title on wordcloud
-#' @param args parameters to passed to wcGeneSummary
+#' @param args parameters to passed to refseq
 #' @param rot.per ggwordcloud parameter
 #' @param dimred dimension reduction method
 #' @param random.order ggwordcloud parameter
@@ -416,7 +416,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 #' @param wc_alpha alpha value for wordcloud
 #' @param wcScale scaling value for wordcloud
 #' @param withTitle whether to append title on wordcloud
-#' @param args parameters to passed to wcGeneSummary
+#' @param args parameters to passed to refseq
 #' @param rot.per ggwordcloud parameter
 #' @param random.order ggwordcloud parameter
 #' @param rad named vector of size of each cluster

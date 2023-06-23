@@ -22,6 +22,7 @@ plot_biotextgraph(
   layout = "nicely",
   na_edge_color = "grey",
   add_pseudo_freq = FALSE,
+  discrete_color_word = FALSE,
   use_seed = 42
 )
 }
@@ -61,6 +62,8 @@ if FALSE, no node is plotted for query nodes. it overrides color_by_tag.}
 
 \item{add_pseudo_freq}{add pseudo value for nodes other than words}
 
+\item{discrete_color_word}{colorize words by "Words" category, not frequency.}
+
 \item{use_seed}{seed value for ggrepel}
 }
 \value{
@@ -70,5 +73,5 @@ biotext class object
 plot biotextgraph after processing graph
 }
 \examples{
-wcGeneSummary(c("PNKP","DDX41")) |> plot_biotextgraph()
+refseq(c("PNKP","DDX41")) |> plot_biotextgraph()
 }

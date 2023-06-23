@@ -1,6 +1,6 @@
 #' biotextgraph
 #' 
-#' wrapper for functions wcGeneSummary, wcAbst, and wcBSDB
+#' wrapper for functions refseq, pubmed, enzyme, and bugsigdb
 #' 
 #' @param target "pubmed", "bugsigdb", "refseq", "ec"
 #' @param argList passed to each function
@@ -13,15 +13,15 @@
 #' 
 biotextgraph <- function(target, argList) {
 	if (target=="pubmed"){
-		return(do.call("wcAbst", argList))
+		return(do.call("pubmed", argList))
 	} else if (target=="bugsigdb"){
-		return(do.call("wcBSDB", argList))
+		return(do.call("bugsigdb", argList))
 	} else if (target=="refseq"){
-		return(do.call("wcGeneSummary", argList))
+		return(do.call("refseq", argList))
 	} else if (target=="ec") {
-		return(do.call("wcEC", argList))
+		return(do.call("enzyme", argList))
 	} else {
-		stop("Please specify pubmed, bugsigdbr, or refseq")
+		stop("Please specify pubmed, bugsigdbr, ec, or refseq")
 	}
 }
 
@@ -156,7 +156,7 @@ setMethod("plot",
 #' @param x biotext object
 #' @param thresh hline to draw in plot
 #' @examples
-#' net1 <- wcGeneSummary(c("DDX41","IRF3"), ora=TRUE)
+#' net1 <- refseq(c("DDX41","IRF3"), ora=TRUE)
 #' plotORA(net1)
 #' @return volcano plot for ORA results
 #' @importFrom ggrepel geom_text_repel

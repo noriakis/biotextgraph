@@ -20,5 +20,5 @@ biotext class object
 graph_cluster
 }
 \examples{
-wcGeneSummary(c("PNKP","DDX41")) |> graph_cluster()
+refseq(c("PNKP","DDX41")) |> graph_cluster()
 }

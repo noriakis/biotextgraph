@@ -18,5 +18,5 @@ biotext class object
 changeLayout
 }
 \examples{
-wcGeneSummary(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
+refseq(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
 }

@@ -1,4 +1,4 @@
-#' wcEC
+#' enzyme
 #' 
 #' Query the Enzyme Comission number and obtain description,
 #' and search pubmed for these enzymes and make word cloud and
@@ -20,11 +20,11 @@
 #' @return object consisting of data frame and ggplot2 object
 #' @examples
 #' file <- "enzyme.dat"
-#' \dontrun{wcEC(file, ecnum="1.2.1.1")}
+#' \dontrun{enzyme(file, ecnum="1.2.1.1")}
 #' @export
 #' 
 
-wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
+enzyme <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
                  taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list(),
                  apiKey=NULL) {
   flg <- FALSE
@@ -126,7 +126,7 @@ wcEC <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
   argList[["target"]] <- "abstract"
   argList[["queries"]] <- quoted
   argList[["apiKey"]] <- apiKey
-  abst <- do.call("wcAbst", argList)
+  abst <- do.call("pubmed", argList)
   abst@ec <- candecs
   abst@type <- "EC"
   return(abst)

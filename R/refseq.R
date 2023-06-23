@@ -31,7 +31,7 @@
 #' @param ngram default to NA (1)
 #' @param genePlot plot associated genes (default: FALSE)
 #' @param genePlotNum number of genes to be plotted
-#' @param genePathPlot plot associated genes and pathways (default: FALSE)
+#' @param genePathPlot plot associated genes and pathways (default: NULL)
 #'                     "kegg" or "reactome"
 #' @param filterMax use pre-calculated filter based on max-values when excludeTfIdf is not null
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
@@ -84,7 +84,7 @@
 #' @import org.Hs.eg.db
 #' @import wordcloud
 #' @import igraph
-#' @import tidygraph
+#' @importFrom tidygraph graph_join as_tbl_graph activate is.tbl_graph
 #' @import ggraph ggplot2
 #' @importFrom pvclust pvclust pvpick
 #' @import methods
@@ -116,7 +116,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
                             ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
-                            genePathPlot=NA, genePathPlotSig=0.05, tag=FALSE,
+                            genePathPlot=NULL, genePathPlotSig=0.05, tag=FALSE,
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
@@ -142,8 +142,8 @@ refseq <- function (geneList, keyType="SYMBOL",
         if (!is.null(enrich)) { ## mining pathway enrichment analysis text
             if (genePlot) {stop("genePlot can't be performed in enrichment analysis mode")}
 
-            ret <- obtain_enrich(geneList, keyType="SYMBOL", enrich="reactome",
-                                 org_db=org.Hs.eg.db, top_path=30)
+            ret <- obtain_enrich(geneList, keyType=keyType, enrich=enrich,
+                                 org_db=orgDb, top_path=topPath)
             ret <- ret |> set_filter_words(exclude_by=exclude,
                 exclude_type=excludeType, exclude="GS",
                 exclude_number=excludeFreq, filterMax=filterMax,
@@ -176,7 +176,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                                       stem=stem, preserve=preserve,
                                       ngram=ngram)
             docs <- ret@corpus
-
+            filterWords <- ret@filtered
             ## Udpipe mode can only be used with default RefSeq
             if (useUdpipe) {
                 fil$text <- fil$Gene_summary
@@ -248,7 +248,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         ## genePlot: plot associated genes
-        if (!is.na(genePathPlot)) {genePlot <- TRUE}
+        if (!is.null(genePathPlot)) {genePlot <- TRUE}
         if (genePlot) {
             if (!is.null(mergeCorpus)) {
                 stop("Cannot perform genePlot when merging corpus")
@@ -261,7 +261,15 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         ## genePathPlot: plot associated genes and pathways
-        if (!is.na(genePathPlot)) {
+        if (!is.null(genePathPlot)) {
+
+            if (keyType!="ENTREZID"){
+                geneList <- AnnotationDbi::select(orgDb,
+                    keys = geneList, columns = c("ENTREZID"),
+                    keytype = keyType)$ENTREZID
+                geneList <- geneList[!is.na(geneList)] |> unique()
+                # qqcat("  Converted input genes: @{length(geneList)}\n")
+            }
             
             if (genePathPlot == "reactome") {
                 pathRes <- ReactomePA::enrichPathway(geneList)
@@ -359,7 +367,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
 
-        if (!is.na(genePathPlot)) {
+        if (!is.null(genePathPlot)) {
 
             withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
             withinCoGraphPathGraph <- pathGraph[
@@ -476,7 +484,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                 name = "Correlation", na.value=naEdgeColor)+
             theme_graph()
 
-        if (!is.na(genePathPlot)) {
+        if (!is.null(genePathPlot)) {
             netPlot <- netPlot + ggforce::geom_mark_hull(
                 aes(netPlot$data$x,
                     netPlot$data$y,

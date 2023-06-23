@@ -37,9 +37,9 @@ makeBar(
 
 \item{grad}{use gradient of frequency}
 
-\item{retList}{return result of wcGeneSummary}
+\item{retList}{return result of refseq}
 
-\item{argList}{passed to wcGeneSummary()}
+\item{argList}{passed to refseq()}
 }
 \value{
 barplot of word frequency

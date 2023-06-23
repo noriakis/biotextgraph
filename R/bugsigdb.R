@@ -53,7 +53,7 @@
 #' is not specified
 #' 
 #' @param ecPlot plot link between enzyme and microbes
-#' this option requires two files to be passed to wcEC() and getUPTax().
+#' this option requires two files to be passed to enzyme() and getUPTax().
 #' @param ecFile enzyme database file
 #' @param upTaxFile UniProt taxonomy file
 #' @param takeMax when summarizing term-document matrix, take max.
@@ -231,7 +231,7 @@ bugsigdb <- function (mbList,
         abstArg[["target"]] <- target
         abstArg[["onlyDf"]] <- TRUE
 
-        abstDf <- do.call(wcAbst, abstArg)
+        abstDf <- do.call(pubmed, abstArg)
         ret@rawText <- abstDf
         ret@type <- paste0("BSDB_PubMed_",target)
         docs <- VCorpus(VectorSource(abstDf$text))
@@ -315,7 +315,7 @@ bugsigdb <- function (mbList,
         mbPlot <- TRUE
         if (is.null(ecFile)) {stop("Please provide EC file")}
         if (is.null(upTaxFile)) {stop("Please provide UniProt taxonomy file")}
-        ecDf <- wcEC(file=ecFile, ecnum="all", taxec=TRUE,
+        ecDf <- enzyme(file=ecFile, ecnum="all", taxec=TRUE,
             taxFile=upTaxFile, candTax=mbList)
         if (!is.null(ecDf)) {
             ecDf <- ecDf[,c("desc","query")]
@@ -676,6 +676,9 @@ bugsigdb <- function (mbList,
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 ret@pvclust <- pvc
                 ret@pvpick <- pvcl
+            }
+            if (is.null(tagPalette)) {
+              tagPalette <- RColorBrewer::brewer.pal(length(unique(pvcl$clusters)), "Dark2")
             }
             wcCol <- returnDf$word
             for (i in seq_along(pvcl$clusters)){

@@ -67,7 +67,7 @@ pyramid plots are not produced}
 
 \item{type}{"words" or "enrich"}
 
-\item{argList}{passed to wcGeneSummary}
+\item{argList}{passed to refseq}
 
 \item{useFunc}{function to summarize text}
 

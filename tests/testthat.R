@@ -1,4 +1,4 @@
 library(testthat)
-library(wcGeneSummary)
+library(biotextgraph)
 
-test_check("wcGeneSummary")
+test_check("biotextgraph")

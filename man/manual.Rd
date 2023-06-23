@@ -186,6 +186,6 @@ list of data frame and ggplot2 object
 Produce networks using manual input
 }
 \examples{
-ret <- wcGeneSummary("DDX41", plotType="wc")
-wcMan(ret@rawText$Gene_summary, plotType="wc")
+ret <- refseq("DDX41", plotType="wc")
+manual(ret@rawText$Gene_summary, plotType="wc")
 }

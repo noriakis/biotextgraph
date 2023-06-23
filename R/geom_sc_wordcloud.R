@@ -306,7 +306,7 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
 #' @param use_shadowtext use shadowtext for wordcloud
 #' @param bg.colour the background color of shadowtext
 #' @param wcScale word cloud scaling factor
-#' @param args passed to wcGeneSummary()
+#' @param args passed to refseq()
 #' @param wcArgs passed to ggwordcloud()
 #' @param base_ellipse if TRUE, wordclouds are placed based on \code{stat_ellipse}.
 #' @param base_dens if TRUE, wordclouds are placed based on density

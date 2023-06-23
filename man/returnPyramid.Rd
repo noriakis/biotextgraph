@@ -77,7 +77,7 @@ returnPyramid(
 
 \item{orgDb}{organism database to use in enrich}
 
-\item{argList}{parameters passed to wcGeneSummary()}
+\item{argList}{parameters passed to refseq()}
 
 \item{useFunc}{function to summarize text}
 

@@ -46,6 +46,6 @@ perform tasks before plotting
 like obtaining associated genes to plot
 }
 \examples{
-wcGeneSummary(c("DDX41","PNKP")) |>
+refseq(c("DDX41","PNKP")) |>
 process_network_gene()
 }

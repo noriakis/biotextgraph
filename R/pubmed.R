@@ -399,11 +399,13 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
     } else {
+      coGraph <- as_tbl_graph(coGraph) |> activate(nodes) |>
+          mutate(type=ifelse(is.na(Freq),"Queries","Words"))
       E(coGraph)$edgeColor <- E(coGraph)$weight
     }
 
     ## Assign node category
-    nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+    nodeN <- V(coGraph)$type
     V(coGraph)$nodeCat <- nodeN
     names(nodeN) <- V(coGraph)$name
     

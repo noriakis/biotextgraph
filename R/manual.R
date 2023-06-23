@@ -68,8 +68,8 @@
 #' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
 #' frequency of the words to nodes other than words
 #' @examples
-#' ret <- wcGeneSummary("DDX41", plotType="wc")
-#' wcMan(ret@rawText$Gene_summary, plotType="wc")
+#' ret <- refseq("DDX41", plotType="wc")
+#' manual(ret@rawText$Gene_summary, plotType="wc")
 #' @export
 #' @return list of data frame and ggplot2 object
 #' @import tm

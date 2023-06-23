@@ -13,7 +13,7 @@
 #' @param type "words" or "enrich"
 #' @param highlight words to highlight
 #' @param showType when "enrich", which labels to show
-#' @param argList passed to wcGeneSummary()
+#' @param argList passed to refseq()
 #' @param textSize text size in pyramid plots
 #' @param candidateNodes if NULL, all nodes are investigated
 #' @param takeIntersect take intersection or frequent words
@@ -115,7 +115,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                 qqcat("  Producing @{ti}\n")
                 argList[["geneList"]] <- names(geneVec[geneVec==ti])
                 argList[["keyType"]] <- geneVecType
-                im <- do.call(wcGeneSummary, argList)
+                im <- do.call(refseq, argList)
 
                 if (length(wcArgs)==0) {
                     wcArgs[["min.freq"]] <- 1
@@ -244,7 +244,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param type "words" or "enrich"
 #' @param showType when "enrich", which labels to show
 #' @param highlight words to highlight
-#' @param argList passed to wcGeneSummary
+#' @param argList passed to refseq
 #' @param textSize text size in pyramid plots
 #' @param candidateNodes if NULL, all nodes are investigated
 #' @param takeIntersect take intersection or frequent words
@@ -466,7 +466,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param showType which labels to show in enrich
 #' @param highlight words to highlight
 #' @param orgDb organism database to use in enrich
-#' @param argList parameters passed to wcGeneSummary()
+#' @param argList parameters passed to refseq()
 #' @param wrap wrap the strings
 #' @param textSize text size in pyramid plots
 #' @param takeIntersect take intersection or frequent words
@@ -533,7 +533,7 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                 argList[["geneList"]] <- c(names(geneVec)[geneVec %in% L],
                 names(geneVec)[geneVec %in% R])
                 argList[["keyType"]] <- geneVecType
-                retWC <- do.call("wcGeneSummary", argList)
+                retWC <- do.call("refseq", argList)
             }
 
             if (length(wcArgs)==0) {
@@ -566,10 +566,10 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
             argList[["collapse"]] <- TRUE
             argList[["onlyTDM"]] <- TRUE
             argList[["keyType"]] <- geneVecType
-            all_L <- as.matrix(do.call("wcGeneSummary",argList))
+            all_L <- as.matrix(do.call("refseq",argList))
             
             argList[["geneList"]] <- names(geneVec)[geneVec %in% R]
-            all_R <- as.matrix(do.call("wcGeneSummary",argList))
+            all_R <- as.matrix(do.call("refseq",argList))
         } else {
             if (!is.null(useDf)) {
                 argList[["df"]] <- subset(useDf, useDf$query %in% names(geneVec)[geneVec %in% L])

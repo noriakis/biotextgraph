@@ -26,7 +26,8 @@ Suggests:
     quanteda,
     ggtree,
     Seurat,
-    scater
+    scater,
+    BiocStyle
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3

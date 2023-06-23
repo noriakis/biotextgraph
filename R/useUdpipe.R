@@ -196,6 +196,9 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
     net <- net + geom_edge_diagonal(color="grey")
   }
   
+  if (is.null(nodePal)) {
+    nodePal <- RColorBrewer::brewer.pal(length(unique(V(udpGraph)$cat)), "Dark2")
+  }
 
   if (colorText) {
     net <- net + geom_node_point(aes(color=freq, size=freq))

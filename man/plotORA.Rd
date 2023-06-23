@@ -18,6 +18,6 @@ volcano plot for ORA results
 plot volcano-plot like plot for ORA results
 }
 \examples{
-net1 <- wcGeneSummary(c("DDX41","IRF3"), ora=TRUE)
+net1 <- refseq(c("DDX41","IRF3"), ora=TRUE)
 plotORA(net1)
 }

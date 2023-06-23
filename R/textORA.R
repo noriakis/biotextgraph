@@ -39,7 +39,7 @@ textORA <- function(queries, notGene=FALSE, bg=NULL) {
     
     if (is.null(bg)) {
         data_env <- new.env(parent = emptyenv())
-        load(system.file("extdata", "sysdata.rda", package = "wcGeneSummary"),
+        load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
             envir=data_env)
         bg <- data_env[["allFreqGeneSummary"]]
     }

@@ -34,11 +34,11 @@ TextMarkers(
 
 \item{colorText}{colorlize text or not, default to TRUE}
 
-\item{args}{parameters to pass to wcGeneSummary}
+\item{args}{parameters to pass to refseq}
 
 \item{wcArgs}{parameters to pass to ggwordcloud}
 
-\item{raw}{obtain raw results of wcGeneSummary instead of plot}
+\item{raw}{obtain raw results of refseq instead of plot}
 
 \item{col}{color to be used in wordcloud,
 named list of clusters}

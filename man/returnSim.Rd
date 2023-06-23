@@ -22,7 +22,7 @@ default to 5000}
 
 \item{target}{target to query}
 
-\item{argList}{parameters to pass to wcGeneSummary()}
+\item{argList}{parameters to pass to refseq()}
 }
 \value{
 similarity matrix

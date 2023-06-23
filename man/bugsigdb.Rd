@@ -130,7 +130,7 @@ named vector containing `Microbes`, `Diseases`, `Metabolites`, `Enzymes`,
 \item{showLegend}{whether to show legend in correlation network}
 
 \item{ecPlot}{plot link between enzyme and microbes
-this option requires two files to be passed to wcEC() and getUPTax().}
+this option requires two files to be passed to enzyme() and getUPTax().}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
