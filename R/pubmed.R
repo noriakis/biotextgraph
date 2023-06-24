@@ -80,7 +80,7 @@
 #' @param discreteColorWord colorize words by "Words" category, not frequency.
 #' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
 #' @export
-#' @examples \donttest{pubmed("DDX41")}
+#' @examples \dontrun{pubmed("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary

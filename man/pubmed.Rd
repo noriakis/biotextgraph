@@ -227,5 +227,5 @@ object consisting of data frame and ggplot2 object
 make word cloud or correlation network from PubMed
 }
 \examples{
-\donttest{pubmed("DDX41")}
+\dontrun{pubmed("DDX41")}
 }
