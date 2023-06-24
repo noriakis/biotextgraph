@@ -371,8 +371,8 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       vtx <- vtx |> `rownames<-`(1:nrow(vtx))
       eds <- data.frame(genemap)
 
-      words <- vtx |> subset(type=="Words")
-      queriesDf <- vtx |> subset(type=="Queries")
+      words <- vtx |> subset(.data$type=="Words")
+      queriesDf <- vtx |> subset(.data$type=="Queries")
 
       row.names(words)[which(words$name %in% eds[,1])]
       row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
@@ -399,8 +399,8 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
     } else {
-      coGraph <- as_tbl_graph(coGraph) |> activate(nodes) |>
-          mutate(type=ifelse(is.na(Freq),"Queries","Words"))
+      coGraph <- as_tbl_graph(coGraph) |> activate("nodes") |>
+          mutate(type=ifelse(is.na(.data$Freq),"Queries","Words"))
       E(coGraph)$edgeColor <- E(coGraph)$weight
     }
 

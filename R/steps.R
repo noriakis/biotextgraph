@@ -831,8 +831,8 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
 
         coGraph <- graph_join(as_tbl_graph(coGraph),
             as_tbl_graph(mbmap))
-        coGraph <- coGraph |> activate(nodes) |>
-            mutate(type=ifelse(is.na(Freq),"Microbes","Words"))
+        coGraph <- coGraph |> activate("nodes") |>
+            mutate(type=ifelse(is.na(.data$Freq),"Microbes","Words"))
 
         ## If present, add additional graphs
         if (length(addNet)!=0) {
@@ -840,8 +840,8 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
                 tmpAdd <- addNet[[netName]]
                 coGraph <- graph_join(as_tbl_graph(coGraph),
                     as_tbl_graph(tmpAdd))
-                coGraph <- coGraph |> activate(nodes) |>
-                    mutate(type=ifelse(is.na(type),netName,type))
+                coGraph <- coGraph |> activate("nodes") |>
+                    mutate(type=ifelse(is.na(.data$type),netName,.data$type))
             }
         }
         ## Set edge weight
@@ -885,12 +885,12 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
         }
     }
 
-    nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+    nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
     V(coGraph)$nodeCat <- nodeN
 
     if (!identical(ret@dic, logical(0))) {
         pdic <- ret@dic
-        nodeDf <- coGraph |> activate(nodes) |> data.frame()
+        nodeDf <- coGraph |> activate("nodes") |> data.frame()
         V(coGraph)$name <- apply(nodeDf,
               1,
               function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
@@ -1015,8 +1015,8 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
             directed = FALSE))
         coGraph <- tidygraph::graph_join(as_tbl_graph(coGraph),
             as_tbl_graph(genemap))
-        coGraph <- coGraph |> activate(nodes) |>
-            mutate(type=ifelse(is.na(Freq),"Genes","Words"))
+        coGraph <- coGraph |> activate("nodes") |>
+            mutate(type=ifelse(is.na(.data$Freq),"Genes","Words"))
         E(coGraph)$edgeColor <- E(coGraph)$weight
 
         tmpW <- E(coGraph)$weight
@@ -1052,14 +1052,14 @@ process_network_gene <- function(ret, delete_zero_degree=TRUE,
         V(coGraph)$grp <- grp
     }
     ## Assign node category
-    nodeN <- (as_tbl_graph(coGraph) |> activate(nodes) |> data.frame())$type
+    nodeN <- (as_tbl_graph(coGraph) |> activate("nodes") |> data.frame())$type
     V(coGraph)$nodeCat <- nodeN
     names(nodeN) <- V(coGraph)$name
 
     ## Node attributes
     if (!identical(ret@dic, logical(0))) {
     	pdic <- ret@dic
-        nodeDf <- as_tbl_graph(coGraph) |> activate(nodes) |> data.frame()
+        nodeDf <- as_tbl_graph(coGraph) |> activate("nodes") |> data.frame()
         V(coGraph)$name <- apply(nodeDf,
               1,
               function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
@@ -1222,8 +1222,8 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
           vtx <- vtx[!duplicated(vtx),]
           vtx <- vtx |> `rownames<-`(1:nrow(vtx))
           eds <- data.frame(querymap)
-          words <- vtx |> subset(type==ic)
-          queriesDf <- vtx |> subset(type=="Queries")
+          words <- vtx |> subset(.data$type==ic)
+          queriesDf <- vtx |> subset(.data$type=="Queries")
           row.names(words)[which(words$name %in% eds[,1])]
           row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
           eds[,1] <- sapply(eds[,1], function(x) {
@@ -1269,8 +1269,8 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
     vtx <- vtx[!duplicated(vtx),]
     vtx <- vtx |> `rownames<-`(1:nrow(vtx))
     eds <- data.frame(genemap)
-    words <- vtx |> subset(type=="Words")
-    queriesDf <- vtx |> subset(type=="Queries")
+    words <- vtx |> subset(.data$type=="Words")
+    queriesDf <- vtx |> subset(.data$type=="Queries")
     row.names(words)[which(words$name %in% eds[,1])]
     row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
     eds[,1] <- sapply(eds[,1], function(x) {
@@ -1335,7 +1335,7 @@ process_network_manual <- function(ret, delete_zero_degree=TRUE,
 
   if (!identical(ret@dic, logical(0))) {
     pdic <- ret@dic
-    nodeDf <- as_tbl_graph(coGraph) |> activate(nodes) |> data.frame()
+    nodeDf <- as_tbl_graph(coGraph) |> activate("nodes") |> data.frame()
     V(coGraph)$name <- apply(nodeDf,
           1,
           function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],

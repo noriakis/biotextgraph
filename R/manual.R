@@ -289,8 +289,8 @@ manual <- function(df, madeUpper=NULL,
           vtx <- vtx[!duplicated(vtx),]
           vtx <- vtx |> `rownames<-`(1:nrow(vtx))
           eds <- data.frame(querymap)
-          words <- vtx |> subset(type==ic)
-          queriesDf <- vtx |> subset(type=="Queries")
+          words <- vtx |> subset(.data$type==ic)
+          queriesDf <- vtx |> subset(.data$type=="Queries")
           row.names(words)[which(words$name %in% eds[,1])]
           row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
           eds[,1] <- sapply(eds[,1], function(x) {
@@ -341,8 +341,8 @@ manual <- function(df, madeUpper=NULL,
         vtx <- vtx[!duplicated(vtx),]
         vtx <- vtx |> `rownames<-`(1:nrow(vtx))
         eds <- data.frame(genemap)
-        words <- vtx |> subset(type=="Words")
-        queriesDf <- vtx |> subset(type=="Queries")
+        words <- vtx |> subset(.data$type=="Words")
+        queriesDf <- vtx |> subset(.data$type=="Queries")
         row.names(words)[which(words$name %in% eds[,1])]
         row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
         eds[,1] <- sapply(eds[,1], function(x) {

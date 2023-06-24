@@ -84,6 +84,7 @@
 #' @importFrom dplyr filter
 #' @importFrom stats dist
 #' @importFrom grDevices palette
+#' @importFrom tidygraph tbl_graph
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
 #' @importFrom igraph graph.adjacency graph_from_edgelist
 #' @importFrom cowplot as_grob
@@ -527,8 +528,8 @@ bugsigdb <- function (mbList,
             V(coGraph)$type <- "Words"
             coGraph <- graph_join(as_tbl_graph(coGraph),
                 as_tbl_graph(mbmap))
-            coGraph <- coGraph |> activate(nodes) |>
-                mutate(type=ifelse(is.na(Freq),"Microbes","Words"))
+            coGraph <- coGraph |> activate("nodes") |>
+                mutate(type=ifelse(is.na(.data$Freq),"Microbes","Words"))
 
             ## If present, add additional graphs
             if (length(addNet)!=0) {
@@ -536,8 +537,8 @@ bugsigdb <- function (mbList,
                     tmpAdd <- addNet[[netName]]
                     coGraph <- graph_join(as_tbl_graph(coGraph),
                         as_tbl_graph(tmpAdd))
-                    coGraph <- coGraph |> activate(nodes) |>
-                        mutate(type=ifelse(is.na(type),netName,type))
+                    coGraph <- coGraph |> activate("nodes") |>
+                        mutate(type=ifelse(is.na(.data$type),netName,.data$type))
                 }
             }
             ## Set edge weight
@@ -551,11 +552,11 @@ bugsigdb <- function (mbList,
             E(coGraph)$weight <- tmpW
 
         } else {
-            coGraph <- as_tbl_graph(coGraph) |> activate(nodes) |>
-                mutate(type=ifelse(is.na(Freq),"Microbes","Words"))
+            coGraph <- as_tbl_graph(coGraph) |> activate("nodes") |>
+                mutate(type=ifelse(is.na(.data$Freq),"Microbes","Words"))
             E(coGraph)$edgeColor <- E(coGraph)$weight
         }
-        nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+        nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
         V(coGraph)$nodeCat <- nodeN
 
 
@@ -583,7 +584,7 @@ bugsigdb <- function (mbList,
         }
 
         if (preserve) {
-            nodeDf <- coGraph |> activate(nodes) |> data.frame()
+            nodeDf <- coGraph |> activate("nodes") |> data.frame()
             V(coGraph)$name <- apply(nodeDf,
                   1,
                   function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],

@@ -98,8 +98,8 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
   vtx <- vtx[!duplicated(vtx),]
   vtx <- vtx |> `rownames<-`(1:nrow(vtx))
   eds <- data.frame(allqueries)
-  words <- vtx |> subset(type=="Words")
-  queriesDf <- vtx |> subset(type==queryName)
+  words <- vtx |> subset(.data$type=="Words")
+  queriesDf <- vtx |> subset(.data$type==queryName)
   row.names(words)[which(words$name %in% eds[,1])]
   row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
   eds[,1] <- sapply(eds[,1], function(x) {
@@ -133,12 +133,12 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
         tmpAdd <- addNet[[netName]]
         udpGraph <- graph_join(as_tbl_graph(udpGraph),
             as_tbl_graph(tmpAdd))
-        udpGraph <- udpGraph |> activate(nodes) |>
-            mutate(type=ifelse(is.na(type),netName,type))
+        udpGraph <- udpGraph |> activate("nodes") |>
+            mutate(type=ifelse(is.na(.data$type),netName,.data$type))
 
     }
   }
-  nodeN <- (udpGraph |> activate(nodes) |> data.frame())$type
+  nodeN <- (udpGraph |> activate("nodes") |> data.frame())$type
 
   cat <- NULL
   fre <- NULL

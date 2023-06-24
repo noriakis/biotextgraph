@@ -351,8 +351,8 @@ refseq <- function (geneList, keyType="SYMBOL",
 
             coGraph <- tidygraph::graph_join(as_tbl_graph(coGraph),
                 as_tbl_graph(genemap))
-            coGraph <- coGraph |> activate(nodes) |>
-                mutate(type=ifelse(is.na(Freq),"Genes","Words"))
+            coGraph <- coGraph |> activate("nodes") |>
+                mutate(type=ifelse(is.na(.data$Freq),"Genes","Words"))
             # coGraph <- igraph::union(coGraph, genemap)
             E(coGraph)$edgeColor <- E(coGraph)$weight
             tmpW <- E(coGraph)$weight
@@ -361,8 +361,8 @@ refseq <- function (geneList, keyType="SYMBOL",
             tmpW[is.na(tmpW)] <- corThreshGenePlot
             E(coGraph)$weight <- tmpW
         } else {
-            coGraph <- as_tbl_graph(coGraph) |> activate(nodes) |>
-                mutate(type=ifelse(is.na(Freq),"Genes","Words"))
+            coGraph <- as_tbl_graph(coGraph) |> activate("nodes") |>
+                mutate(type=ifelse(is.na(.data$Freq),"Genes","Words"))
             E(coGraph)$edgeColor <- E(coGraph)$weight
         }
 
@@ -400,7 +400,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         ## Assign node category
-        nodeN <- (coGraph |> activate(nodes) |> data.frame())$type
+        nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
         V(coGraph)$nodeCat <- nodeN
         
         if (tag) {
@@ -438,7 +438,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             #   }
             # }
             # coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
-            nodeDf <- coGraph |> activate(nodes) |> data.frame()
+            nodeDf <- coGraph |> activate("nodes") |> data.frame()
             V(coGraph)$name <- apply(nodeDf,
                   1,
                   function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
