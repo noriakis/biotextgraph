@@ -208,7 +208,7 @@ of the words in the network}
 
 \item{wcScale}{scaling size for ggwordcloud}
 
-\item{catColors}{colors for words and texts when colorize=TRUE and discreteColorWord is TRUE}
+\item{catColors}{colors for words and texts when colorize is TRUE and discreteColorWord is TRUE}
 
 \item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 

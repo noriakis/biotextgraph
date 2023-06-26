@@ -77,7 +77,7 @@
 #' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 #' of the words in the network
 #' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param catColors colors for words and texts when colorize=TRUE and discreteColorWord is TRUE
+#' @param catColors colors for words and texts when colorize is TRUE and discreteColorWord is TRUE
 #' @param geneColor color for associated genes with words (when tag or colorize option is TRUE)
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param scaleEdgeWidth scale for edge width
