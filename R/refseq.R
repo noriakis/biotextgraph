@@ -3,6 +3,7 @@
 #' Text mining RefSeq description obtained by GeneSummary
 #' 
 #' @param geneList gene ID list
+#' @param plotType "wc" or "network", default to "network"
 #' @param exclude "frequency" or "tfidf",
 #' @param excludeFreq default to 5000
 #' @param excludeType ">" or "<"
@@ -10,19 +11,13 @@
 #' @param additionalRemove specific words to be excluded
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
+#' use `SYMBOL` key in `orgDb`. 
 #' @param pre remove words "pmids", "geneids"
-#' @param pal palette for color gradient in correlation network
 #' @param numWords the number of words to be shown
-#' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param corThresh the correlation (cooccurrence) threshold
-#' @param layout the layout for correlation network, defaul to "nicely"
-#' @param edgeLink if FALSE, use geom_edge_diagonal
-#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
-#' @param showLegend whether to show legend in correlation network
-#' @param colorText color text label based on frequency in correlation network
 #' @param orgDb default to org.Hs.eg.db
 #' @param organism organism ID to use
 #' @param enrich currently, only 'reactome' and 'kegg' is supported
@@ -52,33 +47,43 @@
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
 #' @param stem whether to use stemming
-#' @param tagPalette tag palette when tag is TRUE
 #' @param preserve preserve original characters
 #' @param takeMax take max values for each term in term-document matrix
 #' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
 #' Otherwise take sum.
 #' @param collapse default to FALSE, collapse all the sentences
-#' @param argList parameters to pass to wordcloud()
 #' @param normalize sum normalize the term frequency document-wise
 #' @param takeMean take mean values for each term in term-document matrix
+#' @param useSeed seed
+#' 
+#' @param useggwordcloud default to TRUE, otherwise use `wordcloud` function.
+#' @param wcScale scaling size for ggwordcloud
+#' @param argList parameters to pass to wordcloud()
+#' 
+#' @param layout the layout for correlation network, defaul to "nicely"
+#' @param edgeLink if FALSE, use geom_edge_diagonal
+#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
+#' @param pal palette for color gradient in correlation network
+#' should be a vector of length two.
+#' @param showLegend whether to show legend in correlation network
+#' @param colorText color text label based on frequency in correlation network
+#' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
+#' using udpipe, and tagging colorization for word cloud.
+#' Default to NULL, which indicates automatically set.
 #' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
 #' @param fontFamily font family to use, default to "sans"
-#' @param useggwordcloud default to TRUE
-#' @param wcScale scaling size for ggwordcloud
-#' 
 #' @param addFreqToGene add pseudo frequency to gene in genePlot
-#' @param colorize color the word nodes by their frequency, and the other nodes by their category
+#' @param colorize color the word nodes by their frequency, and the other nodes by their category.
 #' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 #' of the words in the network
 #' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
+#' @param catColors colors for words and texts when colorize=TRUE and discreteColorWord is TRUE
 #' @param geneColor color for associated genes with words (when tag or colorize option is TRUE)
-#' 
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param scaleEdgeWidth scale for edge width
 #' 
-#' @param useSeed seed
-#' @return list of data frame and ggplot2 object
+#' @return `biotext` class object
+#' 
 #' @import tm
 #' @import GeneSummary
 #' @import org.Hs.eg.db

@@ -103,7 +103,8 @@ Otherwise take sum.}
 
 \item{organism}{organism ID to use}
 
-\item{pal}{palette for color gradient in correlation network}
+\item{pal}{palette for color gradient in correlation network
+should be a vector of length two.}
 
 \item{numWords}{the number of words to be shown}
 
@@ -129,7 +130,7 @@ Otherwise take sum.}
 
 \item{ngram}{default to NA (1)}
 
-\item{plotType}{"wc" or "network"}
+\item{plotType}{"wc" or "network", default to "network"}
 
 \item{onlyTDM}{return only TDF}
 
@@ -167,7 +168,8 @@ like PubMed information and RefSeq summary}
 
 \item{numOnly}{delete number only (not deleting XXX123)}
 
-\item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}
+\item{madeUpperGenes}{make genes upper case automatically (default to TRUE)
+use `SYMBOL` key in `orgDb`.}
 
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
@@ -176,7 +178,9 @@ on whole dataset or top-words specified by numWords}
 
 \item{takeMean}{take mean values for each term in term-document matrix}
 
-\item{tagPalette}{tag palette when tag is TRUE}
+\item{tagPalette}{tag palette when `tag` is TRUE. It is also used for dependency network
+using udpipe, and tagging colorization for word cloud.
+Default to NULL, which indicates automatically set.}
 
 \item{collapse}{default to FALSE, collapse all the sentences}
 
@@ -192,7 +196,7 @@ on whole dataset or top-words specified by numWords}
 
 \item{scaleFreq}{default to NULL, scale the value if specified}
 
-\item{colorize}{color the word nodes by their frequency, and the other nodes by their category
+\item{colorize}{color the word nodes by their frequency, and the other nodes by their category.
 if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 of the words in the network}
 
@@ -200,11 +204,11 @@ of the words in the network}
 
 \item{argList}{parameters to pass to wordcloud()}
 
-\item{useggwordcloud}{default to TRUE}
+\item{useggwordcloud}{default to TRUE, otherwise use `wordcloud` function.}
 
 \item{wcScale}{scaling size for ggwordcloud}
 
-\item{catColors}{colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE}
+\item{catColors}{colors for words and texts when colorize=TRUE and discreteColorWord is TRUE}
 
 \item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
@@ -213,7 +217,7 @@ of the words in the network}
 \item{scaleEdgeWidth}{scale for edge width}
 }
 \value{
-list of data frame and ggplot2 object
+`biotext` class object
 }
 \description{
 Text mining RefSeq description obtained by GeneSummary
