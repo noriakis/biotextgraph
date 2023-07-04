@@ -1640,3 +1640,37 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
     write(html, file = paste0(rootDir, "/",netDir, "/index.html"))
     # message(paste0("Exported to ",rootDir,netDir))
 }
+
+
+#' obtainTextPosition
+#' 
+#' obtain text position in biofabric layout
+#' 
+#' @return tbl_graph
+#' @param ig igraph
+#' @examples refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
+#' 
+obtainTextPosition <- function(ig, sort.by=node_rank_fabric()) {
+  fab <- ggraph(ig,
+       "fabric",
+        sort.by = sort.by)
+
+  textPos <- fab$data
+  sortedTextPos <- textPos[order(textPos$x),]
+  nextpos <- NULL
+  for (i in seq_len(nrow(sortedTextPos))) {
+      cur <- sortedTextPos$name[i]
+      nex <- sortedTextPos$name[i+1]
+      tmpCur <- textPos[textPos$name==cur,]
+      tmpNex <- textPos[textPos$name==nex,]
+      max1 <- tmpCur$xmax |> as.numeric()
+      max2 <- tmpNex$xmax |> as.numeric()
+      nextpos <- c(nextpos, max1 + (max2 - max1)/2)
+  }
+  nextpos <- nextpos[!is.na(nextpos)]
+  nextpos <- c(sortedTextPos$x[1] |> as.numeric(), nextpos)
+  sortedTextPos$center <- nextpos
+  sortedTextPos <- sortedTextPos[as.character(seq_len(nrow(sortedTextPos))),]
+  ret <- ig |> as_tbl_graph() |> mutate(center=sortedTextPos$center)
+  ret
+}
