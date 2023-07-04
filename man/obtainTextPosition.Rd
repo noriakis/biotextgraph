@@ -17,5 +17,4 @@ obtain text position in biofabric layout
 }
 \examples{
 refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
-
 }

@@ -1649,6 +1649,7 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
 #' @return tbl_graph
 #' @param ig igraph
 #' @examples refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
+#' @export
 #' 
 obtainTextPosition <- function(ig, sort.by=node_rank_fabric()) {
   fab <- ggraph(ig,
