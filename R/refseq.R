@@ -355,7 +355,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                 directed = FALSE))
 
             coGraph <- tidygraph::graph_join(as_tbl_graph(coGraph),
-                as_tbl_graph(genemap))
+                as_tbl_graph(genemap), by="name")
             coGraph <- coGraph |> activate("nodes") |>
                 mutate(type=ifelse(is.na(.data$Freq),"Genes","Words"))
             # coGraph <- igraph::union(coGraph, genemap)
@@ -466,14 +466,23 @@ refseq <- function (geneList, keyType="SYMBOL",
         if (tag) { ## Obtain tag coloring
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
-              tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+              if (length(cols)>2) {
+                  tagPalette <- RColorBrewer::brewer.pal(length(cols), "Dark2")
+              } else {
+                  tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
+              }
               names(tagPalette) <- cols
               tagPalette["Genes"] <- geneColor
             }
         }
 
-        if (is.null(catColors)) {
-            catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+        if (is.null(catColors)) { ## Obtain category coloring
+            catLen <- length(unique(V(coGraph)$nodeCat))
+            if (catLen>2) {
+                catColors <- RColorBrewer::brewer.pal(catLen, "Dark2")
+            } else {
+                catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+            }
             names(catColors) <- unique(V(coGraph)$nodeCat)
             catColors["Genes"] <- geneColor
         }

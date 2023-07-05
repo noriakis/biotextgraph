@@ -187,11 +187,21 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
   discreteColorWord){
 
   if (is.null(catColors)) {
-      catColors <- RColorBrewer::brewer.pal(length(unique(V(ret@igraph)$nodeCat)), "Dark2")
+      catNum <- length(unique(V(ret@igraph)$nodeCat))
+      if (catNum>2) {
+        catColors <- RColorBrewer::brewer.pal(catNum, "Dark2")        
+      } else {
+        catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+      }
       names(catColors) <- unique(V(ret@igraph)$nodeCat)
   }
   if (is.null(tagColors)) {
-      tagColors <- RColorBrewer::brewer.pal(length(unique(V(ret@igraph)$tag)), "Dark2")
+      tagNum <- length(unique(V(ret@igraph)$tag))
+      if (tagNum>2) {
+        tagColors <- RColorBrewer::brewer.pal(tagNum, "Dark2")        
+      } else {
+        tagColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(tagNum)]
+      }
       names(tagColors) <- unique(V(ret@igraph)$tag)
   }
 
@@ -308,9 +318,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                       bg.color = "white", segment.color="black",family=fontFamily,
                       bg.r = .15, show.legend=showLegend) 
     }
-
-
-  netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
+  # netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
   netPlot
 }
 

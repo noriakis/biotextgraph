@@ -474,18 +474,26 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
-    if (tag) {
+    if (tag) { ## Obtain tag coloring
         if (is.null(tagPalette)) {
           cols <- V(coGraph)$tag |> unique()
-          tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+          if (length(cols)>2) {
+              tagPalette <- RColorBrewer::brewer.pal(length(cols), "Dark2")
+          } else {
+              tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
+          }
           names(tagPalette) <- cols
           tagPalette["Queries"] <- queryColor
         }
     }
 
-
-    if (is.null(catColors)) {
-        catColors <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$nodeCat)), "Dark2")
+    if (is.null(catColors)) { ## Obtain category coloring
+        catLen <- length(unique(V(coGraph)$nodeCat))
+        if (catLen>2) {
+            catColors <- RColorBrewer::brewer.pal(catLen, "Dark2")
+        } else {
+            catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+        }
         names(catColors) <- unique(V(coGraph)$nodeCat)
         catColors["Queries"] <- queryColor
     }
