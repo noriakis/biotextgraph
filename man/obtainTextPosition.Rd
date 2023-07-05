@@ -8,6 +8,8 @@ obtainTextPosition(ig, sort.by = node_rank_fabric())
 }
 \arguments{
 \item{ig}{igraph}
+
+\item{sort.by}{the argument to be passed to fabric layout function}
 }
 \value{
 tbl_graph

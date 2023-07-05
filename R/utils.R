@@ -1656,6 +1656,7 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
 #' 
 #' @return tbl_graph
 #' @param ig igraph
+#' @param sort.by the argument to be passed to fabric layout function
 #' @examples refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
 #' @export
 #' 
