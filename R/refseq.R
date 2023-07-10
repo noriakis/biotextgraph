@@ -323,15 +323,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                 degree(coGraph) > 0)
         }
 
-        ## Make uppercase
         nodeName <- V(coGraph)$name
-        dtmCol <- colnames(DTM)
-        for (i in madeUpper) {
-            dtmCol[dtmCol == i] <- toupper(i)
-            nodeName[nodeName == i] <- toupper(i)
-        }
-        V(coGraph)$name <- nodeName
-        colnames(DTM) <- dtmCol
 
         if (genePlot) {
             genemap <- c()
@@ -449,6 +441,16 @@ refseq <- function (geneList, keyType="SYMBOL",
                   function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
                     x["name"])})
         }
+
+        ## Make uppercase (after preserve)
+        nodeName <- V(coGraph)$name
+        # dtmCol <- colnames(DTM)
+        for (i in madeUpper) {
+            # dtmCol[dtmCol == i] <- toupper(i)
+            nodeName[nodeName == i] <- toupper(i)
+        }
+        V(coGraph)$name <- nodeName
+        # colnames(DTM) <- dtmCol
 
           if (!is.tbl_graph(coGraph)) {
               ret@igraph <- coGraph

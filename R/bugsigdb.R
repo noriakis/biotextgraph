@@ -479,13 +479,13 @@ bugsigdb <- function (mbList,
         }
 
         nodeName <- V(coGraph)$name
-        dtmCol <- colnames(DTM)
-        for (i in madeUpper) {
-            dtmCol[dtmCol == i] <- toupper(i)
-            nodeName[nodeName == i] <- toupper(i)
-        }
-        V(coGraph)$name <- nodeName
-        colnames(DTM) <- dtmCol
+        # dtmCol <- colnames(DTM)
+        # for (i in madeUpper) {
+        #     dtmCol[dtmCol == i] <- toupper(i)
+        #     nodeName[nodeName == i] <- toupper(i)
+        # }
+        # V(coGraph)$name <- nodeName
+        # colnames(DTM) <- dtmCol
 
         if (mbPlot) {
             mbmap <- c()
@@ -591,6 +591,12 @@ bugsigdb <- function (mbList,
                     x["name"])})
             # coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }
+
+        nodeName <- V(coGraph)$name
+        for (i in madeUpper) {
+          nodeName[nodeName == i] <- toupper(i)
+        }
+        V(coGraph)$name <- nodeName
 
         if (colorize) {addFreqToMB <- TRUE}
         if (addFreqToMB) {

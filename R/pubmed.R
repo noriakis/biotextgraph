@@ -316,13 +316,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     
     nodeName <- V(coGraph)$name
-    dtmCol <- colnames(DTM)
-    for (i in madeUpper) {
-      dtmCol[dtmCol == i] <- toupper(i)
-      nodeName[nodeName == i] <- toupper(i)
-    }
-    V(coGraph)$name <- nodeName
-    colnames(DTM) <- dtmCol
+
     incQuery <- NULL
     distinguish_query <- FALSE
     if (genePlot) {
@@ -442,6 +436,13 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
       }
       coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
     }
+
+    nodeName <- V(coGraph)$name
+    for (i in madeUpper) {
+      nodeName[nodeName == i] <- toupper(i)
+    }
+    V(coGraph)$name <- nodeName
+
     ## Set pseudo freq as min value of freq
 
     if (addFreqToQuery) {

@@ -266,13 +266,6 @@ manual <- function(df, madeUpper=NULL,
       }
     
       nodeName <- V(coGraph)$name
-      dtmCol <- colnames(DTM)
-      for (i in madeUpper) {
-        dtmCol[dtmCol == i] <- toupper(i)
-        nodeName[nodeName == i] <- toupper(i)
-      }
-      V(coGraph)$name <- nodeName
-      colnames(DTM) <- dtmCol
       
       incCols <- colnames(df)
       incCols <- incCols[!incCols %in% c("query","text")]
@@ -442,7 +435,11 @@ manual <- function(df, madeUpper=NULL,
         coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
       }
 
-
+      nodeName <- V(coGraph)$name
+      for (i in madeUpper) {
+        nodeName[nodeName == i] <- toupper(i)
+      }
+      V(coGraph)$name <- nodeName
 
     
       ## Main plot
