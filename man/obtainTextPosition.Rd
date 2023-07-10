@@ -4,12 +4,14 @@
 \alias{obtainTextPosition}
 \title{obtainTextPosition}
 \usage{
-obtainTextPosition(ig, sort.by = node_rank_fabric())
+obtainTextPosition(ig, sort.by = node_rank_fabric(), verbose = FALSE)
 }
 \arguments{
 \item{ig}{igraph}
 
 \item{sort.by}{the argument to be passed to fabric layout function}
+
+\item{verbose}{show logs}
 }
 \value{
 tbl_graph

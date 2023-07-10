@@ -12,10 +12,15 @@ devtools::install_github("noriakis/biotextgraph")
 library(biotextgraph)
 ```
 
-### [Documentation](https://noriakis.github.io/software/biotextgraph/)
+### Documentation
+The documentation using bookdown is available [here](https://noriakis.github.io/software/biotextgraph/), describing the detailed usage.
 
-### [Shiny web server](https://nsato.shinyapps.io/biotextgraphweb/)
+### Shiny web server
+The application using Shiny is available [here](https://nsato.shinyapps.io/biotextgraphweb/), hosted by [shinyapps.io](https://shinyapps.io).
 
 <p align="center">
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
+</p>
+<p align="center">
+<img src="https://github.com/noriakis/software/blob/main/images/biofabric.png?raw=true" width="800px">
 </p>

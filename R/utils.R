@@ -1657,17 +1657,21 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
 #' @return tbl_graph
 #' @param ig igraph
 #' @param sort.by the argument to be passed to fabric layout function
+#' @param verbose show logs
 #' @examples refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
 #' @export
 #' 
-obtainTextPosition <- function(ig, sort.by=node_rank_fabric()) {
+obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
+  verbose=FALSE) {
   fab <- ggraph(ig,
        "fabric",
         sort.by = sort.by)
 
   textPos <- fab$data
   sortedTextPos <- textPos[order(textPos$x),]
-  nextpos <- NULL
+
+  # Obtain raw position index
+  rawpos <- NULL
   for (i in seq_len(nrow(sortedTextPos))) {
       cur <- sortedTextPos$name[i]
       nex <- sortedTextPos$name[i+1]
@@ -1675,12 +1679,53 @@ obtainTextPosition <- function(ig, sort.by=node_rank_fabric()) {
       tmpNex <- textPos[textPos$name==nex,]
       max1 <- tmpCur$xmax |> as.numeric()
       max2 <- tmpNex$xmax |> as.numeric()
+      if (sum(is.na(max2))==0) {
+        if (max2 < max1) {
+          rawpos <- c(rawpos, tmpNex$.ggraph.orig_index)
+        }
+      }
+  }
+
+  rawpos <- NULL
+  cur_max <- 0
+  flag <- NULL
+  adjFlag <- NULL
+  for (i in seq_len(nrow(sortedTextPos))) {
+      cur <- sortedTextPos$name[i]
+      tmpCur <- textPos[textPos$name==cur,]
+      tmp_max <- tmpCur$xmax |> as.numeric()
+      if (tmp_max < cur_max) {
+        flag <- c(flag, i)
+      } else {
+        cur_max <- tmp_max
+        adjFlag <- c(adjFlag, i)
+      }
+  }
+
+  raws <- sortedTextPos[flag,]
+  raws$center <- raws$xmax
+
+  adjs <- sortedTextPos[adjFlag,]
+
+  if (verbose) {
+    qqcat("Raw: @{dim(raws)[1]}, Position to be adjusted: @{dim(adjs)[1]}")
+  }
+
+  nextpos <- NULL
+  for (i in seq_len(nrow(adjs))) {
+      cur <- adjs$name[i]
+      nex <- adjs$name[i+1]
+      tmpCur <- textPos[textPos$name==cur,]
+      tmpNex <- textPos[textPos$name==nex,]
+      max1 <- tmpCur$xmax |> as.numeric()
+      max2 <- tmpNex$xmax |> as.numeric()
       nextpos <- c(nextpos, max1 + (max2 - max1)/2)
   }
   nextpos <- nextpos[!is.na(nextpos)]
-  nextpos <- c(sortedTextPos$x[1] |> as.numeric(), nextpos)
-  sortedTextPos$center <- nextpos
-  sortedTextPos <- sortedTextPos[as.character(seq_len(nrow(sortedTextPos))),]
-  ret <- ig |> as_tbl_graph() |> mutate(center=sortedTextPos$center)
+  nextpos <- c(adjs$x[1] |> as.numeric(), nextpos)
+  adjs$center <- nextpos
+  adjs <- rbind(adjs, raws)
+  adjs <- adjs[as.character(seq_len(nrow(adjs))),]
+  ret <- ig |> as_tbl_graph() |> mutate(center=adjs$center)
   ret
 }
