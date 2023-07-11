@@ -1729,3 +1729,62 @@ obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
   ret <- ig |> as_tbl_graph() |> mutate(center=adjs$center)
   ret
 }
+
+#' plot_biofabric
+#' 
+#' plot the network in biofabric layout
+#' Internally, obtainTextPosition() is used and 
+#' the layers are stacked.
+#' For BioFabric layout, please refer to: https://biofabric.systemsbiology.net/
+#' Citation is: https://doi.org/10.1186/1471-2105-13-275
+#' 
+#' @param res biotext object
+#' @param sort.by passed to fabric layout
+#' @param highlight which category to highlight, default to NULL
+#' @param highlight_color highlight color of the category
+#' @param size mapping to use for size of text on x-axis
+#' default to "rank", which uses default ordering,
+#' other accepted options are those in the node table of tbl_graph object
+#' @param textScaleRange decide text scale range on x-axis
+#' @param end_shape end shape on `geom_edge_span`
+#' @return ggplot2
+#' @export
+#' @examples refseq(c("DDX41","PNKP")) |> plot_biofabric()
+#'
+#'
+plot_biofabric <- function(res,
+                           sort.by = node_rank_fabric(),
+                           size="rank",
+                           end_shape="circle",
+                           highlight=NULL,
+                           highlight_color="tomato",
+                           textScaleRange=c(1.5,2)) {
+    if (size=="rank") {size <- "xmin"}
+    tbl <- res@igraph |> obtainTextPosition(sort.by=sort.by)
+    if (!is.null(highlight)) {
+      g <- ggraph(tbl, "fabric", sort.by = sort.by)+
+        geom_node_range(aes(color=nodeCat)) +
+        geom_edge_span(end_shape = end_shape) +
+        geom_node_shadowtext(aes(x=xmin-4, label=name, filter=type==highlight),
+                             size=2, color=highlight_color, bg.colour="white")+
+        geom_node_text(aes(x=xmin-4, label=name, filter=type!=highlight), size=2)+
+        geom_node_shadowtext(aes(x=center, size=!!sym(size), filter=type!=highlight, color                               =nodeCat, y=y+1, label=name), bg.colour="white")+
+        geom_node_shadowtext(aes(x=center, size=!!sym(size), filter=type==highlight, color=nodeCat,
+                                 y=y+1, label=name), bg.colour="white")+
+        scale_color_manual(values=c(highlight_color, "grey20"),name="Category")+
+        theme_graph()+
+        scale_size(trans = 'reverse', range=textScaleRange)+
+        guides(size="none")
+    } else {
+      g <- ggraph(tbl, "fabric", sort.by = sort.by)+
+        geom_node_range() +
+        geom_edge_span(end_shape = end_shape) +
+        geom_node_shadowtext(aes(x=xmin-4, label=name), color="grey20",size=2, bg.colour="white")+
+        geom_node_shadowtext(aes(x=center, size=!!sym(size), y=y+1, label=name),
+                             bg.colour="white", color="grey20")+
+        theme_graph()+
+        scale_size(trans = 'reverse', range=textScaleRange)+
+        guides(size="none")      
+    }
+    g
+}
