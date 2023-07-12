@@ -12,6 +12,44 @@ changeLayout <- function(g, layout_func) {
   g
 }
 
+#' geom_node_shadowtext
+#' 
+#' Plot shadowtext at node position
+#' 
+#' @export
+#' @param mapping aes mapping
+#' @param data data to plot
+#' @param position positional argument
+#' @param show.legend whether to show legend
+#' @param ... passed to `params` in `layer()` function
+#' @return geom
+#' @importFrom shadowtext GeomShadowText
+#' @examples
+#' nodes <- data.frame(name=c("hsa:1029","hsa:4171"),
+#'                    x=c(1,1),
+#'                    xmin=c(-1,-1),
+#'                    xmax=c(2,2),
+#'                    y=c(1,1),
+#'                    ymin=c(-1,-1),
+#'                    ymax=c(2,2))
+#' edges <- data.frame(from=1, to=2)
+#' graph <- tidygraph::tbl_graph(nodes, edges)
+#' plt <- ggraph::ggraph(graph, layout="manual", x=x, y=y) +
+#'  geom_node_shadowtext(aes(label=name))
+geom_node_shadowtext <- function(mapping = NULL, data = NULL,
+                           position = 'identity',
+                           show.legend = NA, ...) {
+  params <- list(na.rm = FALSE, ...)
+
+  mapping <- c(mapping, aes(x=.data$x, y=.data$y))
+  class(mapping) <- "uneval"
+
+  layer(
+    data = data, mapping = mapping, stat = StatFilter, geom = GeomShadowText,
+    position = position, show.legend = show.legend, inherit.aes = FALSE,
+    params = params
+  )
+}
 
 #' obtainMatrix
 #' 
@@ -191,7 +229,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
       if (catNum>2) {
         catColors <- RColorBrewer::brewer.pal(catNum, "Dark2")        
       } else {
-        catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+        catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catNum)]
       }
       names(catColors) <- unique(V(ret@igraph)$nodeCat)
   }
@@ -1763,14 +1801,16 @@ plot_biofabric <- function(res,
     tbl <- res@igraph |> obtainTextPosition(sort.by=sort.by)
     if (!is.null(highlight)) {
       g <- ggraph(tbl, "fabric", sort.by = sort.by)+
-        geom_node_range(aes(color=nodeCat)) +
+        geom_node_range(aes(color=.data$nodeCat)) +
         geom_edge_span(end_shape = end_shape) +
-        geom_node_shadowtext(aes(x=xmin-4, label=name, filter=type==highlight),
+        geom_node_shadowtext(aes(x=.data$xmin-4, label=.data$name, filter=.data$type==highlight),
                              size=2, color=highlight_color, bg.colour="white")+
-        geom_node_text(aes(x=xmin-4, label=name, filter=type!=highlight), size=2)+
-        geom_node_shadowtext(aes(x=center, size=!!sym(size), filter=type!=highlight, color                               =nodeCat, y=y+1, label=name), bg.colour="white")+
-        geom_node_shadowtext(aes(x=center, size=!!sym(size), filter=type==highlight, color=nodeCat,
-                                 y=y+1, label=name), bg.colour="white")+
+        geom_node_text(aes(x=.data$xmin-4, label=.data$name, filter=.data$type!=highlight), size=2)+
+        geom_node_shadowtext(aes(x=.data$center, size=!!sym(size),
+          filter=.data$type!=highlight, color=.data$nodeCat, y=.data$y+1, label=.data$name), bg.colour="white")+
+        geom_node_shadowtext(aes(x=.data$center, size=!!sym(size),
+          filter=.data$type==highlight, color=.data$nodeCat,
+                                 y=.data$y+1, label=.data$name), bg.colour="white")+
         scale_color_manual(values=c(highlight_color, "grey20"),name="Category")+
         theme_graph()+
         scale_size(trans = 'reverse', range=textScaleRange)+
@@ -1779,12 +1819,12 @@ plot_biofabric <- function(res,
       g <- ggraph(tbl, "fabric", sort.by = sort.by)+
         geom_node_range() +
         geom_edge_span(end_shape = end_shape) +
-        geom_node_shadowtext(aes(x=xmin-4, label=name), color="grey20",size=2, bg.colour="white")+
-        geom_node_shadowtext(aes(x=center, size=!!sym(size), y=y+1, label=name),
+        geom_node_shadowtext(aes(x=.data$xmin-4, label=.data$name), color="grey20",size=2, bg.colour="white")+
+        geom_node_shadowtext(aes(x=.data$center, size=!!sym(size), y=.data$y+1, label=.data$name),
                              bg.colour="white", color="grey20")+
         theme_graph()+
         scale_size(trans = 'reverse', range=textScaleRange)+
-        guides(size="none")      
+        guides(size="none")
     }
     g
 }
