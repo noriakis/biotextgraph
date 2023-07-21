@@ -16,6 +16,7 @@
 #' @param scaleMax maximum scale size for nodes
 #' @param wcScale scaling size for wordcloud
 #' @return export the Cytoscape.js network
+#' @export
 exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,
 	scaleMin=50, scaleMax=200, wcScale=20,
 	keyType="SYMBOL", orgDb=org.Hs.eg.db, wcArgs=list(), numWords=50) {
