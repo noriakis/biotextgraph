@@ -202,7 +202,7 @@ of the words in the network}
 
 \item{geneColor}{color for associated genes with words (when tag or colorize option is TRUE)}
 
-\item{argList}{parameters to pass to wordcloud()}
+\item{argList}{parameters to pass to wordcloud() or ggwordcloud()}
 
 \item{useggwordcloud}{default to TRUE, otherwise use `wordcloud` function.}
 

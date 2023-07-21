@@ -38,10 +38,12 @@ exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,
 
 	images <- NULL
 	for (gl in names(geneList)) {
+		wcArgs[["colors"]] <- colors[[gl]]
 		wc <- refseq(geneList[[gl]],
 			keyType=keyType,
 			orgDb=orgDb,
 			plotType="wc",
+			argList=wcArgs,
 			wcScale=wcScale,
 			numWords=numWords)@wc
 	    ggsave(paste0(dir, "/images/", gl ,".png"),

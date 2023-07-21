@@ -58,7 +58,7 @@
 #' 
 #' @param useggwordcloud default to TRUE, otherwise use `wordcloud` function.
 #' @param wcScale scaling size for ggwordcloud
-#' @param argList parameters to pass to wordcloud()
+#' @param argList parameters to pass to wordcloud() or ggwordcloud()
 #' 
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
