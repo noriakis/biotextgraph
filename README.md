@@ -18,6 +18,9 @@ The documentation using bookdown is available [here](https://noriakis.github.io/
 ### Shiny web server
 The application using Shiny is available [here](https://nsato.shinyapps.io/biotextgraphweb/), hosted by [shinyapps.io](https://shinyapps.io).
 
+
+### Examples
+
 <p align="center">
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
 </p>
