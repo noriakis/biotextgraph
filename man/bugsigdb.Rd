@@ -59,7 +59,7 @@ bugsigdb(
   discreteColorWord = FALSE,
   colorText = FALSE,
   corThresh = 0.2,
-  tag = FALSE,
+  tag = "none",
   tagWhole = FALSE,
   stem = FALSE,
   layout = "nicely",
@@ -187,7 +187,9 @@ when the tag=FALSE, and colorize=TRUE}
 
 \item{corThresh}{the correlation threshold}
 
-\item{tag}{perform pvclust on words and colorlize them in wordcloud}
+\item{tag}{perform pvclust on words and colorlize them in wordcloud or network
+argument of "cor" or "tdm". Default to "none", which performs no tagging.
+If wordcloud, tagging will be performed on TDM.}
 
 \item{tagWhole}{tag whole set or subset}
 

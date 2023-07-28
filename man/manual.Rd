@@ -26,7 +26,7 @@ manual(
   colorText = FALSE,
   corThresh = 0.2,
   layout = "nicely",
-  tag = FALSE,
+  tag = "none",
   tagWhole = FALSE,
   onlyCorpus = FALSE,
   onlyTDM = FALSE,
@@ -105,7 +105,9 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 
-\item{tag}{cluster the words based on text using pvclust}
+\item{tag}{perform pvclust on words and colorlize them in wordcloud or network
+argument of "cor" or "tdm". Default to "none", which performs no tagging.
+If wordcloud, tagging will be performed on TDM.}
 
 \item{tagWhole}{tag based on whole data or subset}
 

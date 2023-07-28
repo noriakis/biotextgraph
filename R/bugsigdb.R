@@ -23,7 +23,9 @@
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
 #' @param ngram default to NA (1)
-#' @param tag perform pvclust on words and colorlize them in wordcloud
+#' @param tag perform pvclust on words and colorlize them in wordcloud or network
+#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
+#' If wordcloud, tagging will be performed on TDM.
 #' @param tagWhole tag whole set or subset
 #' @param target "title" or "abstract"
 #' @param cl cluster object passed to pvclust
@@ -114,8 +116,11 @@ bugsigdb <- function (mbList,
                     ngram=NA, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
                     catColors=NULL, useSeed=42,discreteColorWord=FALSE,
-                    colorText=FALSE, corThresh=0.2, tag=FALSE, tagWhole=FALSE, stem=FALSE,
+                    colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
                     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
+	if (!tag %in% c("none","tdm","cor")) {
+		stop("tag should be none, tdm, or cor.")
+	}
 
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -413,7 +418,7 @@ bugsigdb <- function (mbList,
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
         ret@freqDf <- returnDf
 
-        if (tag) {# Needs rework
+        if (tag=="tdm") {# Needs rework
             if (!is.null(redo)){
                 if (!is.null(redo@pvpick)) {
                     pvcl <- ret@pvpick
@@ -466,6 +471,16 @@ bugsigdb <- function (mbList,
 
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
+        
+        if (tag=="cor") {
+			ret <- tag_words(ret, cl,
+				pvclAlpha, whole=tagWhole,
+				num_words=ret@numWords,
+				corMat=TRUE, mat=matrixs$ret@corMat)
+            pvc <- ret@pvclust
+            pvcl <- ret@pvpick
+        }
+
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret
         ret@igraphRaw <- coGraph
@@ -560,7 +575,7 @@ bugsigdb <- function (mbList,
         V(coGraph)$nodeCat <- nodeN
 
 
-        if (tag) {
+        if (tag!="none") {
             netCol <- tolower(names(V(coGraph)))
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
@@ -609,7 +624,7 @@ bugsigdb <- function (mbList,
 
           ## Define colors
 
-        if (tag) { ## Obtain tag coloring
+        if (tag!="none") { ## Obtain tag coloring
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
               if (length(cols)>2) {
@@ -660,7 +675,7 @@ bugsigdb <- function (mbList,
         matSorted <- matSorted[1:numWords]
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 
-        if (tag) {
+        if (tag!="none") {
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             if (!is.null(redo)){
@@ -722,7 +737,7 @@ bugsigdb <- function (mbList,
             showFreq <- returnDf$freq
         }
 
-        if (tag){
+        if (tag!="none"){
             argList[["words"]] <- returnDf$word
             argList[["freq"]] <- showFreq
             argList[["family"]] <- fontFamily

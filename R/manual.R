@@ -18,7 +18,9 @@
 #' @param colorText color text label based on frequency in correlation network
 #' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
-#' @param tag cluster the words based on text using pvclust
+#' @param tag perform pvclust on words and colorlize them in wordcloud or network
+#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
+#' If wordcloud, tagging will be performed on TDM.
 #' @param tagWhole tag based on whole data or subset
 #' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
 #'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
@@ -89,7 +91,7 @@ manual <- function(df, madeUpper=NULL,
                    pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
                    showLegend=FALSE, plotType="network", colorText=FALSE,
-                   corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
+                   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
                    tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
@@ -100,6 +102,10 @@ manual <- function(df, madeUpper=NULL,
                    useggwordcloud=TRUE, wcScale=10, fontFamily="sans", addFreqToNonWords=FALSE,
                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
+
+	if (!tag %in% c("none","tdm","cor")) {
+		stop("tag should be none, tdm, or cor.")
+	}
 
     if (useUdpipe) {
       qqcat("Using udpipe mode\n")
@@ -232,7 +238,7 @@ manual <- function(df, madeUpper=NULL,
       DTM <- t(as.matrix(docs))
       row.names(DTM) <- df$query
       
-      if (tag) {
+      if (tag=="tdm") {
         if (!is.null(ret) & length(ret@pvpick)!=0){
           qqcat("Using previous pvclust results")
           pvcl <- ret@pvpick
@@ -254,6 +260,16 @@ manual <- function(df, madeUpper=NULL,
     
       matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM)
+      
+    if (tag=="cor") {
+		ret <- tag_words(ret, cl,
+			pvclAlpha, whole=tagWhole,
+			num_words=ret@numWords,
+			corMat=TRUE, mat=matrixs$ret@corMat)
+        pvc <- ret@pvclust
+        pvcl <- ret@pvpick
+    }
+
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret
       ret@igraphRaw <- coGraph
@@ -282,8 +298,8 @@ manual <- function(df, madeUpper=NULL,
           vtx <- vtx[!duplicated(vtx),]
           vtx <- vtx |> `rownames<-`(1:nrow(vtx))
           eds <- data.frame(querymap)
-          words <- vtx |> subset(.data$type==ic)
-          queriesDf <- vtx |> subset(.data$type=="Queries")
+          words <- vtx |> subset(vtx$type==ic)
+          queriesDf <- vtx |> subset(vtx$type=="Queries")
           row.names(words)[which(words$name %in% eds[,1])]
           row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
           eds[,1] <- sapply(eds[,1], function(x) {
@@ -334,8 +350,8 @@ manual <- function(df, madeUpper=NULL,
         vtx <- vtx[!duplicated(vtx),]
         vtx <- vtx |> `rownames<-`(1:nrow(vtx))
         eds <- data.frame(genemap)
-        words <- vtx |> subset(.data$type=="Words")
-        queriesDf <- vtx |> subset(.data$type=="Queries")
+        words <- vtx |> subset(vtx$type=="Words")
+        queriesDf <- vtx |> subset(vtx$type=="Queries")
         row.names(words)[which(words$name %in% eds[,1])]
         row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
         eds[,1] <- sapply(eds[,1], function(x) {
@@ -358,7 +374,7 @@ manual <- function(df, madeUpper=NULL,
       tmpW[is.na(tmpW)] <- corThreshGenePlot
       E(coGraph)$weight <- tmpW
 
-      if (tag) {
+      if (tag!="none") {
         netCol <- tolower(names(V(coGraph)))
         for (i in seq_along(pvcl$clusters)){
           for (j in pvcl$clusters[[i]])
@@ -394,7 +410,8 @@ manual <- function(df, madeUpper=NULL,
         fre[is.na(fre)] <- min(fre, na.rm=TRUE)
         V(coGraph)$Freq <- fre
 
-        if (tag) {qqcat("Overriding tagged information by pvclust by colorize option\n")}
+        if (tag!="none") {
+        	qqcat("Overriding tagged information by pvclust by colorize option\n")}
         if (!is.null(nodeN)) {
             addC <- NULL
             for (nn in seq_along(names(V(coGraph)))) {
@@ -453,7 +470,7 @@ manual <- function(df, madeUpper=NULL,
             edgeLabel, showLegend, fontFamily)
 
       ## Define colors
-      if (tag) {
+      if (tag!="none") {
         if (is.null(tagPalette)) {
           cols <- V(coGraph)$tag |> unique()
           tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
@@ -487,7 +504,7 @@ manual <- function(df, madeUpper=NULL,
     freqWords <- names(matSorted)
     freqWordsDTM <- t(as.matrix(docs[row.names(docs) %in% freqWords, ]))
     
-    if (tag) {
+    if (tag!="none") {
       if (tagWhole){
         pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
       } else {
@@ -523,7 +540,7 @@ manual <- function(df, madeUpper=NULL,
     } else {
         showFreq <- returnDf$freq
     }
-    if (tag){
+    if (tag!="none"){
         argList[["words"]] <- returnDf$word
         argList[["freq"]] <- showFreq
         argList[["family"]] <- fontFamily

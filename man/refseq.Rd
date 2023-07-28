@@ -40,7 +40,7 @@ refseq(
   genePlot = FALSE,
   genePathPlot = NULL,
   genePathPlotSig = 0.05,
-  tag = FALSE,
+  tag = "none",
   layout = "nicely",
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
@@ -147,7 +147,9 @@ should be a vector of length two.}
 
 \item{genePathPlotSig}{threshold for adjusted p-values (default: 0.05)}
 
-\item{tag}{perform pvclust on words and colorlize them in wordcloud}
+\item{tag}{perform pvclust on words and colorlize them in wordcloud or network
+argument of "cor" or "tdm". Default to "none", which performs no tagging.
+If wordcloud, tagging will be performed on TDM.}
 
 \item{layout}{the layout for correlation network, defaul to "nicely"}
 

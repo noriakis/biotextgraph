@@ -22,7 +22,9 @@
 #' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
 #' @param target "abstract" or "title"
-#' @param tag cluster the words based on text using pvclust
+#' @param tag perform pvclust on words and colorlize them in wordcloud or network
+#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
+#' If wordcloud, tagging will be performed on TDM.
 #' @param tagWhole tag based on whole data or subset
 #' @param genePlot plot associated genes (default: FALSE)
 #' Query gene name is shown with (Q)
@@ -100,7 +102,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    geneUpper=TRUE, apiKey=NULL, tfidf=FALSE, cl=FALSE,
                    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
                    showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
-                   corThresh=0.2, layout="nicely", tag=FALSE, tagWhole=FALSE,
+                   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
                    edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE, scaleFreq=NULL,
                    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
@@ -112,6 +114,10 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
                    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
 {
+	if (!tag %in% c("none","tdm","cor")) {
+		stop("tag should be none, tdm, or cor.")
+	}
+
   if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
@@ -279,7 +285,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     DTM <- t(as.matrix(docs))
     row.names(DTM) <- allDataDf$query
 
-    if (tag) {
+    if (tag=="tdm") {
       if (!is.null(ret) & length(ret@pvpick)!=0){
         qqcat("Using previous pvclust results")
         pvcl <- ret@pvpick
@@ -302,6 +308,16 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     
     matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM)
+    
+    if (tag=="cor") {
+		ret <- tag_words(ret, cl,
+			pvclAlpha, whole=tagWhole,
+			num_words=ret@numWords,
+			corMat=TRUE, mat=matrixs$ret@corMat)
+        pvc <- ret@pvclust
+        pvcl <- ret@pvpick
+    }
+
     coGraph <- matrixs$coGraph
 
     ret <- matrixs$ret
@@ -364,9 +380,8 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
 
       vtx <- vtx |> `rownames<-`(1:nrow(vtx))
       eds <- data.frame(genemap)
-
-      words <- vtx |> subset(.data$type=="Words")
-      queriesDf <- vtx |> subset(.data$type=="Queries")
+      words <- vtx |> subset(vtx$type=="Words")
+      queriesDf <- vtx |> subset(vtx$type=="Queries")
 
       row.names(words)[which(words$name %in% eds[,1])]
       row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
@@ -403,7 +418,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     V(coGraph)$nodeCat <- nodeN
     names(nodeN) <- V(coGraph)$name
     
-    if (tag) {
+    if (tag!="none") {
       netCol <- tolower(names(V(coGraph)))
       for (i in seq_along(pvcl$clusters)){
         for (j in pvcl$clusters[[i]])
@@ -475,7 +490,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     netPlot <- appendEdges(netPlot, bn, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
-    if (tag) { ## Obtain tag coloring
+    if (tag!="none") { ## Obtain tag coloring
         if (is.null(tagPalette)) {
           cols <- V(coGraph)$tag |> unique()
           if (length(cols)>2) {
@@ -518,7 +533,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     freqWords <- names(matSorted)
     freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
     
-    if (tag) {
+    if (tag!="none") {
       if (!is.null(redo) & length(redo@pvpick)!=0) {
         qqcat("Using previous pvclust results")
         pvcl <- redo@pvpick
@@ -561,7 +576,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         showFreq <- returnDf$freq
     }
 
-    if (tag){
+    if (tag!="none"){
         argList[["words"]] <- returnDf$word
         argList[["freq"]] <- showFreq
         argList[["family"]] <- fontFamily

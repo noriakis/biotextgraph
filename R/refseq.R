@@ -30,7 +30,9 @@
 #'                     "kegg" or "reactome"
 #' @param filterMax use pre-calculated filter based on max-values when excludeTfIdf is not null
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
-#' @param tag perform pvclust on words and colorlize them in wordcloud
+#' @param tag perform pvclust on words and colorlize them in wordcloud or network
+#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
+#' If wordcloud, tagging will be performed on TDM.
 #' @param tagWhole whether to perform pvclust on whole matrix or subset
 #' @param pvclAlpha alpha for pvpick()
 #' @param onlyTDM return only TDF
@@ -121,7 +123,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                             pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
                             ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
                             colorText=FALSE, corThresh=0.2, genePlot=FALSE,
-                            genePathPlot=NULL, genePathPlotSig=0.05, tag=FALSE,
+                            genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
                             layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
                             enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
                             mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
@@ -133,6 +135,9 @@ refseq <- function (geneList, keyType="SYMBOL",
                             argList=list(), useggwordcloud=TRUE, wcScale=10,
                             catColors=NULL, discreteColorWord=FALSE,
                             useSeed=42, scaleEdgeWidth=c(1,3)) {
+	if (!tag %in% c("none","tdm","cor")) {
+		stop("tag should be none, tdm, or cor.")
+	}
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
@@ -246,7 +251,7 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         DTM <- t(as.matrix(docs))
         
-        if (tag) {
+        if (tag=="TDM") {
             ret <- tag_words(ret, cl, pvclAlpha, whole=tagWhole, num_words=ret@numWords)
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
@@ -309,6 +314,16 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
+
+        if (tag=="cor") {
+			ret <- tag_words(ret, cl,
+				pvclAlpha, whole=tagWhole,
+				num_words=ret@numWords,
+				corMat=TRUE, mat=matrixs$ret@corMat)
+            pvc <- ret@pvclust
+            pvcl <- ret@pvpick
+        }
+        
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret
 
@@ -400,7 +415,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
         V(coGraph)$nodeCat <- nodeN
         
-        if (tag) {
+        if (tag!="none") {
             ## If tag=TRUE, significant words are assigned `cluster`
             ## The other words and gene nodes are assigned their category.
             netCol <- tolower(names(V(coGraph)))
@@ -465,7 +480,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             edgeLabel, showLegend, fontFamily)
 
 
-        if (tag) { ## Obtain tag coloring
+        if (tag!="none") { ## Obtain tag coloring
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
               if (length(cols)>2) {
@@ -521,7 +536,7 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
 
-        if (tag) {
+        if (tag!="none") {
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             if (tagWhole){
@@ -559,7 +574,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             showFreq <- returnDf$freq
         }
 
-        if (tag){
+        if (tag!="none"){
             argList[["words"]] <- returnDf$word
             argList[["freq"]] <- showFreq
             argList[["family"]] <- fontFamily

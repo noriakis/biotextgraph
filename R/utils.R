@@ -243,7 +243,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
       names(tagColors) <- unique(V(ret@igraph)$tag)
   }
 
-  if (tag) { ## use pvpick
+  if (tag!="none") { ## use pvpick
       useTagColors <- tagColors[ netPlot$data$tag ]
       netPlot <- netPlot + geom_node_point(aes(size=.data$Freq, color=.data$tag),
                                           show.legend = showLegend)+
@@ -279,7 +279,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
       }
   }
   if (colorText){
-      if (tag) {
+      if (tag!="none") {
           netPlot <- netPlot + 
               geom_node_text(aes(label=.data$name, size=.data$Freq, color=.data$tag),
                 # color=useTagColors,

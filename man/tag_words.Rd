@@ -4,7 +4,15 @@
 \alias{tag_words}
 \title{tag_words}
 \usage{
-tag_words(ret, cl = FALSE, pvclAlpha = 0.95, whole = FALSE, num_words = 30)
+tag_words(
+  ret,
+  cl = FALSE,
+  pvclAlpha = 0.95,
+  whole = FALSE,
+  num_words = 30,
+  corMat = FALSE,
+  mat = NULL
+)
 }
 \arguments{
 \item{ret}{biotext class object}
@@ -15,8 +23,12 @@ tag_words(ret, cl = FALSE, pvclAlpha = 0.95, whole = FALSE, num_words = 30)
 
 \item{whole}{perform clustering on whole matrix (take time)}
 
-\item{num_words}{if set, subset to this number of words
+\item{num_words}{if set, subset to this number of words}
+
+\item{corMat}{tagging based on correlation matrix
 based on ranking}
+
+\item{mat}{correlation matrix}
 }
 \value{
 biotext class object
