@@ -58,10 +58,10 @@ net
 net@net
 ```
 
-Tagging the set of words is possible by enabling the option `tag=TRUE`. This allows us to see what word sets appear significantly and to reflect this information in the plots.
+Tagging the set of words is possible by enabling the option `tag="cor"` (based on the adjacency matrix of inferred network) or `tag="tdm"` (term-document matrix). This allows us to see what word sets appear significantly and to reflect this information in the plots.
 
 ```{r tag}
-tag <- refseq(c(inpSymbol, cxcls), plotType="network", tag=TRUE,
+tag <- refseq(c(inpSymbol, cxcls), plotType="network", tag="cor",
     colorText=TRUE, edgeLink=FALSE, genePlot=TRUE, genePlotNum=5)
 tag@pvpick
 ```
