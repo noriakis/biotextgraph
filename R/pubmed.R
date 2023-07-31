@@ -104,7 +104,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                    showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
                    corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, genePlot=FALSE, scaleFreq=NULL,
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
                    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    discreteColorWord=FALSE,
                    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqN=FALSE, addFreqToQuery=FALSE,
@@ -199,7 +199,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
   if (onlyCorpus){
     return(docs)
   }
-  if (!is.na(ngram)){
+  if (ngram!=1){
     NgramTokenizer <- function(x)
       unlist(lapply(ngrams(words(x), ngram),
                     paste, collapse = " "),

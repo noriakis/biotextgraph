@@ -441,7 +441,7 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
     if (length(filterWords[!is.na(filterWords)])!=0) {
         tokens <- quanteda::tokens_remove(tokens, filterWords)
     }
-    if (!is.na(ngram)) {
+    if (ngram!=1) {
         tokens <- quanteda::tokens_ngrams(tokens, n=ngram)
     }
 
@@ -754,9 +754,10 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
     unlist(lapply(ngrams(words(x), ngram),
         paste, collapse = " "),
         use.names = FALSE)
-
-  ldocs <- docs %>%
-      tm_map(FUN=content_transformer(tolower))
+  ## Changes results if perform tolower here
+  ldocs <- docs
+  # ldocs <- docs %>%
+  #     tm_map(FUN=content_transformer(tolower))
   if (numOnly) {
     ldocs <- ldocs %>% tm_map(FUN=removeAloneNumbers)
     docs <- docs %>% tm_map(FUN=removeAloneNumbers)
@@ -764,17 +765,23 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
     ldocs <- ldocs %>% tm_map(FUN=removeNumbers)
     docs <- docs %>% tm_map(FUN=removeNumbers)
   }
+
   docs <- docs %>%
+    tm_map(removeWords, stopwords::stopwords("english",
+                                           "stopwords-iso")) %>%
     tm_map(FUN=removePunctuation) %>%
     tm_map(FUN=stripWhitespace)
   ldocs <- ldocs %>%
+    tm_map(removeWords, stopwords::stopwords("english",
+                                           "stopwords-iso")) %>%
     tm_map(FUN=removePunctuation) %>%
     tm_map(FUN=stripWhitespace)
   if (stem) {
     docs <- docs %>% tm_map(stemDocument) 
     ldocs <- ldocs %>% tm_map(stemDocument)
   }
-  if (!is.na(ngram)){
+
+  if (ngram!=1){
       docs <- TermDocumentMatrix(docs,
                                  control = list(tokenize = NgramTokenizer,
                                                 tolower=FALSE))
@@ -785,9 +792,11 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
       docs <- TermDocumentMatrix(docs, control=list(tolower=FALSE))
       ldocs <- TermDocumentMatrix(ldocs, control=list(tolower=TRUE))
   }
+
   rawrn <- row.names(docs)
   lrn <- row.names(ldocs)
   dic <- list()
+
   for (i in rawrn) {
     if (tolower(i) %in% lrn) {
       dic[[tolower(i)]] <- i      
@@ -1454,11 +1463,12 @@ returnExample <- function() {
 #' @import tm
 #' 
 #' 
-makeCorpus <- function (docs, filterWords, additionalRemove, numOnly, stem, lower=TRUE) {
-    if (lower) {
-        docs <- docs %>%
-            tm_map(FUN=content_transformer(tolower))
-    }
+makeCorpus <- function (docs, filterWords, additionalRemove,
+    numOnly, stem, lower=TRUE) {
+    # if (lower) {
+    #     docs <- docs %>%
+    #         tm_map(FUN=content_transformer(tolower))
+    # }
     if (numOnly) {
         docs <- docs %>% tm_map(FUN=removeAloneNumbers)
     } else {

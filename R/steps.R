@@ -510,6 +510,7 @@ make_corpus <- function(ret, collapse=FALSE,
     ret@numOnly <- num_only
     ret@stem <- stem
     ret@ngram <- ngram
+
     if (preserve) {pdic <- preserveDict(docs, ngram,
     	num_only, stem)
             ret@dic <- pdic}
@@ -535,7 +536,7 @@ make_TDM <- function(ret, tfidf=FALSE,
 	normalize=FALSE, takeMean=FALSE, takeMax=FALSE) {
 	ngram <- ret@ngram
     docs <- ret@corpus
-    if (!is.na(ngram)){
+    if (ngram!=1){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
                 paste, collapse = " "),

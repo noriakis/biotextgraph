@@ -35,7 +35,7 @@ manual(
   queryColor = "grey",
   edgeLabel = FALSE,
   edgeLink = TRUE,
-  ngram = NA,
+  ngram = 1,
   colorize = FALSE,
   tagPalette = NULL,
   preserve = TRUE,

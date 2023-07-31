@@ -93,7 +93,7 @@ manual <- function(df, madeUpper=NULL,
                    showLegend=FALSE, plotType="network", colorText=FALSE,
                    corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
                    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=NA, colorize=FALSE,
+                   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, colorize=FALSE,
                    tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
                    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
                    normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
@@ -161,7 +161,7 @@ manual <- function(df, madeUpper=NULL,
       if (onlyCorpus){
         return(docs)
       }
-      if (!is.na(ngram)){
+      if (ngram!=1){
         NgramTokenizer <- function(x)
           unlist(lapply(ngrams(words(x), ngram),
                         paste, collapse = " "),

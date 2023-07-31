@@ -113,7 +113,7 @@ bugsigdb <- function (mbList,
                     ecFile=NULL, upTaxFile=NULL, filterMax=FALSE, mbColor="grey",
                     useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
                     udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
-                    ngram=NA, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
+                    ngram=1, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
                     naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
                     catColors=NULL, useSeed=42,discreteColorWord=FALSE,
                     colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
@@ -125,7 +125,7 @@ bugsigdb <- function (mbList,
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
-        ngram <- NA
+        ngram <- 1
 
         udmodel_english <- udpipe::udpipe_load_model(file = udpipeModel)
     }
@@ -359,7 +359,7 @@ bugsigdb <- function (mbList,
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
     if (is.na(numWords)){numWords<-10}
-    if (!is.na(ngram)){
+    if (ngram!=1){
         NgramTokenizer <- function(x)
             unlist(lapply(ngrams(words(x), ngram),
                 paste, collapse = " "),

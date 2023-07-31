@@ -40,7 +40,7 @@ pubmed(
   retMax = 10,
   edgeLabel = FALSE,
   edgeLink = TRUE,
-  ngram = NA,
+  ngram = 1,
   genePlot = FALSE,
   scaleFreq = NULL,
   onlyDf = FALSE,

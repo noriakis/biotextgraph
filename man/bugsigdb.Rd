@@ -46,7 +46,7 @@ bugsigdb(
   cooccurrence = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   scaleFreq = NULL,
-  ngram = NA,
+  ngram = 1,
   plotType = "network",
   disPlot = FALSE,
   onWholeDTM = FALSE,
