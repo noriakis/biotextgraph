@@ -755,9 +755,9 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
         paste, collapse = " "),
         use.names = FALSE)
   ## Changes results if perform tolower here
-  ldocs <- docs
-  # ldocs <- docs %>%
-  #     tm_map(FUN=content_transformer(tolower))
+  # ldocs <- docs
+  ldocs <- docs %>%
+      tm_map(FUN=content_transformer(tolower))
   if (numOnly) {
     ldocs <- ldocs %>% tm_map(FUN=removeAloneNumbers)
     docs <- docs %>% tm_map(FUN=removeAloneNumbers)
@@ -1465,10 +1465,10 @@ returnExample <- function() {
 #' 
 makeCorpus <- function (docs, filterWords, additionalRemove,
     numOnly, stem, lower=TRUE) {
-    # if (lower) {
-    #     docs <- docs %>%
-    #         tm_map(FUN=content_transformer(tolower))
-    # }
+    if (lower) {
+        docs <- docs %>%
+            tm_map(FUN=content_transformer(tolower))
+    }
     if (numOnly) {
         docs <- docs %>% tm_map(FUN=removeAloneNumbers)
     } else {

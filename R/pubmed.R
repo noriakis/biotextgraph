@@ -441,15 +441,12 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
 
     if (preserve) {
-      newGname <- NULL
-      for (nm in names(V(coGraph))) {
-        if (nm %in% names(pdic)) {
-          newGname <- c(newGname, pdic[nm])
-        } else {
-          newGname <- c(newGname, nm)
-        }
-      }
-      coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
+        nodeDf <- coGraph |> activate("nodes") |> data.frame()
+        V(coGraph)$name <- apply(nodeDf,
+              1,
+              function(x) {ifelse(x["type"]=="Words",
+              	ifelse(is.na(pdic[x["name"]]), x["name"], pdic[x["name"]]),
+                x["name"])})
     }
 
     nodeName <- V(coGraph)$name

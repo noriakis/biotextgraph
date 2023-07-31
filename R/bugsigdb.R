@@ -602,7 +602,8 @@ bugsigdb <- function (mbList,
             nodeDf <- coGraph |> activate("nodes") |> data.frame()
             V(coGraph)$name <- apply(nodeDf,
                   1,
-                  function(x) {ifelse(x["type"]=="Words", pdic[x["name"]],
+                  function(x) {ifelse(x["type"]=="Words",
+                  	ifelse(is.na(pdic[x["name"]]), x["name"], pdic[x["name"]]),
                     x["name"])})
             # coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
         }

@@ -24,7 +24,7 @@ textORA <- function(queries, notGene=FALSE, bg=NULL) {
 
         ## The same filtering as the `allFreqGeneSummary`
         docs <- docs |>
-            # tm_map(FUN=content_transformer(tolower)) |> 
+            tm_map(FUN=content_transformer(tolower)) |> 
             tm_map(FUN=removeNumbers) |>
             tm_map(removeWords, stopwords::stopwords("english", "stopwords-iso")) |>
             tm_map(FUN=removePunctuation) |>

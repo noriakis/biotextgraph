@@ -1483,10 +1483,16 @@ plot_biotextgraph <- function(ret,
             tag_colors["Microbes"] <- query_color
         }
     }
-
+    tagflag <- "none"
+    if (color_by_tag) {
+    	tagflag <- TRUE
+    }
+    if (color_by_community) {
+    	tagflag <- TRUE
+    }
 
     netPlot <- appendNodesAndTexts(netPlot,
-        tag=color_by_tag | color_by_community,
+        tag=tagflag,
         colorize=colorize,
         nodePal=NULL,
         showLegend=show_legend,
