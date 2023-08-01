@@ -441,7 +441,7 @@ manual <- function(df, madeUpper=NULL,
 
 
       if (preserve) {
-        nodeDf <- coGraph |> activate("nodes") |> data.frame()
+        nodeDf <- coGraph |> as_tbl_graph() |> activate("nodes") |> data.frame()
         V(coGraph)$name <- apply(nodeDf,
               1,
               function(x) {ifelse(x["type"]=="Words",

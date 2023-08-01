@@ -175,6 +175,12 @@ refseq <- function (geneList, keyType="SYMBOL",
             fil <- ret@rawText
             if (ora){
                 qqcat("Performing ORA\n")
+                if (keyType!="ENTREZID"){
+                    geneList <- AnnotationDbi::select(orgDb,
+                        keys = geneList, columns = c("ENTREZID"),
+                        keytype = keyType)$ENTREZID
+                    geneList <- geneList[!is.na(geneList)] |> unique()
+                }
                 sig <- textORA(geneList)
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
                 qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
@@ -413,8 +419,9 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         ## Assign node category
         nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
+        names(nodeN) <- names(V(coGraph))
         V(coGraph)$nodeCat <- nodeN
-        
+
         if (tag!="none") {
             ## If tag=TRUE, significant words are assigned `cluster`
             ## The other words and gene nodes are assigned their category.

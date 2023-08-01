@@ -98,8 +98,8 @@ retUdpipeNet <- function(ret,texts,udmodel_english,orgDb,
   vtx <- vtx[!duplicated(vtx),]
   vtx <- vtx |> `rownames<-`(1:nrow(vtx))
   eds <- data.frame(allqueries)
-  words <- vtx |> subset(.data$type=="Words")
-  queriesDf <- vtx |> subset(.data$type==queryName)
+  words <- vtx |> subset(vtx$type=="Words")
+  queriesDf <- vtx |> subset(vtx$type==queryName)
   row.names(words)[which(words$name %in% eds[,1])]
   row.names(queriesDf)[which(queriesDf$name %in% eds[,2])]
   eds[,1] <- sapply(eds[,1], function(x) {

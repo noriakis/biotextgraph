@@ -36,7 +36,7 @@ textORA <- function(queries, notGene=FALSE, bg=NULL) {
     docs <- TermDocumentMatrix(docs)
     mat <- as.matrix(docs)
     matSorted <- sort(rowSums(mat), decreasing=TRUE)
-    
+
     if (is.null(bg)) {
         data_env <- new.env(parent = emptyenv())
         load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),

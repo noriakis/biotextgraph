@@ -573,7 +573,7 @@ bugsigdb <- function (mbList,
         }
         nodeN <- (coGraph |> activate("nodes") |> data.frame())$type
         V(coGraph)$nodeCat <- nodeN
-
+        names(nodeN) <- names(V(coGraph))
 
         if (tag!="none") {
             netCol <- tolower(names(V(coGraph)))
@@ -599,7 +599,7 @@ bugsigdb <- function (mbList,
         }
 
         if (preserve) {
-            nodeDf <- coGraph |> activate("nodes") |> data.frame()
+            nodeDf <- coGraph |> as_tbl_graph() |>activate("nodes") |> data.frame()
             V(coGraph)$name <- apply(nodeDf,
                   1,
                   function(x) {ifelse(x["type"]=="Words",
