@@ -205,6 +205,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
         if (!is.null(useggfx)) {
             addPlot <- do.call(useggfx, c(list(x=addPlot),ggfxParams))
         }
+
         if (dendPlot!="ggtree") {
             if (horiz) {
                 dendroPlot <- dendroPlot +
@@ -315,7 +316,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     segments <- ddata$segments
     xpositions <- unique(segments$x)
     xpositions <- xpositions[order(xpositions)]
-
+    print(xpositions)
     while (k < length(dhc %>% labels)){
         subdendro <- dhc %>% get_subdendrograms(k=k)
         for (num in seq_along(subdendro)) {
@@ -325,42 +326,50 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
             ## Perhaps spanning over all the nodes is good
             if (length(NODES)!=1) {
                 subs <- dendextend::get_subdendrograms(i, k=2)
-
+                # print(subs)
                 if (length(subs[[1]])>1) { ## Xmin
                   sub_sub <- get_subdendrograms(subs[[1]],2)
+                  # print(sub_sub)
                   labs1 <- get_nodes_attr(sub_sub[[1]], "label")
                   labs1 <- labs1[!is.na(labs1)]
                   labs2 <- get_nodes_attr(sub_sub[[2]], "label")
                   labs2 <- labs2[!is.na(labs2)]
 
-                  min1 <- as.numeric(labelPos %>%
-                                       filter(label==labs1[length(labs1)]) %>% select(.data$x))
-                  min1 <- xpositions[which(xpositions==min1)+1]
-                  min2 <- as.numeric(labelPos %>%
-                                       filter(label==labs2[1]) %>% select(.data$x))
-                  min2 <- xpositions[which(xpositions==min2)-1]
-
-                  XMIN <- min2
+                  min1 <- labelPos %>%
+                                       filter(label %in% labs1) %>% select(.data$x)
+                  min1 <- median(min1$x)
+                  # min1 <- xpositions[which(xpositions==min1)+1]
+                  min2 <- labelPos %>%
+                                       filter(label %in% labs2) %>% select(.data$x)
+                  min2 <- median(min2$x)
+                  # min2 <- xpositions[which(xpositions==min2)-1]
+                  XMIN <- (min1+min2)/2
                 } else {
                   XMIN <- as.numeric(labelPos %>%
                                        filter(label==NODES[1]) %>% select(.data$x))
                 }
 
                 if (length(subs[[2]])>1) { ## Xmax
+                  # print("RIGHT")
                   sub_sub <- get_subdendrograms(subs[[2]],2)
+                  # print(sub_sub)
+
                   labs1 <- get_nodes_attr(sub_sub[[1]], "label")
                   labs1 <- labs1[!is.na(labs1)]
                   labs2 <- get_nodes_attr(sub_sub[[2]], "label")
                   labs2 <- labs2[!is.na(labs2)]
 
-                  max1 <- as.numeric(labelPos %>%
-                                       filter(label==labs1[length(labs1)]) %>% select(.data$x))
-                  max1 <- xpositions[which(xpositions==max1)+1]
+                  max1 <- labelPos %>%
+                                       filter(label %in% labs1) %>% select(.data$x)
+                  max1 <- median(max1$x)
+                  
+                  # max1 <- xpositions[which(xpositions==max1)+1]
 
-                  max2 <- as.numeric(labelPos %>%
-                                       filter(label==labs2[1]) %>% select(.data$x))
-                  max2 <- xpositions[which(xpositions==max2)+1]
-                  XMAX <- max1
+                  max2 <- labelPos %>%
+                                       filter(label %in% labs2) %>% select(.data$x)
+                  max2 <- median(max2$x)
+                  # max2 <- xpositions[which(xpositions==max2)+1]
+                  XMAX <- (max1+max2)/2
                 } else {
                   XMAX <- as.numeric(labelPos %>%
                                        filter(label==NODES[length(NODES)]) %>% select(.data$x))  
@@ -374,6 +383,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
             }
             centerPos <- (XMIN+XMAX)/2
             centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
+            if (dim(centerPos)[1]==0) {stop("Something's wrong with the calculation. No X position specified")}
+            
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
 

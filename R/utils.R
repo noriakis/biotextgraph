@@ -367,12 +367,16 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 #'
 #' When an interesting word is found in two or more networks,
 #' connect the words and gene names and return the graph.
-#' Note that genePlot must be set to TRUE.
+#' Note that genePlot must be set to TRUE in all the networks.
 #'
-#' @param nets named list of nets
+#' @param nets named list of nets (if no names are given, automatically set)
 #' @param query_word word to connect
+#' @param return_tbl_graph return tbl_graph
+#' @param neighbors obtain neighbors words for queried words, default to FALSE
 #' @return igraph object
-connectGenes <- function(nets, query_word) {
+#' @export
+connectGenes <- function(nets, query_word, return_tbl_graph=FALSE,
+    neighbors=FALSE) {
   words <- NULL
   if (is.null(names(nets))) {
     names(nets) <- paste0("Net",seq_len(length(nets)))
@@ -382,6 +386,9 @@ connectGenes <- function(nets, query_word) {
     if (dim(net@geneMap)[1]==0) {
       stop("No gene mapping present in object")
     }
+    if (neighbors) {
+        el <- induced.subgraph(net@igraphRaw, neighbors(net@igraphRaw, query_word)) |> as_edgelist()
+    }
     
     mp <- net@geneMap
     mp <- data.frame(mp[mp[,1]==query_word,])
@@ -389,9 +396,22 @@ connectGenes <- function(nets, query_word) {
     
     words <- rbind(words, mp[,c(1,2)])
     words <- rbind(words, mp[,c(2,3)]|>`colnames<-`(colnames(mp[,c(1,2)])))
+    if (neighbors) {
+        nbs <- NULL
+        for (i in c(unique(el[,2],el[,1]))) {
+            nbs <- rbind(nbs, c(i, query_word))
+        }
+        nbs <- nbs |> data.frame() |> `colnames<-`(colnames(mp[,c(1,2)]))
+        words <- rbind(words, nbs)
+    }
     k <- k+1
   }
-  return(graph_from_edgelist(as.matrix(words), directed = FALSE))
+  g <- graph_from_edgelist(as.matrix(words), directed = FALSE)
+  if (return_tbl_graph) {
+    return(g |> as_tbl_graph())
+  } else {
+    return(g)
+  }
 }
 
 #'

@@ -4,12 +4,16 @@
 \alias{connectGenes}
 \title{connectGenes}
 \usage{
-connectGenes(nets, query_word)
+connectGenes(nets, query_word, return_tbl_graph = FALSE, neighbors = FALSE)
 }
 \arguments{
-\item{nets}{named list of nets}
+\item{nets}{named list of nets (if no names are given, automatically set)}
 
 \item{query_word}{word to connect}
+
+\item{return_tbl_graph}{return tbl_graph}
+
+\item{neighbors}{obtain neighbors words for queried words, default to FALSE}
 }
 \value{
 igraph object
@@ -17,5 +21,5 @@ igraph object
 \description{
 When an interesting word is found in two or more networks,
 connect the words and gene names and return the graph.
-Note that genePlot must be set to TRUE.
+Note that genePlot must be set to TRUE in all the networks.
 }
