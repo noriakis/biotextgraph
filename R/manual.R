@@ -470,7 +470,8 @@ manual <- function(df, madeUpper=NULL,
       if (tag!="none") {
         if (is.null(tagPalette)) {
           cols <- V(coGraph)$tag |> unique()
-          tagPalette <- RColorBrewer::brewer.pal(length(unique(V(coGraph)$tag)), "Dark2")
+          tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
+          tagPalette <- colorRampPalette(tagPalette)(length(unique(V(coGraph)$tag)))
           names(tagPalette) <- cols
           tagPalette["query"] <- queryColor
         }
