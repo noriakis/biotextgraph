@@ -316,7 +316,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     segments <- ddata$segments
     xpositions <- unique(segments$x)
     xpositions <- xpositions[order(xpositions)]
-    print(xpositions)
+
     while (k < length(dhc %>% labels)){
         subdendro <- dhc %>% get_subdendrograms(k=k)
         for (num in seq_along(subdendro)) {
@@ -383,7 +383,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
             }
             centerPos <- (XMIN+XMAX)/2
             centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
-            if (dim(centerPos)[1]==0) {stop("Something's wrong with the calculation. No X position specified")}
+            # if (dim(centerPos)[1]==0) {stop("Something's wrong with the calculation. No X position specified")}
             
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
