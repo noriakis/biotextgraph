@@ -9,6 +9,7 @@ plot_biofabric(
   sort.by = node_rank_fabric(),
   size = "rank",
   end_shape = "circle",
+  color_map = NULL,
   highlight = NULL,
   highlight_color = "tomato",
   textScaleRange = c(1.5, 2)
@@ -24,6 +25,9 @@ default to "rank", which uses default ordering,
 other accepted options are those in the node table of tbl_graph object}
 
 \item{end_shape}{end shape on `geom_edge_span`}
+
+\item{color_map}{passed to aes mapping in geom_node_range.
+Override `highlight` option.}
 
 \item{highlight}{which category to highlight, default to NULL}
 

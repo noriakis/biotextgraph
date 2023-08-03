@@ -448,15 +448,6 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         if (preserve) {
-            # newGname <- NULL
-            # for (nm in names(V(coGraph))) {
-            #   if (nm %in% names(pdic)) {
-            #     newGname <- c(newGname, pdic[nm])
-            #   } else {
-            #     newGname <- c(newGname, nm)
-            #   }
-            # }
-            # coGraph <- set.vertex.attribute(coGraph, "name", value=newGname)
             nodeDf <- coGraph |> activate("nodes") |> data.frame()
             V(coGraph)$name <- apply(nodeDf,
                   1,
@@ -475,11 +466,12 @@ refseq <- function (geneList, keyType="SYMBOL",
         V(coGraph)$name <- nodeName
         # colnames(DTM) <- dtmCol
 
-          if (!is.tbl_graph(coGraph)) {
-              ret@igraph <- coGraph
-          } else {
-              ret@igraph <- as.igraph(coGraph)
-          }
+        if (!is.tbl_graph(coGraph)) {
+            ret@igraph <- coGraph
+        } else {
+            ret@igraph <- as.igraph(coGraph)
+        }
+        
         ## Main plot
         E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
         netPlot <- ggraph(coGraph, layout=layout)
@@ -492,7 +484,8 @@ refseq <- function (geneList, keyType="SYMBOL",
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
               if (length(cols)>2) {
-                  tagPalette <- RColorBrewer::brewer.pal(length(cols), "Dark2")
+                  tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
+                  tagPalette <- colorRampPalette(tagPalette)(length(cols))
               } else {
                   tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
               }

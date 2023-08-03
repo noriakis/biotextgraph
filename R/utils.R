@@ -1815,6 +1815,8 @@ obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
 #' other accepted options are those in the node table of tbl_graph object
 #' @param textScaleRange decide text scale range on x-axis
 #' @param end_shape end shape on `geom_edge_span`
+#' @param color_map passed to aes mapping in geom_node_range.
+#' Override `highlight` option.
 #' @return ggplot2
 #' @export
 #' @examples refseq(c("DDX41","PNKP")) |> plot_biofabric()
@@ -1824,11 +1826,24 @@ plot_biofabric <- function(res,
                            sort.by = node_rank_fabric(),
                            size="rank",
                            end_shape="circle",
+                           color_map=NULL,
                            highlight=NULL,
                            highlight_color="tomato",
                            textScaleRange=c(1.5,2)) {
     if (size=="rank") {size <- "xmin"}
     tbl <- res@igraph |> obtainTextPosition(sort.by=sort.by)
+    if (!is.null(color_map)) {
+        g <- ggraph(tbl, "fabric", sort.by = sort.by)+
+            geom_node_range(aes(color=!!sym(color_map))) +
+            geom_edge_span(end_shape = end_shape) +
+            geom_node_shadowtext(aes(x=.data$xmin-4, label=.data$name), color="grey20",size=2, bg.colour="white")+
+            geom_node_shadowtext(aes(x=.data$center, size=!!sym(size), y=.data$y+1, label=.data$name),
+                            bg.colour="white", color="grey20")+
+            theme_graph()+
+            scale_size(trans = 'reverse', range=textScaleRange)+
+            guides(size="none")
+        return(g)
+    }
     if (!is.null(highlight)) {
       g <- ggraph(tbl, "fabric", sort.by = sort.by)+
         geom_node_range(aes(color=.data$nodeCat)) +

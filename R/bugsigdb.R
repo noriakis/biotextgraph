@@ -629,7 +629,8 @@ bugsigdb <- function (mbList,
             if (is.null(tagPalette)) {
               cols <- V(coGraph)$tag |> unique()
               if (length(cols)>2) {
-                  tagPalette <- RColorBrewer::brewer.pal(length(cols), "Dark2")
+                  tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
+                  tagPalette <- colorRampPalette(tagPalette)(length(cols))
               } else {
                   tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
               }
