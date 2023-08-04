@@ -114,6 +114,7 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 #' @param withTitle ggtitle({cluster name}) will be added
 #' @param withggfx applying ggfx filters
 #' @param ggfxParams parameter list for ggfx
+#' @param FDRThresh FDR threshold
 #' @examples 
 #' df <- data.frame(
 #'   p.value=c(0.01, 0.01),gene=c("PNKP","DDX41"),
@@ -139,6 +140,7 @@ TextMarkersScran <- function(res,
     withTitle=TRUE,
     top=10,
     withggfx=NULL,
+    FDRThresh=0.05,
     ggfxParams=list()
     ) {
 
@@ -171,6 +173,7 @@ TextMarkersScran <- function(res,
 
         tmp <- res[[i]]
         candidate <- subset(tmp, tmp$Top < top)
+        candidate <- subset(candidate, candidate$FDR < FDRThresh)
         cand_genes <- candidate |> row.names()
         args[["geneList"]] <- cand_genes
 

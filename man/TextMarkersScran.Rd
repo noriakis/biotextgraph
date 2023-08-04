@@ -18,6 +18,7 @@ TextMarkersScran(
   withTitle = TRUE,
   top = 10,
   withggfx = NULL,
+  FDRThresh = 0.05,
   ggfxParams = list()
 )
 }
@@ -47,6 +48,8 @@ TextMarkersScran(
 \item{top}{Top-{top} genes for each cluster will be included}
 
 \item{withggfx}{applying ggfx filters}
+
+\item{FDRThresh}{FDR threshold}
 
 \item{ggfxParams}{parameter list for ggfx}
 }
