@@ -118,7 +118,7 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 #' @examples 
 #' df <- data.frame(
 #'   p.value=c(0.01, 0.01),gene=c("PNKP","DDX41"),
-#'   Top=c(1,2)
+#'   Top=c(1,2),FDR=c(0.01, 0.01)
 #' )
 #' row.names(df) <- df$gene
 #' markers <- list("1"=df)
