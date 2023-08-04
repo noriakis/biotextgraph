@@ -321,6 +321,10 @@ refseq <- function (geneList, keyType="SYMBOL",
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
 
+        
+        coGraph <- matrixs$coGraph
+        ret <- matrixs$ret
+        
         if (tag=="cor") {
 			ret <- tag_words(ret, cl,
 				pvclAlpha, whole=tagWhole,
@@ -329,9 +333,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
         }
-        
-        coGraph <- matrixs$coGraph
-        ret <- matrixs$ret
+
 
         ret@igraphRaw <- coGraph
 

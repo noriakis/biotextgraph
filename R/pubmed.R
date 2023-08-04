@@ -309,6 +309,10 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM)
     
+
+    coGraph <- matrixs$coGraph
+
+    ret <- matrixs$ret
     if (tag=="cor") {
 		ret <- tag_words(ret, cl,
 			pvclAlpha, whole=tagWhole,
@@ -318,9 +322,6 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         pvcl <- ret@pvpick
     }
 
-    coGraph <- matrixs$coGraph
-
-    ret <- matrixs$ret
     ret@igraphRaw <- coGraph
     coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
     V(coGraph)$Freq <- matSorted[V(coGraph)$name]

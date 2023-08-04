@@ -472,6 +472,10 @@ bugsigdb <- function (mbList,
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM)
         
+
+
+        coGraph <- matrixs$coGraph
+        ret <- matrixs$ret
         if (tag=="cor") {
 			ret <- tag_words(ret, cl,
 				pvclAlpha, whole=tagWhole,
@@ -480,9 +484,6 @@ bugsigdb <- function (mbList,
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
         }
-
-        coGraph <- matrixs$coGraph
-        ret <- matrixs$ret
         ret@igraphRaw <- coGraph
 
         ## Subset to frequent-words

@@ -261,17 +261,18 @@ manual <- function(df, madeUpper=NULL,
       matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM)
       
-    if (tag=="cor") {
-		ret <- tag_words(ret, cl,
-			pvclAlpha, whole=tagWhole,
-			num_words=ret@numWords,
-			corMat=TRUE, mat=matrixs$ret@corMat)
-        pvc <- ret@pvclust
-        pvcl <- ret@pvpick
-    }
-
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret
+	    if (tag=="cor") {
+			ret <- tag_words(ret, cl,
+				pvclAlpha, whole=tagWhole,
+				num_words=ret@numWords,
+				corMat=TRUE, mat=matrixs$ret@corMat)
+	        pvc <- ret@pvclust
+	        pvcl <- ret@pvpick
+	    }
+
+
       ret@igraphRaw <- coGraph
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
       V(coGraph)$Freq <- matSorted[V(coGraph)$name]
