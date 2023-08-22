@@ -9,7 +9,7 @@ DimPlotWithTexts(
   markers,
   label = TRUE,
   pt.size = 0.5,
-  reduction = "umap",
+  reduction = "pca",
   point_alpha = 0.2,
   use_shadowtext = TRUE,
   bg.colour = "white",

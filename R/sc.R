@@ -438,7 +438,7 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 #' @importFrom dplyr group_by
 #' @return single-cell plot with text annotation
 DimPlotWithTexts <- function(seu, markers,
-         label=TRUE, pt.size=0.5, reduction="umap",
+         label=TRUE, pt.size=0.5, reduction="pca",
          point_alpha=0.2, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL,
          wc_alpha=1, wcScale=5,
