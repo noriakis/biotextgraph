@@ -110,31 +110,31 @@
 #' refseq(geneList)
 #' 
 refseq <- function (geneList, keyType="SYMBOL",
-                            excludeFreq=2000, exclude="frequency",
-                            filterMax=FALSE, excludeType=">",
-                            tfidf=FALSE, genePlotNum=10,
-                            preserve=TRUE, takeMax=FALSE,
-                            additionalRemove=NA, onlyCorpus=FALSE,
-                            madeUpper=c("dna","rna"), organism=9606,
-                            pal=c("blue","red"), numWords=15,
-                            scaleRange=c(5,10), showLegend=FALSE,
-                            orgDb=org.Hs.eg.db, edgeLabel=FALSE,
-                            naEdgeColor="grey50", cooccurrence=FALSE,
-                            pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
-                            ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
-                            colorText=FALSE, corThresh=0.2, genePlot=FALSE,
-                            genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
-                            layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-                            enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
-                            mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
-                            onWholeDTM=FALSE, pre=TRUE, takeMean=FALSE,
-                            tagPalette=NULL, collapse=FALSE, addFreqToGene=FALSE,
-                            useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
-                            udpipeModel="english-ewt-ud-2.5-191206.udpipe",
-                            scaleFreq=NULL, colorize=FALSE, geneColor="grey",
-                            argList=list(), useggwordcloud=TRUE, wcScale=10,
-                            catColors=NULL, discreteColorWord=FALSE,
-                            useSeed=42, scaleEdgeWidth=c(1,3)) {
+    excludeFreq=2000, exclude="frequency",
+    filterMax=FALSE, excludeType=">",
+    tfidf=FALSE, genePlotNum=10,
+    preserve=TRUE, takeMax=FALSE,
+    additionalRemove=NA, onlyCorpus=FALSE,
+    madeUpper=c("dna","rna"), organism=9606,
+    pal=c("blue","red"), numWords=15,
+    scaleRange=c(5,10), showLegend=FALSE,
+    orgDb=org.Hs.eg.db, edgeLabel=FALSE,
+    naEdgeColor="grey50", cooccurrence=FALSE,
+    pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
+    ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
+    colorText=FALSE, corThresh=0.2, genePlot=FALSE,
+    genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
+    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
+    enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
+    mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
+    onWholeDTM=FALSE, pre=TRUE, takeMean=FALSE,
+    tagPalette=NULL, collapse=FALSE, addFreqToGene=FALSE,
+    useUdpipe=FALSE, normalize=FALSE, fontFamily="sans",
+    udpipeModel="english-ewt-ud-2.5-191206.udpipe",
+    scaleFreq=NULL, colorize=FALSE, geneColor="grey",
+    argList=list(), useggwordcloud=TRUE, wcScale=10,
+    catColors=NULL, discreteColorWord=FALSE,
+    useSeed=42, scaleEdgeWidth=c(1,3)) {
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
 	}
@@ -436,16 +436,16 @@ refseq <- function (geneList, keyType="SYMBOL",
             V(coGraph)$tag <- netCol
 
             if (!is.null(nodeN)) {
-              addC <- V(coGraph)$tag
-              for (nn in seq_along(names(V(coGraph)))) {
-                if (V(coGraph)$tag[nn]!="not_assigned"){next}
-                if (names(V(coGraph))[nn] %in% names(nodeN)) {
-                  addC[nn] <- nodeN[names(V(coGraph))[nn]]
-                } else {
-                  next
+                addC <- V(coGraph)$tag
+                for (nn in seq_along(names(V(coGraph)))) {
+                    if (V(coGraph)$tag[nn]!="not_assigned"){next}
+                    if (names(V(coGraph))[nn] %in% names(nodeN)) {
+                        addC[nn] <- nodeN[names(V(coGraph))[nn]]
+                    } else {
+                        next
+                    }
                 }
-              }
-              V(coGraph)$tag <- addC
+                V(coGraph)$tag <- addC
             }
         }
 
@@ -484,15 +484,15 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         if (tag!="none") { ## Obtain tag coloring
             if (is.null(tagPalette)) {
-              cols <- V(coGraph)$tag |> unique()
-              if (length(cols)>2) {
-                  tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
-                  tagPalette <- colorRampPalette(tagPalette)(length(cols))
-              } else {
-                  tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
-              }
-              names(tagPalette) <- cols
-              tagPalette["Genes"] <- geneColor
+                cols <- V(coGraph)$tag |> unique()
+                if (length(cols)>2) {
+                    tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
+                    tagPalette <- colorRampPalette(tagPalette)(length(cols))
+                } else {
+                    tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
+                }
+                names(tagPalette) <- cols
+                tagPalette["Genes"] <- geneColor
             }
         }
 
@@ -614,6 +614,5 @@ refseq <- function (geneList, keyType="SYMBOL",
         ret@freqDf <- returnDf
         ret@wc <- wc
     }
-
     return(ret)
 }
