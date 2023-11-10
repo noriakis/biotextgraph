@@ -21,6 +21,7 @@ pubmed(
   apiKey = NULL,
   tfidf = FALSE,
   cl = FALSE,
+  autoThresh = TRUE,
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
@@ -107,6 +108,8 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 \item{tfidf}{use TfIdf when making TDM}
 
 \item{cl}{cluster to pass to pvclust (snow::makeCluster(n))}
+
+\item{autoThresh}{automatically determine the threshold value to show `numWords`}
 
 \item{pal}{palette for color gradient in correlation network}
 

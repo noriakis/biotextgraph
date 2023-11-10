@@ -2,7 +2,6 @@
 #' 
 #' make word cloud or correlation network from PubMed
 #' 
-#' 
 #' @param queries gene symbols
 #' @param redo if plot in other parameters, input the previous list
 #' @param madeUpper make the words uppercase in resulting plot
@@ -13,6 +12,7 @@
 #' @param scaleRange scale for label and node size in correlation network
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param corThresh the correlation threshold
+#' @param autoThresh automatically determine the threshold value to show `numWords`
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
@@ -95,23 +95,29 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
-                   target="abstract", useFil=NA, filType="above",
-                   filNum=0, sortOrder="relevance", fontFamily="sans",
-                   pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
-                   apiKey=NULL, tfidf=FALSE, cl=FALSE,
-                   pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
-                   showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
-                   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
-                   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
-                   discreteColorWord=FALSE,
-                   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE, addFreqToQuery=FALSE,
-                   naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE, queryColor="grey",
-                   useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
-                   udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE, takeMean=FALSE,
-                   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db, onlyGene=FALSE,
-                   pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE, argList=list())
+   target="abstract", useFil=NA, filType="above",
+   filNum=0, sortOrder="relevance", fontFamily="sans",
+   pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
+   apiKey=NULL, tfidf=FALSE, cl=FALSE, autoThresh=TRUE,
+   pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
+   showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
+   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
+   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
+   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
+   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
+   catColors=NULL,
+   discreteColorWord=FALSE,
+   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE,
+   addFreqToQuery=FALSE,
+   naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE,
+   queryColor="grey",
+   useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
+   udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
+   takeMean=FALSE,
+   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
+   onlyGene=FALSE,
+   pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
+   argList=list())
 {
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
@@ -142,7 +148,8 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         # ret@query <- queries
         # ret@delim <- delim
         if (quote) {
-            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)), collapse=paste0(" ",delim," "))
+            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
+                collapse=paste0(" ",delim," "))
         } else {
             query <- paste(queries, collapse=paste0(" ",delim," "))
         }
@@ -312,7 +319,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         }
     
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
     
 
         coGraph <- matrixs$coGraph
@@ -443,7 +450,10 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         }
 
         if (preserve) {
-            nodeDf <- coGraph |> as_tbl_graph() |>activate("nodes") |> data.frame()
+            nodeDf <- coGraph |>
+                as_tbl_graph() |>
+                activate("nodes") |>
+                data.frame()
             V(coGraph)$name <- apply(nodeDf, 1,
                 function(x) {
                     ifelse(x["type"]=="Words",
@@ -502,7 +512,9 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
                     tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
                     tagPalette <- colorRampPalette(tagPalette)(length(cols))
                 } else {
-                    tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
+                    tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[
+                        seq_len(length(cols))
+                    ]
                 }
                 names(tagPalette) <- cols
                 tagPalette["Queries"] <- queryColor
@@ -514,7 +526,9 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
             if (catLen>2) {
                 catColors <- RColorBrewer::brewer.pal(catLen, "Dark2")
             } else {
-                catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+                catColors <- RColorBrewer::brewer.pal(3,"Dark2")[
+                    seq_len(catLen)
+                ]
             }
             names(catColors) <- unique(V(coGraph)$nodeCat)
             catColors["Queries"] <- queryColor
@@ -522,14 +536,16 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
             showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-            useSeed,ret,tagColors=tagPalette, discreteColorWord=discreteColorWord)
+            useSeed,ret,tagColors=tagPalette,
+            discreteColorWord=discreteColorWord)
 
 
         netPlot <- netPlot+
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
-            scale_edge_color_gradient(low=pal[1],high=pal[2],na.value=naEdgeColor,
-                                name = "Correlation")+
+            scale_edge_color_gradient(low=pal[1],high=pal[2],
+                na.value=naEdgeColor,
+                name = "Correlation")+
             theme_graph()
         ret@net <- netPlot
     } else {

@@ -66,6 +66,7 @@ bugsigdb(
   edgeLink = TRUE,
   deleteZeroDeg = TRUE,
   cl = FALSE,
+  autoThresh = TRUE,
   argList = list()
 )
 }
@@ -202,6 +203,8 @@ If wordcloud, tagging will be performed on TDM.}
 \item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
 
 \item{cl}{cluster object passed to pvclust}
+
+\item{autoThresh}{automatically determine the threshold value to show `numWords`}
 
 \item{argList}{parameters to pass to wordcloud()}
 }

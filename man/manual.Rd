@@ -53,6 +53,7 @@ manual(
   argList = list(),
   useUdpipe = FALSE,
   discreteColorWord = FALSE,
+  autoThresh = TRUE,
   useggwordcloud = TRUE,
   wcScale = 10,
   fontFamily = "sans",
@@ -167,6 +168,8 @@ on whole dataset or top-words specified by numWords}
 \item{useUdpipe}{use udpipe to make a network}
 
 \item{discreteColorWord}{colorize words by "Words" category, not frequency.}
+
+\item{autoThresh}{automatically determine the threshold value to show `numWords`}
 
 \item{useggwordcloud}{default to TRUE}
 

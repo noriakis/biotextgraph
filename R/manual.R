@@ -9,6 +9,7 @@
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
+#' @param autoThresh automatically determine the threshold value to show `numWords`
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
@@ -86,21 +87,22 @@
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
 manual <- function(df, madeUpper=NULL,
-                   useFil=NA, filType="above", cooccurrence=FALSE,
-                   filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
-                   pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
-                   pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
-                   showLegend=FALSE, plotType="network", colorText=FALSE,
-                   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
-                   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
-                   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, colorize=FALSE,
-                   tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
-                   deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
-                   normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
-                   onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
-                   discreteColorWord=FALSE,
-                   useggwordcloud=TRUE, wcScale=10, fontFamily="sans", addFreqToNonWords=FALSE,
-                   udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
+   useFil=NA, filType="above", cooccurrence=FALSE,
+   filNum=0, useQuanteda=FALSE, quantedaArgs=list(),
+   pvclAlpha=0.95, numOnly=TRUE, tfidf=FALSE, cl=FALSE,
+   pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
+   showLegend=FALSE, plotType="network", colorText=FALSE,
+   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
+   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
+   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, colorize=FALSE,
+   tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
+   deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
+   normalize=FALSE, takeMean=FALSE, queryPlot=FALSE, collapse=FALSE,
+   onWholeDTM=FALSE, stem=FALSE, argList=list(), useUdpipe=FALSE,
+   discreteColorWord=FALSE, autoThresh=TRUE,
+   useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
+   addFreqToNonWords=FALSE,
+   udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
 	if (!tag %in% c("none","tdm","cor")) {
@@ -259,7 +261,7 @@ manual <- function(df, madeUpper=NULL,
       }
     
       matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
-          corThresh, cooccurrence, onWholeDTM)
+          corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
       
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret

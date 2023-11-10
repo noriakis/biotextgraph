@@ -15,6 +15,7 @@
 #' @param plotType "wc" or "network"
 #' @param scaleRange scale for label and node size in correlation network
 #' @param corThresh the correlation threshold
+#' @param autoThresh automatically determine the threshold value to show `numWords`
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param layout the layout for correlation network, defaul to "nicely"
 #' @param edgeLink if FALSE, use geom_edge_diagonal
@@ -99,25 +100,27 @@
 #' @export
 #' 
 bugsigdb <- function (mbList,
-                    excludeFreq=1000, exclude="frequency",
-                    excludeType=">", normalize=FALSE, takeMean=FALSE,
-                    additionalRemove=NA, tfidf=FALSE,
-                    target="title", apiKey=NULL, takeMax=FALSE,
-                    pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
-                    madeUpper=c("dna","rna"), redo=NULL, fontFamily="sans",
-                    pal=c("blue","red"), numWords=15, preserve=TRUE,
-                    metab=NULL, metThresh=0.2, curate=TRUE,
-                    abstArg=list(), tagPalette=NULL, metCol=NULL,
-                    scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
-                    edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
-                    ecFile=NULL, upTaxFile=NULL, filterMax=FALSE, mbColor="grey",
-                    useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
-                    udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
-                    ngram=1, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
-                    naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
-                    catColors=NULL, useSeed=42,discreteColorWord=FALSE,
-                    colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
-                    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE, argList=list()) {
+    excludeFreq=1000, exclude="frequency",
+    excludeType=">", normalize=FALSE, takeMean=FALSE,
+    additionalRemove=NA, tfidf=FALSE,
+    target="title", apiKey=NULL, takeMax=FALSE,
+    pre=FALSE, pvclAlpha=0.95, numOnly=TRUE,
+    madeUpper=c("dna","rna"), redo=NULL, fontFamily="sans",
+    pal=c("blue","red"), numWords=15, preserve=TRUE,
+    metab=NULL, metThresh=0.2, curate=TRUE,
+    abstArg=list(), tagPalette=NULL, metCol=NULL,
+    scaleRange=c(5,10), showLegend=FALSE, ecPlot=FALSE,
+    edgeLabel=FALSE, mbPlot=FALSE, onlyTDM=FALSE,
+    ecFile=NULL, upTaxFile=NULL, filterMax=FALSE, mbColor="grey",
+    useUdpipe=FALSE, colorize=FALSE, cooccurrence=FALSE,
+    udpipeModel="english-ewt-ud-2.5-191206.udpipe", scaleFreq=NULL,
+    ngram=1, plotType="network", disPlot=FALSE, onWholeDTM=FALSE,
+    naEdgeColor="grey50", useggwordcloud=TRUE, wcScale=10,addFreqToMB=FALSE,
+    catColors=NULL, useSeed=42,discreteColorWord=FALSE,
+    colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
+    layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE,
+    autoThresh=TRUE, argList=list()) {
+    
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
 	}
@@ -470,10 +473,8 @@ bugsigdb <- function (mbList,
         }
 
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
         
-
-
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret
         if (tag=="cor") {
