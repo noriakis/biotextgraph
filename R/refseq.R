@@ -45,6 +45,8 @@
 #' @param R how many bootstrap when bn is stated
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
+#' @param autoThresh automatically choose thresholding value to show the `numWords`,
+#' when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
@@ -116,13 +118,14 @@ refseq <- function (geneList, keyType="SYMBOL",
     preserve=TRUE, takeMax=FALSE,
     additionalRemove=NA, onlyCorpus=FALSE,
     madeUpper=c("dna","rna"), organism=9606,
-    pal=c("blue","red"), numWords=15,
+    pal=c("blue","red"), numWords=30,
     scaleRange=c(5,10), showLegend=FALSE,
     orgDb=org.Hs.eg.db, edgeLabel=FALSE,
     naEdgeColor="grey50", cooccurrence=FALSE,
     pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
     ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
     colorText=FALSE, corThresh=0.2, genePlot=FALSE,
+    autoThresh=TRUE,
     genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
     enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
@@ -135,8 +138,9 @@ refseq <- function (geneList, keyType="SYMBOL",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
     useSeed=42, scaleEdgeWidth=c(1,3)) {
+    
 	if (!tag %in% c("none","tdm","cor")) {
-		stop("tag should be none, tdm, or cor.")
+		stop("tag input should be none, tdm, or cor.")
 	}
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -319,7 +323,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
 
         
         coGraph <- matrixs$coGraph

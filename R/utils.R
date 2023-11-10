@@ -58,14 +58,9 @@ geom_node_shadowtext <- function(mapping = NULL, data = NULL,
 #' @noRd
 #' @return list of graph and osplot object
 #' 
-obtainMatrix <- function(ret,
-                          bn,
-                          R,
-                          DTM,
-                          freqWords,
-                          corThresh,
-                          cooccurrence,
-                          onWholeDTM) {
+obtainMatrix <- function(ret, bn, R, DTM, freqWords,
+    corThresh, cooccurrence, onWholeDTM, numWords, autoThresh=FALSE) {
+
     retList <- list()
     if (bn) {
       qqcat("bn specified, R=@{R}\n")
@@ -94,6 +89,23 @@ obtainMatrix <- function(ret,
           corData <- t(corInput) %*% corInput
       } else {
           corData <- cor(corInput)
+      }
+      if (autoThresh) {
+        qqcat("Ignoring corThresh, automatically determine the value\n")
+        noden_list <- lapply(seq(0, 1, 0.05), function(tmpCorThresh) {
+            tmpCorData <- corData
+            tmpCorData[tmpCorData<tmpCorThresh] <- 0
+            tmpCoGraph <- graph.adjacency(tmpCorData, weighted=TRUE,
+                      mode="undirected", diag = FALSE)
+            tmpCoGraph <- induced.subgraph(tmpCoGraph,
+                degree(tmpCoGraph) > 0)
+            length(V(tmpCoGraph))
+        })
+        names(noden_list) <- seq(0, 1, 0.05)
+        noden_list <- noden_list |> unlist()
+        tmp_thresh <- noden_list[noden_list >= numWords] |> names()
+        corThresh <- tmp_thresh[length(tmp_thresh)] |> as.numeric()
+        qqcat("threshold = @{corThresh}\n")
       }
       ret@corMat <- corData
       ret@corThresh <- corThresh

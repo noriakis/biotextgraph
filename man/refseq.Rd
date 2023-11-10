@@ -20,7 +20,7 @@ refseq(
   madeUpper = c("dna", "rna"),
   organism = 9606,
   pal = c("blue", "red"),
-  numWords = 15,
+  numWords = 30,
   scaleRange = c(5, 10),
   showLegend = FALSE,
   orgDb = org.Hs.eg.db,
@@ -38,6 +38,7 @@ refseq(
   colorText = FALSE,
   corThresh = 0.2,
   genePlot = FALSE,
+  autoThresh = TRUE,
   genePathPlot = NULL,
   genePathPlotSig = 0.05,
   tag = "none",
@@ -141,6 +142,9 @@ should be a vector of length two.}
 \item{corThresh}{the correlation (cooccurrence) threshold}
 
 \item{genePlot}{plot associated genes (default: FALSE)}
+
+\item{autoThresh}{automatically choose thresholding value to show the `numWords`,
+when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.}
 
 \item{genePathPlot}{plot associated genes and pathways (default: NULL)
 "kegg" or "reactome"}
