@@ -18,7 +18,6 @@ pubmed(
   numOnly = TRUE,
   delim = "OR",
   limit = 10,
-  geneUpper = TRUE,
   apiKey = NULL,
   tfidf = FALSE,
   cl = FALSE,
@@ -51,7 +50,7 @@ pubmed(
   discreteColorWord = FALSE,
   useUdpipe = FALSE,
   udpipeOnlyFreq = FALSE,
-  udpipeOnlyFreqN = FALSE,
+  udpipeOnlyFreqNB = FALSE,
   addFreqToQuery = FALSE,
   naEdgeColor = "grey50",
   cooccurrence = FALSE,
@@ -102,8 +101,6 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 \item{delim}{delimiter for queries}
 
 \item{limit}{limit number for query count, default to 10}
-
-\item{geneUpper}{make queries uppercase}
 
 \item{apiKey}{api key for eutilities}
 
@@ -174,7 +171,7 @@ Otherwise take sum.}
 
 \item{udpipeOnlyFreq}{when using udpipe, include only high-frequent words}
 
-\item{udpipeOnlyFreqN}{when using udpipe, include only the neighbors of
+\item{udpipeOnlyFreqNB}{when using udpipe, include only the neighbors of
 high-frequent words}
 
 \item{addFreqToQuery}{add pseudo-frequency to query node}

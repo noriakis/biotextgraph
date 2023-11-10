@@ -506,16 +506,16 @@ convertMetaCyc <- function (ids, onlySpecies=FALSE) {
 #' @param ex vector of text
 #' @noRd
 clearPath <- function (ex) {
-    ex <- gsub("|FRAME: ", "", ex)
-    ex <- gsub("FRAME: ", "", ex)
-    ex <- gsub("|CITS: ", "", ex)
-    ex <- gsub("CITS: ", "", ex)
-    ex <- gsub("\\[[^][]*]", "", ex)
-    ex <- gsub("\"", "", ex)
+    ex <- gsub("|FRAME: ", "", ex,useBytes = TRUE)
+    ex <- gsub("FRAME: ", "", ex,useBytes = TRUE)
+    ex <- gsub("|CITS: ", "", ex,useBytes = TRUE)
+    ex <- gsub("CITS: ", "", ex,useBytes = TRUE)
+    ex <- gsub("\\[[^][]*]", "", ex,useBytes = TRUE)
+    ex <- gsub("\"", "", ex,useBytes = TRUE)
     ## Clean HTML tags
-    ex <- gsub("<.*?>", "", ex)
+    ex <- gsub("<.*?>", "", ex,useBytes = TRUE)
     ## lastly remove \\|
-    ex <- gsub("\\|","",ex)
+    ex <- gsub("\\|","",ex,useBytes = TRUE)
     ex
 }
 
@@ -552,7 +552,7 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
       commn <- NA
       spec <- NULL
       taxr <- NULL
-      pwy <- gsub("UNIQUE-ID - ","",line)
+      pwy <- gsub("UNIQUE-ID - ","",line,useBytes = TRUE)
       flg <- TRUE
     }
     if (flg) {
@@ -560,17 +560,17 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
         com <- c(com, line)
       }
       if (startsWith(line, "COMMON-NAME")) {
-        commn <- gsub("COMMON-NAME - ","",line)
+        commn <- gsub("COMMON-NAME - ","",line,useBytes = TRUE)
       }
       if (startsWith(line, "SPECIES - ")) {
-        spec <- c(spec, gsub("SPECIES - ","",line))
+        spec <- c(spec, gsub("SPECIES - ","",line,useBytes = TRUE))
       }
       if (startsWith(line, "TAXONOMIC-RANGE - ")) {
-        taxr <- c(taxr, gsub("TAXONOMIC-RANGE - ","",line))
+        taxr <- c(taxr, gsub("TAXONOMIC-RANGE - ","",line,useBytes = TRUE))
       }
       if (startsWith(line,"//")) {
         coms <- paste(com[!is.na(com)], collapse=" ")
-        coms <- gsub("/","",coms)
+        coms <- gsub("/","",coms,useBytes = TRUE)
 
         if (!noComma) {
           if (length(spec)!=0) {spec <- paste0(spec, collapse=",")} else {spec <- ""}
@@ -638,6 +638,7 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
   if (clear) {
     allmeta$text <- clearPath(allmeta$text)
   }
+  allmeta$text <- iconv(allmeta$text, "ASCII", "UTF-8")
   return(allmeta)
 }
 

@@ -148,6 +148,27 @@ setMethod("plot",
                  edge.curved=0)
           })
 
+#' @export
+setGeneric("plotNet",
+    function(x) standardGeneric("plotNet"))
+
+setMethod("plotNet", "biotext",
+    function(x) x@net)
+
+#' @export
+setGeneric("plotWC",
+    function(x) standardGeneric("plotWC"))
+
+setMethod("plotWC", "biotext",
+    function(x) x@wc)
+
+#' @export
+setGeneric("getSlot",
+    function(x, ...) standardGeneric("getSlot"))
+
+setMethod("getSlot", "biotext",
+    function(x, slot) attr(x, slot))
+
 
 #' plotORA
 #' 
