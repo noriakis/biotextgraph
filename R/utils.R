@@ -878,6 +878,7 @@ getPubMed <- function(ret, searchQuery, rawQuery,
     	obtainedText <- NULL
     	pmids <- NULL
     	for (tmp_query in searchQuery) {
+    		qqcat("  Querying @{tmp_query}\n")
 		    pubmedSearch <- entrez_search("pubmed",
 		                                  term = tmp_query, 
 		                                  retmax = retMax,
