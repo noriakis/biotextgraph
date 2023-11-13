@@ -33,6 +33,7 @@
 #' @param filNum specify filter tfidf
 #' @param filType "above" or "below"
 #' @param apiKey api key for eutilities
+#' @param perQuery search for the queries one by one recursively, not using `delim`.
 #' @param tfidf use TfIdf when making TDM
 #' @param pvclAlpha alpha for pvpick()
 #' @param onlyCorpus return only corpus
@@ -105,7 +106,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
    onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
    edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
-   catColors=NULL,
+   catColors=NULL, perQuery=FALSE,
    discreteColorWord=FALSE,
    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE,
    addFreqToQuery=FALSE,
@@ -141,22 +142,27 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     if (is.null(redo)) {
         ret <- new("biotext")
         ret@type <- paste0("pubmed_",target)
-        ## Disabled the limit of the number of query
-        # if (length(queries)>limit){
-        #     stop("Number of queries exceeded specified limit number")
-        # }
         # ret@query <- queries
         # ret@delim <- delim
-        if (quote) {
-            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
-                collapse=paste0(" ",delim," "))
+        if (perQuery) {
+	        ## Disabled the limit of the number of query
+    	    # if (length(queries)>limit){
+        	#     stop("Number of queries exceeded specified limit number")
+        	# }
+        	query <- queries	
         } else {
-            query <- paste(queries, collapse=paste0(" ",delim," "))
+	        if (quote) {
+	            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
+    	            collapse=paste0(" ",delim," "))
+        	} else {
+            	query <- paste(queries, collapse=paste0(" ",delim," "))
+        	}
         }
+
         ret@query <- query
         clearQuery <- gsub('\"', '', queries)
         ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,
-           retMax=retMax, sortOrder=sortOrder)
+           retMax=retMax, sortOrder=sortOrder, perQuery=perQuery)
         ret@retMax <- retMax
         allDataDf <- ret@rawText
     } else {

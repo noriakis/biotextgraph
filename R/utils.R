@@ -851,39 +851,69 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
 #' @param type abstract or title
 #' @param apiKey api key
 #' @param retMax retmax
+#' @param perQuery query per searchQuery.
+#' apiKey should be enabled as it recursively query API.
 #' @import rentrez
 #' 
 #' @noRd
 
 getPubMed <- function(ret, searchQuery, rawQuery,
-    type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance") {
+    type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance",
+    perQuery=FALSE) {
     if (is.null(apiKey)){
-      qqcat("Proceeding without API key\n")
+        qqcat("Proceeding without API key\n")
+        if (perQuery) {
+      	    qqcat("It is strongly recommended to use API key when using",
+      		    " multiple queries without a delimiter\n")
+        }
     } else {
-      set_entrez_key(apiKey)
+        set_entrez_key(apiKey)
     }
-    pubmedSearch <- entrez_search("pubmed",
-                                  term = searchQuery, 
-                                  retmax = retMax,
-                                  sort = sortOrder)
-    ret@pmids <- pubmedSearch$ids
-    searchResults <- entrez_fetch(db="pubmed",
-                                  pubmedSearch$ids, rettype="xml", 
-                                  parsed=FALSE)
-    parsedXML <- xmlTreeParse(as.character(searchResults))
-
     if (type=="abstract") {
-      obt <- "Abstract"
+        obt <- "Abstract"
     } else {
-      obt <- "ArticleTitle"
+        obt <- "ArticleTitle"
+    }
+    if (perQuery) {
+    	obtainedText <- NULL
+    	pmids <- NULL
+    	for (tmp_query in searchQuery) {
+		    pubmedSearch <- entrez_search("pubmed",
+		                                  term = tmp_query, 
+		                                  retmax = retMax,
+		                                  sort = sortOrder)
+		    ret@pmids <- c(ret@pmids, pubmedSearch$ids)
+		    searchResults <- entrez_fetch(db="pubmed",
+		                                  pubmedSearch$ids, rettype="xml", 
+		                                  parsed=FALSE)
+		    parsedXML <- xmlTreeParse(as.character(searchResults))
+		    charset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+		                                    obt,
+		                                    recursive = TRUE)
+		    obtainedText <- c(obtainedText, as.character(xmlValue(charset)))
+		    Sys.sleep(1) ## Make sure not querying in one second
+    	}
+    } else {
+	    pubmedSearch <- entrez_search("pubmed", term = searchQuery, 
+	                                  retmax = retMax, sort = sortOrder)
+	    ret@pmids <- pubmedSearch$ids
+	    searchResults <- entrez_fetch(db="pubmed",
+	                                  pubmedSearch$ids, rettype="xml", 
+	                                  parsed=FALSE)
+	    parsedXML <- xmlTreeParse(as.character(searchResults))
+
+
+
+	    charset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
+	                                    obt,
+	                                    recursive = TRUE)
+
+	    obtainedText <- as.character(xmlValue(charset))
     }
 
-    charset <- xmlElementsByTagName(parsedXML$doc$children$PubmedArticleSet,
-                                    obt,
-                                    recursive = TRUE)
-
-    obtainedText <- as.character(xmlValue(charset))
-
+    ## Query flag is obtained by grep the query in the whole text,
+    ## thus the multiple queries can be found in one article.
+    
     incs <- c()
     for (i in rawQuery){
       li <- tolower(i)

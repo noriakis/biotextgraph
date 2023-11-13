@@ -48,6 +48,7 @@ pubmed(
   preserve = TRUE,
   takeMax = FALSE,
   catColors = NULL,
+  perQuery = FALSE,
   discreteColorWord = FALSE,
   useUdpipe = FALSE,
   udpipeOnlyFreq = FALSE,
@@ -167,6 +168,8 @@ Query gene name is shown with (Q)}
 Otherwise take sum.}
 
 \item{catColors}{colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE}
+
+\item{perQuery}{search for the queries one by one recursively, not using `delim`.}
 
 \item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
