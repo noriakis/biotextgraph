@@ -88,11 +88,13 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
       if (cooccurrence) {
           corData <- t(corInput) %*% corInput
       } else {
-          corData <- cor(corInput)
+          corData <- abs(cor(corInput))
       }
       if (autoThresh) {
         qqcat("Ignoring corThresh, automatically determine the value\n")
-        noden_list <- lapply(seq(0, 1, 0.05), function(tmpCorThresh) {
+        tryVals <- seq(min(corData), max(corData),
+        	(max(corData)-min(corData)) / 10)
+        noden_list <- lapply(tryVals, function(tmpCorThresh) {
             tmpCorData <- corData
             tmpCorData[tmpCorData<tmpCorThresh] <- 0
             tmpCoGraph <- graph.adjacency(tmpCorData, weighted=TRUE,
@@ -101,7 +103,7 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
                 degree(tmpCoGraph) > 0)
             length(V(tmpCoGraph))
         })
-        names(noden_list) <- seq(0, 1, 0.05)
+        names(noden_list) <- tryVals
         noden_list <- noden_list |> unlist()
         tmp_thresh <- noden_list[noden_list >= numWords] |> names()
         corThresh <- tmp_thresh[length(tmp_thresh)] |> as.numeric()

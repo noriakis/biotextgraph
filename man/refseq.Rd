@@ -39,6 +39,7 @@ refseq(
   corThresh = 0.2,
   genePlot = FALSE,
   autoThresh = TRUE,
+  autoNumWords = FALSE,
   genePathPlot = NULL,
   genePathPlotSig = 0.05,
   tag = "none",
@@ -145,6 +146,8 @@ should be a vector of length two.}
 
 \item{autoThresh}{automatically choose thresholding value to show the `numWords`,
 when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.}
+
+\item{autoNumWords}{determine the number of words to be shown by ORA}
 
 \item{genePathPlot}{plot associated genes and pathways (default: NULL)
 "kegg" or "reactome"}

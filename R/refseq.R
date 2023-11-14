@@ -47,6 +47,7 @@
 #'                   on whole dataset or top-words specified by numWords
 #' @param autoThresh automatically choose thresholding value to show the `numWords`,
 #' when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.
+#' @param autoNumWords determine the number of words to be shown by ORA
 #' @param useUdpipe use udpipe to make a network
 #' @param udpipeModel udpipe model file name
 #' @param cl for parPvclust, parallel clustering can be performed
@@ -125,7 +126,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
     ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
     colorText=FALSE, corThresh=0.2, genePlot=FALSE,
-    autoThresh=TRUE,
+    autoThresh=TRUE, autoNumWords=FALSE,
     genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
     enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
@@ -177,8 +178,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                 additional_remove=additionalRemove,
                 pre=pre, pre_microbe=FALSE)
             fil <- ret@rawText
-            if (ora){
-                qqcat("Performing ORA\n")
+            if (autoNumWords) {
                 if (keyType!="ENTREZID"){
                     geneList <- AnnotationDbi::select(orgDb,
                         keys = geneList, columns = c("ENTREZID"),
@@ -186,6 +186,21 @@ refseq <- function (geneList, keyType="SYMBOL",
                     geneList <- geneList[!is.na(geneList)] |> unique()
                 }
                 sig <- textORA(geneList)
+                numWords <- names(sig)[p.adjust(sig, "bonferroni")<0.05] |> length()
+                if (numWords>30) {numWords <- 30}
+                qqcat("numWords is set to @{numWords}\n")
+            }
+            if (ora){
+                qqcat("Performing ORA\n")
+                if (!autoNumWords) {
+	                if (keyType!="ENTREZID"){
+	                    geneList <- AnnotationDbi::select(orgDb,
+	                        keys = geneList, columns = c("ENTREZID"),
+	                        keytype = keyType)$ENTREZID
+	                    geneList <- geneList[!is.na(geneList)] |> unique()
+	                }
+	                sig <- textORA(geneList)                	
+                }
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
                 qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
                 ret@filtered <- c(ret@filtered, sigFilter)
@@ -242,7 +257,7 @@ refseq <- function (geneList, keyType="SYMBOL",
 
     ## Set parameters for correlation network
     if (is.na(corThresh)){corThresh<-0.6}
-    if (is.na(numWords)){numWords<-10}
+    if (is.na(numWords)){numWords<-30}
 
     ## Subset to numWords
     ret@numWords <- numWords
