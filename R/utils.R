@@ -370,7 +370,7 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
                       bg.color = "white", segment.color="black",family=fontFamily,
                       bg.r = .15, show.legend=showLegend) 
     }
-  netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
+  # netPlot <- netPlot + scale_size(range=scaleRange, name="Frequency")
   netPlot
 }
 

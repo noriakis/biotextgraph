@@ -22,6 +22,7 @@ refseq(
   pal = c("blue", "red"),
   numWords = 30,
   scaleRange = c(5, 10),
+  autoScale = FALSE,
   showLegend = FALSE,
   orgDb = org.Hs.eg.db,
   edgeLabel = FALSE,
@@ -111,6 +112,8 @@ should be a vector of length two.}
 \item{numWords}{the number of words to be shown}
 
 \item{scaleRange}{scale for label and node size in correlation network}
+
+\item{autoScale}{scale the label and node size automatically for the large network}
 
 \item{showLegend}{whether to show legend in correlation network}
 

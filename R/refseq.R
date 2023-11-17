@@ -15,6 +15,7 @@
 #' @param pre remove words "pmids", "geneids"
 #' @param numWords the number of words to be shown
 #' @param scaleRange scale for label and node size in correlation network
+#' @param autoScale scale the label and node size automatically for the large network
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param corThresh the correlation (cooccurrence) threshold
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
@@ -120,7 +121,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     additionalRemove=NA, onlyCorpus=FALSE,
     madeUpper=c("dna","rna"), organism=9606,
     pal=c("blue","red"), numWords=30,
-    scaleRange=c(5,10), showLegend=FALSE,
+    scaleRange=c(5,10), autoScale=FALSE,
+    showLegend=FALSE,
     orgDb=org.Hs.eg.db, edgeLabel=FALSE,
     naEdgeColor="grey50", cooccurrence=FALSE,
     pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
@@ -187,7 +189,7 @@ refseq <- function (geneList, keyType="SYMBOL",
                 }
                 sig <- textORA(geneList)
                 numWords <- names(sig)[p.adjust(sig, "bonferroni")<0.05] |> length()
-                if (numWords>30) {numWords <- 30}
+                if (numWords>50) {numWords <- 50}
                 qqcat("numWords is set to @{numWords}\n")
             }
             if (ora){
@@ -492,9 +494,9 @@ refseq <- function (geneList, keyType="SYMBOL",
         } else {
             ret@igraph <- as.igraph(coGraph)
         }
-        
-        ## Main plot
         E(coGraph)$weightLabel <- round(E(coGraph)$weight, 3)
+        
+        ## Main plot (probably these functions should be moved to plotNet())
         netPlot <- ggraph(coGraph, layout=layout)
 
         netPlot <- appendEdges(netPlot, bn, edgeLink,
@@ -527,9 +529,14 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         netPlot <- appendNodesAndTexts(netPlot,tag,colorize,tagPalette,
-                          showLegend,catColors,pal,fontFamily,colorText,scaleRange,
-                          useSeed,ret,tagColors=tagPalette, discreteColorWord=discreteColorWord)
-
+                          showLegend,catColors,pal,fontFamily,colorText,
+                          scaleRange,
+                          useSeed, ret, tagColors=tagPalette,
+                          discreteColorWord=discreteColorWord)
+        if (autoScale) {
+        	scaleRange <- c((500 * (1 / numWords))/2.5,
+        		500 * (1 / numWords))
+        }
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=scaleEdgeWidth, name = "Correlation")+
