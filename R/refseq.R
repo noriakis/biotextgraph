@@ -42,8 +42,6 @@
 #' @param mergeCorpus specify multiple corpus if intend to combine them.
 #'                    like PubMed information and RefSeq summary
 #' @param numOnly delete number only (not deleting XXX123)
-#' @param bn perform bootstrap-based Bayesian network inference instead of correlation using bnlearn
-#' @param R how many bootstrap when bn is stated
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param autoThresh automatically choose thresholding value to show the `numWords`,
@@ -125,7 +123,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     showLegend=FALSE,
     orgDb=org.Hs.eg.db, edgeLabel=FALSE,
     naEdgeColor="grey50", cooccurrence=FALSE,
-    pvclAlpha=0.95, bn=FALSE, R=20, cl=FALSE,
+    pvclAlpha=0.95, cl=FALSE,
     ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
     colorText=FALSE, corThresh=0.2, genePlot=FALSE,
     autoThresh=TRUE, autoNumWords=FALSE,
@@ -237,7 +235,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         ret@type <- "merged"
         docs <- mergeCorpus
     }
-
+    ret@tag <- tag
     ret@corpus <- docs
     pdic <- ret@dic
     ret <- ret |> make_TDM(tfidf=tfidf,
@@ -339,7 +337,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             }
         }
 
-        matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
+        matrixs <- obtainMatrix(ret, FALSE, R, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
 
         
@@ -499,7 +497,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         ## Main plot (probably these functions should be moved to plotNet())
         netPlot <- ggraph(coGraph, layout=layout)
 
-        netPlot <- appendEdges(netPlot, bn, edgeLink,
+        netPlot <- appendEdges(netPlot, FALSE, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
 

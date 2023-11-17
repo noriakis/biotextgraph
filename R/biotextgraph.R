@@ -39,6 +39,7 @@ setClass("biotext", slots=list(
         delim="character",
         type="character",
         model="character",
+        tag="character",
         filtered="character",
         pmids="character",
         retMax="numeric",
@@ -154,6 +155,86 @@ setGeneric("plotNet",
 
 setMethod("plotNet", "biotext",
     function(x) x@net)
+
+
+#' @export
+setGeneric("plotNetRe",
+    function(x, ...) standardGeneric("plotNetRe"))
+
+setMethod("plotNetRe", "biotext",
+    function(x, layout="nicely", edgeLink=FALSE,
+    	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
+    	tagPalette=NULL, catColors=NULL, geneColor="grey",
+    	pal=c("blue","red"), colorize=FALSE,
+    	discreteColorWord=FALSE, useSeed=42, autoScale=FALSE,
+    	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
+    	naEdgeColor=NA, colorText=FALSE) {
+    	coGraph <- x@igraph
+        netPlot <- ggraph(coGraph, layout=layout)
+
+        netPlot <- appendEdges(netPlot, FALSE, edgeLink,
+            edgeLabel, showLegend, fontFamily)
+
+
+        if (!is.null(names(x@pvpick))) { ## Obtain tag coloring
+            if (is.null(tagPalette)) {
+                cols <- V(coGraph)$tag |> unique()
+                if (length(cols)>2) {
+                    tagPalette <- RColorBrewer::brewer.pal(8, "Dark2")
+                    tagPalette <- colorRampPalette(tagPalette)(length(cols))
+                } else {
+                    tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
+                }
+                names(tagPalette) <- cols
+                tagPalette["Genes"] <- geneColor
+            }
+        }
+
+        if (is.null(catColors)) { ## Obtain category coloring
+            catLen <- length(unique(V(coGraph)$nodeCat))
+            if (catLen>2) {
+                catColors <- RColorBrewer::brewer.pal(catLen, "Dark2")
+            } else {
+                catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
+            }
+            names(catColors) <- unique(V(coGraph)$nodeCat)
+            catColors["Genes"] <- geneColor
+        }
+        tag <- x@tag
+        netPlot <- appendNodesAndTexts(netPlot, tag, colorize, tagPalette,
+                          showLegend, catColors, pal, fontFamily, colorText,
+                          scaleRange, useSeed, ret=x, tagColors=tagPalette,
+                          discreteColorWord=discreteColorWord)
+        if (autoScale) {
+        	scaleRange <- c((500 * (1 / x@numWords))/2.5,
+        		500 * (1 / x@numWords))
+        }
+        netPlot <- netPlot +
+            scale_size(range=scaleRange, name="Frequency")+
+            scale_edge_width(range=scaleEdgeWidth, name = "Correlation")+
+            scale_edge_color_gradient(low=pal[1],high=pal[2],
+                name = "Correlation", na.value=naEdgeColor)+
+            theme_graph()
+
+        if (dim(x@enrichResults)[1]!=0) {
+            netPlot <- netPlot + ggforce::geom_mark_hull(
+                aes(netPlot$data$x,
+                    netPlot$data$y,
+                    group = grp,
+                    label=grp, fill=grp,
+                    filter = !is.na(grp)),
+                concavity = 4,
+                expand = unit(2, "mm"),
+                alpha = 0.25,
+                na.rm = TRUE,
+                show.legend = FALSE
+            )
+        }
+        netPlot
+    }
+)
+
+
 
 #' @export
 setGeneric("plotWC",

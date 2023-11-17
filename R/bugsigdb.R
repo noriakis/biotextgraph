@@ -271,6 +271,7 @@ bugsigdb <- function (mbList,
         }
     }
     ret@corpus <- docs
+    ret@tag <- tag
 
     ## Make additional network
     if (disPlot & plotType=="network") {## This does not need to be deduplicated

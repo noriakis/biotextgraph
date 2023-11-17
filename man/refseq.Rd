@@ -29,8 +29,6 @@ refseq(
   naEdgeColor = "grey50",
   cooccurrence = FALSE,
   pvclAlpha = 0.95,
-  bn = FALSE,
-  R = 20,
   cl = FALSE,
   ngram = 1,
   plotType = "network",
@@ -126,10 +124,6 @@ should be a vector of length two.}
 \item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
 
 \item{pvclAlpha}{alpha for pvpick()}
-
-\item{bn}{perform bootstrap-based Bayesian network inference instead of correlation using bnlearn}
-
-\item{R}{how many bootstrap when bn is stated}
 
 \item{cl}{for parPvclust, parallel clustering can be performed}
 

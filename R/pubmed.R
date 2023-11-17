@@ -42,9 +42,6 @@
 #' @param preserve try to preserve the original characters
 #' @param numOnly delete number only
 #' @param cl cluster to pass to pvclust (snow::makeCluster(n))
-#' @param bn perform bootstrap-based Bayesian network inference 
-#' instead of correlation using bnlearn
-#' @param R how many bootstrap when bn is stated
 #' @param delim delimiter for queries
 #' @param retMax how many items are to be retlieved?
 #' @param orgDb org database, default to org.Hs.eg.db
@@ -103,7 +100,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
    showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
    corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
-   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, retMax=10,
+   onlyCorpus=FALSE, onlyTDM=FALSE, retMax=10,
    edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
    catColors=NULL, perQuery=FALSE,
@@ -206,6 +203,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     
     docs <- makeCorpus(docs, filterWords,
         additionalRemove, numOnly, stem)
+    ret@tag <- tag
     ret@corpus <- docs
     if (onlyCorpus){
         return(docs)
@@ -508,7 +506,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         }
 
         netPlot <- ggraph(coGraph, layout=layout)
-        netPlot <- appendEdges(netPlot, bn, edgeLink,
+        netPlot <- appendEdges(netPlot, FALSE, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
         if (tag!="none") { ## Obtain tag coloring

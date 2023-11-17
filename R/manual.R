@@ -34,9 +34,6 @@
 #' @param preserve try to preserve the original characters
 #' @param numOnly delete number only
 #' @param cl cluster to pass to pvclust (snow::makeCluster(n))
-#' @param bn perform bootstrap-based Bayesian network inference 
-#' instead of correlation using bnlearn
-#' @param R how many bootstrap when bn is stated
 #' @param onWholeDTM calculate correlation network
 #'                   on whole dataset or top-words specified by numWords
 #' @param stem whether to use stemming
@@ -93,7 +90,7 @@ manual <- function(df, madeUpper=NULL,
    pal=c("blue","red"), numWords=30, scaleRange=c(5,10), scaleFreq=NULL,
    showLegend=FALSE, plotType="network", colorText=FALSE,
    corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
-   onlyCorpus=FALSE, onlyTDM=FALSE, bn=FALSE, R=20, queryColor="grey",
+   onlyCorpus=FALSE, onlyTDM=FALSE, queryColor="grey",
    edgeLabel=FALSE, edgeLink=TRUE, ngram=1, colorize=FALSE,
    tagPalette=NULL, preserve=TRUE, takeMax=FALSE, catColors=NULL,
    deleteZeroDeg=TRUE, additionalRemove=NA, naEdgeColor="grey50",
@@ -260,7 +257,7 @@ manual <- function(df, madeUpper=NULL,
         }
       }
     
-      matrixs <- obtainMatrix(ret, bn, R, DTM, freqWords,
+      matrixs <- obtainMatrix(ret, FALSE, R, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
       
       coGraph <- matrixs$coGraph
@@ -458,7 +455,7 @@ manual <- function(df, madeUpper=NULL,
       }
       V(coGraph)$name <- nodeName
 
-    
+      ret@tag <- tag
       ## Main plot
       if (!is.tbl_graph(coGraph)) {
           ret@igraph <- coGraph
@@ -466,7 +463,7 @@ manual <- function(df, madeUpper=NULL,
           ret@igraph <- as.igraph(coGraph)
       }
       netPlot <- ggraph(coGraph, layout=layout)
-      netPlot <- appendEdges(netPlot, bn, edgeLink,
+      netPlot <- appendEdges(netPlot, FALSE, edgeLink,
             edgeLabel, showLegend, fontFamily)
 
       ## Define colors

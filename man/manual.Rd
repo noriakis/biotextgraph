@@ -30,8 +30,6 @@ manual(
   tagWhole = FALSE,
   onlyCorpus = FALSE,
   onlyTDM = FALSE,
-  bn = FALSE,
-  R = 20,
   queryColor = "grey",
   edgeLabel = FALSE,
   edgeLink = TRUE,
@@ -115,11 +113,6 @@ If wordcloud, tagging will be performed on TDM.}
 \item{onlyCorpus}{return only corpus}
 
 \item{onlyTDM}{return only TDM, if quanteda, return DFM}
-
-\item{bn}{perform bootstrap-based Bayesian network inference 
-instead of correlation using bnlearn}
-
-\item{R}{how many bootstrap when bn is stated}
 
 \item{queryColor}{color for query in the network plot
 if tagPalette or catColors is NULL, determined palettes with 
