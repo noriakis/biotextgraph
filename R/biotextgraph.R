@@ -164,11 +164,15 @@ setGeneric("plotNetRe",
 setMethod("plotNetRe", "biotext",
     function(x, layout="nicely", edgeLink=FALSE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
-    	tagPalette=NULL, catColors=NULL, geneColor="grey",
+    	tagPalette=NULL, catColors=NULL, queryColor="grey",
     	pal=c("blue","red"), colorize=FALSE,
     	discreteColorWord=FALSE, useSeed=42, autoScale=FALSE,
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
-    	naEdgeColor=NA, colorText=FALSE) {
+    	naEdgeColor="grey", colorText=FALSE) {
+    	
+		allnodecat <- V(x@igraph)$nodeCat
+		allnodecat <- allnodecat[allnodecat!="Words"] |> unique()
+    	
     	coGraph <- x@igraph
         netPlot <- ggraph(coGraph, layout=layout)
 
@@ -186,7 +190,7 @@ setMethod("plotNetRe", "biotext",
                     tagPalette <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(length(cols))]
                 }
                 names(tagPalette) <- cols
-                tagPalette["Genes"] <- geneColor
+                tagPalette[allnodecat] <- queryColor
             }
         }
 
@@ -198,7 +202,7 @@ setMethod("plotNetRe", "biotext",
                 catColors <- RColorBrewer::brewer.pal(3,"Dark2")[seq_len(catLen)]
             }
             names(catColors) <- unique(V(coGraph)$nodeCat)
-            catColors["Genes"] <- geneColor
+            catColors[allnodecat] <- queryColor
         }
         tag <- x@tag
         netPlot <- appendNodesAndTexts(netPlot, tag, colorize, tagPalette,
