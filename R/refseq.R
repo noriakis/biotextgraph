@@ -576,6 +576,10 @@ refseq <- function (geneList, keyType="SYMBOL",
             ret@pvpick <- pvcl
 
             wcCol <- returnDf$word
+	        if (is.null(tagPalette)) {
+	        	tagPalette <- colorRampPalette(brewer.pal(12, "RdBu"))(length(pvcl$clusters |> unique()))
+	        	names(tagPalette) <- pvcl$clusters |> unique()
+	        }
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
                     wcCol[wcCol==j] <- tagPalette[i]

@@ -242,10 +242,90 @@ setMethod("plotNetRe", "biotext",
 
 #' @export
 setGeneric("plotWC",
-    function(x) standardGeneric("plotWC"))
+    function(x, ...) standardGeneric("plotWC"))
 
 setMethod("plotWC", "biotext",
-    function(x) x@wc)
+    function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
+    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
+    	wcScale=10, argList=list(), useggwordcloud=TRUE) {
+	    matSorted <- x@wholeFreq
+	    tag <- x@tag
+	    docs <- x@TDM
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        
+        if (!is.null(names(x@pvpick))) {
+
+        	pvc <- x@pvclust
+        	pvcl <- x@pvpick
+            wcCol <- returnDf$word
+	        if (is.null(tagPalette)) {
+	        	tagPalette <- colorRampPalette(brewer.pal(12, "RdBu"))(length(pvcl$clusters |> unique()))
+	        	names(tagPalette) <- pvcl$clusters |> unique()
+	        }
+            for (i in seq_along(pvcl$clusters)){
+                for (j in pvcl$clusters[[i]])
+                    wcCol[wcCol==j] <- tagPalette[i]
+            }
+            wcCol[!wcCol %in% tagPalette] <- "grey"
+
+        }
+        for (i in madeUpper) {
+            # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
+            returnDf[returnDf$word == i,"word"] <- toupper(i)
+        }
+        if (preserve) {
+        	pdic <- x@dic
+            for (nm in unique(returnDf$word)) {
+                if (nm %in% names(pdic)) {
+                    returnDf[returnDf$word == nm, "word"] <- pdic[nm]
+                }
+            }
+        }
+        
+        if (!is.null(scaleFreq)) {
+            showFreq <- returnDf$freq*scaleFreq
+        } else {
+            showFreq <- returnDf$freq
+        }
+
+        if (tag!="none"){
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- showFreq
+            argList[["family"]] <- fontFamily
+            argList[["colors"]] <- wcCol
+            argList[["random.order"]] <- FALSE
+            argList[["ordered.colors"]] <- TRUE
+            if ("bg.color" %in% names(argList)) {
+                argList[["bg.colour"]] <- argList[["bg.color"]]
+            }
+            if (useggwordcloud) {
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill="transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
+        } else {
+            argList[["words"]] <- returnDf$word
+            argList[["freq"]] <- showFreq
+            argList[["family"]] <- fontFamily
+            if ("bg.color" %in% names(argList)) {
+                argList[["bg.colour"]] <- argList[["bg.color"]]
+            }
+            if (useggwordcloud) {
+                wc <- do.call(ggwordcloud::ggwordcloud, argList)+
+                scale_size_area(max_size = wcScale)+
+                theme(plot.background = element_rect(fill = "transparent",
+                    colour = NA))
+            } else {
+                wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
+            }
+        }
+        wc 	
+    }
+    
+)
 
 #' @export
 setGeneric("getSlot",
