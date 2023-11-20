@@ -517,7 +517,7 @@ manual <- function(df, madeUpper=NULL,
       ret@pvpick <- pvcl
       wcCol <- returnDf$word
 	  if (is.null(tagPalette)) {
-		tagPalette <- colorRampPalette(brewer.pal(12, "RdBu"))(length(pvcl$clusters |> unique()))
+		tagPalette <- colorRampPalette(brewer.pal(11, "RdBu"))(length(pvcl$clusters |> unique()))
     	names(tagPalette) <- pvcl$clusters |> unique()
 	  }
       for (i in seq_along(pvcl$clusters)){
