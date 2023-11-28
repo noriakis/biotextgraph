@@ -265,6 +265,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @importFrom ggdendro dendro_data
 #' @importFrom dplyr select
 #' @importFrom ggdendro label
+#' @importFrom stats median
 #' @importFrom dendextend get_nodes_attr get_subdendrograms nnodes
 #' 
 #' @examples

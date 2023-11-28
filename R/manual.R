@@ -257,7 +257,7 @@ manual <- function(df, madeUpper=NULL,
         }
       }
     
-      matrixs <- obtainMatrix(ret, FALSE, R, DTM, freqWords,
+      matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
           corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
       
       coGraph <- matrixs$coGraph

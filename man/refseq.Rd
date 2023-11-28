@@ -147,7 +147,7 @@ when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.}
 \item{autoNumWords}{determine the number of words to be shown by ORA}
 
 \item{genePathPlot}{plot associated genes and pathways (default: NULL)
-"kegg" or "reactome"}
+Must be "kegg" or "reactome"}
 
 \item{genePathPlotSig}{threshold for adjusted p-values (default: 0.05)}
 

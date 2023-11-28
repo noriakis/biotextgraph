@@ -593,6 +593,7 @@ make_TDM <- function(ret, tfidf=FALSE,
 #' @param corMat tagging based on correlation matrix
 #' based on ranking
 #' @param mat correlation matrix
+#' @importFrom stats as.dist
 #' @return biotext class object
 #' @examples obtain_refseq(c("IRF3","PNKP")) |> 
 #' make_corpus() |> make_TDM() |> tag_words()

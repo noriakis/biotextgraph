@@ -28,7 +28,7 @@
 #' @param genePlot plot associated genes (default: FALSE)
 #' @param genePlotNum number of genes to be plotted
 #' @param genePathPlot plot associated genes and pathways (default: NULL)
-#'                     "kegg" or "reactome"
+#'                     Must be "kegg" or "reactome"
 #' @param filterMax use pre-calculated filter based on max-values when excludeTfIdf is not null
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
@@ -337,7 +337,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             }
         }
 
-        matrixs <- obtainMatrix(ret, FALSE, R, DTM, freqWords,
+        matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
             corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
 
         

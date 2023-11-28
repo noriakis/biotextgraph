@@ -150,7 +150,13 @@ setMethod("plot",
                  edge.curved=0)
           })
 
+#' plotNet
+#' 
+#' plot the network changing the visualization parameters
+#' 
+#' @param layout layout specification
 #' @export
+#' @return network visualization
 setGeneric("plotNet",
     function(x, layout="nicely", edgeLink=FALSE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
@@ -224,9 +230,10 @@ setMethod("plotNet", "biotext",
             netPlot <- netPlot + ggforce::geom_mark_hull(
                 aes(netPlot$data$x,
                     netPlot$data$y,
-                    group = grp,
-                    label=grp, fill=grp,
-                    filter = !is.na(grp)),
+                    group = netPlot$data$grp,
+                    label=netPlot$data$grp,
+                    fill=netPlot$data$grp,
+                    filter = !is.na(netPlot$data$grp)),
                 concavity = 4,
                 expand = unit(2, "mm"),
                 alpha = 0.25,
@@ -239,8 +246,13 @@ setMethod("plotNet", "biotext",
 )
 
 
-
+#' plotWC
+#' 
+#' plot the wordcloud changing the visualization parameters
+#' 
+#' @param tagPalette word-cluster coloring specification
 #' @export
+#' @return wordcloud visualization
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
     	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
@@ -329,10 +341,26 @@ setMethod("plotWC", "biotext",
     
 )
 
-#' @export
-setGeneric("getSlot",
-    function(x, ...) standardGeneric("getSlot"))
 
+#' getSlot
+#' 
+#' get the slot value from biotext object
+#' 
+#' @param x biotext object
+#' @param slot slot name
+#' @export
+#' @return attribute value
+setGeneric("getSlot",
+    function(x, slot) standardGeneric("getSlot"))
+
+#' getSlot
+#' 
+#' get the slot value from biotext object
+#' 
+#' @param x biotext object
+#' @param slot slot name
+#' @export
+#' @return attribute value
 setMethod("getSlot", "biotext",
     function(x, slot) attr(x, slot))
 

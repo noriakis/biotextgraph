@@ -92,8 +92,8 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
       }
       if (autoThresh) {
         qqcat("Ignoring corThresh, automatically determine the value\n")
-        tryVals <- seq(min(corData), max(corData),
-        	(max(corData)-min(corData)) / 10)
+        tryVals <- seq(min(corData, na.rm=TRUE), max(corData, na.rm=TRUE),
+        	(max(corData, na.rm=TRUE)-min(corData, na.rm=TRUE)) / 10)
         noden_list <- lapply(tryVals, function(tmpCorThresh) {
             tmpCorData <- corData
             tmpCorData[tmpCorData<tmpCorThresh] <- 0
