@@ -35,48 +35,49 @@ setOldClass("ggraph")
 setOldClass("dfm")
 setOldClass("communities")
 setClass("biotext", slots=list(
-        query="character",
-        delim="character",
-        type="character",
-        model="character",
-        tag="character",
-        filtered="character",
-        pmids="character",
-        retMax="numeric",
-        excludeFreq="numeric",
-        excludeTfIdf="numeric",
-        numWords="numeric",
-        corThresh="numeric",
-        ora="vector",
-        enrichResults="data.frame",
-        rawText="data.frame",
-        rawAnnot="data.frame",
-        rawTextBSDB="data.frame",
-        TDM="TermDocumentMatrix",
-        dfm="dfm",
-        corpus="VCorpus",
-        corpusQuanteda="corpus",
-        freqDf="data.frame",
-        pvclust="pvclust",
-        pvpick="list",
-        strength="data.frame",
-        corMat="matrix",
-        igraphRaw="igraph",
-        igraph="igraph",
-        geneCount="table",
-        geneMap="matrix",
-        net="ggraph",
-        wc="gg",
-        ec="data.frame",
-        wholeFreq="numeric",
-        dic="vector",
-        sortOrder="character",
-        numOnly="logical",
-        stem="logical",
-        ngram="numeric",
-        curate="logical",
-        communities="communities"
-        ))
+	date="POSIXct",
+    query="character",
+    delim="character",
+    type="character",
+    model="character",
+    tag="character",
+    filtered="character",
+    pmids="character",
+    retMax="numeric",
+    excludeFreq="numeric",
+    excludeTfIdf="numeric",
+    numWords="numeric",
+    corThresh="numeric",
+    ora="vector",
+    enrichResults="data.frame",
+    rawText="data.frame",
+    rawAnnot="data.frame",
+    rawTextBSDB="data.frame",
+    TDM="TermDocumentMatrix",
+    dfm="dfm",
+    corpus="VCorpus",
+    corpusQuanteda="corpus",
+    freqDf="data.frame",
+    pvclust="pvclust",
+    pvpick="list",
+    strength="data.frame",
+    corMat="matrix",
+    igraphRaw="igraph",
+    igraph="igraph",
+    geneCount="table",
+    geneMap="matrix",
+    net="ggraph",
+    wc="gg",
+    ec="data.frame",
+    wholeFreq="numeric",
+    dic="vector",
+    sortOrder="character",
+    numOnly="logical",
+    stem="logical",
+    ngram="numeric",
+    curate="logical",
+    communities="communities"
+))
 
 #' @importFrom utils object.size
 setMethod("show",
@@ -151,17 +152,16 @@ setMethod("plot",
 
 #' @export
 setGeneric("plotNet",
-    function(x) standardGeneric("plotNet"))
+    function(x, layout="nicely", edgeLink=FALSE,
+    	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
+    	tagPalette=NULL, catColors=NULL, queryColor="grey",
+    	pal=c("blue","red"), colorize=FALSE,
+    	discreteColorWord=FALSE, useSeed=42, autoScale=FALSE,
+    	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
+    	naEdgeColor="grey", colorText=FALSE) 
+    standardGeneric("plotNet"))
 
 setMethod("plotNet", "biotext",
-    function(x) x@net)
-
-
-#' @export
-setGeneric("plotNetRe",
-    function(x, ...) standardGeneric("plotNetRe"))
-
-setMethod("plotNetRe", "biotext",
     function(x, layout="nicely", edgeLink=FALSE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
     	tagPalette=NULL, catColors=NULL, queryColor="grey",
@@ -242,7 +242,9 @@ setMethod("plotNetRe", "biotext",
 
 #' @export
 setGeneric("plotWC",
-    function(x, ...) standardGeneric("plotWC"))
+    function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
+    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
+    	wcScale=10, argList=list(), useggwordcloud=TRUE) standardGeneric("plotWC"))
 
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),

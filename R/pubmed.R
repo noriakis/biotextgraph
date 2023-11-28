@@ -138,6 +138,7 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
     }
     if (is.null(redo)) {
         ret <- new("biotext")
+        ret@date <- Sys.time()
         ret@type <- paste0("pubmed_",target)
         # ret@query <- queries
         # ret@delim <- delim
@@ -148,6 +149,9 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         	# }
         	query <- queries	
         } else {
+        	if ((length(queries)>10) & delim=="OR") {
+        		message("Major genes could dominate the search results when the number of queries is large")
+        	}
 	        if (quote) {
 	            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
     	            collapse=paste0(" ",delim," "))
