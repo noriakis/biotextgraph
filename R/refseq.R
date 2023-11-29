@@ -89,7 +89,9 @@
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param scaleEdgeWidth scale for edge width
 #' @param splitByEA automatically split the genes based on significant enrichment analysis results,
-#' and returns the list of object for each term.
+#' and returns the list of object for each term. Default to NULL. Must be 'kegg' or 'reactome',
+#' in which the function performs over-representation analysis by enrichKEGG or enrichPathway in
+#' clusterProfiler and ReactomePA.
 #' @param filterByGO filter the results to the words obtained from GO terms,
 #' while preserving the number of words to be shown
 #' 
@@ -145,8 +147,18 @@ refseq <- function (geneList, keyType="SYMBOL",
     scaleFreq=NULL, colorize=FALSE, geneColor="grey",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
-    useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=FALSE,
+    useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=NULL,
     filterByGO=FALSE) {
+    
+    if (!is.null(splitByEA)) {
+    	if (length(splitByEA)!=1) {
+    		stop("Please specify kegg or reactome to splitByEA")}
+    	if ((splitByEA=="kegg")|(splitByEA=="reactome")) {
+	    	return(split_by_ea(as.list(environment())))		
+    	} else {
+    		stop("Please specify kegg or reactome to splitByEA")
+    	}
+    }
     
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag input should be none, tdm, or cor.")
@@ -334,10 +346,10 @@ refseq <- function (geneList, keyType="SYMBOL",
                 stop("Please specify 'reactome' or 'kegg'")
             }
             
-            if (dim(subset(pathRes@result, p.adjust<0.05))[1]==0) {
+            if (dim(subset(pathRes@result, p.adjust<genePathPlotSig))[1]==0) {
                 stop("No enriched term found.")
             } else {
-                qqcat("Found @{dim(subset(pathRes@result, p.adjust<0.05))[1]} enriched term\n")
+                qqcat("Found @{dim(subset(pathRes@result, p.adjust<genePathPlotSig))[1]} enriched term\n")
             }
             if (genePathPlot=="kegg"){pathRes@keytype <- "ENTREZID"}
             ret@enrichResults <- pathRes@result

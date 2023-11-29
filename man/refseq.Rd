@@ -72,7 +72,7 @@ refseq(
   discreteColorWord = FALSE,
   useSeed = 42,
   scaleEdgeWidth = c(1, 3),
-  splitByEA = FALSE,
+  splitByEA = NULL,
   filterByGO = FALSE
 )
 }
@@ -157,7 +157,10 @@ Must be "kegg" or "reactome"}
 argument of "cor" or "tdm". Default to "none", which performs no tagging.
 If wordcloud, tagging will be performed on TDM.}
 
-\item{layout}{the layout for correlation network, defaul to "nicely"}
+\item{layout}{the layout for the network, defaul to "nicely".
+It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+`kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+The options are available at: https://igraph.org/r/doc/layout_.html}
 
 \item{edgeLink}{if FALSE, use geom_edge_diagonal}
 
@@ -225,7 +228,9 @@ of the words in the network}
 \item{scaleEdgeWidth}{scale for edge width}
 
 \item{splitByEA}{automatically split the genes based on significant enrichment analysis results,
-and returns the list of object for each term.}
+and returns the list of object for each term. Default to NULL. Must be 'kegg' or 'reactome',
+in which the function performs over-representation analysis by enrichKEGG or enrichPathway in
+clusterProfiler and ReactomePA.}
 
 \item{filterByGO}{filter the results to the words obtained from GO terms,
 while preserving the number of words to be shown}

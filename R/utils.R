@@ -1,3 +1,49 @@
+#' split_by_ea
+#' 
+#' used internally for splitting the gene list by EA and returns the list of networks
+#' 
+#' @noRd
+#' 
+split_by_ea <- function(args) {
+    if (args$keyType!="ENTREZID"){
+        geneList <- AnnotationDbi::select(args$orgDb,
+            keys = args$geneList, columns = c("ENTREZID"),
+            keytype = args$keyType)$ENTREZID
+        geneList <- geneList[!is.na(geneList)] |> unique()
+    } else {
+    	geneList <- args$geneList
+    }
+    if (args$splitByEA=="kegg") {
+    	enr_res <- clusterProfiler::enrichKEGG(geneList)
+    } else {
+    	enr_res <- ReactomePA::enrichPathway(geneList)
+    }
+    sig_thresh <- args$genePathPlotSig
+    if (dim(subset(enr_res@result, p.adjust<sig_thresh))[1]==0) {
+        stop("No enriched term found.")
+    }
+    enr_genes <- enr_res@result %>% data.frame() %>% 
+        filter(p.adjust<sig_thresh)
+    gene_list <- lapply(enr_genes$geneID, function(x) strsplit(x, "/"))
+    names(gene_list) <- enr_genes$Description
+    
+    ## Those genes not in the enrichment analysis results
+    no_enr <- geneList[!(geneList %in% unique(unlist(gene_list)))]
+    gene_list[["no_enrichment"]] <- no_enr
+    
+    qqcat("Total of @{length(gene_list)} pathways, including non-enrichment terms\n")
+    args2 <- args
+    btg_list <- lapply(gene_list, function(tmp_gene_list) {
+    	args2$geneList <- tmp_gene_list |> unlist()
+    	args2$splitByEA <- NULL
+    	args2$keyType <- "ENTREZID"
+    	do.call(refseq, args2)
+    })
+    names(btg_list) <- enr_genes$Description
+    return(btg_list)
+}
+
+
 #' changeLayout
 #' @param g biotext object
 #' @param layout_func layout function in igraph

@@ -7,7 +7,7 @@
 plotNet(
   x,
   layout = "nicely",
-  edgeLink = FALSE,
+  edgeLink = TRUE,
   edgeLabel = FALSE,
   showLegend = FALSE,
   fontFamily = "sans",
@@ -27,7 +27,10 @@ plotNet(
 )
 }
 \arguments{
-\item{layout}{layout specification}
+\item{layout}{the layout for the network, defaul to "nicely".
+It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+`kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+The options are available at: https://igraph.org/r/doc/layout_.html}
 
 \item{asis}{plot the original network (default to FALSE)}
 }
