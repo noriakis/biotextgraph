@@ -15,7 +15,6 @@
 #' @param scaleRange point size scaling
 #' @param returnNet return only the network (ig)
 #' @param colPal color palette to be used in RColorBrewer
-#' @param colNum color number to be used in plot
 #' @param colorText whether to color text based on category
 #' @param ovlThresh show text with this number of overlap between graphs
 #' @param community compare based on community (igraph), override tag 
@@ -33,7 +32,7 @@ compareWordNet <- function(listOfNets, titles=NULL,
                            layout="nicely", hull=FALSE, size="freq", conc=1,
                            tag=FALSE, tagLevel=1, edgeLink=TRUE,
                            freqMean=FALSE, scaleRange=c(5,10), ovlThresh=0,
-                           returnNet=FALSE, colPal="Pastel1", colNum=5,
+                           returnNet=FALSE, colPal="Pastel1",
                            colorText=FALSE, community=FALSE, returnClass=TRUE) {
   ret <- new("biotext")
   ret@type <- "combine"
@@ -167,8 +166,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
   catNum <- length(unique(V(uig)$col))
   ## You can change it later
   cs <- RColorBrewer::brewer.pal(catNum, colPal)
-  if (length(cs)<colNum) {
-    cs <- colorRampPalette(cs)(colNum)
+  if (length(cs)<catNum) {
+    cs <- colorRampPalette(cs)(catNum)
   }
 
 

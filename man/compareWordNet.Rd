@@ -19,7 +19,6 @@ compareWordNet(
   ovlThresh = 0,
   returnNet = FALSE,
   colPal = "Pastel1",
-  colNum = 5,
   colorText = FALSE,
   community = FALSE,
   returnClass = TRUE
@@ -53,8 +52,6 @@ compareWordNet(
 \item{returnNet}{return only the network (ig)}
 
 \item{colPal}{color palette to be used in RColorBrewer}
-
-\item{colNum}{color number to be used in plot}
 
 \item{colorText}{whether to color text based on category}
 
