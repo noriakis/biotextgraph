@@ -154,17 +154,22 @@ setMethod("plot",
 #' 
 #' plot the network changing the visualization parameters
 #' 
-#' @param layout layout specification
+#' @param layout the layout for the network, defaul to "nicely".
+#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+#' The options are available at: https://igraph.org/r/doc/layout_.html
+#' 
+#' @param asis plot the original network (default to FALSE)
 #' @export
 #' @return network visualization
 setGeneric("plotNet",
-    function(x, layout="nicely", edgeLink=FALSE,
+    function(x, layout="nicely", edgeLink=TRUE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
     	tagPalette=NULL, catColors=NULL, queryColor="grey",
     	pal=c("blue","red"), colorize=FALSE,
     	discreteColorWord=FALSE, useSeed=42, autoScale=FALSE,
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
-    	naEdgeColor="grey", colorText=FALSE) 
+    	naEdgeColor="grey", colorText=FALSE, asis=FALSE)
     standardGeneric("plotNet"))
 
 setMethod("plotNet", "biotext",
@@ -174,8 +179,11 @@ setMethod("plotNet", "biotext",
     	pal=c("blue","red"), colorize=FALSE,
     	discreteColorWord=FALSE, useSeed=42, autoScale=FALSE,
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
-    	naEdgeColor="grey", colorText=FALSE) {
+    	naEdgeColor="grey", colorText=FALSE, asis=FALSE) {
     	
+    	if (asis) {
+    		return(x@net)
+    	}
 		allnodecat <- V(x@igraph)$nodeCat
 		allnodecat <- allnodecat[allnodecat!="Words"] |> unique()
     	
@@ -256,12 +264,18 @@ setMethod("plotNet", "biotext",
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
     	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
-    	wcScale=10, argList=list(), useggwordcloud=TRUE) standardGeneric("plotWC"))
+    	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
+    standardGeneric("plotWC"))
 
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
     	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
-    	wcScale=10, argList=list(), useggwordcloud=TRUE) {
+    	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE) {
+    	
+    	if (asis) {
+    		return(x@wc)
+    	}
+    	
 	    matSorted <- x@wholeFreq
 	    tag <- x@tag
 	    docs <- x@TDM

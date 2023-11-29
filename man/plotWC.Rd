@@ -13,7 +13,8 @@ plotWC(
   fontFamily = "sans",
   wcScale = 10,
   argList = list(),
-  useggwordcloud = TRUE
+  useggwordcloud = TRUE,
+  asis = FALSE
 )
 }
 \arguments{

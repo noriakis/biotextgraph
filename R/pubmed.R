@@ -2,7 +2,8 @@
 #' 
 #' make word cloud or correlation network from PubMed
 #' 
-#' @param queries gene symbols
+#' @param queries gene symbols or the other queries sent to PubMed
+#' @param useRawQuery if you would like to send the query as is, please set this option to TRUE.
 #' @param redo if plot in other parameters, input the previous list
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
@@ -13,19 +14,22 @@
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
 #' @param corThresh the correlation threshold
 #' @param autoThresh automatically determine the threshold value to show `numWords`
-#' @param layout the layout for correlation network, defaul to "nicely"
-#' @param edgeLink if FALSE, use geom_edge_diagonal
+#' @param layout the layout for the network, defaul to "nicely".
+#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+#' The options are available at: https://igraph.org/r/doc/layout_.html
+#' @param edgeLink if FALSE, use geom_edge_diagonal() (default: TRUE)
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param deleteZeroDeg delete zero degree node from plot in correlation network
-#' @param showLegend whether to show legend in correlation network
-#' @param colorText color text label based on frequency in correlation network
-#' @param ngram default to NA (1)
+#' @param deleteZeroDeg delete zero degree node from plot in the network
+#' @param showLegend whether to show legend in the network
+#' @param colorText color text label based on frequency in the network
+#' @param ngram Use n-gram in tokenization. default to 1
 #' @param additionalRemove specific words to be excluded
 #' @param target "abstract" or "title"
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
 #' argument of "cor" or "tdm". Default to "none", which performs no tagging.
 #' If wordcloud, tagging will be performed on TDM.
-#' @param tagWhole tag based on whole data or subset
+#' @param tagWhole tag based on whole data or subset of the data.
 #' @param genePlot plot associated genes (default: FALSE)
 #' Query gene name is shown with (Q)
 #' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
@@ -92,30 +96,31 @@
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
 #' @importFrom ggplotify as.ggplot
-pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
-   target="abstract", useFil=NA, filType="above",
-   filNum=0, sortOrder="relevance", fontFamily="sans",
-   pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
-   apiKey=NULL, tfidf=FALSE, cl=FALSE, autoThresh=TRUE,
-   pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
-   showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
-   corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
-   onlyCorpus=FALSE, onlyTDM=FALSE, retMax=10,
-   edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
-   onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
-   catColors=NULL, perQuery=FALSE,
-   discreteColorWord=FALSE,
-   useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE,
-   addFreqToQuery=FALSE,
-   naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE,
-   queryColor="grey",
-   useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
-   udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
-   takeMean=FALSE,
-   deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
-   onlyGene=FALSE,
-   pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
-   argList=list())
+pubmed <- function(queries, useRawQuery=FALSE,
+	redo=NULL, madeUpper=c("dna","rna"),
+    target="abstract", useFil=NA, filType="above",
+    filNum=0, sortOrder="relevance", fontFamily="sans",
+    pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
+    apiKey=NULL, tfidf=FALSE, cl=FALSE, autoThresh=TRUE,
+    pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
+    showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
+    corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
+    onlyCorpus=FALSE, onlyTDM=FALSE, retMax=10,
+    edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
+    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
+    catColors=NULL, perQuery=FALSE,
+    discreteColorWord=FALSE,
+    useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE,
+    addFreqToQuery=FALSE,
+    naEdgeColor="grey50", cooccurrence=FALSE, colorize=FALSE,
+    queryColor="grey",
+    useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
+    udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
+    takeMean=FALSE,
+    deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
+    onlyGene=FALSE,
+    pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
+    argList=list())
 {
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
@@ -142,24 +147,28 @@ pubmed <- function(queries, redo=NULL, madeUpper=c("dna","rna"),
         ret@type <- paste0("pubmed_",target)
         # ret@query <- queries
         # ret@delim <- delim
-        if (perQuery) {
-	        ## Disabled the limit of the number of query
-    	    # if (length(queries)>limit){
-        	#     stop("Number of queries exceeded specified limit number")
-        	# }
-        	query <- queries	
+        if (useRawQuery) {
+        	query <- queries
         } else {
-        	if ((length(queries)>10) & delim=="OR") {
-        		message("Major genes could dominate the search results when the number of queries is large")
-        	}
-	        if (quote) {
-	            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
-    	            collapse=paste0(" ",delim," "))
-        	} else {
-            	query <- paste(queries, collapse=paste0(" ",delim," "))
-        	}
+	        if (perQuery) {
+		        ## Disabled the limit of the number of query
+	    	    # if (length(queries)>limit){
+	        	#     stop("Number of queries exceeded specified limit number")
+	        	# }
+	        	query <- queries	
+	        } else {
+	        	if ((length(queries)>10) & delim=="OR") {
+	        		message("Warning: major genes could dominate the search",
+	        		" results when the number of queries is large")
+	        	}
+		        if (quote) {
+		            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
+	    	            collapse=paste0(" ",delim," "))
+	        	} else {
+	            	query <- paste(queries, collapse=paste0(" ",delim," "))
+	        	}
+	        }        	
         }
-
         ret@query <- query
         clearQuery <- gsub('\"', '', queries)
         ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,

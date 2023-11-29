@@ -22,11 +22,14 @@ plotNet(
   scaleRange = c(5, 10),
   scaleEdgeWidth = c(1, 3),
   naEdgeColor = "grey",
-  colorText = FALSE
+  colorText = FALSE,
+  asis = FALSE
 )
 }
 \arguments{
 \item{layout}{layout specification}
+
+\item{asis}{plot the original network (default to FALSE)}
 }
 \value{
 network visualization

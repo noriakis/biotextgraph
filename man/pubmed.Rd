@@ -6,6 +6,7 @@
 \usage{
 pubmed(
   queries,
+  useRawQuery = FALSE,
   redo = NULL,
   madeUpper = c("dna", "rna"),
   target = "abstract",
@@ -75,7 +76,9 @@ pubmed(
 )
 }
 \arguments{
-\item{queries}{gene symbols}
+\item{queries}{gene symbols or the other queries sent to PubMed}
+
+\item{useRawQuery}{if you would like to send the query as is, please set this option to TRUE.}
 
 \item{redo}{if plot in other parameters, input the previous list}
 
@@ -116,23 +119,26 @@ or "BSDB_TfIdf" (whole bugsigdb tf-idf)}
 
 \item{scaleRange}{scale for label and node size in correlation network}
 
-\item{showLegend}{whether to show legend in correlation network}
+\item{showLegend}{whether to show legend in the network}
 
 \item{plotType}{"wc" or "network"}
 
-\item{colorText}{color text label based on frequency in correlation network}
+\item{colorText}{color text label based on frequency in the network}
 
 \item{quote}{whether to quote the queries}
 
 \item{corThresh}{the correlation threshold}
 
-\item{layout}{the layout for correlation network, defaul to "nicely"}
+\item{layout}{the layout for the network, defaul to "nicely".
+It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+`kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+The options are available at: https://igraph.org/r/doc/layout_.html}
 
 \item{tag}{perform pvclust on words and colorlize them in wordcloud or network
 argument of "cor" or "tdm". Default to "none", which performs no tagging.
 If wordcloud, tagging will be performed on TDM.}
 
-\item{tagWhole}{tag based on whole data or subset}
+\item{tagWhole}{tag based on whole data or subset of the data.}
 
 \item{onlyCorpus}{return only corpus}
 
@@ -142,9 +148,9 @@ If wordcloud, tagging will be performed on TDM.}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
-\item{edgeLink}{if FALSE, use geom_edge_diagonal}
+\item{edgeLink}{if FALSE, use geom_edge_diagonal() (default: TRUE)}
 
-\item{ngram}{default to NA (1)}
+\item{ngram}{Use n-gram in tokenization. default to 1}
 
 \item{genePlot}{plot associated genes (default: FALSE)
 Query gene name is shown with (Q)}
@@ -198,7 +204,7 @@ by appending (Q) on query}
 
 \item{takeMean}{take mean values for each term in term-document matrix}
 
-\item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
+\item{deleteZeroDeg}{delete zero degree node from plot in the network}
 
 \item{additionalRemove}{specific words to be excluded}
 

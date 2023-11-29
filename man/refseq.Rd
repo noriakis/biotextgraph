@@ -71,7 +71,9 @@ refseq(
   catColors = NULL,
   discreteColorWord = FALSE,
   useSeed = 42,
-  scaleEdgeWidth = c(1, 3)
+  scaleEdgeWidth = c(1, 3),
+  splitByEA = FALSE,
+  filterByGO = FALSE
 )
 }
 \arguments{
@@ -221,6 +223,12 @@ of the words in the network}
 \item{useSeed}{seed}
 
 \item{scaleEdgeWidth}{scale for edge width}
+
+\item{splitByEA}{automatically split the genes based on significant enrichment analysis results,
+and returns the list of object for each term.}
+
+\item{filterByGO}{filter the results to the words obtained from GO terms,
+while preserving the number of words to be shown}
 }
 \value{
 `biotext` class object

@@ -64,7 +64,10 @@
 #' @param wcScale scaling size for ggwordcloud
 #' @param argList parameters to pass to wordcloud() or ggwordcloud()
 #' 
-#' @param layout the layout for correlation network, defaul to "nicely"
+#' @param layout the layout for the network, defaul to "nicely".
+#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+#' The options are available at: https://igraph.org/r/doc/layout_.html
 #' @param edgeLink if FALSE, use geom_edge_diagonal
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
 #' @param pal palette for color gradient in correlation network
@@ -85,6 +88,10 @@
 #' @param geneColor color for associated genes with words (when tag or colorize option is TRUE)
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param scaleEdgeWidth scale for edge width
+#' @param splitByEA automatically split the genes based on significant enrichment analysis results,
+#' and returns the list of object for each term.
+#' @param filterByGO filter the results to the words obtained from GO terms,
+#' while preserving the number of words to be shown
 #' 
 #' @return `biotext` class object
 #' 
@@ -138,7 +145,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     scaleFreq=NULL, colorize=FALSE, geneColor="grey",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
-    useSeed=42, scaleEdgeWidth=c(1,3)) {
+    useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=FALSE,
+    filterByGO=FALSE) {
     
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag input should be none, tdm, or cor.")
@@ -255,9 +263,16 @@ refseq <- function (geneList, keyType="SYMBOL",
         return(docs)
     }
 
-    ## Set parameters for correlation network
-    if (is.na(corThresh)){corThresh<-0.6}
-    if (is.na(numWords)){numWords<-30}
+    ## Set parameters for the network
+    if (!is.numeric(corThresh)){corThresh<-0.6}
+    if (!is.numeric(numWords)){numWords<-30}
+
+    ## If filter by GO terms
+    if (filterByGO) {
+    	qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+    	matSorted <- matSorted[filtered_by_GO]
+    }
 
     ## Subset to numWords
     ret@numWords <- numWords
