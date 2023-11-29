@@ -82,6 +82,8 @@
 #' @param addFreqToQuery add pseudo-frequency to query node
 #' @param discreteColorWord colorize words by "Words" category, not frequency.
 #' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
+#' @param filterByGO filter the results to the words obtained from GO terms,
+#' while preserving the number of words to be shown
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -118,7 +120,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
     udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
     takeMean=FALSE,
     deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
-    onlyGene=FALSE,
+    onlyGene=FALSE, filterByGO=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
     argList=list())
 {
@@ -271,11 +273,25 @@ pubmed <- function(queries, useRawQuery=FALSE,
 
     ret@TDM <- docs
 
+    ## If filter by GO terms
+    if (filterByGO) {
+    	qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+    	if (ngram==1) {
+	    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+	    	matSorted <- matSorted[filtered_by_GO]
+    	} else if (ngram==2) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords2gram]
+	    	matSorted <- matSorted[filtered_by_GO]    		
+    	} else {# Do nothing
+        }
+    }
+
     if (numWords > length(matSorted)){
         numWords <- length(matSorted)
     }
-    ret@numWords <- numWords  
-  
+    ret@numWords <- numWords
+    
+
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
         returnDf <- data.frame(word=names(matSorted),freq=matSorted)

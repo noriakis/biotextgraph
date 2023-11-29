@@ -282,8 +282,14 @@ refseq <- function (geneList, keyType="SYMBOL",
     ## If filter by GO terms
     if (filterByGO) {
     	qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
-    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
-    	matSorted <- matSorted[filtered_by_GO]
+    	if (ngram==1) {
+	    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+	    	matSorted <- matSorted[filtered_by_GO]
+    	} else if (ngram==2) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords2gram]
+	    	matSorted <- matSorted[filtered_by_GO]    		
+    	} else {# Do nothing
+        }
     }
 
     ## Subset to numWords
