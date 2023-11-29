@@ -181,18 +181,17 @@ setMethod("plotNet", "biotext",
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
     	naEdgeColor="grey", colorText=FALSE, asis=FALSE) {
     	
+    	if (x@type=="combine") {
+    		asis <- TRUE
+    	}
     	if (asis) {
     		return(x@net)
     	}
+    	    	
 		allnodecat <- V(x@igraph)$nodeCat
 		allnodecat <- allnodecat[allnodecat!="Words"] |> unique()
-    	
-    	if (!("igraph" %in% class(x@igraph))) {
-    		## Like, results of compareWordNet
-    		coGraph <- x@igraphRaw
-    	} else {
-        	coGraph <- x@igraph		
-    	}
+    	coGraph <- x@igraph
+
         netPlot <- ggraph(coGraph, layout=layout)
 
         netPlot <- appendEdges(netPlot, FALSE, edgeLink,
