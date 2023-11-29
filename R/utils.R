@@ -29,8 +29,9 @@ split_by_ea <- function(args) {
     
     ## Those genes not in the enrichment analysis results
     no_enr <- geneList[!(geneList %in% unique(unlist(gene_list)))]
-    gene_list[["no_enrichment"]] <- no_enr
-    
+    if (length(no_enr)!=0) {
+	    gene_list[["no_enrichment"]] <- no_enr	
+    }
     qqcat("Total of @{length(gene_list)} pathways, including non-enrichment terms\n")
     args2 <- args
     btg_list <- lapply(gene_list, function(tmp_gene_list) {
@@ -39,7 +40,7 @@ split_by_ea <- function(args) {
     	args2$keyType <- "ENTREZID"
     	do.call(refseq, args2)
     })
-    names(btg_list) <- enr_genes$Description
+    names(btg_list) <- names(gene_list)
     return(btg_list)
 }
 
