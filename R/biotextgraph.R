@@ -262,12 +262,14 @@ setMethod("plotNet", "biotext",
 #' 
 #' plot the wordcloud changing the visualization parameters
 #' 
+#' @param numWords number of words to be shown. If not specified, use the 
+#' value set in biotext object.
 #' @param tagPalette word-cluster coloring specification
 #' @export
 #' @return wordcloud visualization
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
+    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
     standardGeneric("plotWC"))
 
