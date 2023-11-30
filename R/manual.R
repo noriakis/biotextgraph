@@ -67,6 +67,9 @@
 #' @param scaleFreq scale the frequency
 #' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
 #' frequency of the words to nodes other than words
+#' @param filterByGO filter the results to the words obtained from GO terms,
+#' while preserving the number of words to be shown
+#' @param docsum if TRUE, convert the term-document matrix to binary.
 #' @examples
 #' ret <- refseq("DDX41", plotType="wc")
 #' manual(ret@rawText$Gene_summary, plotType="wc")
@@ -99,6 +102,7 @@ manual <- function(df, madeUpper=NULL,
    discreteColorWord=FALSE, autoThresh=TRUE,
    useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
    addFreqToNonWords=FALSE,
+   filterByGO=FALSE, docsum=FALSE,
    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
@@ -201,7 +205,9 @@ manual <- function(df, madeUpper=NULL,
         return(ret)
     }
 
-  
+    if (docsum) {
+        mat <- apply(mat, 2, function(x) ifelse(x>0, 1, 0))
+    }
     if (normalize) {
         mat <- sweep(mat, 2, colSums(mat), `/`)
     }
@@ -220,14 +226,28 @@ manual <- function(df, madeUpper=NULL,
     matSorted <- sort(perterm, decreasing=TRUE)
     ret@wholeFreq <- matSorted
   
+    ## If filter by GO terms
+    if (filterByGO) {
+        qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        if (ngram==1) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+            matSorted <- matSorted[filtered_by_GO]
+        } else if (ngram==2) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords2gram]
+            matSorted <- matSorted[filtered_by_GO]          
+        } else {# Do nothing
+        }
+    }
+    
     if (numWords > length(matSorted)){
       numWords <- length(matSorted)
     }
-    ret@numWords <- numWords  
+    ret@numWords <- numWords
   
     if (plotType=="network"){
       matSorted <- matSorted[1:numWords]
-      returnDf <- data.frame(word=names(matSorted),freq=matSorted)
+      returnDf <- data.frame(word=names(matSorted),freq=matSorted) |>
+            na.omit()
       for (i in madeUpper) {
         returnDf[returnDf$word == i,"word"] <- toupper(i)
       }
@@ -498,7 +518,8 @@ manual <- function(df, madeUpper=NULL,
   } else {
     ## WC part
     matSorted <- matSorted[1:numWords]
-    returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+    returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
     freqWords <- names(matSorted)
     freqWordsDTM <- t(as.matrix(docs[row.names(docs) %in% freqWords, ]))
     

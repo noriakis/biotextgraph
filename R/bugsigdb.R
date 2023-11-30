@@ -23,7 +23,7 @@
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
-#' @param ngram default to NA (1)
+#' @param ngram default to 1
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
 #' argument of "cor" or "tdm". Default to "none", which performs no tagging.
 #' If wordcloud, tagging will be performed on TDM.
@@ -77,6 +77,7 @@
 #' except for words which have frequency mapping
 #' @param useSeed use seed
 #' @param scaleFreq scale the frequency
+#' @param docsum if TRUE, convert the term-document matrix to binary.
 #' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import bugsigdbr
@@ -119,7 +120,7 @@ bugsigdb <- function (mbList,
     catColors=NULL, useSeed=42,discreteColorWord=FALSE,
     colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE,
-    autoThresh=TRUE, argList=list()) {
+    autoThresh=TRUE, argList=list(), docsum=FALSE) {
     
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
@@ -386,7 +387,9 @@ bugsigdb <- function (mbList,
     }
 
     mat <- as.matrix(docs)
-    
+    if (docsum) {
+        mat <- apply(mat, 2, function(x) ifelse(x>0, 1, 0))
+    }    
     if (normalize) {
         mat <- sweep(mat, 2, colSums(mat), `/`)
     }
@@ -419,7 +422,8 @@ bugsigdb <- function (mbList,
         matSorted <- matSorted[1:numWords]
         freqWords <- names(matSorted)
         DTM <- t(as.matrix(docs))
-        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
         ret@freqDf <- returnDf
 
         if (tag=="tdm") {# Needs rework
@@ -678,7 +682,8 @@ bugsigdb <- function (mbList,
     } else {
         ## WC
         matSorted <- matSorted[1:numWords]
-        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
 
         if (tag!="none") {
             freqWords <- names(matSorted)

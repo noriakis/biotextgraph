@@ -73,7 +73,8 @@ refseq(
   useSeed = 42,
   scaleEdgeWidth = c(1, 3),
   splitByEA = NULL,
-  filterByGO = FALSE
+  filterByGO = FALSE,
+  docsum = FALSE
 )
 }
 \arguments{
@@ -234,6 +235,8 @@ clusterProfiler and ReactomePA.}
 
 \item{filterByGO}{filter the results to the words obtained from GO terms,
 while preserving the number of words to be shown}
+
+\item{docsum}{if TRUE, convert the term-document matrix to binary.}
 }
 \value{
 `biotext` class object

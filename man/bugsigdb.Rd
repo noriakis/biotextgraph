@@ -67,7 +67,8 @@ bugsigdb(
   deleteZeroDeg = TRUE,
   cl = FALSE,
   autoThresh = TRUE,
-  argList = list()
+  argList = list(),
+  docsum = FALSE
 )
 }
 \arguments{
@@ -160,7 +161,7 @@ except for words which have frequency mapping}
 
 \item{scaleFreq}{scale the frequency}
 
-\item{ngram}{default to NA (1)}
+\item{ngram}{default to 1}
 
 \item{plotType}{"wc" or "network"}
 
@@ -207,6 +208,8 @@ If wordcloud, tagging will be performed on TDM.}
 \item{autoThresh}{automatically determine the threshold value to show `numWords`}
 
 \item{argList}{parameters to pass to wordcloud()}
+
+\item{docsum}{if TRUE, convert the term-document matrix to binary.}
 }
 \value{
 object consisting of data frame and ggplot2 object

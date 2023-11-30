@@ -533,7 +533,7 @@ make_corpus <- function(ret, collapse=FALSE,
 #' @examples obtain_refseq("PNKP") |> make_corpus() |> make_TDM()
 #' @export
 make_TDM <- function(ret, tfidf=FALSE,
-	normalize=FALSE, takeMean=FALSE, takeMax=FALSE) {
+	normalize=FALSE, takeMean=FALSE, takeMax=FALSE, docsum=FALSE) {
 	ngram <- ret@ngram
     docs <- ret@corpus
     if (ngram!=1){
@@ -559,6 +559,9 @@ make_TDM <- function(ret, tfidf=FALSE,
     }
 
     mat <- as.matrix(docs)
+    if (docsum) {
+        mat <- apply(mat, 2, function(x) ifelse(x>0, 1, 0))
+    }
     if (normalize) {
         mat <- sweep(mat, 2, colSums(mat), `/`)
     }

@@ -68,6 +68,8 @@ pubmed(
   additionalRemove = NA,
   orgDb = org.Hs.eg.db,
   onlyGene = FALSE,
+  filterByGO = FALSE,
+  docsum = FALSE,
   pre = FALSE,
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
@@ -212,6 +214,11 @@ by appending (Q) on query}
 
 \item{onlyGene}{plot only the gene symbol
 (orgDb with SYMBOL key can be used)}
+
+\item{filterByGO}{filter the results to the words obtained from GO terms,
+while preserving the number of words to be shown}
+
+\item{docsum}{if TRUE, convert the term-document matrix to binary.}
 
 \item{pre}{filter preset words like publisher's names}
 

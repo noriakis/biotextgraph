@@ -56,6 +56,8 @@ manual(
   wcScale = 10,
   fontFamily = "sans",
   addFreqToNonWords = FALSE,
+  filterByGO = FALSE,
+  docsum = FALSE,
   udpipeModel = "english-ewt-ud-2.5-191206.udpipe",
   useSeed = 42
 )
@@ -172,6 +174,11 @@ on whole dataset or top-words specified by numWords}
 
 \item{addFreqToNonWords}{add pseudo-frequency corresponding to minimum
 frequency of the words to nodes other than words}
+
+\item{filterByGO}{filter the results to the words obtained from GO terms,
+while preserving the number of words to be shown}
+
+\item{docsum}{if TRUE, convert the term-document matrix to binary.}
 
 \item{udpipeModel}{udpipe model file name}
 

@@ -94,6 +94,7 @@
 #' clusterProfiler and ReactomePA.
 #' @param filterByGO filter the results to the words obtained from GO terms,
 #' while preserving the number of words to be shown
+#' @param docsum if TRUE, convert the term-document matrix to binary.
 #' 
 #' @return `biotext` class object
 #' 
@@ -148,7 +149,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
     useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=NULL,
-    filterByGO=FALSE) {
+    filterByGO=FALSE, docsum=FALSE) {
     
     if (!is.null(splitByEA)) {
     	if (length(splitByEA)!=1) {
@@ -261,7 +262,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     ret <- ret |> make_TDM(tfidf=tfidf,
                            normalize=normalize,
                            takeMean=takeMean,
-                           takeMax=takeMax)
+                           takeMax=takeMax,
+                           docsum=docsum)
 
     matSorted <- ret@wholeFreq
 
@@ -300,7 +302,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     if (plotType=="network"){
         incGene <- NULL
         
-        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
         for (i in madeUpper) {
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
@@ -594,7 +597,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     } else {
         ## WC
 
-        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
 
         if (tag!="none") {
             freqWords <- names(matSorted)

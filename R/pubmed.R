@@ -84,6 +84,7 @@
 #' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
 #' @param filterByGO filter the results to the words obtained from GO terms,
 #' while preserving the number of words to be shown
+#' @param docsum if TRUE, convert the term-document matrix to binary.
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -120,7 +121,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
     udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
     takeMean=FALSE,
     deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
-    onlyGene=FALSE, filterByGO=FALSE,
+    onlyGene=FALSE, filterByGO=FALSE, docsum=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
     argList=list())
 {
@@ -250,7 +251,9 @@ pubmed <- function(queries, useRawQuery=FALSE,
     }
   
     mat <- as.matrix(docs)
-
+    if (docsum) {
+        mat <- apply(mat, 2, function(x) ifelse(x>0, 1, 0))
+    }
     if (normalize) {
         mat <- sweep(mat, 2, colSums(mat), `/`)
     }
@@ -294,7 +297,8 @@ pubmed <- function(queries, useRawQuery=FALSE,
 
     if (plotType=="network"){
         matSorted <- matSorted[1:numWords]
-        returnDf <- data.frame(word=names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word=names(matSorted),freq=matSorted)  |>
+            na.omit()
         for (i in madeUpper) {
             returnDf[returnDf$word == i,"word"] <- toupper(i)
         }
@@ -584,7 +588,8 @@ pubmed <- function(queries, useRawQuery=FALSE,
     } else {
         ## WC part
         matSorted <- matSorted[1:numWords]
-        returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
+            na.omit()
         freqWords <- names(matSorted)
         freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ])) 
         if (tag!="none") {
