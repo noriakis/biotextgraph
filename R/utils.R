@@ -154,6 +154,7 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
         noden_list <- noden_list |> unlist()
         tmp_thresh <- noden_list[noden_list >= numWords] |> names()
         corThresh <- tmp_thresh[length(tmp_thresh)] |> as.numeric()
+        if (identical(numeric(0), corThresh)) {corThresh <- 0}
         qqcat("threshold = @{round(corThresh, 3)}\n")
       }
       ret@corMat <- corData
