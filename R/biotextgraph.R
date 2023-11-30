@@ -273,14 +273,21 @@ setGeneric("plotWC",
 
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans",
+    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE) {
     	
     	if (asis) {
     		return(x@wc)
     	}
-    	
+    	if (is.null(numWords)) {
+    		numWords <- x@numWords	
+    	}
 	    matSorted <- x@wholeFreq
+	    if (length(matSorted) < numWords) {
+	    	numWords <- length(matSorted)
+	    }
+	    matSorted <- matSorted[1:numWords]
+	    
 	    tag <- x@tag
 	    docs <- x@TDM
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
