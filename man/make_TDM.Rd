@@ -9,7 +9,8 @@ make_TDM(
   tfidf = FALSE,
   normalize = FALSE,
   takeMean = FALSE,
-  takeMax = FALSE
+  takeMax = FALSE,
+  docsum = FALSE
 )
 }
 \arguments{
