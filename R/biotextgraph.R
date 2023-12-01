@@ -184,6 +184,9 @@ setMethod("plotNet", "biotext",
     	if (x@type=="combine") {
     		asis <- TRUE
     	}
+        if (x@type=="udpipe") {
+            asis <- TRUE
+        }
     	if (asis) {
     		return(x@net)
     	}

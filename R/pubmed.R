@@ -326,6 +326,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
                 queryPlot=genePlot, layout=layout,
                 pal=pal,showNeighbors=showNeighbors,
                 showFreq=showFreq, nodePal=tagPalette)
+            ret@type <- "udpipe"
             return(ret)
         }
 

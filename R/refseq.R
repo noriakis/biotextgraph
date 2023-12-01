@@ -239,8 +239,9 @@ refseq <- function (geneList, keyType="SYMBOL",
                 fil$ID <- fil$Gene_ID
                 ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
                     orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
-                    colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
+                    colorText=colorText, edgeLink=edgeLink, queryPlot=genePlot, layout=layout,
                     pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
+                ret@type <- "udpipe"
                 return(ret)
             }
         }
