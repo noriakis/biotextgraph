@@ -225,7 +225,11 @@ setMethod("plotNet", "biotext",
             names(catColors) <- unique(V(coGraph)$nodeCat)
             catColors[allnodecat] <- queryColor
         }
-        tag <- x@tag
+        if ("tag" %in% slotNames(x)) {
+            tag <- x@tag        
+        } else {
+            tag <- "none"
+        }
         if (identical(tag, character(0))) {tag <- "none"}
 
         netPlot <- appendNodesAndTexts(netPlot, tag, colorize, tagPalette,
@@ -295,11 +299,16 @@ setMethod("plotWC", "biotext",
 	    }
 	    matSorted <- matSorted[1:numWords]
 	    
-	    tag <- x@tag
+        if ("tag" %in% slotNames(x)) {
+            tag <- x@tag        
+        } else {
+            tag <- "none"
+        }
+        if (identical(tag, character(0))) {tag <- "none"}
+
 	    docs <- x@TDM
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
             
-        if (identical(tag, character(0))) {tag <- "none"}
         wcCol <- NULL
         returnDf$wcColor <- "black"
         
