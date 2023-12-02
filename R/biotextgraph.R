@@ -226,6 +226,8 @@ setMethod("plotNet", "biotext",
             catColors[allnodecat] <- queryColor
         }
         tag <- x@tag
+        if (identical(tag, character(0))) {tag <- "none"}
+
         netPlot <- appendNodesAndTexts(netPlot, tag, colorize, tagPalette,
                           showLegend, catColors, pal, fontFamily, colorText,
                           scaleRange, useSeed, ret=x, tagColors=tagPalette,
@@ -296,8 +298,8 @@ setMethod("plotWC", "biotext",
 	    tag <- x@tag
 	    docs <- x@TDM
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
-        
-        
+            
+        if (identical(tag, character(0))) {tag <- "none"}
         wcCol <- NULL
         returnDf$wcColor <- "black"
         
