@@ -12,8 +12,9 @@
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
 #' use `SYMBOL` key in `orgDb`. 
-#' @param pre remove words "pmids", "geneids"
-#' @param numWords the number of words to be shown
+#' @param pre remove preset filtering words
+#' @param numWords the number of words to be shown in the plot.
+#' When `autoThresh` is TRUE, the number of this value will be shown.
 #' @param scaleRange scale for label and node size in correlation network
 #' @param autoScale scale the label and node size automatically for the large network
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
@@ -125,7 +126,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     excludeFreq=2000, exclude="frequency",
     filterMax=FALSE, excludeType=">",
     tfidf=FALSE, genePlotNum=10,
-    preserve=TRUE, takeMax=FALSE,
+    preserve=FALSE, takeMax=FALSE,
     additionalRemove=NA, onlyCorpus=FALSE,
     madeUpper=c("dna","rna"), organism=9606,
     pal=c("blue","red"), numWords=30,

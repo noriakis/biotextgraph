@@ -272,13 +272,13 @@ setMethod("plotNet", "biotext",
 #' @return wordcloud visualization
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
+    	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
     standardGeneric("plotWC"))
 
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
+    	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE) {
     	
     	if (asis) {
