@@ -184,6 +184,9 @@ setMethod("plotNet", "biotext",
     	if (x@type=="combine") {
     		asis <- TRUE
     	}
+        if (x@type=="udpipe") {
+            asis <- TRUE
+        }
     	if (asis) {
     		return(x@net)
     	}
@@ -269,13 +272,13 @@ setMethod("plotNet", "biotext",
 #' @return wordcloud visualization
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
+    	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
     standardGeneric("plotWC"))
 
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
-    	preserve=TRUE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
+    	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE) {
     	
     	if (asis) {
@@ -293,6 +296,22 @@ setMethod("plotWC", "biotext",
 	    tag <- x@tag
 	    docs <- x@TDM
         returnDf <- data.frame(word = names(matSorted),freq=matSorted)
+        
+        
+        wcCol <- NULL
+        returnDf$wcColor <- "black"
+        
+        genePlot <- FALSE
+        if (dim(x@geneMap)[1]!=0) {
+        	genePlot <- TRUE
+        	genemap <- x@geneMap
+            genemap <- data.frame(genemap) |> `colnames<-`(c("word","gene"))
+            collapsed_genemap <- genemap %>%
+                group_by(.data$word) %>%
+                summarise(gene_name=paste0(.data$gene, collapse=","))
+            returnDf <- merge(returnDf, collapsed_genemap, by="word")
+        }
+
         
         if (!is.null(names(x@pvpick))) {
 
@@ -325,21 +344,33 @@ setMethod("plotWC", "biotext",
         
         if (!is.null(scaleFreq)) {
             showFreq <- returnDf$freq*scaleFreq
+            returnDf$freq <- returnDf$freq*scaleFreq
         } else {
             showFreq <- returnDf$freq
         }
+        
+        if (!("min.freq" %in% names(argList))) {
+            argList[["min.freq"]] <- 3
+        }
+        returnDf$wcColor <- wcCol
+        returnDf <- returnDf[returnDf$freq > argList[["min.freq"]], ]
 
         if (tag!="none"){
             argList[["words"]] <- returnDf$word
-            argList[["freq"]] <- showFreq
+            argList[["freq"]] <- returnDf$freq
             argList[["family"]] <- fontFamily
-            argList[["colors"]] <- wcCol
+            argList[["colors"]] <- returnDf$wcColor
             argList[["random.order"]] <- FALSE
             argList[["ordered.colors"]] <- TRUE
             if ("bg.color" %in% names(argList)) {
                 argList[["bg.colour"]] <- argList[["bg.color"]]
             }
             if (useggwordcloud) {
+                if (genePlot) {
+                    argList[["label_content"]] <- 
+                    sprintf("%s<span style='font-size:7.5pt'><br>(%s)</span>",
+                        returnDf$word, returnDf$gene_name)
+                }
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
                 theme(plot.background = element_rect(fill="transparent",
@@ -349,12 +380,17 @@ setMethod("plotWC", "biotext",
             }
         } else {
             argList[["words"]] <- returnDf$word
-            argList[["freq"]] <- showFreq
+            argList[["freq"]] <- returnDf$freq
             argList[["family"]] <- fontFamily
             if ("bg.color" %in% names(argList)) {
                 argList[["bg.colour"]] <- argList[["bg.color"]]
             }
             if (useggwordcloud) {
+                if (genePlot) {
+                    argList[["label_content"]] <- 
+                    sprintf("%s<span style='font-size:7.5pt'><br>(%s)</span>",
+                        returnDf$word, returnDf$gene_name)
+                }
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
                 theme(plot.background = element_rect(fill = "transparent",

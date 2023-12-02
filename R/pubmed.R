@@ -110,7 +110,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
     corThresh=0.2, layout="nicely", tag="none", tagWhole=FALSE,
     onlyCorpus=FALSE, onlyTDM=FALSE, retMax=10,
     edgeLabel=FALSE, edgeLink=TRUE, ngram=1, genePlot=FALSE, scaleFreq=NULL,
-    onlyDf=FALSE, tagPalette=NULL, preserve=TRUE, takeMax=FALSE,
+    onlyDf=FALSE, tagPalette=NULL, preserve=FALSE, takeMax=FALSE,
     catColors=NULL, perQuery=FALSE,
     discreteColorWord=FALSE,
     useUdpipe=FALSE, udpipeOnlyFreq=FALSE, udpipeOnlyFreqNB=FALSE,
@@ -326,6 +326,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
                 queryPlot=genePlot, layout=layout,
                 pal=pal,showNeighbors=showNeighbors,
                 showFreq=showFreq, nodePal=tagPalette)
+            ret@type <- "udpipe"
             return(ret)
         }
 

@@ -12,8 +12,9 @@
 #' @param madeUpper make the words uppercase in resulting plot
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
 #' use `SYMBOL` key in `orgDb`. 
-#' @param pre remove words "pmids", "geneids"
-#' @param numWords the number of words to be shown
+#' @param pre remove preset filtering words
+#' @param numWords the number of words to be shown in the plot.
+#' When `autoThresh` is TRUE, the number of this value will be shown.
 #' @param scaleRange scale for label and node size in correlation network
 #' @param autoScale scale the label and node size automatically for the large network
 #' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
@@ -125,7 +126,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     excludeFreq=2000, exclude="frequency",
     filterMax=FALSE, excludeType=">",
     tfidf=FALSE, genePlotNum=10,
-    preserve=TRUE, takeMax=FALSE,
+    preserve=FALSE, takeMax=FALSE,
     additionalRemove=NA, onlyCorpus=FALSE,
     madeUpper=c("dna","rna"), organism=9606,
     pal=c("blue","red"), numWords=30,
@@ -152,18 +153,18 @@ refseq <- function (geneList, keyType="SYMBOL",
     filterByGO=FALSE, docsum=FALSE) {
     
     if (!is.null(splitByEA)) {
-    	if (length(splitByEA)!=1) {
-    		stop("Please specify kegg or reactome to splitByEA")}
-    	if ((splitByEA=="kegg")|(splitByEA=="reactome")) {
-	    	return(split_by_ea(as.list(environment())))		
-    	} else {
-    		stop("Please specify kegg or reactome to splitByEA")
-    	}
+        if (length(splitByEA)!=1) {
+            stop("Please specify kegg or reactome to splitByEA")}
+        if ((splitByEA=="kegg")|(splitByEA=="reactome")) {
+            return(split_by_ea(as.list(environment())))     
+        } else {
+            stop("Please specify kegg or reactome to splitByEA")
+        }
     }
     
-	if (!tag %in% c("none","tdm","cor")) {
-		stop("tag input should be none, tdm, or cor.")
-	}
+    if (!tag %in% c("none","tdm","cor")) {
+        stop("tag input should be none, tdm, or cor.")
+    }
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
@@ -214,13 +215,13 @@ refseq <- function (geneList, keyType="SYMBOL",
             if (ora){
                 qqcat("Performing ORA\n")
                 if (!autoNumWords) {
-	                if (keyType!="ENTREZID"){
-	                    geneList <- AnnotationDbi::select(orgDb,
-	                        keys = geneList, columns = c("ENTREZID"),
-	                        keytype = keyType)$ENTREZID
-	                    geneList <- geneList[!is.na(geneList)] |> unique()
-	                }
-	                sig <- textORA(geneList)                	
+                    if (keyType!="ENTREZID"){
+                        geneList <- AnnotationDbi::select(orgDb,
+                            keys = geneList, columns = c("ENTREZID"),
+                            keytype = keyType)$ENTREZID
+                        geneList <- geneList[!is.na(geneList)] |> unique()
+                    }
+                    sig <- textORA(geneList)                    
                 }
                 sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
                 qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
@@ -239,8 +240,9 @@ refseq <- function (geneList, keyType="SYMBOL",
                 fil$ID <- fil$Gene_ID
                 ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
                     orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
-                    colorText=colorText,edgeLink=edgeLink,queryPlot=genePlot, layout=layout,
+                    colorText=colorText, edgeLink=edgeLink, queryPlot=genePlot, layout=layout,
                     pal=pal, showNeighbors=NULL, showFreq=NULL, nodePal=tagPalette)
+                ret@type <- "udpipe"
                 return(ret)
             }
         }
@@ -283,14 +285,14 @@ refseq <- function (geneList, keyType="SYMBOL",
 
     ## If filter by GO terms
     if (filterByGO) {
-    	qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
-    	if (ngram==1) {
-	    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
-	    	matSorted <- matSorted[filtered_by_GO]
-    	} else if (ngram==2) {
+        qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        if (ngram==1) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+            matSorted <- matSorted[filtered_by_GO]
+        } else if (ngram==2) {
             filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords2gram]
-	    	matSorted <- matSorted[filtered_by_GO]    		
-    	} else {# Do nothing
+            matSorted <- matSorted[filtered_by_GO]          
+        } else {# Do nothing
         }
     }
 
@@ -381,10 +383,10 @@ refseq <- function (geneList, keyType="SYMBOL",
         ret <- matrixs$ret
         
         if (tag=="cor") {
-			ret <- tag_words(ret, cl,
-				pvclAlpha, whole=tagWhole,
-				num_words=ret@numWords,
-				corMat=TRUE, mat=matrixs$ret@corMat)
+            ret <- tag_words(ret, cl,
+                pvclAlpha, whole=tagWhole,
+                num_words=ret@numWords,
+                corMat=TRUE, mat=matrixs$ret@corMat)
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
         }
@@ -509,7 +511,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             V(coGraph)$name <- apply(nodeDf,
                   1,
                   function(x) {ifelse(x["type"]=="Words",
-                  	ifelse(is.na(pdic[x["name"]]), x["name"], pdic[x["name"]]),
+                    ifelse(is.na(pdic[x["name"]]), x["name"], pdic[x["name"]]),
                     x["name"])})
         }
 
@@ -568,8 +570,8 @@ refseq <- function (geneList, keyType="SYMBOL",
                           useSeed, ret, tagColors=tagPalette,
                           discreteColorWord=discreteColorWord)
         if (autoScale) {
-        	scaleRange <- c((500 * (1 / numWords))/2.5,
-        		500 * (1 / numWords))
+            scaleRange <- c((500 * (1 / numWords))/2.5,
+                500 * (1 / numWords))
         }
         netPlot <- netPlot +
             scale_size(range=scaleRange, name="Frequency")+
@@ -596,9 +598,42 @@ refseq <- function (geneList, keyType="SYMBOL",
         ret@net <- netPlot
     } else {
         ## WC
-
         returnDf <- data.frame(word = names(matSorted),freq=matSorted) |>
             na.omit()
+        wcCol <- NULL
+        returnDf$wcColor <- "black"
+                
+        if (genePlot) {
+            ## We need DTM with gene ID with row.names
+            DTM <- t(as.matrix(docs))
+            if (!is.null(mergeCorpus)) {
+                stop("Cannot perform genePlot when merging corpus")
+            }
+            revID <- AnnotationDbi::select(orgDb,
+                keys = as.character(fil$Gene_ID), 
+                columns = c("SYMBOL"),
+                keytype = "ENTREZID")$SYMBOL
+            row.names(DTM) <- revID
+            
+            genemap <- NULL
+            nodeName <- returnDf$word
+            for (rn in nodeName){
+                tmp <- DTM[, rn]
+                for (nm in names(tmp[tmp!=0])){
+                    genemap <- rbind(genemap, c(rn, nm))
+                }
+            }
+            
+            gcnt <- table(genemap[,2])
+            gcnt <- gcnt[order(gcnt, decreasing=TRUE)]
+            if (length(gcnt)!=1) {ret@geneCount <- gcnt}
+            ret@geneMap <- genemap
+            genemap <- data.frame(genemap) |> `colnames<-`(c("word","gene"))
+            collapsed_genemap <- genemap %>%
+                group_by(.data$word) %>%
+                summarise(gene_name=paste0(.data$gene, collapse=","))
+            returnDf <- merge(returnDf, collapsed_genemap, by="word")
+        }
 
         if (tag!="none") {
             freqWords <- names(matSorted)
@@ -613,16 +648,16 @@ refseq <- function (geneList, keyType="SYMBOL",
             ret@pvpick <- pvcl
 
             wcCol <- returnDf$word
-	        if (is.null(tagPalette)) {
-	        	tagPalette <- colorRampPalette(brewer.pal(11, "RdBu"))(length(pvcl$clusters |> unique()))
-	        	names(tagPalette) <- pvcl$clusters |> unique()
-	        }
+            if (is.null(tagPalette)) {
+                tagPalette <- colorRampPalette(brewer.pal(11, "RdBu"))(length(pvcl$clusters |> unique()))
+                names(tagPalette) <- pvcl$clusters |> unique()
+            }
             for (i in seq_along(pvcl$clusters)){
                 for (j in pvcl$clusters[[i]])
                     wcCol[wcCol==j] <- tagPalette[i]
             }
             wcCol[!wcCol %in% tagPalette] <- "grey"
-
+            returnDf$wcColor <- wcCol
         }
         for (i in madeUpper) {
             # returnDf$word <- str_replace(returnDf$word, i, toupper(i))
@@ -638,21 +673,35 @@ refseq <- function (geneList, keyType="SYMBOL",
         
         if (!is.null(scaleFreq)) {
             showFreq <- returnDf$freq*scaleFreq
+            returnDf$freq <- returnDf$freq*scaleFreq
         } else {
             showFreq <- returnDf$freq
         }
+        
+        if (!("min.freq" %in% names(argList))) {
+            argList[["min.freq"]] <- 3
+        }
+        ret@freqDf <- returnDf
+
+        returnDf <- returnDf[returnDf$freq > argList[["min.freq"]], ]
+        
 
         if (tag!="none"){
             argList[["words"]] <- returnDf$word
-            argList[["freq"]] <- showFreq
+            argList[["freq"]] <- returnDf$freq
             argList[["family"]] <- fontFamily
-            argList[["colors"]] <- wcCol
+            argList[["colors"]] <- returnDf$wcColor
             argList[["random.order"]] <- FALSE
             argList[["ordered.colors"]] <- TRUE
             if ("bg.color" %in% names(argList)) {
                 argList[["bg.colour"]] <- argList[["bg.color"]]
             }
             if (useggwordcloud) {
+                if (genePlot) {
+                    argList[["label_content"]] <- 
+                    sprintf("%s<span style='font-size:7.5pt'><br>(%s)</span>",
+                        returnDf$word, returnDf$gene_name)
+                }
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
                 theme(plot.background = element_rect(fill="transparent",
@@ -662,12 +711,17 @@ refseq <- function (geneList, keyType="SYMBOL",
             }
         } else {
             argList[["words"]] <- returnDf$word
-            argList[["freq"]] <- showFreq
+            argList[["freq"]] <- returnDf$freq
             argList[["family"]] <- fontFamily
             if ("bg.color" %in% names(argList)) {
                 argList[["bg.colour"]] <- argList[["bg.color"]]
             }
             if (useggwordcloud) {
+                if (genePlot) {
+                    argList[["label_content"]] <- 
+                    sprintf("%s<span style='font-size:7.5pt'><br>(%s)</span>",
+                        returnDf$word, returnDf$gene_name)
+                }
                 wc <- do.call(ggwordcloud::ggwordcloud, argList)+
                 scale_size_area(max_size = wcScale)+
                 theme(plot.background = element_rect(fill = "transparent",
@@ -676,7 +730,6 @@ refseq <- function (geneList, keyType="SYMBOL",
                 wc <- as.ggplot(as_grob(~do.call("wordcloud", argList)))
             }
         }
-        ret@freqDf <- returnDf
         ret@wc <- wc
     }
     return(ret)
