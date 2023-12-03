@@ -384,8 +384,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
             }
             centerPos <- (XMIN+XMAX)/2
             centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
+            centerPos <- centerPos %>% filter(.data$yend != 0)
             # if (dim(centerPos)[1]==0) {stop("Something's wrong with the calculation. No X position specified")}
-            
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
 
@@ -445,7 +445,6 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                     # }
 
                                     grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
-                                    
                                     curHeights <- c(curHeights, HEIGHT)
                                     grobNum <- grobNum + 1
                                 }

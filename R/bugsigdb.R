@@ -673,6 +673,7 @@ bugsigdb <- function (mbList,
                           showLegend,catColors,pal,fontFamily,colorText,scaleRange,
                           useSeed, ret, tagColors=tagPalette, discreteColorWord=discreteColorWord)
         netPlot <- netPlot +
+            scale_size(range=scaleRange, name="Frequency")+
             scale_edge_width(range=c(1,3), name = "Correlation")+
             scale_edge_color_gradient(low=pal[1],high=pal[2],
                 name = "Correlation", na.value=naEdgeColor)+
