@@ -317,7 +317,6 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     segments <- ddata$segments
     xpositions <- unique(segments$x)
     xpositions <- xpositions[order(xpositions)]
-
     while (k < length(dhc %>% labels)){
         subdendro <- dhc %>% get_subdendrograms(k=k)
         for (num in seq_along(subdendro)) {
@@ -330,62 +329,96 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                 # print(subs)
                 if (length(subs[[1]])>1) { ## Xmin
                   sub_sub <- get_subdendrograms(subs[[1]],2)
-                  # print(sub_sub)
+                  
+                  h1 <- get_nodes_attr(sub_sub[[1]], "height")[1]
+                  h2 <- get_nodes_attr(sub_sub[[2]], "height")[1]
+
                   labs1 <- get_nodes_attr(sub_sub[[1]], "label")
                   labs1 <- labs1[!is.na(labs1)]
                   labs2 <- get_nodes_attr(sub_sub[[2]], "label")
                   labs2 <- labs2[!is.na(labs2)]
 
-                  min1 <- labelPos %>%
-                                       filter(label %in% labs1) %>% select(.data$x)
-                  min1 <- median(min1$x)
-                  # min1 <- xpositions[which(xpositions==min1)+1]
-                  min2 <- labelPos %>%
-                                       filter(label %in% labs2) %>% select(.data$x)
-                  min2 <- median(min2$x)
-                  # min2 <- xpositions[which(xpositions==min2)-1]
-                  XMIN <- (min1+min2)/2
+                  labs1_x <- labelPos %>%
+                    filter(label %in% labs1) %>% dplyr::pull(.data$x)
+                  if (h1==0) {
+                    min1 <- labs1_x
+                  } else {
+                      min1 <- segments %>% filter(.data$y==h1) %>%
+                        filter(.data$yend==h1) %>%
+                        filter(.data$xend <= max(labs1_x)) %>%
+                        filter(.data$xend >= min(labs1_x)) %>%
+                        dplyr::pull(x) %>% unique()                      
+                  }
+                  
+                  labs2_x <- labelPos %>%
+                    filter(label %in% labs2) %>% dplyr::pull(.data$x)
+                  if (h2==0) {
+                    min2 <- labs2_x
+                  } else {
+                  min2 <- segments %>% filter(.data$y==h2) %>%
+                    filter(.data$yend==h2) %>%
+                    filter(.data$xend <= max(labs2_x)) %>%
+                    filter(.data$xend >= min(labs2_x)) %>%
+                    dplyr::pull(x) %>% unique()
+                  }
+                  XMIN <- median(c(min1, min2))
                 } else {
                   XMIN <- as.numeric(labelPos %>%
-                                       filter(label==NODES[1]) %>% select(.data$x))
+                            filter(label==NODES[1]) %>% select(.data$x))
                 }
 
                 if (length(subs[[2]])>1) { ## Xmax
                   # print("RIGHT")
+
                   sub_sub <- get_subdendrograms(subs[[2]],2)
-                  # print(sub_sub)
+                   
+                  h1 <- get_nodes_attr(sub_sub[[1]], "height")[1]
+                  h2 <- get_nodes_attr(sub_sub[[2]], "height")[1]
 
                   labs1 <- get_nodes_attr(sub_sub[[1]], "label")
                   labs1 <- labs1[!is.na(labs1)]
                   labs2 <- get_nodes_attr(sub_sub[[2]], "label")
                   labs2 <- labs2[!is.na(labs2)]
 
-                  max1 <- labelPos %>%
-                                       filter(label %in% labs1) %>% select(.data$x)
-                  max1 <- median(max1$x)
+                  labs1_x <- labelPos %>%
+                    filter(label %in% labs1) %>% dplyr::pull(.data$x)
+                  if (h1==0) {
+                    max1 <- labs1_x
+                  } else {
+                      max1 <- segments %>% filter(.data$y==h1) %>%
+                        filter(.data$yend==h1) %>%
+                        filter(.data$xend <= max(labs1_x)) %>%
+                        filter(.data$xend >= min(labs1_x)) %>%
+                        dplyr::pull(x) %>% unique()                      
+                  }
                   
-                  # max1 <- xpositions[which(xpositions==max1)+1]
-
-                  max2 <- labelPos %>%
-                                       filter(label %in% labs2) %>% select(.data$x)
-                  max2 <- median(max2$x)
-                  # max2 <- xpositions[which(xpositions==max2)+1]
-                  XMAX <- (max1+max2)/2
+                  labs2_x <- labelPos %>%
+                    filter(label %in% labs2) %>% dplyr::pull(.data$x)
+                  if (h2==0) {
+                    max2 <- labs2_x
+                  } else {
+                  max2 <- segments %>% filter(.data$y==h2) %>%
+                    filter(.data$yend==h2) %>%
+                    filter(.data$xend <= max(labs2_x)) %>%
+                    filter(.data$xend >= min(labs2_x)) %>%
+                    dplyr::pull(x) %>% unique()
+                  }
+                  XMAX <- median(c(max1, max2))
                 } else {
                   XMAX <- as.numeric(labelPos %>%
-                                       filter(label==NODES[length(NODES)]) %>% select(.data$x))  
+                            filter(label==NODES[length(NODES)]) %>% select(.data$x))
                 }
 
             } else {
                 XMIN <- as.numeric(labelPos %>%
                     filter(label==NODES[1]) %>% select(.data$x))
                 XMAX <- as.numeric(labelPos %>%
-                    filter(label==NODES[length(NODES)]) %>% select(.data$x))                
+                    filter(label==NODES[length(NODES)]) %>% select(.data$x))
             }
-            centerPos <- (XMIN+XMAX)/2
+            centerPos <- median(c(XMIN, XMAX))
             centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
-            centerPos <- centerPos %>% filter(.data$yend != 0)
-            # if (dim(centerPos)[1]==0) {stop("Something's wrong with the calculation. No X position specified")}
+            # centerPos <- centerPos %>% filter(.data$yend != 0)
+            if (dim(centerPos)[1]==0) {break}
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
 
@@ -445,7 +478,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                     # }
 
                                     grobList[[as.character(grobNum)]]$heightup <- HEIGHTUP
-                                    curHeights <- c(curHeights, HEIGHT)
+                                    # curHeights <- c(curHeights, HEIGHT)
                                     grobNum <- grobNum + 1
                                 }
                             }
