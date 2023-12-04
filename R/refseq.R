@@ -447,9 +447,14 @@ refseq <- function (geneList, keyType="SYMBOL",
         if (!is.null(genePathPlot)) {
 
             withinCoGraph <- intersect(pathGraph[,2], V(coGraph)$name)
+
             withinCoGraphPathGraph <- pathGraph[
             pathGraph[,2] %in% withinCoGraph,]
 
+            if (is.vector(withinCoGraphPathGraph)) {
+                withinCoGraphPathGraph <- data.frame(withinCoGraphPathGraph[1],
+                    withinCoGraphPathGraph[2])
+            }
             grp <- c()
             for (i in V(coGraph)$name) {
                 if (i %in% withinCoGraphPathGraph[,2]){

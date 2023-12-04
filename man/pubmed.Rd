@@ -44,7 +44,7 @@ pubmed(
   scaleFreq = NULL,
   onlyDf = FALSE,
   tagPalette = NULL,
-  preserve = TRUE,
+  preserve = FALSE,
   takeMax = FALSE,
   catColors = NULL,
   perQuery = FALSE,
@@ -74,7 +74,8 @@ pubmed(
   onWholeDTM = FALSE,
   madeUpperGenes = TRUE,
   stem = FALSE,
-  argList = list()
+  argList = list(),
+  dateRange = NULL
 )
 }
 \arguments{
@@ -230,6 +231,9 @@ on whole dataset or top-words specified by numWords}
 \item{stem}{whether to use stemming}
 
 \item{argList}{parameters to pass to wordcloud()}
+
+\item{dateRange}{if specified, restrict the range of publication date.
+Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`}
 }
 \value{
 object consisting of data frame and ggplot2 object

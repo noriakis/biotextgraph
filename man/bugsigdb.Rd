@@ -24,7 +24,7 @@ bugsigdb(
   fontFamily = "sans",
   pal = c("blue", "red"),
   numWords = 15,
-  preserve = TRUE,
+  preserve = FALSE,
   metab = NULL,
   metThresh = 0.2,
   curate = TRUE,

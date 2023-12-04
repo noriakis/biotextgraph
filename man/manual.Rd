@@ -36,7 +36,7 @@ manual(
   ngram = 1,
   colorize = FALSE,
   tagPalette = NULL,
-  preserve = TRUE,
+  preserve = FALSE,
   takeMax = FALSE,
   catColors = NULL,
   deleteZeroDeg = TRUE,

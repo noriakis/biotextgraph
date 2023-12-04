@@ -453,7 +453,13 @@ connectGenes <- function(nets, query_word, return_tbl_graph=FALSE,
     }
     
     mp <- net@geneMap
-    mp <- data.frame(mp[mp[,1]==query_word,])
+    searched <- mp[mp[,1]==query_word,]
+    if (is.vector(searched)) {
+        mp <- data.frame(searched[1], searched[2])
+    } else {
+        mp <- data.frame(searched)
+    }
+    colnames(mp) <- c("word","gene")
     mp$type <- names(nets)[k]
     
     words <- rbind(words, mp[,c(1,2)])
@@ -903,13 +909,17 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
 #' @param retMax retmax
 #' @param perQuery query per searchQuery.
 #' apiKey should be enabled as it recursively query API.
+#' @param dateRange date range
 #' @import rentrez
 #' 
 #' @noRd
 
 getPubMed <- function(ret, searchQuery, rawQuery,
     type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance",
-    perQuery=FALSE) {
+    perQuery=FALSE, dateRange=NULL) {
+    if (!is.null(dateRange)) {
+        addRange <- paste0('(("', dateRange[1], '"[Date - Publication] : "', dateRange[2], '"[Date - Publication]))')
+    }
     if (is.null(apiKey)){
         qqcat("Proceeding without API key\n")
         if (perQuery) {
@@ -929,6 +939,9 @@ getPubMed <- function(ret, searchQuery, rawQuery,
     	pmids <- NULL
     	for (tmp_query in searchQuery) {
     		qqcat("  Querying @{tmp_query}\n")
+            if (!is.null(dateRange)) {
+                tmp_query <- paste0(tmp_query, " AND ", addRange)
+            }
 		    pubmedSearch <- entrez_search("pubmed",
 		                                  term = tmp_query, 
 		                                  retmax = retMax,
@@ -945,6 +958,9 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 		    Sys.sleep(1) ## Make sure not querying in one second
     	}
     } else {
+        if (!is.null(dateRange)) {
+            searchQuery <- paste0(searchQuery, " AND ", addRange)
+        }
 	    pubmedSearch <- entrez_search("pubmed", term = searchQuery, 
 	                                  retmax = retMax, sort = sortOrder)
 	    ret@pmids <- pubmedSearch$ids

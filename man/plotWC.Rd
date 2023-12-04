@@ -8,7 +8,7 @@ plotWC(
   x,
   tagPalette = NULL,
   madeUpper = c("dna", "rna"),
-  preserve = TRUE,
+  preserve = FALSE,
   scaleFreq = NULL,
   fontFamily = "sans",
   numWords = NULL,

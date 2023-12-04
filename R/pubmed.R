@@ -85,6 +85,8 @@
 #' @param filterByGO filter the results to the words obtained from GO terms,
 #' while preserving the number of words to be shown
 #' @param docsum if TRUE, convert the term-document matrix to binary.
+#' @param dateRange if specified, restrict the range of publication date.
+#' Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -123,7 +125,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
     deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
     onlyGene=FALSE, filterByGO=FALSE, docsum=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
-    argList=list())
+    argList=list(), dateRange=NULL)
 {
 	if (!tag %in% c("none","tdm","cor")) {
 		stop("tag should be none, tdm, or cor.")
@@ -175,7 +177,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
         ret@query <- query
         clearQuery <- gsub('\"', '', queries)
         ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,
-           retMax=retMax, sortOrder=sortOrder, perQuery=perQuery)
+           retMax=retMax, sortOrder=sortOrder, perQuery=perQuery, dateRange=dateRange)
         ret@retMax <- retMax
         allDataDf <- ret@rawText
     } else {

@@ -13,7 +13,7 @@ refseq(
   excludeType = ">",
   tfidf = FALSE,
   genePlotNum = 10,
-  preserve = TRUE,
+  preserve = FALSE,
   takeMax = FALSE,
   additionalRemove = NA,
   onlyCorpus = FALSE,
@@ -110,7 +110,8 @@ Otherwise take sum.}
 \item{pal}{palette for color gradient in correlation network
 should be a vector of length two.}
 
-\item{numWords}{the number of words to be shown}
+\item{numWords}{the number of words to be shown in the plot.
+When `autoThresh` is TRUE, the number of this value will be shown.}
 
 \item{scaleRange}{scale for label and node size in correlation network}
 
@@ -186,7 +187,7 @@ use `SYMBOL` key in `orgDb`.}
 \item{onWholeDTM}{calculate correlation network
 on whole dataset or top-words specified by numWords}
 
-\item{pre}{remove words "pmids", "geneids"}
+\item{pre}{remove preset filtering words}
 
 \item{takeMean}{take mean values for each term in term-document matrix}
 
