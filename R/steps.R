@@ -529,6 +529,7 @@ make_corpus <- function(ret, collapse=FALSE,
 #' @param normalize normalize the values to document number
 #' @param takeMean take the mean value for words to rank
 #' @param takeMax take the max value for words to rank
+#' @param docsum count words per doc
 #' @return biotext class object
 #' @examples obtain_refseq("PNKP") |> make_corpus() |> make_TDM()
 #' @export

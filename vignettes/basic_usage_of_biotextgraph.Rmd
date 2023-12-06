@@ -34,7 +34,7 @@ The main function accepts some omics identifiers and generates a network. Variou
 inpSymbol <- c("ERCC1","ERCC2","ERCC3","ERCC4","ERCC5","ERCC6","ERCC8")
 net <- refseq(inpSymbol, plotType="network")
 net
-net@net
+plotNet(net, asis=TRUE)
 ```
 
 The network visualization can be customized using the options like `colorText`, which colorizes the text based on the node colors, or `edgeLink` to customize the geom to represent edges.
@@ -45,17 +45,17 @@ for (i in c(1,2,3,5,6,8,9,10,11,12,13,14,16)){
     cxcls <- c(cxcls, paste0("CXCL",i))
 }
 cxclNet <- refseq(cxcls, plotType="network",
-    colorText=TRUE, edgeLink=FALSE)
-cxclNet@net
+    colorText=TRUE, edgeLink=FALSE, autoThresh=FALSE)
+plotNet(cxclNet, asis=TRUE)
 ```
 
 It is possible to draw the IDs related to important words in the text in the network within the ID list. This makes it possible to extract important IDs within the list based on word frequency. For The genes, those associated with the frequently occurred words within the cluster can be shown by `genePlot=TRUE`, and the number can be controlled by `genePlotNum`.
 
 ```{r basic3, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-net <- refseq(cxcls, plotType="network",
+net <- refseq(cxcls, plotType="network", autoThresh=FALSE,
     colorText=TRUE, edgeLink=FALSE, genePlot=TRUE, genePlotNum=5)
 net
-net@net
+plotNet(net, asis=TRUE)
 ```
 
 Tagging the set of words is possible by enabling the option `tag="cor"` (based on the adjacency matrix of inferred network) or `tag="tdm"` (term-document matrix). This allows us to see what word sets appear significantly and to reflect this information in the plots.
@@ -63,14 +63,14 @@ Tagging the set of words is possible by enabling the option `tag="cor"` (based o
 ```{r tag}
 tag <- refseq(c(inpSymbol, cxcls), plotType="network", tag="cor",
     colorText=TRUE, edgeLink=FALSE, genePlot=TRUE, genePlotNum=5)
-tag@pvpick
+getSlot(tag, "pvpick")
 ```
 
 It is possible to perform searches against databases such as PubMed using the obtained important genes as queries, and visualize the results. It is recommended to use a PubMed API key for this purpose. Specify one in `apiKey`.
 
 ```{r abst}
-net@geneCount |> head()
-pmquery <- net@geneCount |> head() |> names()
+getSlot(net, "geneCount") |> head()
+pmquery <- getSlot(net, "geneCount") |> head() |> names()
 ```
 
 ```{r abst2, eval=FALSE}
@@ -101,26 +101,25 @@ mappedKeys <- mappedkeys(keggPathways)
 keggList <- as.list(keggPathways[mappedKeys])
 ## Hepatitis C
 hCNet <- refseq(keggList$`05160`, plotType="network",
-                        layout="nicely", corThresh = 0.2, keyType="ENTREZID",
-                        numWords = 30, excludeFreq = 5000, colorText=TRUE,
+                        layout="nicely", keyType="ENTREZID",
+                        autoThresh=FALSE, excludeFreq = 5000, colorText=TRUE,
                         edgeLink=FALSE, showLegend=FALSE)
-hCNet@net
+plotNet(hCNet, asis=TRUE)
 ```
 
 The summarization of text in enrichment analysis results can be performed by `enrich` option. The below example shows enrichment analysis of Reactome database.
 
 ```{r basic5, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 hCNetReac <- refseq(keggList$`05160`, enrich="reactome", keyType="ENTREZID",cooccurrence = TRUE,
-                           topPath=50, numWords=50,
+                           topPath=50, numWords=50, autoThresh=FALSE,
                            plotType="network", corThresh=0.1)
-hCNetReac@net
+plotNet(hCNetReac, asis=TRUE)
 ```
 
 We create another `biotext` object to compare with.
 
 ```{r basic6, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-ecoli <- refseq(keggList$`05130`, keyType="ENTREZID",
-                           numWords=30, corThresh=0.2)
+ecoli <- refseq(keggList$`05130`, keyType="ENTREZID", autoThresh=FALSE)
 ```
 
 Comparison of networks can be performed by `compareWordNet`. By providing multiple biotext class objects, it is possible to create a new network by integrating the networks and tag information contained in each object. This makes it possible to compare multiple different IDs.
@@ -128,8 +127,7 @@ Comparison of networks can be performed by `compareWordNet`. By providing multip
 ```{r compare_word_net, warning=FALSE, message=FALSE, cache=TRUE, fig.height=15, fig.width=15}
 compareWordNet(list(hCNet, hCNetReac, ecoli),
                titles=c("RefSeq_05160","Reactome_05160","RefSeq_05130"),
-               colPal = "Dark2",
-               colNum=3)
+               colPal = "Dark2") |> plotNet()
 ```
 
 ## Summarizing other identifiers' data
@@ -145,7 +143,7 @@ The package provides the other visualization options such as producing a wordclo
 ```{r basic_wc1, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
 gwc <- refseq(inpSymbol, plotType="wc")
 gwc
-gwc@wc
+plotWC(gwc, asis=TRUE)
 ```
 
 The options in `wordcloud` or `ggwordcloud` including color and rotation can be specified in `argList`.
@@ -156,7 +154,7 @@ gwc <- refseq(inpSymbol, numWords=200,
                      colors=RColorBrewer::brewer.pal(5, "Dark2"),
                      rot.per=0.4), plotType="wc", scaleFreq=2)
 gwc
-gwc@wc
+plotWC(gwc, asis=TRUE)
 ```
 
 Text summaries such as word clouds can be combined with other plots. For example, they can be displayed on reduced dimension plots in single-cell analysis. For other ways of combining them, please refer to the documentation.

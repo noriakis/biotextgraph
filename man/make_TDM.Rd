@@ -23,6 +23,8 @@ make_TDM(
 \item{takeMean}{take the mean value for words to rank}
 
 \item{takeMax}{take the max value for words to rank}
+
+\item{docsum}{count words per doc}
 }
 \value{
 biotext class object
