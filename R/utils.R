@@ -35,10 +35,13 @@ split_by_ea <- function(args) {
     qqcat("Total of @{length(gene_list)} pathways, including non-enrichment terms\n")
     args2 <- args
     btg_list <- lapply(gene_list, function(tmp_gene_list) {
+        if (length(tmp_gene_list |> unlist())<=1) {
+            return(NULL)
+        }
     	args2$geneList <- tmp_gene_list |> unlist()
     	args2$splitByEA <- NULL
     	args2$keyType <- "ENTREZID"
-    	do.call(refseq, args2)
+    	return(do.call(refseq, args2))
     })
     names(btg_list) <- names(gene_list)
     return(btg_list)

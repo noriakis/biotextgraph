@@ -86,72 +86,74 @@ refseq(
 
 \item{exclude}{"frequency" or "tfidf",}
 
-\item{filterMax}{use pre-calculated filter based on max-values when excluding TfIdf
+\item{filterMax}{Use pre-calculated filter based on max-values when excluding TfIdf
 Otherwise take sum.}
 
-\item{excludeType}{">" or "<"}
+\item{excludeType}{">" or "<", combined with `exclude` and `excludeFreq`,
+e.g. filter the words with the pre-calculated frequency > 5000}
 
-\item{tfidf}{use TfIdf when making TDM}
+\item{tfidf}{use TfIdf when making TDM, default to FALSE.}
 
-\item{genePlotNum}{number of genes to be plotted}
+\item{genePlotNum}{number of genes to be plotted (default: 10)}
 
-\item{preserve}{preserve original characters}
+\item{preserve}{Try to preserve original characters.}
 
-\item{takeMax}{take max values for each term in term-document matrix}
+\item{takeMax}{Take max values for each term in term-document matrix}
 
 \item{additionalRemove}{specific words to be excluded}
 
-\item{onlyCorpus}{return only corpus}
+\item{onlyCorpus}{return only corpus (tm).}
 
-\item{madeUpper}{make the words uppercase in resulting plot}
+\item{madeUpper}{make these words uppercase in resulting plot,
+default to c("rna" and "dna")}
 
-\item{organism}{organism ID to use}
+\item{organism}{organism ID to use in `GeneSummary`}
 
-\item{pal}{palette for color gradient in correlation network
-should be a vector of length two.}
+\item{pal}{palette for color gradient in correlation network.
+should be a vector of length two like c("red","blue").}
 
 \item{numWords}{the number of words to be shown in the plot.
 When `autoThresh` is TRUE, the number of this value will be shown.}
 
-\item{scaleRange}{scale for label and node size in correlation network}
+\item{scaleRange}{scale for label and node size in the network.}
 
-\item{autoScale}{scale the label and node size automatically for the large network}
+\item{autoScale}{scale the label and node size automatically for the large network.}
 
-\item{showLegend}{whether to show legend in correlation network}
+\item{showLegend}{whether to show legend in the network}
 
-\item{orgDb}{default to org.Hs.eg.db}
+\item{orgDb}{the database used to convert identifiers, default to org.Hs.eg.db.}
 
 \item{edgeLabel}{if TRUE, plot the edge label (default: FALSE)}
 
 \item{naEdgeColor}{edge colors for NA values (linking query with the category other than text)}
 
-\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation}
+\item{cooccurrence}{default to FALSE, if TRUE, use cooccurrence instead of correlation.}
 
-\item{pvclAlpha}{alpha for pvpick()}
+\item{pvclAlpha}{alpha value for pvpick()}
 
 \item{cl}{for parPvclust, parallel clustering can be performed}
 
-\item{ngram}{default to NA (1)}
+\item{ngram}{N-gram specification, default to 1.}
 
 \item{plotType}{"wc" or "network", default to "network"}
 
-\item{onlyTDM}{return only TDF}
+\item{onlyTDM}{return only TDM (tm).}
 
-\item{stem}{whether to use stemming}
+\item{stem}{whether to use stemming when making corpus.}
 
-\item{colorText}{color text label based on frequency in correlation network}
+\item{colorText}{color text label based on frequency in the network}
 
-\item{corThresh}{the correlation (cooccurrence) threshold}
+\item{corThresh}{the correlation (cooccurrence) threshold.}
 
 \item{genePlot}{plot associated genes (default: FALSE)}
 
 \item{autoThresh}{automatically choose thresholding value to show the `numWords`,
 when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.}
 
-\item{autoNumWords}{determine the number of words to be shown by ORA}
+\item{autoNumWords}{determine the number of words to be shown by ORA, default to FALSE.}
 
 \item{genePathPlot}{plot associated genes and pathways (default: NULL)
-Must be "kegg" or "reactome"}
+Must be "kegg" or "reactome", automatically set genePlot to TRUE.}
 
 \item{genePathPlotSig}{threshold for adjusted p-values (default: 0.05)}
 
@@ -164,48 +166,49 @@ It can be one of the layouts implemented in `igraph` and `ggraph`, such as
 `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
 The options are available at: https://igraph.org/r/doc/layout_.html}
 
-\item{edgeLink}{if FALSE, use geom_edge_diagonal}
+\item{edgeLink}{if FALSE, use geom_edge_diagonal. if TRUE, geom_edge_link. Default to TRUE.}
 
-\item{deleteZeroDeg}{delete zero degree node from plot in correlation network}
+\item{deleteZeroDeg}{delete zero degree node from plot in the network}
 
-\item{enrich}{currently, only 'reactome' and 'kegg' is supported}
+\item{enrich}{currently, only 'reactome' and 'kegg' is supported.}
 
-\item{topPath}{how many pathway descriptions are included in text analysis}
+\item{topPath}{how many pathway descriptions are included in text analysis,
+sorted by p-values in the results.}
 
-\item{ora}{perform ora or not (experimental)}
+\item{ora}{perform over-representation analysis or not (experimental)}
 
-\item{tagWhole}{whether to perform pvclust on whole matrix or subset}
+\item{tagWhole}{whether to perform pvclust on whole matrix or subset of the matrix.}
 
 \item{mergeCorpus}{specify multiple corpus if intend to combine them.
 like PubMed information and RefSeq summary}
 
-\item{numOnly}{delete number only (not deleting XXX123)}
+\item{numOnly}{delete number only (not deleting XXX123, but delete only the number)}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)
-use `SYMBOL` key in `orgDb`.}
+This uses the `SYMBOL` key in `orgDb`.}
 
 \item{onWholeDTM}{calculate correlation network
-on whole dataset or top-words specified by numWords}
+on whole dataset or top-words specified by numWords.}
 
-\item{pre}{remove preset filtering words}
+\item{pre}{remove preset filtering words.}
 
-\item{takeMean}{take mean values for each term in term-document matrix}
+\item{takeMean}{take mean values for each term in term-document matrix.}
 
 \item{tagPalette}{tag palette when `tag` is TRUE. It is also used for dependency network
 using udpipe, and tagging colorization for word cloud.
 Default to NULL, which indicates automatically set.}
 
-\item{collapse}{default to FALSE, collapse all the sentences}
+\item{collapse}{default to FALSE, collapse all the sentences.}
 
-\item{addFreqToGene}{add pseudo frequency to gene in genePlot}
+\item{addFreqToGene}{add pseudo frequency to gene in genePlot, default to FALSE.}
 
-\item{useUdpipe}{use udpipe to make a network}
+\item{useUdpipe}{use udpipe to make a dependency network.}
 
-\item{normalize}{sum normalize the term frequency document-wise}
+\item{normalize}{sum normalize the term frequency document-wise.}
 
-\item{fontFamily}{font family to use, default to "sans"}
+\item{fontFamily}{font family to use, default to "sans".}
 
-\item{udpipeModel}{udpipe model file name}
+\item{udpipeModel}{udpipe model file name.}
 
 \item{scaleFreq}{default to NULL, scale the value if specified}
 
@@ -213,7 +216,7 @@ Default to NULL, which indicates automatically set.}
 if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 of the words in the network}
 
-\item{geneColor}{color for associated genes with words (when tag or colorize option is TRUE)}
+\item{geneColor}{color for associated genes with words (used when tag or colorize option is TRUE)}
 
 \item{argList}{parameters to pass to wordcloud() or ggwordcloud()}
 
@@ -225,7 +228,7 @@ of the words in the network}
 
 \item{discreteColorWord}{colorize words by "Words" category, not frequency.}
 
-\item{useSeed}{seed}
+\item{useSeed}{random seed}
 
 \item{scaleEdgeWidth}{scale for edge width}
 

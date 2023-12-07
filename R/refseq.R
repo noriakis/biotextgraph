@@ -6,60 +6,62 @@
 #' @param plotType "wc" or "network", default to "network"
 #' @param exclude "frequency" or "tfidf",
 #' @param excludeFreq default to 5000
-#' @param excludeType ">" or "<"
+#' @param excludeType ">" or "<", combined with `exclude` and `excludeFreq`,
+#' e.g. filter the words with the pre-calculated frequency > 5000
 #' @param keyType default to SYMBOL
 #' @param additionalRemove specific words to be excluded
-#' @param madeUpper make the words uppercase in resulting plot
+#' @param madeUpper make these words uppercase in resulting plot,
+#' default to c("rna" and "dna")
 #' @param madeUpperGenes make genes upper case automatically (default to TRUE)
-#' use `SYMBOL` key in `orgDb`. 
-#' @param pre remove preset filtering words
+#' This uses the `SYMBOL` key in `orgDb`. 
+#' @param pre remove preset filtering words.
 #' @param numWords the number of words to be shown in the plot.
 #' When `autoThresh` is TRUE, the number of this value will be shown.
-#' @param scaleRange scale for label and node size in correlation network
-#' @param autoScale scale the label and node size automatically for the large network
-#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
-#' @param corThresh the correlation (cooccurrence) threshold
-#' @param deleteZeroDeg delete zero degree node from plot in correlation network
-#' @param orgDb default to org.Hs.eg.db
-#' @param organism organism ID to use
-#' @param enrich currently, only 'reactome' and 'kegg' is supported
-#' @param topPath how many pathway descriptions are included in text analysis
-#' @param ora perform ora or not (experimental)
-#' @param ngram default to NA (1)
+#' @param scaleRange scale for label and node size in the network.
+#' @param autoScale scale the label and node size automatically for the large network.
+#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation.
+#' @param corThresh the correlation (cooccurrence) threshold.
+#' @param deleteZeroDeg delete zero degree node from plot in the network
+#' @param orgDb the database used to convert identifiers, default to org.Hs.eg.db.
+#' @param organism organism ID to use in `GeneSummary`
+#' @param enrich currently, only 'reactome' and 'kegg' is supported.
+#' @param topPath how many pathway descriptions are included in text analysis,
+#' sorted by p-values in the results.
+#' @param ora perform over-representation analysis or not (experimental)
+#' @param ngram N-gram specification, default to 1.
 #' @param genePlot plot associated genes (default: FALSE)
-#' @param genePlotNum number of genes to be plotted
+#' @param genePlotNum number of genes to be plotted (default: 10)
 #' @param genePathPlot plot associated genes and pathways (default: NULL)
-#'                     Must be "kegg" or "reactome"
-#' @param filterMax use pre-calculated filter based on max-values when excludeTfIdf is not null
+#'                     Must be "kegg" or "reactome", automatically set genePlot to TRUE.
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
+#' @param filterMax Use pre-calculated filter based on max-values when excluding TfIdf
+#' Otherwise take sum.
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
 #' argument of "cor" or "tdm". Default to "none", which performs no tagging.
 #' If wordcloud, tagging will be performed on TDM.
-#' @param tagWhole whether to perform pvclust on whole matrix or subset
-#' @param pvclAlpha alpha for pvpick()
-#' @param onlyTDM return only TDF
-#' @param onlyCorpus return only corpus
-#' @param tfidf use TfIdf when making TDM
+#' @param tagWhole whether to perform pvclust on whole matrix or subset of the matrix.
+#' @param pvclAlpha alpha value for pvpick()
+#' @param onlyTDM return only TDM (tm).
+#' @param onlyCorpus return only corpus (tm).
+#' @param tfidf use TfIdf when making TDM, default to FALSE.
 #' @param mergeCorpus specify multiple corpus if intend to combine them.
 #'                    like PubMed information and RefSeq summary
-#' @param numOnly delete number only (not deleting XXX123)
+#' @param numOnly delete number only (not deleting XXX123, but delete only the number)
 #' @param onWholeDTM calculate correlation network
-#'                   on whole dataset or top-words specified by numWords
+#'                   on whole dataset or top-words specified by numWords.
 #' @param autoThresh automatically choose thresholding value to show the `numWords`,
 #' when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.
-#' @param autoNumWords determine the number of words to be shown by ORA
-#' @param useUdpipe use udpipe to make a network
-#' @param udpipeModel udpipe model file name
+#' @param autoNumWords determine the number of words to be shown by ORA, default to FALSE.
+#' @param useUdpipe use udpipe to make a dependency network.
+#' @param udpipeModel udpipe model file name.
 #' @param cl for parPvclust, parallel clustering can be performed
-#' @param stem whether to use stemming
-#' @param preserve preserve original characters
-#' @param takeMax take max values for each term in term-document matrix
-#' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
-#' Otherwise take sum.
-#' @param collapse default to FALSE, collapse all the sentences
-#' @param normalize sum normalize the term frequency document-wise
-#' @param takeMean take mean values for each term in term-document matrix
-#' @param useSeed seed
+#' @param stem whether to use stemming when making corpus.
+#' @param preserve Try to preserve original characters.
+#' @param takeMax Take max values for each term in term-document matrix
+#' @param collapse default to FALSE, collapse all the sentences.
+#' @param normalize sum normalize the term frequency document-wise.
+#' @param takeMean take mean values for each term in term-document matrix.
+#' @param useSeed random seed
 #' 
 #' @param useggwordcloud default to TRUE, otherwise use `wordcloud` function.
 #' @param wcScale scaling size for ggwordcloud
@@ -69,24 +71,24 @@
 #' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
 #' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
 #' The options are available at: https://igraph.org/r/doc/layout_.html
-#' @param edgeLink if FALSE, use geom_edge_diagonal
+#' @param edgeLink if FALSE, use geom_edge_diagonal. if TRUE, geom_edge_link. Default to TRUE.
 #' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param pal palette for color gradient in correlation network
-#' should be a vector of length two.
-#' @param showLegend whether to show legend in correlation network
-#' @param colorText color text label based on frequency in correlation network
+#' @param pal palette for color gradient in correlation network.
+#' should be a vector of length two like c("red","blue").
+#' @param showLegend whether to show legend in the network
+#' @param colorText color text label based on frequency in the network
 #' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
 #' using udpipe, and tagging colorization for word cloud.
 #' Default to NULL, which indicates automatically set.
 #' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
-#' @param fontFamily font family to use, default to "sans"
-#' @param addFreqToGene add pseudo frequency to gene in genePlot
+#' @param fontFamily font family to use, default to "sans".
+#' @param addFreqToGene add pseudo frequency to gene in genePlot, default to FALSE.
 #' @param colorize color the word nodes by their frequency, and the other nodes by their category.
 #' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
 #' of the words in the network
 #' @param discreteColorWord colorize words by "Words" category, not frequency.
 #' @param catColors colors for words and texts when colorize is TRUE and discreteColorWord is TRUE
-#' @param geneColor color for associated genes with words (when tag or colorize option is TRUE)
+#' @param geneColor color for associated genes with words (used when tag or colorize option is TRUE)
 #' @param scaleFreq default to NULL, scale the value if specified
 #' @param scaleEdgeWidth scale for edge width
 #' @param splitByEA automatically split the genes based on significant enrichment analysis results,
