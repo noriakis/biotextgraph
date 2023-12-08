@@ -223,7 +223,7 @@ while preserving the number of words to be shown}
 
 \item{pre}{filter preset words like publisher's names}
 
-\item{onWholeDTM}{calculate correlation network
+\item{onWholeDTM}{calculate the network
 on whole dataset or top-words specified by numWords}
 
 \item{madeUpperGenes}{make genes upper case automatically (default to TRUE)}

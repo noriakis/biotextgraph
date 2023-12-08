@@ -50,7 +50,7 @@
 #' @param retMax how many items are to be retlieved?
 #' @param orgDb org database, default to org.Hs.eg.db
 #' @param quote whether to quote the queries
-#' @param onWholeDTM calculate correlation network
+#' @param onWholeDTM calculate the network
 #'                   on whole dataset or top-words specified by numWords
 #' @param limit limit number for query count, default to 10
 #' @param sortOrder sort order, passed to rentrez function
