@@ -594,36 +594,33 @@ make_TDM <- function(ret, tfidf=FALSE,
 #' @param pvclAlpha alpha value for `pvpick`
 #' @param whole perform clustering on whole matrix (take time)
 #' @param num_words if set, subset to this number of words
-#' @param corMat tagging based on correlation matrix
-#' based on ranking
-#' @param mat correlation matrix
 #' @importFrom stats as.dist
 #' @return biotext class object
 #' @examples obtain_refseq(c("IRF3","PNKP")) |> 
 #' make_corpus() |> make_TDM() |> tag_words()
 #' @export
 tag_words <- function(ret, cl=FALSE, pvclAlpha=0.95, whole=FALSE,
-	num_words=30, corMat=FALSE, mat=NULL) {
+	num_words=30, method="correlation") {
 	
-	if (corMat) {
-		if (is.null(mat)) {stop("Please provide matrix")}
-		pvc <- pvclust(as.matrix(as.dist(mat,diag=TRUE,upper=TRUE)))
-	    pvcl <- pvpick(pvc, alpha=pvclAlpha)
-	    ret@pvclust <- pvc
-    	ret@pvpick <- pvcl
-    	return(ret)
-	}
+	# if (corMat) {
+	# 	if (is.null(mat)) {stop("Please provide matrix")}
+	# 	pvc <- pvclust(as.matrix(as.dist(1-mat,diag=TRUE,upper=TRUE)))
+	#     pvcl <- pvpick(pvc, alpha=pvclAlpha)
+	#     ret@pvclust <- pvc
+    # 	ret@pvpick <- pvcl
+    # 	return(ret)
+	# }
 	
 	DTM <- t(as.matrix(ret@TDM))
 	freqWords <- names(ret@wholeFreq[1:num_words])
     if (whole){
-        pvc <- pvclust(as.matrix(dist(t(DTM))), parallel=cl)
+        pvc <- pvclust(as.matrix(dist(t(DTM))), method.dist=method, parallel=cl)
     } else {
     pvc <- pvclust(as.matrix(dist(
         t(
             DTM[, colnames(DTM) %in% freqWords]
             )
-        )), parallel=cl)
+        )), method.dist=method, parallel=cl)
     }
     pvcl <- pvpick(pvc, alpha=pvclAlpha)
     ret@pvclust <- pvc

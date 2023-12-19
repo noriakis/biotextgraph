@@ -10,8 +10,7 @@ tag_words(
   pvclAlpha = 0.95,
   whole = FALSE,
   num_words = 30,
-  corMat = FALSE,
-  mat = NULL
+  method = "correlation"
 )
 }
 \arguments{
@@ -24,11 +23,6 @@ tag_words(
 \item{whole}{perform clustering on whole matrix (take time)}
 
 \item{num_words}{if set, subset to this number of words}
-
-\item{corMat}{tagging based on correlation matrix
-based on ranking}
-
-\item{mat}{correlation matrix}
 }
 \value{
 biotext class object

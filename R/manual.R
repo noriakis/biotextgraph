@@ -20,8 +20,8 @@
 #' @param ngram default to NA (1)
 #' @param additionalRemove specific words to be excluded
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
-#' If wordcloud, tagging will be performed on TDM.
+#' argument of those accepted in pvclust `method.dist` option, like "correlation".
+#' Default to "none", which performs no tagging.
 #' @param tagWhole tag based on whole data or subset
 #' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
 #'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
@@ -263,13 +263,13 @@ manual <- function(df, madeUpper=NULL,
           pvcl <- ret@pvpick
         } else {
           if (tagWhole){
-            pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
+            pvc <- pvclust(as.matrix(dist(as.matrix(docs))), method.dist=tag, parallel=cl)
           } else {
             pvc <- pvclust(as.matrix(dist(
               t(
                 DTM[, colnames(DTM) %in% freqWords]
               )
-            )), parallel=cl)
+            )), parallel=cl, method.dist=tag)
           }
           pvcl <- pvpick(pvc, alpha=pvclAlpha)
           ret@pvclust <- pvc
@@ -282,15 +282,6 @@ manual <- function(df, madeUpper=NULL,
       
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret
-	    if (tag=="cor") {
-			ret <- tag_words(ret, cl,
-				pvclAlpha, whole=tagWhole,
-				num_words=ret@numWords,
-				corMat=TRUE, mat=matrixs$ret@corMat)
-	        pvc <- ret@pvclust
-	        pvcl <- ret@pvpick
-	    }
-
 
       ret@igraphRaw <- coGraph
       coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
@@ -525,13 +516,13 @@ manual <- function(df, madeUpper=NULL,
     
     if (tag!="none") {
       if (tagWhole){
-        pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
+        pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl, method.dist=tag)
       } else {
         pvc <- pvclust(as.matrix(dist(
           t(
             freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
           )
-        )), parallel=cl)
+        )), parallel=cl, method.dist=tag)
       }
       pvcl <- pvpick(pvc, alpha=pvclAlpha)
       ret@pvclust <- pvc

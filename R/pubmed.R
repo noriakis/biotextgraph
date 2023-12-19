@@ -27,8 +27,8 @@
 #' @param additionalRemove specific words to be excluded
 #' @param target "abstract" or "title"
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
-#' If wordcloud, tagging will be performed on TDM.
+#' argument of those accepted in pvclust `method.dist` option, like "correlation".
+#' Default to "none", which performs no tagging.
 #' @param tagWhole tag based on whole data or subset of the data.
 #' @param genePlot plot associated genes (default: FALSE)
 #' Query gene name is shown with (Q)
@@ -336,7 +336,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
         DTM <- t(as.matrix(docs))
         row.names(DTM) <- allDataDf$query
 
-        if (tag=="tdm") {
+        if (tag!="none") {
             if (!is.null(ret) & length(ret@pvpick)!=0){
                 qqcat("Using previous pvclust results")
                 pvcl <- ret@pvpick
@@ -344,13 +344,13 @@ pubmed <- function(queries, useRawQuery=FALSE,
                 if (tagWhole){
                     pvc <- pvclust(as.matrix(
                             dist(as.matrix(docs))
-                        ), parallel=cl)
+                        ), parallel=cl, method.dist=tag)
                 } else {
           
                     pvc <- pvclust(as.matrix(dist(
                         t(
                             DTM[, colnames(DTM) %in% freqWords]
-                        ))), parallel=cl)
+                        ))), parallel=cl, method.dist=tag)
                 }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 ret@pvclust <- pvc
@@ -365,14 +365,14 @@ pubmed <- function(queries, useRawQuery=FALSE,
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret
         
-        if (tag=="cor") {
-		    ret <- tag_words(ret, cl,
-			    pvclAlpha, whole=tagWhole,
-			    num_words=ret@numWords,
-			    corMat=TRUE, mat=matrixs$ret@corMat)
-            pvc <- ret@pvclust
-            pvcl <- ret@pvpick
-        }
+        # if (tag=="cor") {
+		#     ret <- tag_words(ret, cl,
+		# 	    pvclAlpha, whole=tagWhole,
+		# 	    num_words=ret@numWords,
+		# 	    corMat=TRUE, mat=matrixs$ret@corMat)
+        #     pvc <- ret@pvclust
+        #     pvcl <- ret@pvpick
+        # }
 
         ret@igraphRaw <- coGraph
         coGraph <- induced.subgraph(coGraph, names(V(coGraph)) %in% freqWords)
@@ -602,13 +602,13 @@ pubmed <- function(queries, useRawQuery=FALSE,
             } else {
                 if (tagWhole){
                     pvc <- pvclust(as.matrix(dist(as.matrix(docs))),
-                        parallel=cl)
+                        parallel=cl, method.dist=tag)
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
                             freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                         )
-                    )), parallel=cl)
+                    )), parallel=cl, method.dist=tag)
                 }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 ret@pvclust <- pvc

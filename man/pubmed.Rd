@@ -138,8 +138,8 @@ It can be one of the layouts implemented in `igraph` and `ggraph`, such as
 The options are available at: https://igraph.org/r/doc/layout_.html}
 
 \item{tag}{perform pvclust on words and colorlize them in wordcloud or network
-argument of "cor" or "tdm". Default to "none", which performs no tagging.
-If wordcloud, tagging will be performed on TDM.}
+argument of those accepted in pvclust `method.dist` option, like "correlation".
+Default to "none", which performs no tagging.}
 
 \item{tagWhole}{tag based on whole data or subset of the data.}
 

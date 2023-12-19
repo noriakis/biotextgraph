@@ -37,8 +37,8 @@
 #' @param filterMax Use pre-calculated filter based on max-values when excluding TfIdf
 #' Otherwise take sum.
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
-#' If wordcloud, tagging will be performed on TDM.
+#' argument of those accepted in pvclust `method.dist` option, like "correlation".
+#' Default to "none", which performs no tagging.
 #' @param tagWhole whether to perform pvclust on whole matrix or subset of the matrix.
 #' @param pvclAlpha alpha value for pvpick()
 #' @param onlyTDM return only TDM (tm).
@@ -316,8 +316,8 @@ refseq <- function (geneList, keyType="SYMBOL",
 
         DTM <- t(as.matrix(docs))
         
-        if (tag=="TDM") {
-            ret <- tag_words(ret, cl, pvclAlpha, whole=tagWhole, num_words=ret@numWords)
+        if (tag!="none") {
+            ret <- tag_words(ret, cl, pvclAlpha, whole=tagWhole, num_words=ret@numWords, method=tag)
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
         }
@@ -384,14 +384,14 @@ refseq <- function (geneList, keyType="SYMBOL",
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret
         
-        if (tag=="cor") {
-            ret <- tag_words(ret, cl,
-                pvclAlpha, whole=tagWhole,
-                num_words=ret@numWords,
-                corMat=TRUE, mat=matrixs$ret@corMat)
-            pvc <- ret@pvclust
-            pvcl <- ret@pvpick
-        }
+        # if (tag=="cor") {
+        #     ret <- tag_words(ret, cl,
+        #         pvclAlpha, whole=tagWhole,
+        #         num_words=ret@numWords,
+        #         corMat=TRUE, mat=matrixs$ret@corMat)
+        #     pvc <- ret@pvclust
+        #     pvcl <- ret@pvpick
+        # }
 
 
         ret@igraphRaw <- coGraph
@@ -646,9 +646,9 @@ refseq <- function (geneList, keyType="SYMBOL",
             freqWords <- names(matSorted)
             freqWordsDTM <- t(as.matrix(docs[Terms(docs) %in% freqWords, ]))
             if (tagWhole){
-                pvc <- pvclust(as.matrix(dist(as.matrix(docs))), parallel=cl)
+                pvc <- pvclust(as.matrix(dist(as.matrix(docs))), method.dist=tag, parallel=cl)
             } else {
-                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))), parallel=cl)
+                pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),  method.dist=tag, parallel=cl)
             }
             pvcl <- pvpick(pvc)
             ret@pvclust <- pvc

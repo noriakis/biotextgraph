@@ -25,8 +25,8 @@
 #' @param colorText color text label based on frequency in correlation network
 #' @param ngram default to 1
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of "cor" or "tdm". Default to "none", which performs no tagging.
-#' If wordcloud, tagging will be performed on TDM.
+#' argument of those accepted in pvclust `method.dist` option, like "correlation".
+#' Default to "none", which performs no tagging.
 #' @param tagWhole tag whole set or subset
 #' @param target "title" or "abstract"
 #' @param cl cluster object passed to pvclust
@@ -432,13 +432,13 @@ bugsigdb <- function (mbList,
                     pvcl <- ret@pvpick
                 } else {
                     if (tagWhole){
-                        pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl)
+                        pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl, method.dist=tag)
                     } else {
                         pvc <- pvclust(as.matrix(dist(
                             t(
                                 DTM[,colnames(DTM) %in% freqWords]
                                 )
-                            )), parallel=cl)
+                            )), parallel=cl, method.dist=tag)
                     }
                     pvcl <- pvpick(pvc, alpha=pvclAlpha)
                     ret@pvclust <- pvc
@@ -446,7 +446,7 @@ bugsigdb <- function (mbList,
                 }
             } else {
                 if (tagWhole){
-                    pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl)
+                    pvc <- pvclust(as.matrix(dist(t(DTM))),parallel=cl, method.dist=tag)
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
@@ -454,7 +454,7 @@ bugsigdb <- function (mbList,
                             )
                         )),parallel=cl)
                 }
-                pvcl <- pvpick(pvc, alpha=pvclAlpha)
+                pvcl <- pvpick(pvc, alpha=pvclAlpha, method.dist=tag)
                 ret@pvclust <- pvc
                 ret@pvpick <- pvcl
             }
@@ -694,13 +694,13 @@ bugsigdb <- function (mbList,
                     pvcl <- ret@pvpick
                 } else {
                     if (tagWhole){
-                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
+                        pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl, method.dist=tag)
                     } else {
                         pvc <- pvclust(as.matrix(dist(
                             t(
                                 freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                             )
-                        )), parallel=cl)
+                        )), parallel=cl, method.dist=tag)
                     }
                     pvcl <- pvpick(pvc, alpha=pvclAlpha)
                     ret@pvclust <- pvc
@@ -708,13 +708,13 @@ bugsigdb <- function (mbList,
                 }
             } else {
                 if (tagWhole){
-                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl)
+                    pvc <- pvclust(as.matrix(dist(t(freqWordsDTM))),parallel=cl, method.dist=tag)
                 } else {
                     pvc <- pvclust(as.matrix(dist(
                         t(
                             freqWordsDTM[,colnames(freqWordsDTM) %in% freqWords]
                         )
-                    )),parallel=cl)
+                    )),parallel=cl, method.dist=tag)
                 }
                 pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 ret@pvclust <- pvc

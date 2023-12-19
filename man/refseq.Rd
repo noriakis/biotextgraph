@@ -158,8 +158,8 @@ Must be "kegg" or "reactome", automatically set genePlot to TRUE.}
 \item{genePathPlotSig}{threshold for adjusted p-values (default: 0.05)}
 
 \item{tag}{perform pvclust on words and colorlize them in wordcloud or network
-argument of "cor" or "tdm". Default to "none", which performs no tagging.
-If wordcloud, tagging will be performed on TDM.}
+argument of those accepted in pvclust `method.dist` option, like "correlation".
+Default to "none", which performs no tagging.}
 
 \item{layout}{the layout for the network, defaul to "nicely".
 It can be one of the layouts implemented in `igraph` and `ggraph`, such as
