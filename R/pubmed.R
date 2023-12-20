@@ -127,9 +127,6 @@ pubmed <- function(queries, useRawQuery=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
     argList=list(), dateRange=NULL)
 {
-	if (!tag %in% c("none","tdm","cor")) {
-		stop("tag should be none, tdm, or cor.")
-	}
 
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")

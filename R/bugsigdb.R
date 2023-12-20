@@ -122,9 +122,6 @@ bugsigdb <- function (mbList,
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE,
     autoThresh=TRUE, argList=list(), docsum=FALSE) {
     
-	if (!tag %in% c("none","tdm","cor")) {
-		stop("tag should be none, tdm, or cor.")
-	}
 
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -452,9 +449,9 @@ bugsigdb <- function (mbList,
                         t(
                             DTM[,colnames(DTM) %in% freqWords]
                             )
-                        )),parallel=cl)
+                        )),parallel=cl, method.dist=tag)
                 }
-                pvcl <- pvpick(pvc, alpha=pvclAlpha, method.dist=tag)
+                pvcl <- pvpick(pvc, alpha=pvclAlpha)
                 ret@pvclust <- pvc
                 ret@pvpick <- pvcl
             }
@@ -485,8 +482,7 @@ bugsigdb <- function (mbList,
         if (tag=="cor") {
 			ret <- tag_words(ret, cl,
 				pvclAlpha, whole=tagWhole,
-				num_words=ret@numWords,
-				corMat=TRUE, mat=matrixs$ret@corMat)
+				num_words=ret@numWords)
             pvc <- ret@pvclust
             pvcl <- ret@pvpick
         }

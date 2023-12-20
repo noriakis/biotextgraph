@@ -17,7 +17,7 @@
 #' @param deleteZeroDeg delete zero degree node from plot in correlation network
 #' @param showLegend whether to show legend in correlation network
 #' @param colorText color text label based on frequency in correlation network
-#' @param ngram default to NA (1)
+#' @param ngram default to 1
 #' @param additionalRemove specific words to be excluded
 #' @param tag perform pvclust on words and colorlize them in wordcloud or network
 #' argument of those accepted in pvclust `method.dist` option, like "correlation".
@@ -106,9 +106,6 @@ manual <- function(df, madeUpper=NULL,
    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
-	if (!tag %in% c("none","tdm","cor")) {
-		stop("tag should be none, tdm, or cor.")
-	}
 
     if (useUdpipe) {
       qqcat("Using udpipe mode\n")
@@ -257,7 +254,7 @@ manual <- function(df, madeUpper=NULL,
       DTM <- t(as.matrix(docs))
       row.names(DTM) <- df$query
       
-      if (tag=="tdm") {
+      if (tag!="none") {
         if (!is.null(ret) & length(ret@pvpick)!=0){
           qqcat("Using previous pvclust results")
           pvcl <- ret@pvpick

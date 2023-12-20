@@ -164,9 +164,6 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
     }
     
-    if (!tag %in% c("none","tdm","cor")) {
-        stop("tag input should be none, tdm, or cor.")
-    }
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
         plotType="network"
