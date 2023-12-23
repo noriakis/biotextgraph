@@ -1,190 +1,13 @@
-#' refseq, alliance, pubmed, manual, bugsigdb
-#' 
-#' Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data
-#' 
-#' @param geneList gene ID list
-#' @param queries query ID list
-#' @param mbList microbe ID list
-#' @param df manual document data.frame (must have column `text`) or vector of text.
-#' If `query` column and other columns are present, regards them as category related to the text on the same row.
-#' 
-#' @param alliancePath path to The Alliance of Genome Resources gene description file.
-#' default to "GENE-DESCRIPTION-TSV_HUMAN.tsv"
-#' @param plotType "wc" or "network", default to "network"
-#' @param exclude "frequency" or "tfidf",
-#' @param excludeFreq default to 5000
-#' @param excludeType ">" or "<", combined with `exclude` and `excludeFreq`,
-#' e.g. filter the words with the pre-calculated frequency > 5000
-#' @param keyType default to SYMBOL
-#' @param additionalRemove specific words to be excluded
-#' @param madeUpper make these words uppercase in resulting plot,
-#' default to c("rna" and "dna")
-#' @param madeUpperGenes make genes upper case automatically (default to TRUE)
-#' This uses the `SYMBOL` key in `orgDb`. 
-#' @param pre remove preset filtering words.
-#' @param numWords the number of words to be shown in the plot.
-#' When `autoThresh` is TRUE, the number of this value will be shown.
-#' @param scaleRange scale for label and node size in the network.
-#' @param autoScale scale the label and node size automatically for the large network.
-#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation.
-#' @param corThresh the correlation (cooccurrence) threshold.
-#' @param deleteZeroDeg delete zero degree node from plot in the network
-#' @param orgDb the database used to convert identifiers, default to org.Hs.eg.db.
-#' @param organism organism ID to use in `GeneSummary`
-#' @param enrich currently, only 'reactome' and 'kegg' is supported.
-#' @param topPath how many pathway descriptions are included in text analysis,
-#' sorted by p-values in the results.
-#' @param ora perform over-representation analysis or not (experimental)
-#' @param ngram N-gram specification, default to 1.
-#' @param genePlot plot associated genes (default: FALSE)
-#' @param genePlotNum number of genes to be plotted (default: 10)
-#' @param genePathPlot plot associated genes and pathways (default: NULL)
-#'                     Must be "kegg" or "reactome", automatically set genePlot to TRUE.
-#' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
-#' @param filterMax Use pre-calculated filter based on max-values when excluding TfIdf
-#' Otherwise take sum.
-#' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of those accepted in pvclust `method.dist` option, like "correlation".
-#' Default to "none", which performs no tagging.
-#' @param tagWhole whether to perform pvclust on whole matrix or subset of the matrix.
-#' @param pvclAlpha alpha value for pvpick()
-#' @param onlyTDM return only TDM (tm).
-#' @param onlyCorpus return only corpus (tm).
-#' @param tfidf use TfIdf when making TDM, default to FALSE.
-#' @param mergeCorpus specify multiple corpus if intend to combine them.
-#'                    like PubMed information and RefSeq summary
-#' @param numOnly delete number only (not deleting XXX123, but delete only the number)
-#' @param onWholeDTM calculate correlation network
-#'                   on whole dataset or top-words specified by numWords.
-#' @param autoThresh automatically choose thresholding value to show the `numWords`,
-#' when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.
-#' @param autoNumWords determine the number of words to be shown by ORA, default to FALSE.
-#' @param useUdpipe use udpipe to make a dependency network.
-#' @param udpipeModel udpipe model file name.
-#' @param cl for parPvclust, parallel clustering can be performed
-#' @param stem whether to use stemming when making corpus.
-#' @param preserve Try to preserve original characters.
-#' @param takeMax Take max values for each term in term-document matrix
-#' @param collapse default to FALSE, collapse all the sentences.
-#' @param normalize sum normalize the term frequency document-wise.
-#' @param takeMean take mean values for each term in term-document matrix.
-#' @param useSeed random seed
-#' 
-#' @param useggwordcloud default to TRUE, otherwise use `wordcloud` function.
-#' @param wcScale scaling size for ggwordcloud
-#' @param argList parameters to pass to wordcloud() or ggwordcloud()
-#' 
-#' @param layout the layout for the network, defaul to "nicely".
-#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
-#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
-#' The options are available at: https://igraph.org/r/doc/layout_.html
-#' @param edgeLink if FALSE, use geom_edge_diagonal. if TRUE, geom_edge_link. Default to TRUE.
-#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param pal palette for color gradient in correlation network.
-#' should be a vector of length two like c("red","blue").
-#' @param showLegend whether to show legend in the network
-#' @param colorText color text label based on frequency in the network
-#' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
-#' using udpipe, and tagging colorization for word cloud.
-#' Default to NULL, which indicates automatically set.
-#' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
-#' @param fontFamily font family to use, default to "sans".
-#' @param addFreqToGene add pseudo frequency to gene in genePlot, default to FALSE.
-#' @param colorize color the word nodes by their frequency, and the other nodes by their category.
-#' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
-#' of the words in the network
-#' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param catColors colors for words and texts when colorize is TRUE and discreteColorWord is TRUE
-#' @param geneColor color for associated genes with words (used when tag or colorize option is TRUE)
-#' @param scaleFreq default to NULL, scale the value if specified
-#' @param scaleEdgeWidth scale for edge width
-#' @param splitByEA automatically split the genes based on significant enrichment analysis results,
-#' and returns the list of object for each term. Default to NULL. Must be 'kegg' or 'reactome',
-#' in which the function performs over-representation analysis by enrichKEGG or enrichPathway in
-#' clusterProfiler and ReactomePA.
-#' @param filterByGO filter the results to the words obtained from GO terms,
-#' while preserving the number of words to be shown
-#' @param docsum if TRUE, convert the term-document matrix to binary.
-#' @param absolute calculate absolute correlation value
-#' @param corOption passed to `cor` function, like list("method"="kendall")
-#' @param useRawQuery if you would like to send the query as is, please set this option to TRUE.
-#' @param redo if plot in other parameters, input the previous list
-#' @param apiKey api key for eutilities
-#' @param perQuery search for the queries one by one recursively, not using `delim`.
-#' @param retMax how many items are to be retlieved?
-#' @param quote whether to quote the queries
-#' @param sortOrder sort order, passed to rentrez function
-#' @param onlyGene plot only the gene symbol
-#' (orgDb with SYMBOL key can be used)
-#' @param distinguish_query if TRUE, distinguish query and returned texts
-#' by appending (Q) on query
-#' @param dateRange if specified, restrict the range of publication date.
-#' Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`
-#' 
-#' @param mbPlot plot microbe names
-#' @param disPlot plot diseases
-#' @param target "title" or "abstract"
-#' @param metab tibble of metabolite - taxon association
-#' @param metThresh threshold of association
-#' @param metCol metabolite data frame column name in the order of
-#' "candidate taxon", "metabolite", "quantitative values for thresholding"
-#' @param curate include articles in bugsigdb
-#' @param abstArg passed to PubMed function when using curate=FALSE
-#' @param mbColor color for Microbes when tagPalette or catColors 
-#' is not specified
-#' @param ecPlot plot link between enzyme and microbes
-#' this option requires two files to be passed to enzyme() and getUPTax().
-#' @param ecFile enzyme database file
-#' @param upTaxFile UniProt taxonomy file
-#' @param addFreqToMB add pseudo frequency to microbes in mbPlot
-#' @param udpipeOnlyFreq when using udpipe, include only high-frequent words
-#' @param udpipeOnlyFreqNB when using udpipe, include only the neighbors of
-#' high-frequent words
-#' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
-#'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
-#' @param filNum specify filter tfidf
-#' @param filType "above" or "below"
-#' @param useQuanteda use quanteda functions to generate
-#' @param quantedaArgs list of arguments to be passed to tokens()
-#' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
-#' frequency of the words to nodes other than words
-#' @param delim delimiter for queries
-#' @param onlyDf return only the raw data.frame of searching PubMed
-#' @param addFreqToQuery add pseudo-frequency to query node
-#' @param asis plot the original network (default to FALSE)
-#' @param queryColor color for associated queries with words
-#' @param queryPlot plot the query in the graph in relation with the words
-#' @param x biotext class object
-#' @return `biotext` class object
-#' 
-#' @name generalf
-NULL
-
-#' refseq
+#' alliance
 #' @rdname generalf
-#' @import tm
-#' @import GeneSummary
-#' @import org.Hs.eg.db
-#' @import wordcloud
-#' @import igraph
-#' @importFrom tidygraph graph_join as_tbl_graph activate is.tbl_graph
-#' @import ggraph ggplot2
-#' @importFrom pvclust pvclust pvpick
-#' @import methods
-#' @importFrom dplyr filter
-#' @importFrom stats dist na.omit
-#' @importFrom grDevices palette
-#' @importFrom stats as.dendrogram cor dhyper p.adjust
-#' @importFrom igraph graph.adjacency
-#' @importFrom cowplot as_grob
-#' @importFrom NLP ngrams words
-#' @importFrom ggplotify as.ggplot
 #' @export
 #' @examples
 #' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
-#' refseq(geneList)
-#' 
-refseq <- function (geneList, keyType="SYMBOL",
+#' \dontrun{alliance(geneList)}
+
+alliance <- function (geneList,
+    alliancePath="GENE-DESCRIPTION-TSV_HUMAN.tsv",
+    keyType="SYMBOL",
     excludeFreq=2000, exclude="frequency",
     filterMax=FALSE, excludeType=">",
     tfidf=FALSE, genePlotNum=10,
@@ -199,10 +22,10 @@ refseq <- function (geneList, keyType="SYMBOL",
     pvclAlpha=0.95, cl=FALSE,
     ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
     colorText=FALSE, corThresh=0.2, genePlot=FALSE,
-    autoThresh=TRUE, autoNumWords=FALSE,
+    autoThresh=TRUE,
     genePathPlot=NULL, genePathPlotSig=0.05, tag="none",
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, 
-    enrich=NULL, topPath=10, ora=FALSE, tagWhole=FALSE,
+    enrich=NULL, topPath=10, tagWhole=FALSE,
     mergeCorpus=NULL, numOnly=TRUE, madeUpperGenes=TRUE,
     onWholeDTM=FALSE, pre=TRUE, takeMean=FALSE,
     tagPalette=NULL, collapse=FALSE, addFreqToGene=FALSE,
@@ -211,19 +34,9 @@ refseq <- function (geneList, keyType="SYMBOL",
     scaleFreq=NULL, colorize=FALSE, geneColor="grey",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
-    useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=NULL,
+    useSeed=42, scaleEdgeWidth=c(1,3),
     filterByGO=FALSE, docsum=FALSE, absolute=TRUE,
     corOption=list()) {
-    
-    if (!is.null(splitByEA)) {
-        if (length(splitByEA)!=1) {
-            stop("Please specify kegg or reactome to splitByEA")}
-        if ((splitByEA=="kegg")|(splitByEA=="reactome")) {
-            return(split_by_ea(as.list(environment())))     
-        } else {
-            stop("Please specify kegg or reactome to splitByEA")
-        }
-    }
     
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -252,42 +65,17 @@ refseq <- function (geneList, keyType="SYMBOL",
                                       ngram=ngram)
             docs <- ret@corpus
 
-        } else { ## Mining RefSeq text 
-            ret <- obtain_refseq(geneList, keyType=keyType, organism=organism, org_db=orgDb)
+        } else { ## Mining Alliance text 
+            ## ora and autoNumWords is disabled in this function
+            ret <- obtain_alliance(geneList, file=alliancePath,
+                keyType=keyType, org_db=orgDb)
             ret <- ret |> set_filter_words(exclude_by=exclude,
                 exclude_type=excludeType, exclude="GS",
                 exclude_number=excludeFreq, filterMax=filterMax,
                 additional_remove=additionalRemove,
                 pre=pre, pre_microbe=FALSE)
             fil <- ret@rawText
-            if (autoNumWords) {
-                if (keyType!="ENTREZID"){
-                    geneList <- AnnotationDbi::select(orgDb,
-                        keys = geneList, columns = c("ENTREZID"),
-                        keytype = keyType)$ENTREZID
-                    geneList <- geneList[!is.na(geneList)] |> unique()
-                }
-                sig <- textORA(geneList)
-                numWords <- names(sig)[p.adjust(sig, "bonferroni")<0.05] |> length()
-                if (numWords>50) {numWords <- 50}
-                qqcat("numWords is set to @{numWords}\n")
-            }
-            if (ora){
-                qqcat("Performing ORA\n")
-                if (!autoNumWords) {
-                    if (keyType!="ENTREZID"){
-                        geneList <- AnnotationDbi::select(orgDb,
-                            keys = geneList, columns = c("ENTREZID"),
-                            keytype = keyType)$ENTREZID
-                        geneList <- geneList[!is.na(geneList)] |> unique()
-                    }
-                    sig <- textORA(geneList)                    
-                }
-                sigFilter <- names(sig)[p.adjust(sig, "bonferroni")>0.05]
-                qqcat("Filtered @{length(sigFilter)} words (ORA)\n")
-                ret@filtered <- c(ret@filtered, sigFilter)
-                ret@ora <- sig
-            }
+
             ret <- ret |> make_corpus(collapse=collapse,
                                       num_only=numOnly,
                                       stem=stem, preserve=preserve,
@@ -296,7 +84,6 @@ refseq <- function (geneList, keyType="SYMBOL",
             filterWords <- ret@filtered
             ## Udpipe mode can only be used with default RefSeq
             if (useUdpipe) {
-                fil$text <- fil$Gene_summary
                 fil$ID <- fil$Gene_ID
                 ret <- retUdpipeNet(ret=ret, texts=fil,udmodel_english=udmodel_english,
                     orgDb=orgDb, filterWords=filterWords, additionalRemove=additionalRemove,
@@ -386,11 +173,11 @@ refseq <- function (geneList, keyType="SYMBOL",
             if (!is.null(mergeCorpus)) {
                 stop("Cannot perform genePlot when merging corpus")
             }
-            revID <- AnnotationDbi::select(orgDb,
-                keys = as.character(fil$Gene_ID), 
-                columns = c("SYMBOL"),
-                keytype = "ENTREZID")$SYMBOL
-            row.names(DTM) <- revID
+            # revID <- AnnotationDbi::select(orgDb,
+            #     keys = as.character(fil$Gene_ID), 
+            #     columns = c("SYMBOL"),
+            #     keytype = "ENTREZID")$SYMBOL
+            row.names(DTM) <- fil$Gene_ID
         }
 
         ## genePathPlot: plot associated genes and pathways
@@ -674,11 +461,8 @@ refseq <- function (geneList, keyType="SYMBOL",
             if (!is.null(mergeCorpus)) {
                 stop("Cannot perform genePlot when merging corpus")
             }
-            revID <- AnnotationDbi::select(orgDb,
-                keys = as.character(fil$Gene_ID), 
-                columns = c("SYMBOL"),
-                keytype = "ENTREZID")$SYMBOL
-            row.names(DTM) <- revID
+
+            row.names(DTM) <- fil$Gene_ID
             
             genemap <- NULL
             nodeName <- returnDf$word
