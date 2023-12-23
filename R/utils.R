@@ -51,7 +51,7 @@ split_by_ea <- function(args) {
 #' changeLayout
 #' @param g biotext object
 #' @param layout_func layout function in igraph
-#' @examples refseq(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
+#' @examples refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) |> changeLayout(igraph::layout_nicely)
 #' @export
 #' @return biotext class object
 changeLayout <- function(g, layout_func) {
@@ -109,7 +109,8 @@ geom_node_shadowtext <- function(mapping = NULL, data = NULL,
 #' @return list of graph and osplot object
 #' 
 obtainMatrix <- function(ret, bn, R, DTM, freqWords,
-    corThresh, cooccurrence, onWholeDTM, numWords, autoThresh=FALSE) {
+    corThresh, cooccurrence, onWholeDTM, numWords, autoThresh=FALSE, absolute=TRUE,
+    corOption=list()) {
 
     retList <- list()
     if (bn) {
@@ -135,10 +136,15 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
       } else {
           corInput <- DTM[, colnames(DTM) %in% freqWords]
       }
+      corOption[["x"]] <- corInput
       if (cooccurrence) {
           corData <- t(corInput) %*% corInput
       } else {
-          corData <- abs(cor(corInput))
+      	  if (absolute) {
+	        corData <- abs(do.call("cor", corOption))
+      	  } else {
+      	  	corData <- do.call("cor", corOption)
+      	  }
       }
       if (autoThresh) {
         qqcat("Ignoring corThresh, automatically determine the value\n")
@@ -1839,7 +1845,9 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
 #' @param ig igraph
 #' @param sort.by the argument to be passed to fabric layout function
 #' @param verbose show logs
-#' @examples refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' getSlot(refseq(testgenes), "igraph") |> obtainTextPosition()
 #' @export
 #' 
 obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
@@ -1932,7 +1940,10 @@ obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
 #' Override `highlight` option.
 #' @return ggplot2
 #' @export
-#' @examples refseq(c("DDX41","PNKP")) |> plot_biofabric()
+#' @examples
+#' 
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' refseq(testgenes) |> plot_biofabric()
 #'
 #'
 plot_biofabric <- function(res,

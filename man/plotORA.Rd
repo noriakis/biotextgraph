@@ -18,6 +18,7 @@ volcano plot for ORA results
 plot volcano-plot like plot for ORA results
 }
 \examples{
-net1 <- refseq(c("DDX41","IRF3"), ora=TRUE)
+testgenes <- c("DDX41","IRF3","XRCC1","ERCC1","ERCC2","ERCC3")
+net1 <- refseq(testgenes, ora=TRUE)
 plotORA(net1)
 }

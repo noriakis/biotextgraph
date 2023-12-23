@@ -31,5 +31,6 @@ biotext class object
 obtain enrichment analysis description
 }
 \examples{
-obtain_enrich(c("PNKP","DDX41"))
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+obtain_enrich(testgenes)
 }

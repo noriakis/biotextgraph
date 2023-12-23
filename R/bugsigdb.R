@@ -2,83 +2,7 @@
 #' 
 #' Visualize BugSigDB
 #' 
-#' @param mbList microbe list
-#' @param additionalRemove specific words to be excluded
-#' @param exclude "frequency" or "tfidf",
-#' @param excludeFreq default to 1000 (no words are excluded)
-#' @param excludeType ">" or "<"
-#' @param mbPlot plot microbe names
-#' @param disPlot plot diseases
-#' @param madeUpper make the words uppercase in resulting plot
-#' @param pal palette for color gradient in correlation network and tag coloring
-#' @param numWords the number of words to be shown
-#' @param plotType "wc" or "network"
-#' @param scaleRange scale for label and node size in correlation network
-#' @param corThresh the correlation threshold
-#' @param autoThresh automatically determine the threshold value to show `numWords`
-#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
-#' @param layout the layout for correlation network, defaul to "nicely"
-#' @param edgeLink if FALSE, use geom_edge_diagonal
-#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param deleteZeroDeg delete zero degree node from plot in correlation network
-#' @param showLegend whether to show legend in correlation network
-#' @param colorText color text label based on frequency in correlation network
-#' @param ngram default to 1
-#' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of those accepted in pvclust `method.dist` option, like "correlation".
-#' Default to "none", which performs no tagging.
-#' @param tagWhole tag whole set or subset
-#' @param target "title" or "abstract"
-#' @param cl cluster object passed to pvclust
-#' @param apiKey api key for eutilities
-#' @param redo if "abstract" is chosen in target, one can provide resulting object again
-#' @param pre predefined filter words
-#' @param tfidf use TfIdf when making TDM
-#' @param pvclAlpha alpha for pvpick()
-#' @param numOnly delete number only
-#' @param preserve try to preserve the original characters
-#' @param onlyTDM return only TDM
-#' @param onWholeDTM calculate correlation network
-#'                   on whole dataset or top-words specified by numWords
-#' @param metab tibble of metabolite - taxon association
-#' @param metThresh threshold of association
-#' @param metCol metabolite data frame column name in the order of
-#' "candidate taxon", "metabolite", "quantitative values for thresholding"
-#' @param stem whether to use stemming
-#' @param curate include articles in bugsigdb
-#' @param abstArg passed to PubMed function when using curate=FALSE
-#' @param tagPalette tag palette when tag is TRUE.
-#' named vector containing `Microbes`, `Diseases`, `Metabolites`, `Enzymes`,
-#' `cluster_1`, `cluster_2`, etc.
-#' @param catColors named vector showing colors for each category
-#' when the tag=FALSE, and colorize=TRUE
-#' @param mbColor color for Microbes when tagPalette or catColors 
-#' is not specified
-#' 
-#' @param ecPlot plot link between enzyme and microbes
-#' this option requires two files to be passed to enzyme() and getUPTax().
-#' @param ecFile enzyme database file
-#' @param upTaxFile UniProt taxonomy file
-#' @param takeMax when summarizing term-document matrix, take max.
-#' @param filterMax use pre-calculated filter based on max-values when excluding TfIdf
-#' Otherwise take sum.
-#' @param useUdpipe use udpipe to make a network
-#' @param udpipeModel udpipe model file name
-#' @param argList parameters to pass to wordcloud()
-#' @param normalize sum normalize the term frequency document-wise
-#' @param takeMean take mean values for each term in term-document matrix
-#' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param naEdgeColor edge color linking query with the other category than text
-#' @param useggwordcloud default to TRUE
-#' @param wcScale scaling size for ggwordcloud
-#' @param fontFamily font family to use, default to "sans"
-#' @param addFreqToMB add pseudo frequency to microbes in mbPlot
-#' @param colorize color the nodes and texts based on their category,
-#' except for words which have frequency mapping
-#' @param useSeed use seed
-#' @param scaleFreq scale the frequency
-#' @param docsum if TRUE, convert the term-document matrix to binary.
-#' @return object consisting of data frame and ggplot2 object
+#' @rdname generalf
 #' @import tm
 #' @import bugsigdbr
 #' @import wordcloud
@@ -120,7 +44,8 @@ bugsigdb <- function (mbList,
     catColors=NULL, useSeed=42,discreteColorWord=FALSE,
     colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE,
-    autoThresh=TRUE, argList=list(), docsum=FALSE) {
+    autoThresh=TRUE, argList=list(), docsum=FALSE,  absolute=TRUE,
+    corOption=list()) {
     
 
     if (useUdpipe) {
@@ -475,7 +400,7 @@ bugsigdb <- function (mbList,
         }
 
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh, absolute, corOption)
         
         coGraph <- matrixs$coGraph
         ret <- matrixs$ret

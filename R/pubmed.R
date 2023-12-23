@@ -1,92 +1,7 @@
 #' pubmed
 #' 
 #' make word cloud or correlation network from PubMed
-#' 
-#' @param queries gene symbols or the other queries sent to PubMed
-#' @param useRawQuery if you would like to send the query as is, please set this option to TRUE.
-#' @param redo if plot in other parameters, input the previous list
-#' @param madeUpper make the words uppercase in resulting plot
-#' @param madeUpperGenes make genes upper case automatically (default to TRUE)
-#' @param pal palette for color gradient in correlation network
-#' @param numWords the number of words to be shown
-#' @param plotType "wc" or "network"
-#' @param scaleRange scale for label and node size in correlation network
-#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
-#' @param corThresh the correlation threshold
-#' @param autoThresh automatically determine the threshold value to show `numWords`
-#' @param layout the layout for the network, defaul to "nicely".
-#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
-#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
-#' The options are available at: https://igraph.org/r/doc/layout_.html
-#' @param edgeLink if FALSE, use geom_edge_diagonal() (default: TRUE)
-#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param deleteZeroDeg delete zero degree node from plot in the network
-#' @param showLegend whether to show legend in the network
-#' @param colorText color text label based on frequency in the network
-#' @param ngram Use n-gram in tokenization. default to 1
-#' @param additionalRemove specific words to be excluded
-#' @param target "abstract" or "title"
-#' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of those accepted in pvclust `method.dist` option, like "correlation".
-#' Default to "none", which performs no tagging.
-#' @param tagWhole tag based on whole data or subset of the data.
-#' @param genePlot plot associated genes (default: FALSE)
-#' Query gene name is shown with (Q)
-#' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
-#'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
-#' @param filNum specify filter tfidf
-#' @param filType "above" or "below"
-#' @param apiKey api key for eutilities
-#' @param perQuery search for the queries one by one recursively, not using `delim`.
-#' @param tfidf use TfIdf when making TDM
-#' @param pvclAlpha alpha for pvpick()
-#' @param onlyCorpus return only corpus
-#' @param onlyTDM return only TDM
-#' @param pre filter preset words like publisher's names
-#' @param preserve try to preserve the original characters
-#' @param numOnly delete number only
-#' @param cl cluster to pass to pvclust (snow::makeCluster(n))
-#' @param delim delimiter for queries
-#' @param retMax how many items are to be retlieved?
-#' @param orgDb org database, default to org.Hs.eg.db
-#' @param quote whether to quote the queries
-#' @param onWholeDTM calculate the network
-#'                   on whole dataset or top-words specified by numWords
-#' @param limit limit number for query count, default to 10
-#' @param sortOrder sort order, passed to rentrez function
-#' @param stem whether to use stemming
-#' @param onlyDf return only the raw data.frame of searching PubMed
-#' @param tagPalette tag palette when tag is TRUE
-#' @param takeMax when summarizing term-document matrix, take max.
-#' Otherwise take sum.
-#' @param onlyGene plot only the gene symbol
-#' (orgDb with SYMBOL key can be used)
-#' @param argList parameters to pass to wordcloud()
-#' @param useUdpipe use udpipe to make a network
-#' @param udpipeModel udpipe model file name
-#' @param udpipeOnlyFreq when using udpipe, include only high-frequent words
-#' @param udpipeOnlyFreqNB when using udpipe, include only the neighbors of
-#' high-frequent words
-#' @param normalize sum normalize the term frequency document-wise
-#' @param takeMean take mean values for each term in term-document matrix
-#' @param naEdgeColor edge color linking query with the other category than text
-#' @param useggwordcloud default to TRUE
-#' @param wcScale scaling size for ggwordcloud
-#' @param fontFamily font family to use, default to "sans"
-#' @param distinguish_query if TRUE, distinguish query and returned texts
-#' by appending (Q) on query
-#' @param colorize color the nodes and texts based on their category
-#' @param queryColor color for associated queries with words
-#' @param useSeed use seed
-#' @param scaleFreq scale the frequency
-#' @param addFreqToQuery add pseudo-frequency to query node
-#' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param catColors colors for words ant texts when colorize=TRUE and discreteColorWord is TRUE
-#' @param filterByGO filter the results to the words obtained from GO terms,
-#' while preserving the number of words to be shown
-#' @param docsum if TRUE, convert the term-document matrix to binary.
-#' @param dateRange if specified, restrict the range of publication date.
-#' Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`
+#' @rdname generalf
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}
 #' @return object consisting of data frame and ggplot2 object
@@ -105,7 +20,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
 	redo=NULL, madeUpper=c("dna","rna"),
     target="abstract", useFil=NA, filType="above",
     filNum=0, sortOrder="relevance", fontFamily="sans",
-    pvclAlpha=0.95, numOnly=TRUE, delim="OR", limit=10,
+    pvclAlpha=0.95, numOnly=TRUE, delim="OR",
     apiKey=NULL, tfidf=FALSE, cl=FALSE, autoThresh=TRUE,
     pal=c("blue","red"), numWords=30, scaleRange=c(5,10),
     showLegend=FALSE, plotType="network", colorText=FALSE, quote=FALSE,
@@ -121,7 +36,8 @@ pubmed <- function(queries, useRawQuery=FALSE,
     queryColor="grey",
     useggwordcloud=TRUE, wcScale=10, distinguish_query=TRUE, useSeed=42,
     udpipeModel="english-ewt-ud-2.5-191206.udpipe", normalize=FALSE,
-    takeMean=FALSE,
+    takeMean=FALSE,  absolute=TRUE,
+    corOption=list(),
     deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
     onlyGene=FALSE, filterByGO=FALSE, docsum=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
@@ -356,7 +272,8 @@ pubmed <- function(queries, useRawQuery=FALSE,
         }
     
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh,
+            absolute, corOption)
     
 
         coGraph <- matrixs$coGraph

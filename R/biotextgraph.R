@@ -7,7 +7,7 @@
 #' @return list of data frames and ggplot2 object
 #' 
 #' @examples
-#' geneList <- c("DDX41","PNKP")
+#' geneList <- c("DDX41","PNKP","IRF3","XRCC1","ERCC2")
 #' biotextgraph("refseq", argList=list(geneList=geneList))
 #' @export
 #' 
@@ -154,12 +154,7 @@ setMethod("plot",
 #' 
 #' plot the network changing the visualization parameters
 #' 
-#' @param layout the layout for the network, defaul to "nicely".
-#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
-#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
-#' The options are available at: https://igraph.org/r/doc/layout_.html
-#' 
-#' @param asis plot the original network (default to FALSE)
+#' @rdname generalf
 #' @export
 #' @return network visualization
 setGeneric("plotNet",
@@ -171,7 +166,7 @@ setGeneric("plotNet",
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
     	naEdgeColor="grey", colorText=FALSE, asis=FALSE)
     standardGeneric("plotNet"))
-
+#' @rdname generalf
 setMethod("plotNet", "biotext",
     function(x, layout="nicely", edgeLink=FALSE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
@@ -271,9 +266,7 @@ setMethod("plotNet", "biotext",
 #' 
 #' plot the wordcloud changing the visualization parameters
 #' 
-#' @param numWords number of words to be shown. If not specified, use the 
-#' value set in biotext object.
-#' @param tagPalette word-cluster coloring specification
+#' @rdname generalf
 #' @export
 #' @return wordcloud visualization
 setGeneric("plotWC",
@@ -281,7 +274,7 @@ setGeneric("plotWC",
     	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
     standardGeneric("plotWC"))
-
+#' @rdname generalf
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
     	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
@@ -446,7 +439,8 @@ setMethod("getSlot", "biotext",
 #' @param x biotext object
 #' @param thresh hline to draw in plot
 #' @examples
-#' net1 <- refseq(c("DDX41","IRF3"), ora=TRUE)
+#' testgenes <- c("DDX41","IRF3","XRCC1","ERCC1","ERCC2","ERCC3")
+#' net1 <- refseq(testgenes, ora=TRUE)
 #' plotORA(net1)
 #' @return volcano plot for ORA results
 #' @importFrom ggrepel geom_text_repel

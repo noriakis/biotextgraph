@@ -1,8 +1,13 @@
-#' refseq
+#' refseq, pubmed, manual, bugsigdb
 #' 
-#' Text mining RefSeq description obtained by GeneSummary
+#' Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data
 #' 
 #' @param geneList gene ID list
+#' @param queries query ID list
+#' @param mbList microbe ID list
+#' @param df manual document data.frame (must have column `text`) or vector of text.
+#' If `query` column and other columns are present, regards them as category related to the text on the same row.
+#' 
 #' @param plotType "wc" or "network", default to "network"
 #' @param exclude "frequency" or "tfidf",
 #' @param excludeFreq default to 5000
@@ -98,9 +103,63 @@
 #' @param filterByGO filter the results to the words obtained from GO terms,
 #' while preserving the number of words to be shown
 #' @param docsum if TRUE, convert the term-document matrix to binary.
+#' @param absolute calculate absolute correlation value
+#' @param corOption passed to `cor` function, like list("method"="kendall")
+#' @param useRawQuery if you would like to send the query as is, please set this option to TRUE.
+#' @param redo if plot in other parameters, input the previous list
+#' @param apiKey api key for eutilities
+#' @param perQuery search for the queries one by one recursively, not using `delim`.
+#' @param retMax how many items are to be retlieved?
+#' @param quote whether to quote the queries
+#' @param sortOrder sort order, passed to rentrez function
+#' @param onlyGene plot only the gene symbol
+#' (orgDb with SYMBOL key can be used)
+#' @param distinguish_query if TRUE, distinguish query and returned texts
+#' by appending (Q) on query
+#' @param dateRange if specified, restrict the range of publication date.
+#' Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`
 #' 
+#' @param mbPlot plot microbe names
+#' @param disPlot plot diseases
+#' @param target "title" or "abstract"
+#' @param metab tibble of metabolite - taxon association
+#' @param metThresh threshold of association
+#' @param metCol metabolite data frame column name in the order of
+#' "candidate taxon", "metabolite", "quantitative values for thresholding"
+#' @param curate include articles in bugsigdb
+#' @param abstArg passed to PubMed function when using curate=FALSE
+#' @param mbColor color for Microbes when tagPalette or catColors 
+#' is not specified
+#' @param ecPlot plot link between enzyme and microbes
+#' this option requires two files to be passed to enzyme() and getUPTax().
+#' @param ecFile enzyme database file
+#' @param upTaxFile UniProt taxonomy file
+#' @param addFreqToMB add pseudo frequency to microbes in mbPlot
+#' @param udpipeOnlyFreq when using udpipe, include only high-frequent words
+#' @param udpipeOnlyFreqNB when using udpipe, include only the neighbors of
+#' high-frequent words
+#' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
+#'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
+#' @param filNum specify filter tfidf
+#' @param filType "above" or "below"
+#' @param useQuanteda use quanteda functions to generate
+#' @param quantedaArgs list of arguments to be passed to tokens()
+#' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
+#' frequency of the words to nodes other than words
+#' @param delim delimiter for queries
+#' @param onlyDf return only the raw data.frame of searching PubMed
+#' @param addFreqToQuery add pseudo-frequency to query node
+#' @param asis plot the original network (default to FALSE)
+#' @param queryColor color for associated queries with words
+#' @param queryPlot plot the query in the graph in relation with the words
+#' @param x biotext class object
 #' @return `biotext` class object
 #' 
+#' @name generalf
+NULL
+
+#' refseq
+#' @rdname generalf
 #' @import tm
 #' @import GeneSummary
 #' @import org.Hs.eg.db
@@ -111,17 +170,16 @@
 #' @importFrom pvclust pvclust pvpick
 #' @import methods
 #' @importFrom dplyr filter
-#' @importFrom stats dist
+#' @importFrom stats dist na.omit
 #' @importFrom grDevices palette
 #' @importFrom stats as.dendrogram cor dhyper p.adjust
 #' @importFrom igraph graph.adjacency
 #' @importFrom cowplot as_grob
 #' @importFrom NLP ngrams words
 #' @importFrom ggplotify as.ggplot
-#' 
 #' @export
 #' @examples
-#' geneList <- c("DDX41","PNKP")
+#' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
 #' refseq(geneList)
 #' 
 refseq <- function (geneList, keyType="SYMBOL",
@@ -152,7 +210,8 @@ refseq <- function (geneList, keyType="SYMBOL",
     argList=list(), useggwordcloud=TRUE, wcScale=10,
     catColors=NULL, discreteColorWord=FALSE,
     useSeed=42, scaleEdgeWidth=c(1,3), splitByEA=NULL,
-    filterByGO=FALSE, docsum=FALSE) {
+    filterByGO=FALSE, docsum=FALSE, absolute=TRUE,
+    corOption=list()) {
     
     if (!is.null(splitByEA)) {
         if (length(splitByEA)!=1) {
@@ -375,7 +434,7 @@ refseq <- function (geneList, keyType="SYMBOL",
         }
 
         matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
+            corThresh, cooccurrence, onWholeDTM, numWords, autoThresh, absolute)
 
         
         coGraph <- matrixs$coGraph

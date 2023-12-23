@@ -66,7 +66,7 @@ plot comparing gene clusters
 compare two gene clusters based on words
 }
 \examples{
-net1 <- refseq(c("DDX41","IRF3"), plotType="network")
-net2 <- refseq(c("DDX41","PNKP"), plotType="network")
+net1 <- refseq(c("DDX41","IRF3","ERCC1","ERCC2","XRCC1"), plotType="network")
+net2 <- refseq(c("DDX41","PNKP","ERCC3","IRF3","COPA"), plotType="network")
 compare <- compareWordNet(list(net1, net2))
 }

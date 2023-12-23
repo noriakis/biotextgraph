@@ -73,5 +73,6 @@ biotext class object
 plot biotextgraph after processing graph
 }
 \examples{
-refseq(c("PNKP","DDX41")) |> plot_biotextgraph()
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+refseq(testgenes) |> plot_biotextgraph()
 }

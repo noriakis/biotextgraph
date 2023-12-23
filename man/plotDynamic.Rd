@@ -34,7 +34,7 @@ list network of words using graphlayouts::layout_as_dynamic
 }
 \examples{
 library(igraph)
-wc1 <- refseq(c("DDX41","IRF3"), plotType="network")
-wc2 <- refseq(c("DDX41","PNKP"), plotType="network")
+wc1 <- refseq(c("DDX41","IRF3","XRCC1","ERCC1","ERCC2","ERCC3"), plotType="network")
+wc2 <- refseq(c("DDX41","PNKP","XRCC1","COPA","CD4","NLRP3"), plotType="network")
 compare <- plotDynamic(list(wc1, wc2))
 }

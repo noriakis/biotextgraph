@@ -1,5 +1,5 @@
 test_that("test basic functions produce no errors", {
-    geneList <- c("CXCL10","CXCL9")
+    geneList <- c("CXCL10","CXCL9","ERCC1","PNKP","DDX41")
 
     library(ggraph)
     expect_error( refseq(geneList), NA)

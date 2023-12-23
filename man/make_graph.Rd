@@ -36,6 +36,7 @@ biotext class object
 make correlation or cooccurrence network
 }
 \examples{
-obtain_refseq(c("DDX41", "PNKP")) |> 
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+obtain_refseq(testgenes) |> 
 make_corpus() |> make_TDM() |> make_graph()
 }

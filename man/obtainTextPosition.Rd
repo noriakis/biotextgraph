@@ -20,5 +20,6 @@ tbl_graph
 obtain text position in biofabric layout
 }
 \examples{
-refseq(c("PNKP","DDX41"))@igraph |> obtainTextPosition()
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+getSlot(refseq(testgenes), "igraph") |> obtainTextPosition()
 }

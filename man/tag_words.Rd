@@ -23,6 +23,8 @@ tag_words(
 \item{whole}{perform clustering on whole matrix (take time)}
 
 \item{num_words}{if set, subset to this number of words}
+
+\item{method}{method.dist argument in pvclust}
 }
 \value{
 biotext class object

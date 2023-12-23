@@ -20,5 +20,6 @@ biotext class object
 graph_cluster
 }
 \examples{
-refseq(c("PNKP","DDX41")) |> graph_cluster()
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+refseq(testgenes) |> graph_cluster()
 }

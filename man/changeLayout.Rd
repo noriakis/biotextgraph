@@ -18,5 +18,5 @@ biotext class object
 changeLayout
 }
 \examples{
-refseq(c("IRF3","PNKP","DDX41")) |> changeLayout(igraph::layout_nicely)
+refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) |> changeLayout(igraph::layout_nicely)
 }

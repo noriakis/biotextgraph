@@ -46,7 +46,9 @@ For BioFabric layout, please refer to: https://biofabric.systemsbiology.net/
 Citation is: https://doi.org/10.1186/1471-2105-13-275
 }
 \examples{
-refseq(c("DDX41","PNKP")) |> plot_biofabric()
+
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+refseq(testgenes) |> plot_biofabric()
 
 
 }

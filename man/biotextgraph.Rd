@@ -18,6 +18,6 @@ list of data frames and ggplot2 object
 wrapper for functions refseq, pubmed, enzyme, and bugsigdb
 }
 \examples{
-geneList <- c("DDX41","PNKP")
+geneList <- c("DDX41","PNKP","IRF3","XRCC1","ERCC2")
 biotextgraph("refseq", argList=list(geneList=geneList))
 }

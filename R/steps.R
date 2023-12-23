@@ -301,7 +301,9 @@ obtain_enzyme <- function(file, ec_num,
 #' @param top_path the number of pathways to be obtained
 #' sorted by p-values
 #' @export
-#' @examples obtain_enrich(c("PNKP","DDX41"))
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' obtain_enrich(testgenes)
 #' @return biotext class object
 obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
     org_db=org.Hs.eg.db, top_path=30) {
@@ -469,7 +471,9 @@ set_filter_words <- function(ret, exclude_by="frequency",
 #' @param ret biotext class
 #' @param threshold ORA threshold to filter (bonferroni-corrected p-value)
 #' @export
-#' @examples obtain_refseq(c("DDX41")) |> perform_ora()
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' obtain_refseq(testgenes) |> perform_ora()
 #' @return biotext class object
 perform_ora <- function(ret, threshold=0.05) {
 	if (ret@type!="refseq") {stop("ORA for type other than refseq is not supported")}
@@ -594,6 +598,7 @@ make_TDM <- function(ret, tfidf=FALSE,
 #' @param pvclAlpha alpha value for `pvpick`
 #' @param whole perform clustering on whole matrix (take time)
 #' @param num_words if set, subset to this number of words
+#' @param method method.dist argument in pvclust
 #' @importFrom stats as.dist
 #' @return biotext class object
 #' @examples obtain_refseq(c("IRF3","PNKP")) |> 
@@ -640,7 +645,9 @@ tag_words <- function(ret, cl=FALSE, pvclAlpha=0.95, whole=FALSE,
 #' @param R parameter for boot.strength function
 #' @param whole return correlation or cooccurrence for whole words
 #' @return biotext class object
-#' @examples obtain_refseq(c("DDX41", "PNKP")) |> 
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' obtain_refseq(testgenes) |> 
 #' make_corpus() |> make_TDM() |> make_graph()
 #' @export
 make_graph <- function(ret, num_words=30, cor_threshold=0.2,
@@ -664,7 +671,9 @@ make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 #' @param func community detection algorithm in igraph
 #' @param factorize convert to factor upon assigning
 #' @return biotext class object
-#' @examples refseq(c("PNKP","DDX41")) |> graph_cluster()
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' refseq(testgenes) |> graph_cluster()
 #' @export
 graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 	ret@communities <- do.call(func, list(graph=ret@igraphRaw))
@@ -936,7 +945,9 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
 #' @param distinguish_query distinguish query with words in obtained text
 #' @param org_db organism database to convert IDs
 #' @return biotext class object
-#' @examples refseq(c("DDX41","PNKP")) |>
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' refseq(testgenes) |>
 #' process_network_gene()
 #' @export
 process_network_gene <- function(ret, delete_zero_degree=TRUE,
@@ -1414,7 +1425,9 @@ assign_community <- function(ret, coGraph) {
 #' @param discrete_color_word colorize words by "Words" category, not frequency.
 #' @param add_pseudo_freq add pseudo value for nodes other than words
 #' @export
-#' @examples refseq(c("PNKP","DDX41")) |> plot_biotextgraph()
+#' @examples
+#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#' refseq(testgenes) |> plot_biotextgraph()
 #' @return biotext class object
 plot_biotextgraph <- function(ret,
 	edge_link=TRUE,
@@ -1544,7 +1557,8 @@ plot_biotextgraph <- function(ret,
 #' @param arg_list arguments to pass to wordcloud functions
 #' @param wc_scale scale factor for ggwordcloud
 #' @export
-#' @examples refseq("DDX41", plotType="wc") |>
+#' @examples
+#' refseq("DDX41", plotType="wc") |>
 #' plot_wordcloud()
 #' @return biotext class object
 plot_wordcloud <- function(ret, num_words=30, pal=palette(),

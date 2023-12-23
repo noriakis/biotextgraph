@@ -46,6 +46,7 @@ perform tasks before plotting
 like obtaining associated genes to plot
 }
 \examples{
-refseq(c("DDX41","PNKP")) |>
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+refseq(testgenes) |>
 process_network_gene()
 }

@@ -22,8 +22,8 @@
 #' 
 #' @export
 #' @examples
-#' net1 <- refseq(c("DDX41","IRF3"), plotType="network")
-#' net2 <- refseq(c("DDX41","PNKP"), plotType="network")
+#' net1 <- refseq(c("DDX41","IRF3","ERCC1","ERCC2","XRCC1"), plotType="network")
+#' net2 <- refseq(c("DDX41","PNKP","ERCC3","IRF3","COPA"), plotType="network")
 #' compare <- compareWordNet(list(net1, net2))
 #' @return plot comparing gene clusters
 #' @importFrom grDevices colorRampPalette
@@ -276,8 +276,8 @@ compareWordNet <- function(listOfNets, titles=NULL,
 #' @export
 #' @examples
 #' library(igraph)
-#' wc1 <- refseq(c("DDX41","IRF3"), plotType="network")
-#' wc2 <- refseq(c("DDX41","PNKP"), plotType="network")
+#' wc1 <- refseq(c("DDX41","IRF3","XRCC1","ERCC1","ERCC2","ERCC3"), plotType="network")
+#' wc2 <- refseq(c("DDX41","PNKP","XRCC1","COPA","CD4","NLRP3"), plotType="network")
 #' compare <- plotDynamic(list(wc1, wc2))
 #' @return plot comparing gene clusters
 #' @importFrom dplyr arrange

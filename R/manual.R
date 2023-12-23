@@ -2,77 +2,10 @@
 #' 
 #' Produce networks using manual input
 #' 
-#' @param df df
-#' @param madeUpper make the words uppercase in resulting plot
-#' @param pal palette for color gradient in correlation network
-#' @param numWords the number of words to be shown
-#' @param plotType "wc" or "network"
-#' @param scaleRange scale for label and node size in correlation network
-#' @param corThresh the correlation threshold
-#' @param autoThresh automatically determine the threshold value to show `numWords`
-#' @param cooccurrence default to FALSE, if TRUE, use cooccurrence instead of correlation
-#' @param layout the layout for correlation network, defaul to "nicely"
-#' @param edgeLink if FALSE, use geom_edge_diagonal
-#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
-#' @param deleteZeroDeg delete zero degree node from plot in correlation network
-#' @param showLegend whether to show legend in correlation network
-#' @param colorText color text label based on frequency in correlation network
-#' @param ngram default to 1
-#' @param additionalRemove specific words to be excluded
-#' @param tag perform pvclust on words and colorlize them in wordcloud or network
-#' argument of those accepted in pvclust `method.dist` option, like "correlation".
-#' Default to "none", which performs no tagging.
-#' @param tagWhole tag based on whole data or subset
-#' @param useFil filter based on "GS_TfIdf" (whole gene summary tf-idf)
-#'  or "BSDB_TfIdf" (whole bugsigdb tf-idf)
-#' @param filNum specify filter tfidf
-#' @param filType "above" or "below"
-#' @param tfidf use TfIdf when making TDM
-#' @param pvclAlpha alpha for pvpick()
-#' @param onlyCorpus return only corpus
-#' @param onlyTDM return only TDM, if quanteda, return DFM
-#' @param preserve try to preserve the original characters
-#' @param numOnly delete number only
-#' @param cl cluster to pass to pvclust (snow::makeCluster(n))
-#' @param onWholeDTM calculate correlation network
-#'                   on whole dataset or top-words specified by numWords
-#' @param stem whether to use stemming
-#' 
-#' @param colorize color the nodes and texts based on their category
-#' @param catColors named vector showing colors for each category
-#' (e.g. `query`, `Words` and specified column names in data.frame)
-#' @param discreteColorWord colorize words by "Words" category, not frequency.
-#' @param tagPalette palette for each tag when tag is TRUE, default to NULL
-#' (e.g. `cluster_1`, `cluster_2`, ...)
-#' @param queryColor color for query in the network plot
-#' if tagPalette or catColors is NULL, determined palettes with 
-#' queryColor replaced with this color will be used.
-#' 
-#' @param takeMax when summarizing term-document matrix, take max.
-#' Otherwise take sum.
-#' @param argList parameters to pass to wordcloud()
-#' @param normalize sum normalize the term frequency document-wise
-#' @param takeMean take mean values for each term in term-document matrix
-#' @param queryPlot plot query
-#' @param useQuanteda use quanteda functions to generate
-#' @param quantedaArgs list of arguments to be passed to tokens()
-#' @param naEdgeColor edge color values for NA
-#' @param collapse default to FALSE, collapse all the sentences
-#' @param useUdpipe use udpipe to make a network
-#' @param udpipeModel udpipe model file name
-#' @param useggwordcloud default to TRUE
-#' @param wcScale scaling size for ggwordcloud
-#' @param fontFamily font family to use, default to "sans"
-#' @param useSeed seed
-#' @param scaleFreq scale the frequency
-#' @param addFreqToNonWords add pseudo-frequency corresponding to minimum
-#' frequency of the words to nodes other than words
-#' @param filterByGO filter the results to the words obtained from GO terms,
-#' while preserving the number of words to be shown
-#' @param docsum if TRUE, convert the term-document matrix to binary.
+#' @rdname generalf
 #' @examples
 #' ret <- refseq("DDX41", plotType="wc")
-#' manual(ret@rawText$Gene_summary, plotType="wc")
+#' manual(getSlot(ret, "rawText")$Gene_summary, plotType="wc")
 #' @export
 #' @return list of data frame and ggplot2 object
 #' @import tm
@@ -102,7 +35,8 @@ manual <- function(df, madeUpper=NULL,
    discreteColorWord=FALSE, autoThresh=TRUE,
    useggwordcloud=TRUE, wcScale=10, fontFamily="sans",
    addFreqToNonWords=FALSE,
-   filterByGO=FALSE, docsum=FALSE,
+   filterByGO=FALSE, docsum=FALSE,  absolute=TRUE,
+   corOption=list(),
    udpipeModel="english-ewt-ud-2.5-191206.udpipe", useSeed=42)
 {
 
@@ -275,7 +209,7 @@ manual <- function(df, madeUpper=NULL,
       }
     
       matrixs <- obtainMatrix(ret, FALSE, NULL, DTM, freqWords,
-          corThresh, cooccurrence, onWholeDTM, numWords, autoThresh)
+          corThresh, cooccurrence, onWholeDTM, numWords, autoThresh, absolute, corOption)
       
       coGraph <- matrixs$coGraph
       ret <- matrixs$ret

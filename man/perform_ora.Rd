@@ -18,5 +18,6 @@ biotext class object
 perform_ora
 }
 \examples{
-obtain_refseq(c("DDX41")) |> perform_ora()
+testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+obtain_refseq(testgenes) |> perform_ora()
 }
