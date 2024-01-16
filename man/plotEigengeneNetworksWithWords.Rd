@@ -44,7 +44,8 @@ plotEigengeneNetworksWithWords(
   useRandomColor = FALSE,
   bg.colour = NULL,
   useggfx = NULL,
-  ggfxParams = list()
+  ggfxParams = list(),
+  autoSize = TRUE
 )
 }
 \arguments{
@@ -129,6 +130,8 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 \item{useggfx}{filter in ggfx to apply to wordcloud, default to NULL}
 
 \item{ggfxParams}{parameters to pass to ggfx geom}
+
+\item{autoSize}{scale the size of text based on grob width}
 }
 \value{
 plot of dendrogram between module eigengenes with word annotations

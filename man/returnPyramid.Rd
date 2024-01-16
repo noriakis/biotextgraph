@@ -29,7 +29,10 @@ returnPyramid(
   orgDb = org.Hs.eg.db,
   argList = list(),
   useFunc = NULL,
-  useDf = NULL
+  useDf = NULL,
+  xmin = NULL,
+  xmax = NULL,
+  autoSize = TRUE
 )
 }
 \arguments{
@@ -82,6 +85,8 @@ returnPyramid(
 \item{useFunc}{function to summarize text}
 
 \item{useDf}{data.frame to subset when manual function is specified}
+
+\item{autoSize}{size the text based on grob width}
 }
 \value{
 list of pyramid plot grobs and its positions

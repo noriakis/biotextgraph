@@ -45,6 +45,7 @@
 #' @param ggfxParams parameters to pass to ggfx geom
 #' @param useRandomColor use random color on wordclouds
 #' @param normalizeByClusterNum normalize frequency by ID numbers or not
+#' @param autoSize scale the size of text based on grob width
 #' 
 #' @export
 #' @import grid gridExtra
@@ -68,7 +69,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                             returnGlobOnly=FALSE, tipWC=FALSE, tipWCNodes=NULL,
                                             imageDir=NULL, wh=5, al=TRUE, offset=.2, tipSize=0.3,
                                             asp=1.5, horizontalSpacer=0, useRandomColor=FALSE,
-                                            bg.colour=NULL, useggfx=NULL, ggfxParams=list()) {
+                                            bg.colour=NULL, useggfx=NULL, ggfxParams=list(), autoSize=TRUE) {
 
     if (is.null(candidateNodes)) {
         candidateNodes <- unique(colors)
@@ -174,7 +175,8 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
                                  showType=showType, takeIntersect=takeIntersect,
                                  argList=argList, useWC=useWC, wcScale=wcScale, 
                                  normalizeByClusterNum=normalizeByClusterNum,
-                                 useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx)
+                                 useFunc=useFunc, useDf=useDf, wrap=wrap, useggfx=useggfx,
+                                 autoSize=autoSize)
     
     if (returnGlobOnly) {
         return(grobList)
@@ -259,6 +261,7 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 #' @param useRandomColor use random colors on wordclouds
 #' @param bg.colour background color for wordcloud
 #' @param normalizeByClusterNum normalize frequency by ID numbers or not
+#' @param autoSize size the text based on grob width
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import org.Hs.eg.db
@@ -285,7 +288,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                             highlight=NULL, textSize=3.5, wcScale=3, wrap=NULL,
                             candidateNodes=NULL, takeIntersect=TRUE, useDf=NULL, bg.colour=NULL,
                             type="words", argList=list(), useFunc=NULL, useggfx=NULL,
-                            normalizeByClusterNum=TRUE) {
+                            normalizeByClusterNum=TRUE, autoSize=TRUE) {
     
     ## Filter high frequency words if needed
     # filterWords <- allFreqGeneSummary[
@@ -317,7 +320,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
     segments <- ddata$segments
     xpositions <- unique(segments$x)
     xpositions <- xpositions[order(xpositions)]
-    while (k < length(dhc %>% labels)){
+
+    while (k < length(labels(dhc))){
         subdendro <- dhc %>% get_subdendrograms(k=k)
         for (num in seq_along(subdendro)) {
             i <- subdendro[[num]]
@@ -382,7 +386,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 
                   labs1_x <- labelPos %>%
                     filter(label %in% labs1) %>% dplyr::pull(.data$x)
-                  if (h1==0) {
+
+                  if (length(labs1)==1) {
                     max1 <- labs1_x
                   } else {
                       max1 <- segments %>% filter(.data$y==h1) %>%
@@ -394,15 +399,16 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                   
                   labs2_x <- labelPos %>%
                     filter(label %in% labs2) %>% dplyr::pull(.data$x)
-                  if (h2==0) {
+                  if (length(labs2)==1) {
                     max2 <- labs2_x
                   } else {
-                  max2 <- segments %>% filter(.data$y==h2) %>%
-                    filter(.data$yend==h2) %>%
-                    filter(.data$xend <= max(labs2_x)) %>%
-                    filter(.data$xend >= min(labs2_x)) %>%
-                    dplyr::pull(x) %>% unique()
+                      max2 <- segments %>% filter(.data$y==h2) %>%
+                        filter(.data$yend==h2) %>%
+                        filter(.data$xend <= max(labs2_x)) %>%
+                        filter(.data$xend >= min(labs2_x)) %>%
+                        dplyr::pull(x) %>% unique()
                   }
+
                   XMAX <- median(c(max1, max2))
                 } else {
                   XMAX <- as.numeric(labelPos %>%
@@ -416,9 +422,13 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     filter(label==NODES[length(NODES)]) %>% select(.data$x))
             }
             centerPos <- median(c(XMIN, XMAX))
+
             centerPos <- (segments %>% filter(.data$x==centerPos & .data$xend==centerPos))
             # centerPos <- centerPos %>% filter(.data$yend != 0)
-            if (dim(centerPos)[1]==0) {break}
+            if (nnodes(i)!=1){
+                    lb <- i %>% dendextend::cutree(k=2)
+            }
+            if (dim(centerPos)[1]==0) {next}
             HEIGHT <- centerPos$yend
             HEIGHTUP <- centerPos$y
 
@@ -458,7 +468,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                                     argList=argList, textSize=textSize, takeIntersect=takeIntersect,
                                     useWC=useWC, wcScale=wcScale, wcArgs=wcArgs, useFunc=useFunc, bg.colour=bg.colour,
                                     useDf=useDf, wrap=wrap, useggfx=useggfx, useRandomColor=useRandomColor,
-                                    normalizeByClusterNum=normalizeByClusterNum)
+                                    normalizeByClusterNum=normalizeByClusterNum, xmin=XMIN, xmax=XMAX, autoSize=autoSize)
                                 if (!is.null(pyrm)){
                                     grobList[[as.character(grobNum)]]$plot <- pyrm
                                     grobList[[as.character(grobNum)]]$height <- HEIGHT
@@ -523,6 +533,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param useRandomColor use random colors on wordclouds
 #' @param bg.colour background color for wordclouds
 #' @param normalizeByClusterNum normalize frequency by ID numbers or not
+#' @param autoSize size the text based on grob width
 #' 
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
@@ -541,7 +552,8 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
                         type="words", wrap=15, textSize=3.5, useggfx=NULL,
                         normalizeByClusterNum=TRUE,
                         takeIntersect=TRUE, useWC=FALSE, wcArgs=list(), bg.colour=NULL,
-                        orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL) {
+                        orgDb=org.Hs.eg.db, argList=list(), useFunc=NULL, useDf=NULL,
+                        xmin=NULL, xmax=NULL, autoSize=TRUE) {
     ## Convert to ENTREZ ID
     # geneList <- AnnotationDbi::select(orgDb,
     #     keys = names(geneVec)[geneVec %in% L],
@@ -561,7 +573,9 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
     
     # all_bet <- VectorSource(all_bet)
     # all_corpus <- VCorpus(all_bet)
-
+    if (autoSize) {
+        textSize <- (xmax-xmin)*textSize
+    }
 
     if (type=="words") {
 

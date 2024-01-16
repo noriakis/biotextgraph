@@ -26,7 +26,8 @@ getWordsOnDendro(
   argList = list(),
   useFunc = NULL,
   useggfx = NULL,
-  normalizeByClusterNum = TRUE
+  normalizeByClusterNum = TRUE,
+  autoSize = TRUE
 )
 }
 \arguments{
@@ -74,6 +75,8 @@ pyramid plots are not produced}
 \item{useggfx}{use ggfx on resulting plot}
 
 \item{normalizeByClusterNum}{normalize frequency by ID numbers or not}
+
+\item{autoSize}{size the text based on grob width}
 }
 \value{
 list of pyramid plot grobs and its positions
