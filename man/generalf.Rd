@@ -509,7 +509,9 @@ When `autoThresh` is TRUE, the number of this value will be shown.}
 
 \item{corThresh}{the correlation (cooccurrence) threshold.}
 
-\item{genePlot}{plot associated genes (default: FALSE)}
+\item{genePlot}{plot associated genes (default: FALSE)
+This option first calculates the high-frequent words, and subsequently calculates
+the occurrences of these words in each gene, and prioritize the genes by them.}
 
 \item{autoThresh}{automatically choose thresholding value to show the `numWords`,
 when deleteZeroDeg (deleting no-connected words) is TRUE, which is default.}

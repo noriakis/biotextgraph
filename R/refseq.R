@@ -37,6 +37,8 @@
 #' @param ora perform over-representation analysis or not (experimental)
 #' @param ngram N-gram specification, default to 1.
 #' @param genePlot plot associated genes (default: FALSE)
+#' This option first calculates the high-frequent words, and subsequently calculates
+#' the occurrences of these words in each gene, and prioritize the genes by them.
 #' @param genePlotNum number of genes to be plotted (default: 10)
 #' @param genePathPlot plot associated genes and pathways (default: NULL)
 #'                     Must be "kegg" or "reactome", automatically set genePlot to TRUE.

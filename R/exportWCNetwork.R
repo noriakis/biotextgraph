@@ -2,6 +2,8 @@
 #' 
 #' export the wordcloud network provided the gene cluster network
 #' Node size will be the number of genes in the cluster
+#' By default use cola layout, and see below for the parameters
+#' https://github.com/cytoscape/cytoscape.js-cola
 #' 
 #' @param g igraph (node name corresponding to gene cluster name)
 #' @param geneList named list of gene IDs
