@@ -360,7 +360,8 @@ pubmed(
   madeUpperGenes = TRUE,
   stem = FALSE,
   argList = list(),
-  dateRange = NULL
+  dateRange = NULL,
+  cc0 = FALSE
 )
 
 refseq(
@@ -694,6 +695,9 @@ by appending (Q) on query}
 
 \item{dateRange}{if specified, restrict the range of publication date.
 Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`}
+
+\item{cc0}{effective only in `pubmed` function. The prefetched data in `pubmedMini`
+package is used for gene query.}
 
 \item{autoNumWords}{determine the number of words to be shown by ORA, default to FALSE.}
 

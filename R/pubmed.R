@@ -41,8 +41,20 @@ pubmed <- function(queries, useRawQuery=FALSE,
     deleteZeroDeg=TRUE, additionalRemove=NA, orgDb=org.Hs.eg.db,
     onlyGene=FALSE, filterByGO=FALSE, docsum=FALSE,
     pre=FALSE, onWholeDTM=FALSE, madeUpperGenes=TRUE, stem=FALSE,
-    argList=list(), dateRange=NULL)
+    argList=list(), dateRange=NULL, cc0=FALSE)
 {
+    if (cc0) {
+        if (requireNamespace("pubmedMini", quietly = TRUE)) {
+            pmc <- pubmedMini::loadpubmedMini()
+            commons <- intersect(unique(pmc$query), queries)
+            if (length(commons)<1) {
+                stop("No gene query found in `pubmedMini` data.")
+            }
+            pmc <- pmc[pmc$query %in% commons, ]
+        } else {
+            stop("Please install `pubmedMini` library")
+        }
+    }
 
     if (useUdpipe) {
         qqcat("Using udpipe mode\n")
@@ -60,39 +72,47 @@ pubmed <- function(queries, useRawQuery=FALSE,
             "oxford","wiley")
     }
     if (is.null(redo)) {
+
         ret <- new("biotext")
         ret@date <- Sys.time()
         ret@type <- paste0("pubmed_",target)
-        # ret@query <- queries
-        # ret@delim <- delim
-        if (useRawQuery) {
-        	query <- queries
+
+        if (cc0) { ## PMC_CC0 article
+            allDataDf <- pmc
+            allDataDf <- allDataDf[toupper(allDataDf$section) %in% toupper(target), ]
+            if (dim(allDataDf)[1]==0) {stop("No text available")}
+            ret@rawText <- allDataDf
+            ret@type <- paste0("PMC_CC0_",target)
         } else {
-	        if (perQuery) {
-		        ## Disabled the limit of the number of query
-	    	    # if (length(queries)>limit){
-	        	#     stop("Number of queries exceeded specified limit number")
-	        	# }
-	        	query <- queries	
-	        } else {
-	        	if ((length(queries)>10) & delim=="OR") {
-	        		message("Warning: major genes could dominate the search",
-	        		" results when the number of queries is large")
-	        	}
-		        if (quote) {
-		            query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
-	    	            collapse=paste0(" ",delim," "))
-	        	} else {
-	            	query <- paste(queries, collapse=paste0(" ",delim," "))
-	        	}
-	        }        	
+            if (useRawQuery) {
+                query <- queries
+            } else {
+                if (perQuery) {
+                    ## Disabled the limit of the number of query
+                    # if (length(queries)>limit){
+                    #     stop("Number of queries exceeded specified limit number")
+                    # }
+                    query <- queries    
+                } else {
+                    if ((length(queries)>10) & delim=="OR") {
+                        message("Warning: major genes could dominate the search",
+                        " results when the number of queries is large")
+                    }
+                    if (quote) {
+                        query <- paste(dQuote(queries,options(useFancyQuotes = FALSE)),
+                            collapse=paste0(" ",delim," "))
+                    } else {
+                        query <- paste(queries, collapse=paste0(" ",delim," "))
+                    }
+                }           
+            }
+            ret@query <- query
+            clearQuery <- gsub('\"', '', queries)
+            ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,
+               retMax=retMax, sortOrder=sortOrder, perQuery=perQuery, dateRange=dateRange)
+            ret@retMax <- retMax
+            allDataDf <- ret@rawText            
         }
-        ret@query <- query
-        clearQuery <- gsub('\"', '', queries)
-        ret <- getPubMed(ret, query, clearQuery, type=target, apiKey=apiKey,
-           retMax=retMax, sortOrder=sortOrder, perQuery=perQuery, dateRange=dateRange)
-        ret@retMax <- retMax
-        allDataDf <- ret@rawText
     } else {
         if (class(redo)!="biotext") {
             stop("Please provide biotext class object")
@@ -125,7 +145,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
     } else if (target=="title"){
         docs <- VCorpus(VectorSource(allDataDf$text))
     } else {
-        stop("specify target or abstract")
+        stop("specify 'title' or 'abstract' to target argument")
     }
     if (preserve) {
         pdic <- preserveDict(docs, ngram, numOnly, stem)

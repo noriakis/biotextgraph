@@ -157,6 +157,8 @@
 #' @param queryColor color for associated queries with words
 #' @param queryPlot plot the query in the graph in relation with the words
 #' @param x biotext class object
+#' @param cc0 effective only in `pubmed` function. The prefetched data in `pubmedMini`
+#' package is used for gene query.
 #' @return `biotext` class object
 #' 
 #' @name generalf
