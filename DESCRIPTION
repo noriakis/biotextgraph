@@ -28,7 +28,7 @@ Suggests:
     Seurat,
     scater,
     BiocStyle
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 biocViews: Visualization, Microbiome, Network, GeneTarget

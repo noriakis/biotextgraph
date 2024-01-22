@@ -9,8 +9,8 @@ exportWCNetwork(
   geneList,
   dir = "network",
   colors = NULL,
-  scaleMin = 50,
-  scaleMax = 200,
+  sizeMin = 50,
+  sizeMax = 200,
   wcScale = 20,
   keyType = "SYMBOL",
   orgDb = org.Hs.eg.db,
@@ -28,9 +28,9 @@ exportWCNetwork(
 \item{colors}{color palettes to use for each cluster
 named list, or random palette will be assigned if NULL}
 
-\item{scaleMin}{minimum scale size for nodes}
+\item{sizeMin}{minimum scale size for nodes}
 
-\item{scaleMax}{maximum scale size for nodes}
+\item{sizeMax}{maximum scale size for nodes}
 
 \item{wcScale}{scaling size for wordcloud}
 
@@ -50,4 +50,8 @@ export the wordcloud network provided the gene cluster network
 Node size will be the number of genes in the cluster
 By default use cola layout, and see below for the parameters
 https://github.com/cytoscape/cytoscape.js-cola
+}
+\details{
+If "strength" attribute is in the edge of igraph object,
+the parameter is used to size the edge width.
 }

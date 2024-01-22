@@ -342,7 +342,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     if (onlyTDM) {
         return(docs)
     }
-
+    
     ## Set parameters for the network
     if (!is.numeric(corThresh)){corThresh<-0.6}
     if (!is.numeric(numWords)){numWords<-30}

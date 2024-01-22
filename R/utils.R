@@ -1248,7 +1248,6 @@ exportCyjs <- function(g, rootDir, netDir,
     
     pret <- prettify(dataFramesToJSON(edges, nodes))
     pret <- substr(pret, 18, nchar(pret)-3)
-    pret
     
 
     if (bubble) {
@@ -1256,7 +1255,11 @@ exportCyjs <- function(g, rootDir, netDir,
     } else {
       js <- ""
     }
-
+    if (is.null(E(g)$strength)) {
+        width <- 4
+    } else {
+        width <- "'mapData(strength, 0.5, 1, 0, 5)'"
+    }
     js <- paste0(js, "
         var cy = window.cy = cytoscape({
             container: document.getElementById('cy'),
@@ -1279,10 +1282,9 @@ exportCyjs <- function(g, rootDir, netDir,
                       })
                 .selector('edge')
                 .css({
-                        'width' : '4',
                         'target-arrow-shape': 'triangle',
                         'curve-style': 'bezier',
-                        'width' : 'mapData(strength, 0.5, 1, 0, 5)'
+                        'width' : ",width,"
                       }),
             'elements':
         ", pret, ",

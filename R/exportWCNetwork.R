@@ -5,6 +5,9 @@
 #' By default use cola layout, and see below for the parameters
 #' https://github.com/cytoscape/cytoscape.js-cola
 #' 
+#' If "strength" attribute is in the edge of igraph object,
+#' the parameter is used to size the edge width.
+#' 
 #' @param g igraph (node name corresponding to gene cluster name)
 #' @param geneList named list of gene IDs
 #' @param dir directory to output the files, default to current directory
@@ -14,13 +17,13 @@
 #' @param orgDb annotation database
 #' @param wcArgs parameters for ggwordcloud
 #' @param numWords number of words
-#' @param scaleMin minimum scale size for nodes
-#' @param scaleMax maximum scale size for nodes
+#' @param sizeMin minimum scale size for nodes
+#' @param sizeMax maximum scale size for nodes
 #' @param wcScale scaling size for wordcloud
 #' @return export the Cytoscape.js network
 #' @export
 exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,
-	scaleMin=50, scaleMax=200, wcScale=20,
+	sizeMin=50, sizeMax=200, wcScale=20,
 	keyType="SYMBOL", orgDb=org.Hs.eg.db, wcArgs=list(), numWords=50) {
 
 	## Check colors
@@ -58,8 +61,6 @@ exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,
     V(g)$shape <- rep("circle", length(V(g)))
 
 	## Scale the node size
-	sizeMin <- 50
-	sizeMax <- 200
 	rawMin <- min(V(g)$size)
 	rawMax <- max(V(g)$size)
 	scf <- (sizeMax-sizeMin)/(rawMax-rawMin)
