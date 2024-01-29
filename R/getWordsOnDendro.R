@@ -643,6 +643,10 @@ returnPyramid <- function(L, R, geneVec, geneVecType,
         if (normalizeByClusterNum) {
             all_L <- all_L / length(names(geneVec)[geneVec %in% L])
             all_R <- all_R / length(names(geneVec)[geneVec %in% R])
+        } else {
+            ## Normalize by total
+            all_L <- all_L / sum(all_L)
+            all_R <- all_R / sum(all_R)
         }
 
         if (takeIntersect) {
