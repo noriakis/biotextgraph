@@ -86,6 +86,10 @@ returnPyramid(
 
 \item{useDf}{data.frame to subset when manual function is specified}
 
+\item{xmin}{used for adjusting text size}
+
+\item{xmax}{used for adjusting text size}
+
 \item{autoSize}{size the text based on grob width}
 }
 \value{

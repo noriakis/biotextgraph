@@ -17,7 +17,10 @@ refseqWGCNA <- function(wgcna, keyType="ENSEMBL", argList=list()) {
         if (!("keyType" %in% names(argList))) {
             argList[["keyType"]] <- keyType
         }
-        do.call(refseq, argList)
+        res <- try(do.call(refseq, argList))
+        if ("try-error" %in% class(res)) {
+            return(NA)
+        } else { return(res) }
     })
 }
 

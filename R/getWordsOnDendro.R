@@ -534,7 +534,8 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 #' @param bg.colour background color for wordclouds
 #' @param normalizeByClusterNum normalize frequency by ID numbers or not
 #' @param autoSize size the text based on grob width
-#' 
+#' @param xmin used for adjusting text size
+#' @param xmax used for adjusting text size
 #' @return list of pyramid plot grobs and its positions
 #' @import tm
 #' @import ggplot2
