@@ -740,6 +740,7 @@ refseq <- function (geneList, keyType="SYMBOL",
             }
         }
         
+        ## Probably better to scale if most of the words have frequency < 3
         if (!is.null(scaleFreq)) {
             showFreq <- returnDf$freq*scaleFreq
             returnDf$freq <- returnDf$freq*scaleFreq

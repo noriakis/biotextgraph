@@ -467,7 +467,7 @@ DimPlotWithTexts <- function(seu, markers,
         # https://github.com/satijalab/seurat/issues/2835
         plt[[1]]$layers[[1]]$aes_params$alpha <- point_alpha
     } else {
-        stop("Please install Seurat")
+        stop("Please install Seurat.")
     }
 
     ## Obtain color and generate colors for wc
