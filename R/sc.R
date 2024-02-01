@@ -138,7 +138,7 @@ TextMarkersScran <- function(res,
     raw=FALSE,
     col=NULL,
     withTitle=TRUE,
-    top=10,
+    top=5,
     withggfx=NULL,
     FDRThresh=0.05,
     ggfxParams=list()
@@ -249,7 +249,7 @@ TextMarkersScran <- function(res,
 plotReducedDimWithTexts <- function(sce, marker.info,
          colour_by="label", point_alpha=0.4, use_shadowtext=TRUE,
          bg.colour="white", which.label=NULL, wc_alpha=1, wcScale=5,
-         rot.per=0.4, rad=NULL, top=10, gene_name=FALSE, withggfx=NULL, ggfxParams=list(),
+         rot.per=0.4, rad=NULL, top=5, gene_name=FALSE, withggfx=NULL, ggfxParams=list(),
          sortBy="summary.logFC", scaleNumber=2, decreasing=TRUE, geneNum=50,
          random.order=FALSE, dimred="PCA", base_ellipse=FALSE, base_dens=FALSE,
          withTitle=FALSE, args=list()) {
@@ -264,28 +264,38 @@ plotReducedDimWithTexts <- function(sce, marker.info,
                                   colour_by=colour_by,
                                   point_alpha=point_alpha)
     } else {
-        stop("Please install scater")
+        stop("Please install scater.")
     }
+    ## Build and fetch group
     g <- ggplot_build(rawPlot)
 
     ## Map the group
-    map_group <- as.character(rawPlot$data$colour_by)
-    names(map_group) <- as.character(g$data[[1]]$group)
-    map_group <- map_group[!duplicated(map_group)]
+    # map_group <- as.character(rawPlot$data$colour_by)
+    # names(map_group) <- as.character(g$data[[1]]$group)
+    # map_group <- map_group[!duplicated(map_group)]
 
     ## Obtain color and generate colors for wc
     ## Name as character
-    colmap <- g$data[[1]][,c("colour","group")]
-    colmap <- colmap[!duplicated(colmap),]
-    row.names(colmap) <- colmap$group
+    # colmap <- g$data[[1]][,c("colour","group")]
+    # colmap <- colmap[!duplicated(colmap),]
+    # colmap[["orig"]] <- map_group[colmap[["group"]]]
+    # row.names(colmap) <- colmap$orig
+
+    colmap <- cbind(
+        g$data[[1]]$colour,  
+        g$data[[1]]$group,
+        as.character(rawPlot$data$colour_by)
+    ) %>% data.frame() %>% `colnames<-`(c("colour","group","mark"))
+    colmap <- colmap[!duplicated(colmap$mark),]
+    row.names(colmap) <- colmap$mark
     cols <- list()
     vec <- NULL
     for (i in seq_len(nrow(colmap))) {
-      cols[[as.character(colmap[i,"group"])]] <- 
+      cols[[as.character(colmap[i,"mark"])]] <- 
           colorRampPalette(c("grey",colmap[i,"colour"]))(10)
-      vec[as.character(colmap[i,"group"])] <- colmap[i,"colour"]
+      vec[as.character(colmap[i,"mark"])] <- colmap[i,"group"]
     }
-
+    
     if (is.null(which.label)) {
         which.label <- names(marker.info)
     }
@@ -293,26 +303,26 @@ plotReducedDimWithTexts <- function(sce, marker.info,
     wcArgs <- list(alpha=wc_alpha,rot.per=rot.per,random.order=random.order,
         bg.colour=bg.colour)
     if (gene_name) {
-        subset.marker.info <- marker.info[which.label]
-        texts <-  obtainMarkersWCScran(subset.marker.info,
-                                    cols=cols,
-                                    wcArgs=wcArgs,
-                                    wcScale=wcScale,
-                                    scaleNumber=scaleNumber,
-                                    sortBy=sortBy,
-                                    decreasing=decreasing,
-                                    geneNum=geneNum,
-                                    withggfx=withggfx,
-                                    ggfxParams=ggfxParams)
+        texts <-  obtainMarkersWCScran(marker.info[which.label],
+            cols=cols,
+            wcArgs=wcArgs,
+            wcScale=wcScale,
+            scaleNumber=scaleNumber,
+            sortBy=sortBy,
+            decreasing=decreasing,
+            geneNum=geneNum,
+            withggfx=withggfx,
+            ggfxParams=ggfxParams)
     } else {
 
-        texts <- marker.info[which.label] |> TextMarkersScran(wcArgs=wcArgs,
-                                                              col=cols,top=top,
-                                                              genePlot=FALSE,
-                                                              args=args,
-                                                              withTitle=withTitle,
-                                                              withggfx=withggfx,
-                                                              ggfxParams=ggfxParams)
+        texts <- TextMarkersScran(marker.info[which.label],
+            wcArgs=wcArgs,
+            col=cols,top=top,
+            genePlot=FALSE,
+            args=args,
+            withTitle=withTitle,
+            withggfx=withggfx,
+            ggfxParams=ggfxParams)
     }
 
     if (base_ellipse) {

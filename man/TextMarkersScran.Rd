@@ -16,7 +16,7 @@ TextMarkersScran(
   raw = FALSE,
   col = NULL,
   withTitle = TRUE,
-  top = 10,
+  top = 5,
   withggfx = NULL,
   FDRThresh = 0.05,
   ggfxParams = list()

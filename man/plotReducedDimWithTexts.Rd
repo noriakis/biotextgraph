@@ -16,7 +16,7 @@ plotReducedDimWithTexts(
   wcScale = 5,
   rot.per = 0.4,
   rad = NULL,
-  top = 10,
+  top = 5,
   gene_name = FALSE,
   withggfx = NULL,
   ggfxParams = list(),
