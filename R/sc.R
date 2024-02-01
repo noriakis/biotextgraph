@@ -27,7 +27,7 @@
 #' @return list of plots on textual information in the gene cluster
 TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
          genePlotNum=5, colorText=TRUE, args=list(), wcArgs=NULL,
-         raw=FALSE, col=NULL, pvalThresh=0.05, withTitle=TRUE,withggfx=NULL,
+         raw=FALSE, col=NULL, pvalThresh=0.05, withTitle=TRUE, withggfx=NULL,
          ggfxParams=list()) {
 
     plotList <- list()
