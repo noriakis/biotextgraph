@@ -114,7 +114,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
             allDataDf <- ret@rawText            
         }
     } else {
-        if (class(redo)!="biotext") {
+        if (!is(redo, 'biotext')) {
             stop("Please provide biotext class object")
         }
         qqcat("Resuming from the previous results\n")
