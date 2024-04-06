@@ -17,3 +17,7 @@ attribute value
 \description{
 get the slot value from biotext object
 }
+\examples{
+n1 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) 
+getSlot(n1, "igraphRaw")
+}

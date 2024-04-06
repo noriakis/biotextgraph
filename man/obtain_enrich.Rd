@@ -7,7 +7,7 @@
 obtain_enrich(
   geneList,
   keyType = "SYMBOL",
-  enrich = "reactome",
+  enrich = "kegg",
   org_db = org.Hs.eg.db,
   top_path = 30
 )

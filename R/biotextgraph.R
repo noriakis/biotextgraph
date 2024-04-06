@@ -88,7 +88,7 @@ setMethod("show",
     if (length(object@query)<10) {
       cat(paste0("Query: ",paste(object@query, collapse="/")));cat("\n")
     } else {
-      cat(paste0("Query: ",paste0(paste(object@query[1:10],
+      cat(paste0("Query: ",paste0(paste(object@query[seq_len(10)],
         collapse="/"), "/truncated")));cat("\n")
     }
     deg <- NULL; vnum <- NULL; enum <- NULL;
@@ -416,6 +416,9 @@ setMethod("plotWC", "biotext",
 #' @param x biotext object
 #' @param slot slot name
 #' @export
+#' @examples
+#' n1 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) 
+#' getSlot(n1, "igraphRaw")
 #' @return attribute value
 setGeneric("getSlot",
     function(x, slot) standardGeneric("getSlot"))
@@ -427,6 +430,9 @@ setGeneric("getSlot",
 #' @param x biotext object
 #' @param slot slot name
 #' @export
+#' @examples
+#' n1 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) 
+#' getSlot(n1, "igraphRaw")
 #' @return attribute value
 setMethod("getSlot", "biotext",
     function(x, slot) attr(x, slot))

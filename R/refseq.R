@@ -409,7 +409,11 @@ refseq <- function (geneList, keyType="SYMBOL",
             }
             
             if (genePathPlot == "reactome") {
-                pathRes <- ReactomePA::enrichPathway(geneList)
+                if (requireNamespace("ReactomePA")) {
+                    pathRes <- ReactomePA::enrichPathway(geneList)
+                } else {
+                    stop("Please install ReactomePA")
+                }
                 pathRes@result$Description <- gsub("Homo sapiens\r: ",
                                 "",
                                 pathRes@result$Description)

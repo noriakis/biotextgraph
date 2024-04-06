@@ -305,7 +305,7 @@ obtain_enzyme <- function(file, ec_num,
 #' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
 #' obtain_enrich(testgenes)
 #' @return biotext class object
-obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
+obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="kegg",
     org_db=org.Hs.eg.db, top_path=30) {
     ret <- new("biotext")
     ret@query <- geneList
@@ -322,7 +322,11 @@ obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="reactome",
 
     qqcat("Performing enrichment analysis\n")
     if (enrich=="reactome"){
-        pathRes <- ReactomePA::enrichPathway(geneList)
+        if (requireNamespace("ReactomePA")) {
+            pathRes <- ReactomePA::enrichPathway(geneList)
+        } else {
+            stop("Please install ReactomePA")
+        }
         pathRes@result$Description <- gsub("Homo sapiens\r: ",
                         "",
                         pathRes@result$Description)                
@@ -1142,7 +1146,11 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 
 
     if (gene_path_plot == "reactome") {
-        pathRes <- ReactomePA::enrichPathway(gene_list)
+        if (requireNamespace("ReactomePA")) {
+            pathRes <- ReactomePA::enrichPathway(gene_list)
+        } else {
+            stop("Please install ReactomePA")
+        }
         pathRes@result$Description <- gsub("Homo sapiens\r: ",
                         "",
                         pathRes@result$Description)

@@ -45,6 +45,8 @@ pubmed <- function(queries, useRawQuery=FALSE,
 {
     if (cc0) {
         if (requireNamespace("pubmedMini", quietly = TRUE)) {
+            ## Installation by 
+            ## devtools::install_github("noriakis/pubmedMini")
             pmc <- pubmedMini::loadpubmedMini()
             commons <- intersect(unique(pmc$query), queries)
             if (length(commons)<1) {
@@ -52,7 +54,7 @@ pubmed <- function(queries, useRawQuery=FALSE,
             }
             pmc <- pmc[pmc$query %in% commons, ]
         } else {
-            stop("Please install `pubmedMini` library")
+            stop("Please install `pubmedMini` library, by devtools::install_github('noriakis/pubmedMini')")
         }
     }
 

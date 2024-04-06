@@ -23,3 +23,8 @@ When an interesting word is found in two or more networks,
 connect the words and gene names and return the graph.
 Note that genePlot must be set to TRUE in all the networks.
 }
+\examples{
+n1 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1"), genePlot=TRUE) 
+n2 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1"), genePlot=TRUE)
+connectGenes(list(n1, n2), query_word="dna")
+}

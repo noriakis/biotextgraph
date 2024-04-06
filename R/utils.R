@@ -16,7 +16,11 @@ split_by_ea <- function(args) {
     if (args$splitByEA=="kegg") {
     	enr_res <- clusterProfiler::enrichKEGG(geneList)
     } else {
-    	enr_res <- ReactomePA::enrichPathway(geneList)
+      if (requireNamespace("ReactomePA")) {
+        enr_res <- ReactomePA::enrichPathway(geneList)
+      } else {
+        stop("Please install ReactomePA")
+      }
     }
     sig_thresh <- args$genePathPlotSig
     if (dim(subset(enr_res@result, p.adjust<sig_thresh))[1]==0) {
@@ -114,20 +118,21 @@ obtainMatrix <- function(ret, bn, R, DTM, freqWords,
 
     retList <- list()
     if (bn) {
-      qqcat("bn specified, R=@{R}\n")
-      # To avoid computaitonal time, subset to numWords
-      bnboot <- bnlearn::boot.strength(
-          data.frame(
-              DTM[, colnames(DTM) %in% freqWords]),
-          algorithm = "hc", R=R)
-      ret@strength <- bnboot
-      av <- bnlearn::averaged.network(bnboot)
-      avig <- bnlearn::as.igraph(av)
-      el <- data.frame(as_edgelist(avig))
-      colnames(el) <- c("from","to")
-      mgd <- merge(el, bnboot, by=c("from","to"))
-      colnames(mgd) <- c("from","to","weight","direction")
-      coGraph <- graph_from_data_frame(mgd, directed=TRUE)
+      cat("BN mode is currently disabled\n")
+      # qqcat("bn specified, R=@{R}\n")
+      # # To avoid computaitonal time, subset to numWords
+      # bnboot <- bnlearn::boot.strength(
+      #     data.frame(
+      #         DTM[, colnames(DTM) %in% freqWords]),
+      #     algorithm = "hc", R=R)
+      # ret@strength <- bnboot
+      # av <- bnlearn::averaged.network(bnboot)
+      # avig <- bnlearn::as.igraph(av)
+      # el <- data.frame(as_edgelist(avig))
+      # colnames(el) <- c("from","to")
+      # mgd <- merge(el, bnboot, by=c("from","to"))
+      # colnames(mgd) <- c("from","to","weight","direction")
+      # coGraph <- graph_from_data_frame(mgd, directed=TRUE)
     } else {
       ## Check correlation
       ## TODO: speed up calculation using Rcpp
@@ -445,6 +450,10 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 #' @param return_tbl_graph return tbl_graph
 #' @param neighbors obtain neighbors words for queried words, default to FALSE
 #' @return igraph object
+#' @examples
+#' n1 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1"), genePlot=TRUE) 
+#' n2 <- refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1"), genePlot=TRUE)
+#' connectGenes(list(n1, n2), query_word="dna")
 #' @export
 connectGenes <- function(nets, query_word, return_tbl_graph=FALSE,
     neighbors=FALSE) {

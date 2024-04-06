@@ -2,7 +2,7 @@ Package: biotextgraph
 Type: Package
 Title: visualization and interpretation of textual information from omics summary data through network analysis
 Version: 0.99.0
-Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"))
+Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"), comment=c(ORCID="0000-0001-7721-9359"))
 Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome through network approach. The package identifies important words among the biological identifiers list, and compare the clusters based on those information using network. It contributes to understanding the functionality of biological entities and aid in convenient interpretation and visualization.
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -11,24 +11,19 @@ Depends:
 Imports: tm, dplyr, GeneSummary, wordcloud, cowplot, ggplotify, stopwords, ggraph, igraph, ggdendro, AnnotationDbi, patchwork, org.Hs.eg.db, jsonlite, gridExtra, pvclust, rentrez, GetoptLong, grid, grDevices, stats, NLP, bugsigdbr, stringr, XML, methods, dendextend, RColorBrewer, utils, ggrepel, cyjShiny, graphlayouts, ggforce, ggwordcloud, MASS, tidygraph, data.table, shadowtext
 Suggests:
     concaveman,
-    ReactomePA,
     clusterProfiler,
-    bnlearn,
-    pathview,
     png,
     limma,
     knitr,
     rmarkdown,
     markdown,
-    udpipe,
     testthat (>= 3.0.0),
-    taxonomizr,
-    quanteda,
-    ggtree,
-    Seurat,
-    scater,
     BiocStyle
-RoxygenNote: 7.3.0
+Enhances:
+    ReactomePA, Seurat, scater, pubmedMini, ggtree, quanteda, taxonomizr, udpipe
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 biocViews: Visualization, Microbiome, Network, GeneTarget
+URL: https://github.com/noriakis/biotextgraph
+BugReports: https://github.com/noriakis/biotextgraph/issues
