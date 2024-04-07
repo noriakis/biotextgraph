@@ -47,7 +47,7 @@ jobs:
             any::testthat
             any::knitr
             any::rmarkdown
-          extra-packages: any::rcmdcheck
+            any::rcmdcheck
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
