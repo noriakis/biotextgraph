@@ -21,7 +21,6 @@ jobs:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
-          - {os: ubuntu-latest,   r: 'oldrel-1'}
 
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
@@ -48,6 +47,7 @@ jobs:
             any::knitr
             any::rmarkdown
             any::rcmdcheck
+            any::clusterProfiler
           needs: check
 
       - uses: r-lib/actions/check-r-package@v2
