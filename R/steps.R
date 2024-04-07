@@ -302,8 +302,10 @@ obtain_enzyme <- function(file, ec_num,
 #' sorted by p-values
 #' @export
 #' @examples
-#' testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
-#' obtain_enrich(testgenes)
+#' if (requireNamespace("clusterProfiler")) {
+#'     testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
+#'     obtain_enrich(testgenes)
+#' }
 #' @return biotext class object
 obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="kegg",
     org_db=org.Hs.eg.db, top_path=30) {
