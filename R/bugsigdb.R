@@ -8,7 +8,7 @@
 #' @import wordcloud
 #' @import igraph
 #' @import ggraph ggplot2
-#' @import XML
+#' @importFrom XML xmlParse xpathSApply xmlTreeParse xmlElementsByTagName xmlValue
 #' @importFrom dplyr filter
 #' @importFrom stats dist
 #' @importFrom grDevices palette

@@ -14,7 +14,11 @@ split_by_ea <- function(args) {
     	geneList <- args$geneList
     }
     if (args$splitByEA=="kegg") {
-    	enr_res <- clusterProfiler::enrichKEGG(geneList)
+        if (requireNamespace("clusterProfiler")) {
+            enr_res <- clusterProfiler::enrichKEGG(geneList)        
+        } else {
+            stop("Please install clusterProfiler.")
+        }
     } else {
       if (requireNamespace("ReactomePA")) {
         enr_res <- ReactomePA::enrichPathway(geneList)

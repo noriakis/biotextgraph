@@ -107,15 +107,6 @@ hCNet <- refseq(keggList$`05160`, plotType="network",
 plotNet(hCNet, asis=TRUE)
 ```
 
-The summarization of text in enrichment analysis results can be performed by `enrich` option. The below example shows enrichment analysis of KEGG database.
-
-```{r basic5, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
-hCNetK <- refseq(keggList$`05160`, enrich="kegg", keyType="ENTREZID",cooccurrence = TRUE,
-                           topPath=50, numWords=50, autoThresh=FALSE,
-                           plotType="network", corThresh=0.1)
-plotNet(hCNetK, asis=TRUE)
-```
-
 We create another `biotext` object to compare with.
 
 ```{r basic6, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
@@ -125,9 +116,20 @@ ecoli <- refseq(keggList$`05130`, keyType="ENTREZID", autoThresh=FALSE)
 Comparison of networks can be performed by `compareWordNet`. By providing multiple biotext class objects, it is possible to create a new network by integrating the networks and tag information contained in each object. This makes it possible to compare multiple different IDs.
 
 ```{r compare_word_net, warning=FALSE, message=FALSE, cache=TRUE, fig.height=15, fig.width=15}
-compareWordNet(list(hCNet, hCNetK, ecoli),
-               titles=c("RefSeq_05160","KEGG_05160","RefSeq_05130"),
+compareWordNet(list(hCNet, ecoli),
+               titles=c("RefSeq_05160","RefSeq_05130"),
                colPal = "Dark2") |> plotNet()
+```
+
+The summarization of text in enrichment analysis results can be optionally performed by `enrich` option. The below example shows enrichment analysis of KEGG database.
+
+```{r basic5, warning=FALSE, message=FALSE, cache=TRUE, fig.height=8, fig.width=8}
+if (requireNamespace("clusterProfiler")) {
+    hCNetK <- refseq(keggList$`05160`, enrich="kegg", keyType="ENTREZID",cooccurrence = TRUE,
+                               topPath=50, numWords=50, autoThresh=FALSE,
+                               plotType="network", corThresh=0.1)
+    plotNet(hCNetK, asis=TRUE)    
+}
 ```
 
 ## Summarizing other identifiers' data
