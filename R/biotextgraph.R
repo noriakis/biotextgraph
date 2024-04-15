@@ -152,11 +152,38 @@ setMethod("plot",
 
 #' plotNet
 #' 
-#' plot the network changing the visualization parameters
+#' Plot the network changing the visualization parameters
 #' 
-#' @rdname generalf
+#' @rdname plotnet
+#' @param x biotextgraph object
+#' @param layout the layout for the network, defaul to "nicely".
+#' It can be one of the layouts implemented in `igraph` and `ggraph`, such as
+#' `kk` (Kamada-Kawai), `nicely` (automatic selection of algorithm), `drl` (the force-directed DrL layout).
+#' The options are available at: https://igraph.org/r/doc/layout_.html
+#' @param edgeLink if FALSE, use geom_edge_diagonal. if TRUE, geom_edge_link. Default to TRUE.
+#' @param edgeLabel if TRUE, plot the edge label (default: FALSE)
+#' @param pal palette for color gradient in correlation network.
+#' should be a vector of length two like c("red","blue").
+#' @param showLegend whether to show legend in the network
+#' @param colorText color text label based on frequency in the network
+#' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
+#' using udpipe, and tagging colorization for word cloud.
+#' Default to NULL, which indicates automatically set.
+#' @param naEdgeColor edge colors for NA values (linking query with the category other than text)
+#' @param fontFamily font family to use, default to "sans".
+#' @param colorize color the word nodes by their frequency, and the other nodes by their category.
+#' if colorize=FALSE and addFreqToGene=TRUE, gene nodes are colorized according to the minimum frequency 
+#' of the words in the network
+#' @param discreteColorWord colorize words by "Words" category, not frequency.
+#' @param catColors colors for words and texts when colorize is TRUE and discreteColorWord is TRUE
+#' @param scaleEdgeWidth scale for edge width
+#' @param asis plot the original network (default to FALSE)
+#' @param queryColor color for associated queries with words
+#' @param useSeed random seed
+#' @param scaleRange scale for label and node size in the network.
+#' @param autoScale scale the label and node size automatically for the large network.
 #' @export
-#' @return network visualization
+#' @return biotext object with network visualization changed
 setGeneric("plotNet",
     function(x, layout="nicely", edgeLink=TRUE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
@@ -166,7 +193,7 @@ setGeneric("plotNet",
     	scaleRange=c(5,10), scaleEdgeWidth=c(1,3),
     	naEdgeColor="grey", colorText=FALSE, asis=FALSE)
     standardGeneric("plotNet"))
-#' @rdname generalf
+#' @rdname plotnet
 setMethod("plotNet", "biotext",
     function(x, layout="nicely", edgeLink=FALSE,
     	edgeLabel=FALSE, showLegend=FALSE, fontFamily="sans",
@@ -266,7 +293,22 @@ setMethod("plotNet", "biotext",
 #' 
 #' plot the wordcloud changing the visualization parameters
 #' 
-#' @rdname generalf
+#' @rdname plotwc
+#' @param x biotext object
+#' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
+#' using udpipe, and tagging colorization for word cloud.
+#' Default to NULL, which indicates automatically set.
+#' @param madeUpper make these words uppercase in resulting plot,
+#' default to c("rna" and "dna")
+#' @param preserve Try to preserve original characters.
+#' @param scaleFreq default to NULL, scale the value if specified
+#' @param numWords the number of words to be shown in the plot.
+#' When `autoThresh` is TRUE, the number of this value will be shown.
+#' @param useggwordcloud default to TRUE, otherwise use `wordcloud` function.
+#' @param wcScale scaling size for ggwordcloud
+#' @param argList parameters to pass to wordcloud() or ggwordcloud()
+#' @param asis plot the original network (default to FALSE)
+#' @param fontFamily font family to use, default to "sans".
 #' @export
 #' @return wordcloud visualization
 setGeneric("plotWC",
@@ -274,7 +316,7 @@ setGeneric("plotWC",
     	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
     	wcScale=10, argList=list(), useggwordcloud=TRUE, asis=FALSE)
     standardGeneric("plotWC"))
-#' @rdname generalf
+#' @rdname plotwc
 setMethod("plotWC", "biotext",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
     	preserve=FALSE, scaleFreq=NULL, fontFamily="sans", numWords=NULL,
