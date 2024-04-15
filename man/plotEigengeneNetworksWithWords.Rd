@@ -137,7 +137,12 @@ if dendPlot=="ggtree", provide those accepted by ggtree function to `dhc`.}
 plot of dendrogram between module eigengenes with word annotations
 }
 \description{
-plot an eigengene dendrogram with word annotation
+Plot an eigengene dendrogram with word annotation
+}
+\details{
+The function accepts the module eigengene (ME) data.frame and
+named vector of genes with ME information and returns the dendrogram with
+textual information. The input is the typical output of WGCNA.
 }
 \examples{
 mod <- returnExample()

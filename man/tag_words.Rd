@@ -30,7 +30,11 @@ tag_words(
 biotext class object
 }
 \description{
-tag the words based on pvclust and word matrix
+Tag the words based on pvclust and word matrix.
+}
+\details{
+Identify important word clusters with statistical significance
+using `pvclust`.
 }
 \examples{
 obtain_refseq(c("IRF3","PNKP")) |> 

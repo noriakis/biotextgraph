@@ -47,8 +47,11 @@ process_network_microbe(
 biotext class object
 }
 \description{
-perform tasks before plotting
-like obtaining associated diseases to plot
+Process the network from BugSigDB.
+}
+\details{
+Perform tasks before plotting
+for the data from BugSigDB, like obtaining associated diseases to plot
 }
 \examples{
 bugsigdb("Veillonella dispar") |> process_network_microbe()

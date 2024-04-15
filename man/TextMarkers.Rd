@@ -55,12 +55,18 @@ named list of clusters}
 list of plots on textual information in the gene cluster
 }
 \description{
-Take results of Seurat::FindAllMarkers as input,
-and plot wordcloud or network for all the clusters.
+Take results of `Seurat::FindAllMarkers` as input and plot wordcloud or network for all the clusters.
+}
+\details{
+Using the results of marker gene identification such as `FindAllMarkers` from Seurat,
+Recursively summarize the textual information of markers and output the visualizations.
 }
 \examples{
 markers <- data.frame(p_val_adj=c(0.01, 0.01, 0.04),
 gene=c("PNKP","DDX41","IRF3"),cluster=c("1","1","1"))
 colors <- list("1"="red")
 TextMarkers(markers, col=colors, type="wc")
+}
+\seealso{
+obtainMarkersWC
 }

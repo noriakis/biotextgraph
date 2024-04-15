@@ -27,7 +27,7 @@ process_network_manual(
 biotext class object
 }
 \description{
-process graph made from user-specified df
+Process graph made from user-specified data.frame
 }
 \examples{
 obtain_manual(data.frame(text=c("test4 test4",

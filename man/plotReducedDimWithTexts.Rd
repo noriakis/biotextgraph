@@ -88,5 +88,12 @@ in `gene_name`}
 single-cell plot with text annotation
 }
 \description{
-plotReducedDimWithTexts
+Directly output the dimension reduction plot with textual information.
+}
+\details{
+The function accepts the SingleCellExperiment object and marker gene information
+and output the reduced dimension plot with the textual information.
+}
+\seealso{
+DimPlotWithTexts
 }

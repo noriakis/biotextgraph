@@ -4,7 +4,6 @@
 #' @examples
 #' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
 #' \dontrun{alliance(geneList)}
-
 alliance <- function (geneList,
     alliancePath="GENE-DESCRIPTION-TSV_HUMAN.tsv",
     keyType="SYMBOL",

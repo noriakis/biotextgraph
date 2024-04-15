@@ -1,7 +1,8 @@
 #' obtain_manual
 #' 
-#' obtain biotext class object from manually specified data
-#' 
+#' @description Obtain biotext class object from manually specified data
+#' @details The function obtains the biotext object from data.frame.
+#' @seealso generalf
 #' @param df data frame
 #' @export
 #' @examples obtain_manual(data.frame(text=c("test")))
@@ -23,9 +24,10 @@ obtain_manual <- function(df) {
 
 #' obtain_alliance
 #' 
-#' obtain gene description from 
+#' @description Obtain biotext class object from The Alliance of Genome Resources
+#' @details Obtain gene description from 
 #' The Alliance of Genome Resources
-#' https://www.alliancegenome.org/downloads
+#' (https://www.alliancegenome.org/downloads)
 #' 
 #' @param geneList gene ID list
 #' @param file filename, default to "GENE-DESCRIPTION-TSV_HUMAN.tsv"
@@ -60,8 +62,9 @@ obtain_alliance <- function(geneList, file="GENE-DESCRIPTION-TSV_HUMAN.tsv",
 
 #' obtain_bugsigdb
 #' 
-#' obtain microbe-related information from bugsigdb
-#' 
+#' @description Obtain microbe-related information from bugsigdb
+#' @details Obtain microbe description from BugSigDB using bugsigdbr.
+#' @seealso generalf
 #' @param mb_list microbe list
 #' @param target title or abstract
 #' @param api_key API key for PubMed
@@ -164,7 +167,12 @@ obtain_bugsigdb <- function(mb_list,
 
 #' obtain_enzyme
 #' 
-#' obtain EC-related text data from PubMed
+#' @description Obtain EC-related text data from PubMed
+#' @details Query the Enzyme Comission number and obtain description,
+#' and search pubmed for these enzymes and make word cloud and
+#' correlation network. Need to specify the path to "enzyme.dat"
+#' downloaded from from ExPASy (https://enzyme.expasy.org/).
+#' @seealso generalf
 #' 
 #' @param file file downloaded from expasy
 #' @param ec_num candidate ecnum, like those obtained from eggNOG-mapper
@@ -292,7 +300,10 @@ obtain_enzyme <- function(file, ec_num,
 
 #' obtain_enrich
 #' 
-#' obtain enrichment analysis description
+#' @description Obtain enrichment analysis description
+#' @details The function performs enrichment analysis on
+#' queried vector, and returns the biotext object using the
+#' textual information from biological pathways.
 #' 
 #' @param geneList gene list
 #' @param keyType key type of gene list
@@ -347,8 +358,9 @@ obtain_enrich <- function(geneList, keyType="SYMBOL", enrich="kegg",
 
 #' obtain_refseq
 #' 
-#' obtain RefSeq text data
-#' 
+#' @description Obtain RefSeq textual data
+#' @details Obtain refseq textual data and makes a biotext object.
+#' @seealso generalf
 #' @param geneList gene list
 #' @param keyType key type of gene list
 #' @param organism organism
@@ -379,8 +391,9 @@ obtain_refseq <- function(geneList, keyType="SYMBOL", organism=9606, org_db=org.
 
 #' obtain_pubmed
 #' 
-#' obtain PubMed text data
-#' 
+#' @description Obtain PubMed text data
+#' @details Obtain pubmed textual data and makes a biotext object.
+#' @seealso generalf
 #' @param queries query list
 #' @param delim delimiter for query, default to OR
 #' @param api_key API key for PubMed
@@ -419,8 +432,9 @@ obtain_pubmed <- function(queries, target="title",
 
 #' set_filter_words
 #' 
-#' set filtering words to class
-#' If filtered words are already present, add words to them
+#' @description Set filtering words to class.
+#' @details Set filtering words to class.
+#' If filtered words are already present, add the specified words to them.
 #' 
 #' @param ret biotext object
 #' @param exclude GS for using GeneSummary, 
@@ -474,6 +488,9 @@ set_filter_words <- function(ret, exclude_by="frequency",
 
 
 #' perform_ora
+#' @description Performs ORA on obtained text data.
+#' @details Performs over representation analysis on the obtained text data.
+#' Used only with biotext object with type `refseq`.
 #' @param ret biotext class
 #' @param threshold ORA threshold to filter (bonferroni-corrected p-value)
 #' @export
@@ -494,7 +511,9 @@ perform_ora <- function(ret, threshold=0.05) {
 
 
 #' make_corpus
-#' make corpus based on biotext class
+#' @description Make corpus based on biotext class
+#' @details Make corpus based on biotext class using tm.
+#' Ngram, stemming parameters can be specified by this function.
 #' @param ret biotext class object
 #' @param collapse collapse all the sentences to one sentence
 #' @param num_only delete number only (not deleting XXX123)
@@ -534,6 +553,8 @@ make_corpus <- function(ret, collapse=FALSE,
 
 #' make_TDM
 #' 
+#' @description Make text document matrix (TDM) from biotext object.
+#' @details Make TDM based on biotext class using tm.
 #' @param ret biotext class
 #' @param tfidf use TF-IDF
 #' @param normalize normalize the values to document number
@@ -597,7 +618,9 @@ make_TDM <- function(ret, tfidf=FALSE,
 
 #' tag_words
 #' 
-#' tag the words based on pvclust and word matrix
+#' @description Tag the words based on pvclust and word matrix.
+#' @details Identify important word clusters with statistical significance
+#' using `pvclust`.
 #' 
 #' @param ret biotext class object
 #' @param cl cluster for parallel computing
@@ -641,7 +664,10 @@ tag_words <- function(ret, cl=FALSE, pvclAlpha=0.95, whole=FALSE,
 
 #' make_graph
 #' 
-#' make correlation or cooccurrence network
+#' @description Make correlation or cooccurrence network
+#' @details Make correlation or cooccurrence network based on biotext object.
+#' The resulting raw network is stored in `igraphRaw` slot in biotext object.
+#' The networks can be customized in the subsequent functions like `process_network_gene`.
 #' 
 #' @param ret biotext class object
 #' @param num_words number of words to include
@@ -673,6 +699,9 @@ make_graph <- function(ret, num_words=30, cor_threshold=0.2,
 }
 
 #' graph_cluster
+#' @description Performs graph-based clustering.
+#' @details Performs graph-based clustering using igraph and stores the information
+#' in the biotext object. Default to use `igraph::cluster_leiden`.
 #' @param ret biotext class object
 #' @param func community detection algorithm in igraph
 #' @param factorize convert to factor upon assigning
@@ -694,8 +723,9 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 
 #' process_network_microbe
 #' 
-#' perform tasks before plotting
-#' like obtaining associated diseases to plot
+#' @description Process the network from BugSigDB.
+#' @details Perform tasks before plotting
+#' for the data from BugSigDB, like obtaining associated diseases to plot
 #' 
 #' @param ret biotext class object
 #' @param delete_zero_degree exclude zero degree nodes from plotting
@@ -936,9 +966,10 @@ process_network_microbe <- function(ret, delete_zero_degree=TRUE,
 }
 
 #' process_network_gene
-#' 
-#' perform tasks before plotting
-#' like obtaining associated genes to plot
+
+#' @description Process the network from refseq, pubmed or alliance.
+#' @details Perform tasks before plotting the networks
+#' like obtaining associated genes to plot.
 #' 
 #' @param ret biotext class object
 #' @param delete_zero_degree exclude zero degree nodes from plotting
@@ -1189,7 +1220,9 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 
 #' process_network_manual
 #' 
-#' process graph made from user-specified df
+#' @description Process graph made from user-specified data.frame
+#' @dedtails Process the graph obtained from user data, like 
+#' associating words to the other variables.
 #' 
 #' @param ret biotext class object
 #' @param delete_zero_degree delete zero degree nodes
@@ -1412,8 +1445,9 @@ assign_community <- function(ret, coGraph) {
 
 #' plot_biotextgraph
 #' 
-#' plot biotextgraph after processing graph
-#' 
+#' @description Plot biotextgraph after processing graph
+#' @details Plot the network stored in biotextgraph object after processing the graph.
+#' @seealso plotwc plotnet
 #' @param ret biotext object
 #' @param edge_link whether to use edge link or edge diagonal
 #' @param edge_label whether to show edge label
@@ -1555,7 +1589,9 @@ plot_biotextgraph <- function(ret,
     ret
 }
 #' plot_wordcloud
-#' 
+#' @description Plot wordclouds
+#' @details Plot the wordclouds stored in biotextgraph object.
+#' @seealso plotwc plotnet
 #' @param ret biotext object
 #' @param num_words number of words to include
 #' @param pal palette for colorizing words

@@ -100,5 +100,15 @@ of the words in the network}
 biotext object with network visualization changed
 }
 \description{
-Plot the network changing the visualization parameters
+Plot the network stored in the biotext object with changing the visualization parameters.
+}
+\details{
+The function accepts the already calculated biotext object and outputs the visualization based on
+the specified parameters.
+}
+\examples{
+library(ggraph)
+geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
+test <- refseq(geneList)
+plotNet(test, asis=TRUE)
 }

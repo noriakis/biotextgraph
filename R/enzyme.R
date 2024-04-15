@@ -1,9 +1,11 @@
 #' enzyme
 #' 
-#' Query the Enzyme Comission number and obtain description,
+#' @description Text mining the enzyme information.
+#' 
+#' @details Query the Enzyme Comission number and obtain description,
 #' and search pubmed for these enzymes and make word cloud and
-#' correlation network. Need "enzyme.dat" from ExPASy
-#' (https://enzyme.expasy.org/).
+#' correlation network. Need to specify the path to "enzyme.dat"
+#' downloaded from from ExPASy (https://enzyme.expasy.org/).
 #' 
 #' @param file file downloaded from expasy
 #' @param ecnum candidate ecnum, like those obtained from eggNOG-mapper
@@ -22,8 +24,7 @@
 #' file <- "enzyme.dat"
 #' \dontrun{enzyme(file, ecnum="1.2.1.1")}
 #' @export
-#' 
-
+#' @seealso generalf
 enzyme <- function(file, ecnum, onlyTerm=FALSE, onlyDf=FALSE, target="abstract",
                  taxec=FALSE, taxFile=NULL, candTax=NULL, argList=list(),
                  apiKey=NULL) {

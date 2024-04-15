@@ -44,5 +44,14 @@ If this is TRUE, data.frame is returned}
 biotext class object
 }
 \description{
-obtain EC-related text data from PubMed
+Obtain EC-related text data from PubMed
+}
+\details{
+Query the Enzyme Comission number and obtain description,
+and search pubmed for these enzymes and make word cloud and
+correlation network. Need to specify the path to "enzyme.dat"
+downloaded from from ExPASy (https://enzyme.expasy.org/).
+}
+\seealso{
+generalf
 }

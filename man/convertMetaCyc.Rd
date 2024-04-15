@@ -15,7 +15,10 @@ convertMetaCyc(ids, onlySpecies = FALSE)
 coverted species name
 }
 \description{
-this function needs taxonomizr package to be installed,
+Convert MetaCyc IDs to the actual taxonomy names.
+}
+\details{
+This function needs taxonomizr package to be installed,
 and needs download of databases by prepareDatabase(getAccessions=FALSE)
 }
 \examples{

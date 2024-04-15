@@ -42,8 +42,11 @@ process_network_gene(
 biotext class object
 }
 \description{
-perform tasks before plotting
-like obtaining associated genes to plot
+Process the network from refseq, pubmed or alliance.
+}
+\details{
+Perform tasks before plotting the networks
+like obtaining associated genes to plot.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")

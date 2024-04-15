@@ -88,5 +88,12 @@ in `gene_name`}
 single-cell plot with text annotation
 }
 \description{
-DimPlotWithTexts
+Directly output the dimension reduction plot with textual information.
+}
+\details{
+The function accepts the Seurat object and marker gene information
+and output the reduced dimension plot with the textual information.
+}
+\seealso{
+plotReducedDimWithTexts
 }

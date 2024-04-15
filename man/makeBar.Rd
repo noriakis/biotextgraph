@@ -45,7 +45,11 @@ makeBar(
 barplot of word frequency
 }
 \description{
-Makeing a barplot of word frequency from queried genes
+Make a barplot of word frequency from queried identifiers
+}
+\details{
+The function accepts the biological entities, returns the bar plots
+of their frequencies in the database.
 }
 \examples{
 geneList <- c("DDX41")

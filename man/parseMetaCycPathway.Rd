@@ -27,7 +27,10 @@ parseMetaCycPathway(
 data.frame of MetaCyc pathway information
 }
 \description{
-parse MetaCyc "pathways.dat"
+Parse MetaCyc "pathways.dat"
+}
+\details{
+Parse the MetaCyc pathway information for the use in the package.
 }
 \examples{
 file <- "pathways.dat"

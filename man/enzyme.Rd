@@ -44,12 +44,18 @@ If this is TRUE, data.frame is returned}
 object consisting of data frame and ggplot2 object
 }
 \description{
+Text mining the enzyme information.
+}
+\details{
 Query the Enzyme Comission number and obtain description,
 and search pubmed for these enzymes and make word cloud and
-correlation network. Need "enzyme.dat" from ExPASy
-(https://enzyme.expasy.org/).
+correlation network. Need to specify the path to "enzyme.dat"
+downloaded from from ExPASy (https://enzyme.expasy.org/).
 }
 \examples{
 file <- "enzyme.dat"
 \dontrun{enzyme(file, ecnum="1.2.1.1")}
+}
+\seealso{
+generalf
 }

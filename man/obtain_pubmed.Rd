@@ -36,5 +36,11 @@ obtain_pubmed(
 biotext class object
 }
 \description{
-obtain PubMed text data
+Obtain PubMed text data
+}
+\details{
+Obtain pubmed textual data and makes a biotext object.
+}
+\seealso{
+generalf
 }

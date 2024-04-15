@@ -98,3 +98,7 @@ list of pyramid plot grobs and its positions
 \description{
 Return pyramid plots
 }
+\details{
+Returns the pyramid plots of text frequencies between clusters.
+Used internally in getWordsOnDendro.
+}

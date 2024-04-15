@@ -1,6 +1,9 @@
 #' compareWordNet
 #' 
-#' compare two gene clusters based on words 
+#' @description Compare multiple networks based on words 
+#' @details The function accepts list (named) of biotext object, and 
+#' plot the merged network highlighting the intersection of the network
+#' and identified clusters.
 #' 
 #' @param listOfNets list consisting results of wc* functions (plotType="network")
 #' @param titles title to be shown on plot
@@ -264,7 +267,9 @@ compareWordNet <- function(listOfNets, titles=NULL,
 
 #' plotDynamic
 #' 
-#' list network of words using graphlayouts::layout_as_dynamic
+#' @description List network of words using graphlayouts::layout_as_dynamic
+#' @details The function accepts the list of biotext object storing inferred networks.
+#' The networks are aligned by the specific layout and plotted.
 #' 
 #' @param listOfNets list consisting results of wc* functions (plotType="network")
 #' @param concat "union" or "intersection"

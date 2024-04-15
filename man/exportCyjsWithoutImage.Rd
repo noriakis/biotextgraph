@@ -39,6 +39,9 @@ exportCyjsWithoutImage(
 return nothing, export to a specified directory
 }
 \description{
+Export Cytoscape.js from the network without images
+}
+\details{
 Export Cytoscape.js script, HTML and stylesheet for the graph without image
 }
 \examples{

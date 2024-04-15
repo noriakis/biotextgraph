@@ -1,6 +1,7 @@
 #' pubmed
 #' 
 #' make word cloud or correlation network from PubMed
+#' 
 #' @rdname generalf
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}

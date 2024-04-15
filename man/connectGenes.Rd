@@ -19,6 +19,9 @@ connectGenes(nets, query_word, return_tbl_graph = FALSE, neighbors = FALSE)
 igraph object
 }
 \description{
+Connect genes by words
+}
+\details{
 When an interesting word is found in two or more networks,
 connect the words and gene names and return the graph.
 Note that genePlot must be set to TRUE in all the networks.

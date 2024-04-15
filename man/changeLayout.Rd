@@ -15,7 +15,10 @@ changeLayout(g, layout_func)
 biotext class object
 }
 \description{
-changeLayout
+Change the layout of biotext object and plot.
+}
+\details{
+Change the layout of biotext object and plot.
 }
 \examples{
 refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) |> changeLayout(igraph::layout_nicely)

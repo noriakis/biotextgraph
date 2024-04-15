@@ -16,7 +16,7 @@ returnQuanteda(
 )
 }
 \arguments{
-\item{ret}{osplot object}
+\item{ret}{biotext object}
 
 \item{quantedaArgs}{args to passed to tokens function}
 
@@ -33,9 +33,12 @@ returnQuanteda(
 \item{collapse}{collapse sentences}
 }
 \value{
-osplot object after filtering using quanteda
+biotext object after filtering using quanteda
 }
 \description{
+return quanteda object
+}
+\details{
 simple function to generate dfm and export to wc* functions.
 It did not utilize full functionality of quanteda, and 
 will add better support.

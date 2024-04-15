@@ -1,6 +1,8 @@
 #' biotextgraph
 #' 
-#' wrapper for functions refseq, pubmed, enzyme, and bugsigdb
+#' @description wrapper for functions refseq, pubmed, enzyme, and bugsigdb
+#' @details The function calls the various types of databases (refseq, pubmed, ...)
+#' for summarizing the textual data.
 #' 
 #' @param target "pubmed", "bugsigdb", "refseq", "ec"
 #' @param argList passed to each function
@@ -152,7 +154,9 @@ setMethod("plot",
 
 #' plotNet
 #' 
-#' Plot the network changing the visualization parameters
+#' @description Plot the network stored in the biotext object with changing the visualization parameters.
+#' @details The function accepts the already calculated biotext object and outputs the visualization based on
+#' the specified parameters.
 #' 
 #' @rdname plotnet
 #' @param x biotextgraph object
@@ -183,6 +187,11 @@ setMethod("plot",
 #' @param scaleRange scale for label and node size in the network.
 #' @param autoScale scale the label and node size automatically for the large network.
 #' @export
+#' @examples
+#' library(ggraph)
+#' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
+#' test <- refseq(geneList)
+#' plotNet(test, asis=TRUE)
 #' @return biotext object with network visualization changed
 setGeneric("plotNet",
     function(x, layout="nicely", edgeLink=TRUE,
@@ -291,8 +300,9 @@ setMethod("plotNet", "biotext",
 
 #' plotWC
 #' 
-#' plot the wordcloud changing the visualization parameters
-#' 
+#' @description Plot the wordcloud changing the visualization parameters.
+#' @details The function accepts the already calculated biotext object and outputs the visualization based on
+#' the specified parameters.
 #' @rdname plotwc
 #' @param x biotext object
 #' @param tagPalette tag palette when `tag` is TRUE. It is also used for dependency network
@@ -310,6 +320,10 @@ setMethod("plotNet", "biotext",
 #' @param asis plot the original network (default to FALSE)
 #' @param fontFamily font family to use, default to "sans".
 #' @export
+#' @examples
+#' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
+#' test <- refseq(geneList, plotType="wc")
+#' plotWC(test, asis=TRUE)
 #' @return wordcloud visualization
 setGeneric("plotWC",
     function(x, tagPalette=NULL, madeUpper=c("dna","rna"),
@@ -453,7 +467,8 @@ setMethod("plotWC", "biotext",
 
 #' getSlot
 #' 
-#' get the slot value from biotext object
+#' @description get the slot value from biotext object
+#' @details get the slot value from biotext object
 #' 
 #' @param x biotext object
 #' @param slot slot name
@@ -464,10 +479,10 @@ setMethod("plotWC", "biotext",
 #' @return attribute value
 setGeneric("getSlot",
     function(x, slot) standardGeneric("getSlot"))
-
 #' getSlot
 #' 
-#' get the slot value from biotext object
+#' @description get the slot value from biotext object
+#' @details get the slot value from biotext object
 #' 
 #' @param x biotext object
 #' @param slot slot name
@@ -482,7 +497,10 @@ setMethod("getSlot", "biotext",
 
 #' plotORA
 #' 
-#' plot volcano-plot like plot for ORA results
+#' @description plot volcano-plot like plot for ORA results
+#' @details Plot the volcano-plot like plot for the ORA results
+#' using the biotext object. The ORA should be performed beforehand
+#' by specifying ora option to TRUE.
 #' 
 #' @param x biotext object
 #' @param thresh hline to draw in plot

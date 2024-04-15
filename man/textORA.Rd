@@ -19,8 +19,11 @@ p-values for the words
 p-values for the words
 }
 \description{
-Return p-values from hypergeometric distribution
-(experimental)
+Return text p-values from hypergeometric distribution
+}
+\details{
+Returns the p-values for the words using hypergeometric distribution (experimental).
+By default uses the RefSeq background, but you can use the favorite backgrounds.
 }
 \examples{
 textORA(c("2067","2068","2071","2072"))

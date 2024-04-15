@@ -638,11 +638,16 @@ object consisting of data frame and ggplot2 object
 \description{
 Visualize BugSigDB
 
-Produce networks using manual input
+Produce networks using manual input.
 
 make word cloud or correlation network from PubMed
 
-Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data
+Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data.
+}
+\details{
+The main functions of the `biotextgraph` package. The functions accepts
+a character vector of biological entities and returns the summarized statistics and visualization
+contained in `biotext` object.
 }
 \examples{
 geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")

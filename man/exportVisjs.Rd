@@ -17,6 +17,9 @@ exportVisjs(g, rootDir, netDir)
 return nothing, export to a specified directory
 }
 \description{
+Export vis.js from the network
+}
+\details{
 Export vis.js script, HTML and stylesheet for the graph and image
 }
 \examples{

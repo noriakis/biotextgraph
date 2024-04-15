@@ -47,6 +47,10 @@ list of ggplot containing wordclouds
 \description{
 obtain wordclouds of cluster markers identified in Seurat
 }
+\details{
+Using the results of marker gene identification such as `FindAllMarkers` from Seurat,
+Recursively summarize the textual information of markers and output the wordclouds.
+}
 \examples{
 markers <- data.frame(p_val=c(0.01, 0.01),gene=c("PNKP","DDX41"),cluster=c("1","1"))
 colors <- list("1"="red")

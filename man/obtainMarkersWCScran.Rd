@@ -2,8 +2,7 @@
 % Please edit documentation in R/geom_sc_wordcloud.R
 \name{obtainMarkersWCScran}
 \alias{obtainMarkersWCScran}
-\title{obtainMarkersWCScran
-make gene wordcloud from scran::findMarkers() results}
+\title{obtainMarkersWCScran}
 \usage{
 obtainMarkersWCScran(
   markers,
@@ -46,8 +45,11 @@ obtainMarkersWCScran(
 list of ggplot containing wordclouds
 }
 \description{
-obtainMarkersWCScran
-make gene wordcloud from scran::findMarkers() results
+Make gene wordcloud from scran::findMarkers() results
+}
+\details{
+using the results of marker gene identification such as `findMarkers` from scran,
+Recursively summarize the textual information of markers and output the wordclouds.
 }
 \examples{
 df <- data.frame(

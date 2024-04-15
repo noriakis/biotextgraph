@@ -57,8 +57,11 @@ TextMarkersScran(
 list of ggplot
 }
 \description{
-Take results of scran::findMarkers as input,
-and plot wordcloud or network for all the clusters.
+Make gene wordcloud from scran::findMarkers() results
+}
+\details{
+using the results of marker gene identification such as `findMarkers` from scran,
+Recursively summarize the textual information of markers and output the visualizations.
 }
 \examples{
 df <- data.frame(
@@ -70,4 +73,7 @@ markers <- list("1"=df)
 colors <- list("1"="blue")
 TextMarkersScran(markers, col=colors)
 
+}
+\seealso{
+obtainMarkersWCScran
 }

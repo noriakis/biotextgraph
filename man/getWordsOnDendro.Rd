@@ -84,6 +84,11 @@ list of pyramid plot grobs and its positions
 \description{
 Get grobs to plot on the dendrogram with the position information
 }
+\details{
+The function accepts the dendrogram and named vector of genes with associated clusters
+and returns the list of plots with the positional information. Used internally in
+`plotEigengeneNetworksWithWords`.
+}
 \examples{
 mod <- returnExample()
 result <- hclust(dist(t(mod$MEs)))

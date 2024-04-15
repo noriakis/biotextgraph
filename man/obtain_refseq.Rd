@@ -24,8 +24,14 @@ obtain_refseq(
 biotext class object
 }
 \description{
-obtain RefSeq text data
+Obtain RefSeq textual data
+}
+\details{
+Obtain refseq textual data and makes a biotext object.
 }
 \examples{
 obtain_refseq(c("PNKP"))
+}
+\seealso{
+generalf
 }

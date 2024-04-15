@@ -39,9 +39,11 @@ Override `highlight` option.}
 ggplot2
 }
 \description{
-plot the network in biofabric layout
-Internally, obtainTextPosition() is used and 
-the layers are stacked.
+Plot the network in biofabric layout.
+}
+\details{
+Plot the network in biofabric layout.
+Internally, obtainTextPosition() is used and the layers are stacked.
 For BioFabric layout, please refer to: https://biofabric.systemsbiology.net/
 Citation is: https://doi.org/10.1186/1471-2105-13-275
 }

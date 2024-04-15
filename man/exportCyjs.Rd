@@ -23,6 +23,9 @@ use the grouping to draw bubblesets using
 return nothing, export to a specified directory
 }
 \description{
+Export Cytoscape.js from the network
+}
+\details{
 Export Cytoscape.js script, HTML and stylesheet for the graph and image
 }
 \examples{

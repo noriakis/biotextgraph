@@ -36,7 +36,10 @@ findTerm(
 named list of frequency
 }
 \description{
-find queried terms in list of gene clusters and return frequency
+Find queried terms in list of gene clusters and return frequency
+}
+\details{
+Find queried terms in list of gene clusters and return frequency
 }
 \examples{
 query <- "DNA repair"

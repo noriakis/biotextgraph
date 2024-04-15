@@ -28,7 +28,12 @@ sorted by p-values}
 biotext class object
 }
 \description{
-obtain enrichment analysis description
+Obtain enrichment analysis description
+}
+\details{
+The function performs enrichment analysis on
+queried vector, and returns the biotext object using the
+textual information from biological pathways.
 }
 \examples{
 if (requireNamespace("clusterProfiler")) {

@@ -30,7 +30,10 @@ make_TDM(
 biotext class object
 }
 \description{
-make_TDM
+Make text document matrix (TDM) from biotext object.
+}
+\details{
+Make TDM based on biotext class using tm.
 }
 \examples{
 obtain_refseq("PNKP") |> make_corpus() |> make_TDM()

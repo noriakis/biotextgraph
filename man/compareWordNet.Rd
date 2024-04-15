@@ -63,7 +63,12 @@ compareWordNet(
 plot comparing gene clusters
 }
 \description{
-compare two gene clusters based on words
+Compare multiple networks based on words
+}
+\details{
+The function accepts list (named) of biotext object, and 
+plot the merged network highlighting the intersection of the network
+and identified clusters.
 }
 \examples{
 net1 <- refseq(c("DDX41","IRF3","ERCC1","ERCC2","XRCC1"), plotType="network")

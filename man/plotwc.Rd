@@ -64,5 +64,14 @@ When `autoThresh` is TRUE, the number of this value will be shown.}
 wordcloud visualization
 }
 \description{
-plot the wordcloud changing the visualization parameters
+Plot the wordcloud changing the visualization parameters.
+}
+\details{
+The function accepts the already calculated biotext object and outputs the visualization based on
+the specified parameters.
+}
+\examples{
+geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
+test <- refseq(geneList, plotType="wc")
+plotWC(test, asis=TRUE)
 }

@@ -2,8 +2,7 @@
 % Please edit documentation in R/steps.R
 \name{make_corpus}
 \alias{make_corpus}
-\title{make_corpus
-make corpus based on biotext class}
+\title{make_corpus}
 \usage{
 make_corpus(
   ret,
@@ -31,8 +30,11 @@ make_corpus(
 biotext class object
 }
 \description{
-make_corpus
-make corpus based on biotext class
+Make corpus based on biotext class
+}
+\details{
+Make corpus based on biotext class using tm.
+Ngram, stemming parameters can be specified by this function.
 }
 \examples{
 obtain_refseq("PNKP") |> make_corpus()

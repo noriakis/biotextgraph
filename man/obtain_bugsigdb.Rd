@@ -20,8 +20,14 @@ if FALSE, same for fetching from PubMed by specified query}
 biotext class object
 }
 \description{
-obtain microbe-related information from bugsigdb
+Obtain microbe-related information from bugsigdb
+}
+\details{
+Obtain microbe description from BugSigDB using bugsigdbr.
 }
 \examples{
 obtain_bugsigdb("Veillonella dispar")
+}
+\seealso{
+generalf
 }

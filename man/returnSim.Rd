@@ -28,8 +28,12 @@ default to 5000}
 similarity matrix
 }
 \description{
-return similarity matrix of cluster
+Return similarity matrix of cluster
 based on intersection over union of words
+}
+\details{
+The function accepts the list of character vectors
+or named vector of identifiers to returns the textual similarity matrix.
 }
 \examples{
 ex <- returnExample()

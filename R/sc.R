@@ -1,8 +1,9 @@
 #' TextMarkers
 #' 
-#' Take results of Seurat::FindAllMarkers as input,
-#' and plot wordcloud or network for all the clusters.
-#' 
+#' @description Take results of `Seurat::FindAllMarkers` as input and plot wordcloud or network for all the clusters.
+#' @details Using the results of marker gene identification such as `FindAllMarkers` from Seurat,
+#' Recursively summarize the textual information of markers and output the visualizations.
+#' @seealso obtainMarkersWC
 #' @param df result of FindAllMarkers()
 #' @param keyType keytype
 #' @param type wc or network
@@ -96,10 +97,12 @@ TextMarkers <- function(df, keyType="SYMBOL",type="wc", genePlot=TRUE,
 
 
 #' TextMarkersScran
+#' @description Make gene wordcloud from scran::findMarkers() results
 #' 
-#' Take results of scran::findMarkers as input,
-#' and plot wordcloud or network for all the clusters.
+#' @details using the results of marker gene identification such as `findMarkers` from scran,
+#' Recursively summarize the textual information of markers and output the visualizations.
 #' 
+#' @seealso obtainMarkersWCScran
 #' @param res result of findMarkers()
 #' @param keyType keytype
 #' @param type wc or network
@@ -216,6 +219,11 @@ TextMarkersScran <- function(res,
 
 #' plotReducedDimWithTexts
 #' 
+#' @description Directly output the dimension reduction plot with textual information.
+#' @details The function accepts the SingleCellExperiment object and marker gene information
+#' and output the reduced dimension plot with the textual information.
+#' @rdname plotReducedDimWithTexts
+#' @seealso DimPlotWithTexts
 #' @param sce sce object
 #' @param marker.info results of findMarkers()
 #' @param colour_by colorize by this label
@@ -416,7 +424,11 @@ plotReducedDimWithTexts <- function(sce, marker.info,
 
 
 #' DimPlotWithTexts
-#' 
+#' @description Directly output the dimension reduction plot with textual information.
+#' @details The function accepts the Seurat object and marker gene information
+#' and output the reduced dimension plot with the textual information.
+#' @seealso plotReducedDimWithTexts
+#' @rdname DimPlotWithTexts
 #' @param seu Seurat object
 #' @param markers results of FindAllMarkers()
 #' @param label plot label or not

@@ -2,8 +2,7 @@
 % Please edit documentation in R/geom_sc_wordcloud.R
 \name{ggplot_add.geom_sc_wordcloud}
 \alias{ggplot_add.geom_sc_wordcloud}
-\title{ggplot_add.geom_sc_wordcloud
-use ggplot_add to populate single-cell plot with textual information}
+\title{ggplot_add.geom_sc_wordcloud}
 \usage{
 \method{ggplot_add}{geom_sc_wordcloud}(object, plot, object_name)
 }
@@ -18,6 +17,9 @@ use ggplot_add to populate single-cell plot with textual information}
 ggplot
 }
 \description{
-ggplot_add.geom_sc_wordcloud
-use ggplot_add to populate single-cell plot with textual information
+Use ggplot_add to populate single-cell plot with textual information
+}
+\details{
+Use layered approach to add wordclouds to the dimension reduction plots
+from single cell transcriptomics data. Use with `ggsc`.
 }

@@ -17,7 +17,11 @@ obtainTextPosition(ig, sort.by = node_rank_fabric(), verbose = FALSE)
 tbl_graph
 }
 \description{
-obtain text position in biofabric layout
+Obtain text position in biofabric layout
+}
+\details{
+The function obtains the horizontal text position 
+for the plot in the `biofabric` layout implemented in ggraph.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")

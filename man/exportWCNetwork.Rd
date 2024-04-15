@@ -46,12 +46,13 @@ named list, or random palette will be assigned if NULL}
 export the Cytoscape.js network
 }
 \description{
-export the wordcloud network provided the gene cluster network
-Node size will be the number of genes in the cluster
-By default use cola layout, and see below for the parameters
-https://github.com/cytoscape/cytoscape.js-cola
+Export wordcloud networks to Cytoscape.js
 }
 \details{
+The function exports the wordcloud network provided the gene cluster network.
+Node size will be the number of genes in the cluster.
+By default use cola layout, and see below for the parameters of the layout.
+(https://github.com/cytoscape/cytoscape.js-cola) 
 If "strength" attribute is in the edge of igraph object,
 the parameter is used to size the edge width.
 }

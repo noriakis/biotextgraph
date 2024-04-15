@@ -23,5 +23,5 @@ makeCorpus(docs, filterWords, additionalRemove, numOnly, stem, lower = TRUE)
 cleaned corpus
 }
 \description{
-Clean-up the corpus
+makeCorpus
 }

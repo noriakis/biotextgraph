@@ -13,8 +13,14 @@ obtain_manual(df)
 biotext class object
 }
 \description{
-obtain biotext class object from manually specified data
+Obtain biotext class object from manually specified data
+}
+\details{
+The function obtains the biotext object from data.frame.
 }
 \examples{
 obtain_manual(data.frame(text=c("test")))
+}
+\seealso{
+generalf
 }

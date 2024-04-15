@@ -1,6 +1,9 @@
 #' refseq, alliance, pubmed, manual, bugsigdb
 #' 
-#' Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data
+#' @description Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data.
+#' @details The main functions of the `biotextgraph` package. The functions accepts
+#' a character vector of biological entities and returns the summarized statistics and visualization
+#' contained in `biotext` object.
 #' 
 #' @param geneList gene ID list
 #' @param queries query ID list

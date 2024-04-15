@@ -57,6 +57,8 @@ split_by_ea <- function(args) {
 
 
 #' changeLayout
+#' @description Change the layout of biotext object and plot.
+#' @details Change the layout of biotext object and plot.
 #' @param g biotext object
 #' @param layout_func layout function in igraph
 #' @examples refseq(c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")) |> changeLayout(igraph::layout_nicely)
@@ -72,7 +74,8 @@ changeLayout <- function(g, layout_func) {
 
 #' geom_node_shadowtext
 #' 
-#' Plot shadowtext at node position
+#' @description Plot shadowtext at node position.
+#' @details Plot shadowtext at node position.
 #' 
 #' @export
 #' @param mapping aes mapping
@@ -444,8 +447,9 @@ appendNodesAndTexts <- function(netPlot,tag,colorize,nodePal,
 
 #'
 #' connectGenes
-#'
-#' When an interesting word is found in two or more networks,
+#' 
+#' @description Connect genes by words
+#' @details When an interesting word is found in two or more networks,
 #' connect the words and gene names and return the graph.
 #' Note that genePlot must be set to TRUE in all the networks.
 #'
@@ -507,10 +511,11 @@ connectGenes <- function(nets, query_word, return_tbl_graph=FALSE,
 #'
 #' returnQuanteda
 #' 
-#' simple function to generate dfm and export to wc* functions.
+#' @description return quanteda object
+#' @details simple function to generate dfm and export to wc* functions.
 #' It did not utilize full functionality of quanteda, and 
 #' will add better support.
-#' @param ret osplot object
+#' @param ret biotext object
 #' @param quantedaArgs args to passed to tokens function
 #' @param numWords number of words
 #' @param ngram tokens_ngrams
@@ -518,7 +523,7 @@ connectGenes <- function(nets, query_word, return_tbl_graph=FALSE,
 #' @param filterWords filtered words
 #' @param additionalRemove user-specified filter words
 #' @param collapse collapse sentences
-#' @return osplot object after filtering using quanteda
+#' @return biotext object after filtering using quanteda
 returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
                            filterWords,additionalRemove, tfidf, collapse) {
     
@@ -568,8 +573,9 @@ returnQuanteda <- function(ret, quantedaArgs,numWords,ngram,
 
 
 #' convertMetaCyc
-#'
-#' this function needs taxonomizr package to be installed,
+#' 
+#' @description Convert MetaCyc IDs to the actual taxonomy names.
+#' @details This function needs taxonomizr package to be installed,
 #' and needs download of databases by prepareDatabase(getAccessions=FALSE)
 #' 
 #' @param ids tax ids from metacyc
@@ -613,8 +619,8 @@ clearPath <- function (ex) {
 #'
 #' parseMetaCycPathway
 #' 
-#' parse MetaCyc "pathways.dat"
-#' 
+#' @description Parse MetaCyc "pathways.dat"
+#' @details Parse the MetaCyc pathway information for the use in the package.
 #' 
 #' @param file path to pathways.dat
 #' @param candSp species to grepl
@@ -738,7 +744,6 @@ parseMetaCycPathway <- function(file, candSp, withTax=FALSE, noComma=FALSE, clea
 #' @param filType "above" or "below"
 #' @param filNum number
 #' @noRd
-
 retFiltWords <- function(useFil, filType, filNum) {
 
     data_env <- new.env(parent = emptyenv())
@@ -935,7 +940,6 @@ preserveDict <- function(docs, ngram, numOnly, stem) {
 #' @import rentrez
 #' 
 #' @noRd
-
 getPubMed <- function(ret, searchQuery, rawQuery,
     type="abstract", apiKey=NULL, retMax=10, sortOrder="relevance",
     perQuery=FALSE, dateRange=NULL) {
@@ -1024,7 +1028,8 @@ getPubMed <- function(ret, searchQuery, rawQuery,
 
 #' findTerm
 #' 
-#' find queried terms in list of gene clusters and return frequency
+#' @description Find queried terms in list of gene clusters and return frequency
+#' @details Find queried terms in list of gene clusters and return frequency
 #' 
 #' @param query query words
 #' @param listOfGenes named list of genes
@@ -1083,8 +1088,10 @@ findTerm <- function (query, listOfGenes, split=FALSE, ngram=1,
 
 #' returnSim
 #' 
-#' return similarity matrix of cluster
+#' @description Return similarity matrix of cluster
 #' based on intersection over union of words
+#' @details The function accepts the list of character vectors
+#' or named vector of identifiers to returns the textual similarity matrix.
 #' 
 #' @param cllist cluster list (named vector or list)
 #' @param keyType keytype
@@ -1131,7 +1138,9 @@ returnSim <- function (cllist, keyType="ENTREZID", numLimit=5000,
 
 #' makeBar
 #' 
-#' Makeing a barplot of word frequency from queried genes
+#' @description Make a barplot of word frequency from queried identifiers
+#' @details The function accepts the biological entities, returns the bar plots
+#' of their frequencies in the database.
 #' 
 #' @examples
 #' geneList <- c("DDX41")
@@ -1213,7 +1222,8 @@ makeBar <- function(queries, top=10, keyType="SYMBOL",
 
 #' exportCyjs
 #' 
-#' Export Cytoscape.js script, HTML and stylesheet for the graph and image
+#' @description Export Cytoscape.js from the network
+#' @details Export Cytoscape.js script, HTML and stylesheet for the graph and image
 #' 
 #' @param g igraph object
 #' @param rootDir root directory path
@@ -1433,7 +1443,8 @@ exportCyjs <- function(g, rootDir, netDir,
 
 #' exportVisjs
 #' 
-#' Export vis.js script, HTML and stylesheet for the graph and image
+#' @description Export vis.js from the network
+#' @details Export vis.js script, HTML and stylesheet for the graph and image
 #' 
 #' @param g igraph object
 #' @param rootDir root directory path
@@ -1551,7 +1562,8 @@ exportVisjs <- function(g, rootDir, netDir){
 
 #' returnExample
 #' 
-#' return an example dataset used in the analysis
+#' @description Return an example dataset used in the analysis
+#' @details Return an example dataset used in the analysis
 #' 
 #' @import org.Hs.eg.db
 #' @return return example MEs and colors
@@ -1604,8 +1616,6 @@ returnExample <- function() {
 
 #' makeCorpus
 #' 
-#' Clean-up the corpus
-#' 
 #' @param docs corpus to clean
 #' @param filterWords words to filter based on frequency
 #' @param additionalRemove words to filter
@@ -1615,8 +1625,6 @@ returnExample <- function() {
 #' 
 #' @return cleaned corpus
 #' @import tm
-#' 
-#' 
 makeCorpus <- function (docs, filterWords, additionalRemove,
     numOnly, stem, lower=TRUE) {
     if (lower) {
@@ -1646,7 +1654,8 @@ makeCorpus <- function (docs, filterWords, additionalRemove,
 
 #' getUPtax
 #' 
-#' Obtain the list of UniProt organism identification codes, by querying taxonomy or UniProt codes.
+#' @description Get UniProt taxonomy information.
+#' @details Obtain the list of UniProt organism identification codes, by querying taxonomy or UniProt codes.
 #' https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt
 #' The file above must be downloaded and specified to file argument.
 #' 
@@ -1703,7 +1712,8 @@ getUPtax <- function(file, candUP, candTax=NULL) {
 
 #' exportCyjsWithoutImage
 #' 
-#' Export Cytoscape.js script, HTML and stylesheet for the graph without image
+#' @description Export Cytoscape.js from the network without images
+#' @details Export Cytoscape.js script, HTML and stylesheet for the graph without image
 #' 
 #' @param g igraph object
 #' @param rootDir root directory path
@@ -1854,7 +1864,9 @@ exportCyjsWithoutImage <- function(g, rootDir, netDir,
 
 #' obtainTextPosition
 #' 
-#' obtain text position in biofabric layout
+#' @description Obtain text position in biofabric layout
+#' @details The function obtains the horizontal text position 
+#' for the plot in the `biofabric` layout implemented in ggraph.
 #' 
 #' @return tbl_graph
 #' @param ig igraph
@@ -1936,9 +1948,9 @@ obtainTextPosition <- function(ig, sort.by=node_rank_fabric(),
 
 #' plot_biofabric
 #' 
-#' plot the network in biofabric layout
-#' Internally, obtainTextPosition() is used and 
-#' the layers are stacked.
+#' @description Plot the network in biofabric layout.
+#' @details Plot the network in biofabric layout.
+#' Internally, obtainTextPosition() is used and the layers are stacked.
 #' For BioFabric layout, please refer to: https://biofabric.systemsbiology.net/
 #' Citation is: https://doi.org/10.1186/1471-2105-13-275
 #' 

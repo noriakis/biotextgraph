@@ -85,5 +85,9 @@ in `gene_name`}
 ggplot
 }
 \description{
-geom_sc_wordcloud
+Use ggplot_add to populate single-cell plot with textual information
+}
+\details{
+Use layered approach to add wordclouds to the dimension reduction plots
+from single cell transcriptomics data. Use with `ggsc`.
 }

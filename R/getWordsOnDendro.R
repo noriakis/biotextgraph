@@ -1,7 +1,9 @@
 #' plotEigengeneNetworksWithWords
 #' 
-#' plot an eigengene dendrogram with word annotation
-#' 
+#' @description Plot an eigengene dendrogram with word annotation
+#' @details The function accepts the module eigengene (ME) data.frame and
+#' named vector of genes with ME information and returns the dendrogram with
+#' textual information. The input is the typical output of WGCNA.
 #' 
 #' @param MEs module eigengene data (data.frame of row as sample and col as gene cluster IDs)
 #' @param colors named vector of cluster
@@ -236,7 +238,10 @@ plotEigengeneNetworksWithWords <- function (MEs, colors, nboot=100,
 
 #' getWordsOnDendro
 #' 
-#' Get grobs to plot on the dendrogram with the position information
+#' @description Get grobs to plot on the dendrogram with the position information
+#' @details The function accepts the dendrogram and named vector of genes with associated clusters
+#' and returns the list of plots with the positional information. Used internally in
+#' `plotEigengeneNetworksWithWords`.
 #' 
 #' @param dhc dendrogram
 #' @param geneVec gene-named vector of node names in dendrogram
@@ -505,8 +510,9 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
 
 #' returnPyramid
 #' 
-#' Return pyramid plots
-#' 
+#' @description Return pyramid plots
+#' @details Returns the pyramid plots of text frequencies between clusters.
+#' Used internally in getWordsOnDendro.
 #' 
 #' @param L genes in the cluster
 #' @param R genes in the other cluster

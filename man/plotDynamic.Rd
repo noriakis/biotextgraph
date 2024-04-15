@@ -30,7 +30,11 @@ plotDynamic(
 plot comparing gene clusters
 }
 \description{
-list network of words using graphlayouts::layout_as_dynamic
+List network of words using graphlayouts::layout_as_dynamic
+}
+\details{
+The function accepts the list of biotext object storing inferred networks.
+The networks are aligned by the specific layout and plotted.
 }
 \examples{
 library(igraph)

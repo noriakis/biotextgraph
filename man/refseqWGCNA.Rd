@@ -17,5 +17,8 @@ refseqWGCNA(wgcna, keyType = "ENSEMBL", argList = list())
 list of biotext class object
 }
 \description{
+Text mining WGCNA results
+}
+\details{
 Return the list of biotext class object per cluster for the blockwise module results in WGCNA
 }

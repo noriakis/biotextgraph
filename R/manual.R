@@ -1,6 +1,6 @@
 #' manual
 #' 
-#' Produce networks using manual input
+#' Produce networks using manual input.
 #' 
 #' @rdname generalf
 #' @examples

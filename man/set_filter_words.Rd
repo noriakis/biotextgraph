@@ -40,8 +40,11 @@ for each word}
 biotext class object
 }
 \description{
-set filtering words to class
-If filtered words are already present, add words to them
+Set filtering words to class.
+}
+\details{
+Set filtering words to class.
+If filtered words are already present, add the specified words to them.
 }
 \examples{
 obtain_refseq(c("PNKP")) |> set_filter_words()

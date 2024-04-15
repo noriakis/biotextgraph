@@ -33,7 +33,12 @@ make_graph(
 biotext class object
 }
 \description{
-make correlation or cooccurrence network
+Make correlation or cooccurrence network
+}
+\details{
+Make correlation or cooccurrence network based on biotext object.
+The resulting raw network is stored in `igraphRaw` slot in biotext object.
+The networks can be customized in the subsequent functions like `process_network_gene`.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")

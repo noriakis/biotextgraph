@@ -42,9 +42,15 @@ plot_wordcloud(
 biotext class object
 }
 \description{
-plot_wordcloud
+Plot wordclouds
+}
+\details{
+Plot the wordclouds stored in biotextgraph object.
 }
 \examples{
 refseq("DDX41", plotType="wc") |>
 plot_wordcloud()
+}
+\seealso{
+plotwc plotnet
 }

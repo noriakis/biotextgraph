@@ -15,7 +15,11 @@ perform_ora(ret, threshold = 0.05)
 biotext class object
 }
 \description{
-perform_ora
+Performs ORA on obtained text data.
+}
+\details{
+Performs over representation analysis on the obtained text data.
+Used only with biotext object with type `refseq`.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")

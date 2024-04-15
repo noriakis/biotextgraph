@@ -10,7 +10,10 @@ returnExample()
 return example MEs and colors
 }
 \description{
-return an example dataset used in the analysis
+Return an example dataset used in the analysis
+}
+\details{
+Return an example dataset used in the analysis
 }
 \examples{
 returnExample()

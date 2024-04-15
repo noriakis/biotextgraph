@@ -24,9 +24,12 @@ obtain_alliance(
 biotext class object
 }
 \description{
-obtain gene description from 
+Obtain biotext class object from The Alliance of Genome Resources
+}
+\details{
+Obtain gene description from 
 The Alliance of Genome Resources
-https://www.alliancegenome.org/downloads
+(https://www.alliancegenome.org/downloads)
 }
 \examples{
 \dontrun{obtain_alliance(c("PNKP"))}

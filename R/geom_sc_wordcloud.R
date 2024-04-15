@@ -1,8 +1,10 @@
 
 #' obtainMarkersWC
 #' 
-#' obtain wordclouds of cluster markers identified in Seurat
-#' 
+#' @description obtain wordclouds of cluster markers identified in Seurat
+#' @details Using the results of marker gene identification such as `FindAllMarkers` from Seurat,
+#' Recursively summarize the textual information of markers and output the wordclouds.
+#' @rdname obtainMarkersWC
 #' @param markers marker data frame
 #' @param cols list of colors
 #' @param wcArgs arguments for ggwordcloud
@@ -61,7 +63,11 @@ obtainMarkersWC <- function(markers,
 
 
 #' obtainMarkersWCScran
-#' make gene wordcloud from scran::findMarkers() results
+#' 
+#' @description Make gene wordcloud from scran::findMarkers() results
+#' @details using the results of marker gene identification such as `findMarkers` from scran,
+#' Recursively summarize the textual information of markers and output the wordclouds.
+#' @rdname obtainMarkersWCScran
 #' @param markers marker list
 #' @param cols list of colors
 #' @param wcArgs arguments for ggwordcloud
@@ -127,7 +133,9 @@ obtainMarkersWCScran <- function(markers,
 }
 
 #' ggplot_add.geom_sc_wordcloud
-#' use ggplot_add to populate single-cell plot with textual information
+#' @description Use ggplot_add to populate single-cell plot with textual information
+#' @details Use layered approach to add wordclouds to the dimension reduction plots
+#' from single cell transcriptomics data. Use with `ggsc`.
 #' @param object An object to add to the plot
 #' @param plot The ggplot object to add object to
 #' @param object_name The name of the object to add
@@ -290,6 +298,9 @@ ggplot_add.geom_sc_wordcloud <- function(object, plot, object_name) {
 }
 
 #' geom_sc_wordcloud
+#' @description Use ggplot_add to populate single-cell plot with textual information
+#' @details Use layered approach to add wordclouds to the dimension reduction plots
+#' from single cell transcriptomics data. Use with `ggsc`.
 #' @param markers FindAllMarkers() results
 #' @param show_markers candidate clusters to be appear in plot, default to NULL,
 #' which means all the clusters are plotted

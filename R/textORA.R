@@ -1,7 +1,8 @@
 #' textORA
 #' 
-#' Return p-values from hypergeometric distribution
-#' (experimental)
+#' @description Return text p-values from hypergeometric distribution
+#' @details Returns the p-values for the words using hypergeometric distribution (experimental).
+#' By default uses the RefSeq background, but you can use the favorite backgrounds.
 #' 
 #' @param queries gene list (Entrez ID)
 #' @param notGene boolean specifying type of input, default to gene IDs

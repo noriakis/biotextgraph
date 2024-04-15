@@ -1,7 +1,8 @@
 
 #' refseqWGCNA
 #' 
-#' Return the list of biotext class object per cluster for the blockwise module results in WGCNA
+#' @description Text mining WGCNA results
+#' @details Return the list of biotext class object per cluster for the blockwise module results in WGCNA
 #' 
 #' @param wgcna results of blockwiseModules()
 #' @param keyType key type of gene
@@ -26,7 +27,8 @@ refseqWGCNA <- function(wgcna, keyType="ENSEMBL", argList=list()) {
 
 #' refseqDESeq2
 #' 
-#' Return the biotext class object by specified filter in DESeq2 results object
+#' @description Text mining DESeq2 results
+#' @details Return the biotext class object by specified filter in DESeq2 results object
 #' 
 #' @param res results of DESeq2::results()
 #' @param condition filtering condition

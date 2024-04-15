@@ -17,7 +17,11 @@ graph_cluster(ret, func = igraph::cluster_leiden, factorize = TRUE)
 biotext class object
 }
 \description{
-graph_cluster
+Performs graph-based clustering.
+}
+\details{
+Performs graph-based clustering using igraph and stores the information
+in the biotext object. Default to use `igraph::cluster_leiden`.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")

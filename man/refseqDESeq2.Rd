@@ -19,5 +19,8 @@ refseqDESeq2(res, condition, keyType = "ENSEMBL", argList = list())
 list of biotext class object
 }
 \description{
+Text mining DESeq2 results
+}
+\details{
 Return the biotext class object by specified filter in DESeq2 results object
 }

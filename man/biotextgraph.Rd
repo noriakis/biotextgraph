@@ -17,6 +17,10 @@ list of data frames and ggplot2 object
 \description{
 wrapper for functions refseq, pubmed, enzyme, and bugsigdb
 }
+\details{
+The function calls the various types of databases (refseq, pubmed, ...)
+for summarizing the textual data.
+}
 \examples{
 geneList <- c("DDX41","PNKP","IRF3","XRCC1","ERCC2")
 biotextgraph("refseq", argList=list(geneList=geneList))

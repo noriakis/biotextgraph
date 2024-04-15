@@ -70,9 +70,15 @@ if FALSE, no node is plotted for query nodes. it overrides color_by_tag.}
 biotext class object
 }
 \description{
-plot biotextgraph after processing graph
+Plot biotextgraph after processing graph
+}
+\details{
+Plot the network stored in biotextgraph object after processing the graph.
 }
 \examples{
 testgenes <- c("IRF3","PNKP","DDX41","ERCC1","ERCC2","XRCC1")
 refseq(testgenes) |> plot_biotextgraph()
+}
+\seealso{
+plotwc plotnet
 }

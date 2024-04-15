@@ -27,7 +27,10 @@ geom_node_shadowtext(
 geom
 }
 \description{
-Plot shadowtext at node position
+Plot shadowtext at node position.
+}
+\details{
+Plot shadowtext at node position.
 }
 \examples{
 nodes <- data.frame(name=c("hsa:1029","hsa:4171"),

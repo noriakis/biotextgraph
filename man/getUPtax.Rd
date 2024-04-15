@@ -17,6 +17,9 @@ getUPtax(file, candUP, candTax = NULL)
 data.frame consisting of taxonomy name and UniProt IDs
 }
 \description{
+Get UniProt taxonomy information.
+}
+\details{
 Obtain the list of UniProt organism identification codes, by querying taxonomy or UniProt codes.
 https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/docs/speclist.txt
 The file above must be downloaded and specified to file argument.

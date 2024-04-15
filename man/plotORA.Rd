@@ -17,6 +17,11 @@ volcano plot for ORA results
 \description{
 plot volcano-plot like plot for ORA results
 }
+\details{
+Plot the volcano-plot like plot for the ORA results
+using the biotext object. The ORA should be performed beforehand
+by specifying ora option to TRUE.
+}
 \examples{
 testgenes <- c("DDX41","IRF3","XRCC1","ERCC1","ERCC2","ERCC3")
 net1 <- refseq(testgenes, ora=TRUE)
