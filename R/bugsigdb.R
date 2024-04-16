@@ -45,7 +45,7 @@ bugsigdb <- function (mbList,
     colorText=FALSE, corThresh=0.2, tag="none", tagWhole=FALSE, stem=FALSE,
     layout="nicely", edgeLink=TRUE, deleteZeroDeg=TRUE, cl=FALSE,
     autoThresh=TRUE, argList=list(), docsum=FALSE,  absolute=TRUE,
-    corOption=list()) {
+    corOption=list(), cache=TRUE) {
     
 
     if (useUdpipe) {
@@ -67,7 +67,7 @@ bugsigdb <- function (mbList,
     
     if (is.null(redo)) {
         qqcat("Input microbes: @{length(mbList)}\n")
-        tb <- importBugSigDB()
+        tb <- importBugSigDB(cache=cache)
         subTb <- c()        
         for (m in mbList) {
             tmp <- tb[grepl(m, tb$`MetaPhlAn taxon names`,

@@ -1221,7 +1221,7 @@ return_gene_path_graph <- function(ret, gene_path_plot="kegg",
 #' process_network_manual
 #' 
 #' @description Process graph made from user-specified data.frame
-#' @dedtails Process the graph obtained from user data, like 
+#' @details Process the graph obtained from user data, like 
 #' associating words to the other variables.
 #' 
 #' @param ret biotext class object

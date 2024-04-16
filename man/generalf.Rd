@@ -149,7 +149,8 @@ bugsigdb(
   argList = list(),
   docsum = FALSE,
   absolute = TRUE,
-  corOption = list()
+  corOption = list(),
+  cache = TRUE
 )
 
 manual(
@@ -562,6 +563,8 @@ is not specified}
 \item{disPlot}{plot diseases}
 
 \item{addFreqToMB}{add pseudo frequency to microbes in mbPlot}
+
+\item{cache}{Caching when BugSigDB is downloaded (default to TRUE)}
 
 \item{df}{manual document data.frame (must have column `text`) or vector of text.
 If `query` column and other columns are present, regards them as category related to the text on the same row.}

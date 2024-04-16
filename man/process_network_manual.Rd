@@ -29,6 +29,10 @@ biotext class object
 \description{
 Process graph made from user-specified data.frame
 }
+\details{
+Process the graph obtained from user data, like 
+associating words to the other variables.
+}
 \examples{
 obtain_manual(data.frame(text=c("test4 test4",
                                 "test3 test3 testi",
