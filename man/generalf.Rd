@@ -645,18 +645,22 @@ Produce networks using manual input.
 
 make word cloud or correlation network from PubMed
 
-Text mining RefSeq description, PubMed, BugSigDB and the other manually curated data.
+Text mining RefSeq description, PubMed, BugSigDB
+and the other manually curated textual data.
 }
 \details{
-The main functions of the `biotextgraph` package. The functions accepts
-a character vector of biological entities and returns the summarized statistics and visualization
-contained in `biotext` object.
+The main functions of the {{biotextgraph}} package. The functions accepts
+a character vector of biological entities (such as gene identifiers)
+and returns the summarized statistics and visualization
+contained in {{biotext}} object.
 }
 \examples{
 geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
 \dontrun{alliance(geneList)}
 mbList <- c("Veillonella dispar")
-bugsigdb(mbList, plotType="wc")
+\dontrun{
+    bugsigdb(mbList, plotType="wc")
+}
 ret <- refseq("DDX41", plotType="wc")
 manual(getSlot(ret, "rawText")$Gene_summary, plotType="wc")
 \dontrun{pubmed("DDX41")}

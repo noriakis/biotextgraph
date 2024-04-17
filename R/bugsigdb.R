@@ -21,7 +21,9 @@
 #' 
 #' @examples
 #' mbList <- c("Veillonella dispar")
-#' bugsigdb(mbList, plotType="wc")
+#' \dontrun{
+#'     bugsigdb(mbList, plotType="wc")
+#' }
 #' @export
 #' 
 bugsigdb <- function (mbList,
