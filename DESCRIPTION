@@ -1,7 +1,7 @@
 Package: biotextgraph
 Type: Package
 Title: visualization and interpretation of textual information from omics summary data through network analysis
-Version: 0.99.0
+Version: 0.99.1
 Authors@R: person("Noriaki", "Sato", email = "nori@hgc.jp", role = c("cre", "aut"), comment=c(ORCID="0000-0001-7721-9359"))
 Description: This package aims to visualize the word and text information contained in the gene or the other omics identifiers such as microbiome through network approach. The package identifies important words among the biological identifiers list, and compare the clusters based on those information using network. It contributes to understanding the functionality of biological entities and aid in convenient interpretation and visualization.
 License: MIT + file LICENSE
