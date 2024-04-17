@@ -1,11 +1,6 @@
-#' pubmed
-#' 
-#' make word cloud or correlation network from PubMed
-#' 
 #' @rdname generalf
 #' @export
 #' @examples \dontrun{pubmed("DDX41")}
-#' @return object consisting of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
 #' @import wordcloud
@@ -216,14 +211,20 @@ pubmed <- function(queries, useRawQuery=FALSE,
 
     ## If filter by GO terms
     if (filterByGO) {
-    	qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
-    	if (ngram==1) {
-	    	filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
-	    	matSorted <- matSorted[filtered_by_GO]
-    	} else if (ngram==2) {
+        qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        data_env <- new.env(parent = emptyenv())
+        load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
+            envir=data_env)
+        goWords <- data_env[["goWords"]]
+        goWords2gram <- data_env[["goWords2gram"]]
+
+        if (ngram==1) {
+            filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
+            matSorted <- matSorted[filtered_by_GO]
+        } else if (ngram==2) {
             filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords2gram]
-	    	matSorted <- matSorted[filtered_by_GO]    		
-    	} else {# Do nothing
+            matSorted <- matSorted[filtered_by_GO]          
+        } else {# Do nothing
         }
     }
 

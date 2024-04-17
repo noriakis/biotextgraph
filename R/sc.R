@@ -366,14 +366,14 @@ plotReducedDimWithTexts <- function(sce, marker.info,
             YMe <- dens_max$y
             
             new_points <- rbind(new_points,
-                                c(map_group[i],
+                                c(colmap[i,"group"],
                                   XMe - r,
                                   YMe - r,
                                   XMe + r,
                                   YMe + r))
           } else {
             new_points <- rbind(new_points,
-                                c(map_group[i],
+                                c(colmap[i,"group"],
                                   ctr["x"] - min(dist2center),
                                   ctr["y"] - min(dist2center),
                                   ctr["x"] + max(dist2center),

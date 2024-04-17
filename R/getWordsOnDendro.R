@@ -356,7 +356,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         filter(.data$yend==h1) %>%
                         filter(.data$xend <= max(labs1_x)) %>%
                         filter(.data$xend >= min(labs1_x)) %>%
-                        dplyr::pull(x) %>% unique()                      
+                        dplyr::pull(.data$x) %>% unique()                      
                   }
                   
                   labs2_x <- labelPos %>%
@@ -368,7 +368,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                     filter(.data$yend==h2) %>%
                     filter(.data$xend <= max(labs2_x)) %>%
                     filter(.data$xend >= min(labs2_x)) %>%
-                    dplyr::pull(x) %>% unique()
+                    dplyr::pull(.data$x) %>% unique()
                   }
                   XMIN <- median(c(min1, min2))
                 } else {
@@ -399,7 +399,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         filter(.data$yend==h1) %>%
                         filter(.data$xend <= max(labs1_x)) %>%
                         filter(.data$xend >= min(labs1_x)) %>%
-                        dplyr::pull(x) %>% unique()                      
+                        dplyr::pull(.data$x) %>% unique()                      
                   }
                   
                   labs2_x <- labelPos %>%
@@ -411,7 +411,7 @@ getWordsOnDendro <- function(dhc, geneVec, geneNumLimit=1000,
                         filter(.data$yend==h2) %>%
                         filter(.data$xend <= max(labs2_x)) %>%
                         filter(.data$xend >= min(labs2_x)) %>%
-                        dplyr::pull(x) %>% unique()
+                        dplyr::pull(.data$x) %>% unique()
                   }
 
                   XMAX <- median(c(max1, max2))

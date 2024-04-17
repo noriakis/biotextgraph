@@ -1,13 +1,8 @@
-#' manual
-#' 
-#' Produce networks using manual input.
-#' 
 #' @rdname generalf
 #' @examples
 #' ret <- refseq("DDX41", plotType="wc")
 #' manual(getSlot(ret, "rawText")$Gene_summary, plotType="wc")
 #' @export
-#' @return list of data frame and ggplot2 object
 #' @import tm
 #' @import GeneSummary
 #' @import wordcloud
@@ -160,6 +155,12 @@ manual <- function(df, madeUpper=NULL,
     ## If filter by GO terms
     if (filterByGO) {
         qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        data_env <- new.env(parent = emptyenv())
+        load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
+            envir=data_env)
+        goWords <- data_env[["goWords"]]
+        goWords2gram <- data_env[["goWords2gram"]]
+
         if (ngram==1) {
             filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
             matSorted <- matSorted[filtered_by_GO]

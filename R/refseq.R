@@ -2,10 +2,10 @@
 #' 
 #' @description Text mining RefSeq description, PubMed, BugSigDB
 #' and the other manually curated textual data.
-#' @details The main functions of the {{biotextgraph}} package. The functions accepts
+#' @details The main functions of the \pkg{biotextgraph} package. The functions accepts
 #' a character vector of biological entities (such as gene identifiers)
 #' and returns the summarized statistics and visualization
-#' contained in {{biotext}} object.
+#' contained in \code{biotext} object.
 #' 
 #' @param geneList gene ID list
 #' @param queries query ID list
@@ -354,6 +354,12 @@ refseq <- function (geneList, keyType="SYMBOL",
     ## If filter by GO terms
     if (filterByGO) {
         qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        data_env <- new.env(parent = emptyenv())
+        load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
+            envir=data_env)
+        goWords <- data_env[["goWords"]]
+        goWords2gram <- data_env[["goWords2gram"]]
+
         if (ngram==1) {
             filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
             matSorted <- matSorted[filtered_by_GO]

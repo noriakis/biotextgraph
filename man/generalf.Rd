@@ -8,7 +8,7 @@
 \alias{pubmed}
 \alias{generalf}
 \alias{refseq}
-\title{alliance}
+\title{refseq, alliance, pubmed, manual, bugsigdb}
 \usage{
 alliance(
   geneList,
@@ -632,27 +632,17 @@ in which the function performs over-representation analysis by enrichKEGG or enr
 clusterProfiler and ReactomePA.}
 }
 \value{
-list of data frame and ggplot2 object
-
-object consisting of data frame and ggplot2 object
-
 `biotext` class object
 }
 \description{
-Visualize BugSigDB
-
-Produce networks using manual input.
-
-make word cloud or correlation network from PubMed
-
 Text mining RefSeq description, PubMed, BugSigDB
 and the other manually curated textual data.
 }
 \details{
-The main functions of the {{biotextgraph}} package. The functions accepts
+The main functions of the \pkg{biotextgraph} package. The functions accepts
 a character vector of biological entities (such as gene identifiers)
 and returns the summarized statistics and visualization
-contained in {{biotext}} object.
+contained in \code{biotext} object.
 }
 \examples{
 geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")

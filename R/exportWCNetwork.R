@@ -20,6 +20,7 @@
 #' @param sizeMin minimum scale size for nodes
 #' @param sizeMax maximum scale size for nodes
 #' @param wcScale scaling size for wordcloud
+#' @importFrom RColorBrewer brewer.pal
 #' @return export the Cytoscape.js network
 #' @export
 exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,

@@ -1,6 +1,6 @@
-#' alliance
 #' @rdname generalf
 #' @export
+#' @importFrom RColorBrewer brewer.pal
 #' @examples
 #' geneList <- c("DDX41","PNKP","ERCC1","IRF3","XRCC1")
 #' \dontrun{alliance(geneList)}
@@ -132,6 +132,12 @@ alliance <- function (geneList,
     ## If filter by GO terms
     if (filterByGO) {
         qqcat("`filterByGO` option enabled. Filtering by GO terms ...\n")
+        data_env <- new.env(parent = emptyenv())
+        load(system.file("extdata", "sysdata.rda", package = "biotextgraph"),
+            envir=data_env)
+        goWords <- data_env[["goWords"]]
+        goWords2gram <- data_env[["goWords2gram"]]
+
         if (ngram==1) {
             filtered_by_GO <- names(matSorted)[tolower(names(matSorted)) %in% goWords]
             matSorted <- matSorted[filtered_by_GO]

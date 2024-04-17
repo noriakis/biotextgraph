@@ -1,7 +1,3 @@
-#' bugsigdb
-#' 
-#' Visualize BugSigDB
-#' 
 #' @rdname generalf
 #' @import tm
 #' @import bugsigdbr
