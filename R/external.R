@@ -8,6 +8,11 @@
 #' @param keyType key type of gene
 #' @param argList argument list to pass to refseq()
 #' @export
+#' @examples
+#' cols <- sample(c(1), 6, replace=TRUE)
+#' names(cols) <- c("PNKP","ERCC2","ERCC3","IRF3","TP53","MCM6")
+#' wg <- list("colors"=cols)
+#' refseqWGCNA(wg, keyType="SYMBOL")
 #' @return list of biotext class object
 refseqWGCNA <- function(wgcna, keyType="ENSEMBL", argList=list()) {
     all_cols <- unique(wgcna$colors)

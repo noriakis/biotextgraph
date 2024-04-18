@@ -26,7 +26,9 @@ Obtain microbe-related information from bugsigdb
 Obtain microbe description from BugSigDB using bugsigdbr.
 }
 \examples{
-obtain_bugsigdb("Veillonella dispar")
+\dontrun{
+    obtain_bugsigdb("Veillonella dispar")
+}
 }
 \seealso{
 generalf

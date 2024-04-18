@@ -71,7 +71,10 @@ obtain_alliance <- function(geneList, file="GENE-DESCRIPTION-TSV_HUMAN.tsv",
 #' @param curate curated articles (TRUE) or search for PubMed (FALSE)
 #' if FALSE, same for fetching from PubMed by specified query
 #' @export
-#' @examples obtain_bugsigdb("Veillonella dispar")
+#' @examples 
+#' \dontrun{
+#'     obtain_bugsigdb("Veillonella dispar")
+#' }
 #' @return biotext class object
 obtain_bugsigdb <- function(mb_list,
 	target="title",

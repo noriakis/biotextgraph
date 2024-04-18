@@ -22,3 +22,9 @@ Text mining WGCNA results
 \details{
 Return the list of biotext class object per cluster for the blockwise module results in WGCNA
 }
+\examples{
+cols <- sample(c(1), 6, replace=TRUE)
+names(cols) <- c("PNKP","ERCC2","ERCC3","IRF3","TP53","MCM6")
+wg <- list("colors"=cols)
+refseqWGCNA(wg, keyType="SYMBOL")
+}
