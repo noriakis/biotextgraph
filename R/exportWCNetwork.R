@@ -1,7 +1,7 @@
 #' exportWCNetwork
 #' 
 #' @description Export wordcloud networks to Cytoscape.js 
-#' @details The function exports the wordcloud network provided the gene cluster network.
+#' @details The function exports the wordcloud network by providing the gene cluster network.
 #' Node size will be the number of genes in the cluster.
 #' By default use cola layout, and see below for the parameters of the layout.
 #' (https://github.com/cytoscape/cytoscape.js-cola) 
@@ -22,6 +22,10 @@
 #' @param wcScale scaling size for wordcloud
 #' @importFrom RColorBrewer brewer.pal
 #' @return export the Cytoscape.js network
+#' @examples
+#' g <- igraph::graph_from_edgelist(rbind(c("ME1","ME2")))
+#' gl <- list("ME1"=c("PNKP","IRF3","MCM5"), "ME2"=c("IRF3","ERCC2","TP53"))
+#' exportWCNetwork(g, gl)
 #' @export
 exportWCNetwork <- function(g, geneList, dir="network", colors=NULL,
 	sizeMin=50, sizeMax=200, wcScale=20,

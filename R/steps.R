@@ -744,7 +744,10 @@ graph_cluster <- function(ret, func=igraph::cluster_leiden, factorize=TRUE) {
 #' @param ec_file enzyme database file
 #' @param up_tax_file UniProt taxonomy file
 #' @export
-#' @examples bugsigdb("Veillonella dispar") |> process_network_microbe()
+#' @examples 
+#' \dontrun{
+#'     bugsigdb("Veillonella dispar") |> process_network_microbe()
+#' }
 #' @return biotext class object
 #' 
 process_network_microbe <- function(ret, delete_zero_degree=TRUE,

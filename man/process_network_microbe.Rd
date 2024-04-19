@@ -54,5 +54,7 @@ Perform tasks before plotting
 for the data from BugSigDB, like obtaining associated diseases to plot
 }
 \examples{
-bugsigdb("Veillonella dispar") |> process_network_microbe()
+\dontrun{
+    bugsigdb("Veillonella dispar") |> process_network_microbe()
+}
 }

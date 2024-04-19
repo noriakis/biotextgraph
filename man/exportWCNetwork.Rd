@@ -49,10 +49,15 @@ export the Cytoscape.js network
 Export wordcloud networks to Cytoscape.js
 }
 \details{
-The function exports the wordcloud network provided the gene cluster network.
+The function exports the wordcloud network by providing the gene cluster network.
 Node size will be the number of genes in the cluster.
 By default use cola layout, and see below for the parameters of the layout.
 (https://github.com/cytoscape/cytoscape.js-cola) 
 If "strength" attribute is in the edge of igraph object,
 the parameter is used to size the edge width.
+}
+\examples{
+g <- igraph::graph_from_edgelist(rbind(c("ME1","ME2")))
+gl <- list("ME1"=c("PNKP","IRF3","MCM5"), "ME2"=c("IRF3","ERCC2","TP53"))
+exportWCNetwork(g, gl)
 }
