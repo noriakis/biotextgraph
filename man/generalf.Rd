@@ -315,6 +315,7 @@ refseq(
   cooccurrence = FALSE,
   pvclAlpha = 0.95,
   cl = FALSE,
+  multiVals = "first",
   ngram = 1,
   plotType = "network",
   onlyTDM = FALSE,
@@ -621,6 +622,9 @@ Must be the two-length vector, like `c("2013/1/1", "2023/1/1")`}
 
 \item{cc0}{effective only in `pubmed` function. The prefetched data in `pubmedMini`
 package is used for gene query.}
+
+\item{multiVals}{passed to mapIds function when converting ENTREZID to SYMBOL when
+genePlot is on.}
 
 \item{autoNumWords}{determine the number of words to be shown by ORA, default to FALSE.}
 

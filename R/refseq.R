@@ -45,6 +45,8 @@
 #' This option first calculates the high-frequent words, and subsequently calculates
 #' the occurrences of these words in each gene, and prioritize the genes by them.
 #' @param genePlotNum number of genes to be plotted (default: 10)
+#' @param multiVals passed to mapIds function when converting ENTREZID to SYMBOL when
+#' genePlot is on.
 #' @param genePathPlot plot associated genes and pathways (default: NULL)
 #'                     Must be "kegg" or "reactome", automatically set genePlot to TRUE.
 #' @param genePathPlotSig threshold for adjusted p-values (default: 0.05)
@@ -204,7 +206,7 @@ refseq <- function (geneList, keyType="SYMBOL",
     showLegend=FALSE,
     orgDb=org.Hs.eg.db, edgeLabel=FALSE,
     naEdgeColor="grey50", cooccurrence=FALSE,
-    pvclAlpha=0.95, cl=FALSE,
+    pvclAlpha=0.95, cl=FALSE, multiVals="first",
     ngram=1, plotType="network", onlyTDM=FALSE, stem=FALSE,
     colorText=FALSE, corThresh=0.2, genePlot=FALSE,
     autoThresh=TRUE, autoNumWords=FALSE,
@@ -400,10 +402,10 @@ refseq <- function (geneList, keyType="SYMBOL",
             if (!is.null(mergeCorpus)) {
                 stop("Cannot perform genePlot when merging corpus")
             }
-            revID <- AnnotationDbi::select(orgDb,
+            revID <- AnnotationDbi::mapIds(orgDb,
                 keys = as.character(fil$Gene_ID), 
-                columns = c("SYMBOL"),
-                keytype = "ENTREZID")$SYMBOL
+                column = c("SYMBOL"), multiVals=multiVals,
+                keytype = "ENTREZID")
             row.names(DTM) <- revID
         }
 

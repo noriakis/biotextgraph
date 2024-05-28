@@ -24,10 +24,6 @@ The application using Shiny is available [here](https://nsato.shinyapps.io/biote
 <p align="center">
 <img src="https://github.com/noriakis/software/blob/main/images/wcbn.png?raw=true" width="800px">
 </p>
-<p align="center">
-<img src="https://github.com/noriakis/software/blob/main/images/biofabric.png?raw=true" width="800px">
-</p>
-
 
 ### Bugs and errors
 If you find bugs or errors, please kindly report them to Issues, or make a pull request, or report it directly to [e-mail](nori@hgc.jp).
